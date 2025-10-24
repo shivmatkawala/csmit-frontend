@@ -1,0 +1,467 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+/* Color Variables (Matching Header/Navbar theme but adapted for dark background) */
+:host {
+    --primary-red: #e03a3e; /* Strong Red Accent from Header */
+    --primary-red-hover: #ff5559;
+    --dark-bg: #111827; /* Deep Black/Dark Blue Background */
+    --text-white: #ffffff;
+    --text-light: #9ca3af; /* Light gray for body text */
+    --link-color: #f3f4f6;
+    --divider-color: rgba(255, 255, 255, 0.1);
+    
+    /* Social Media Colors */
+    --whatsapp-color: #25D366;
+    --instagram-color: #E1306C;
+    --twitter-color: #1DA1F2; /* Traditional Twitter Blue */
+    --facebook-color: #1877F2;
+    --youtube-color: #FF0000;
+}
+
+/* Base Footer Styling - Dark Theme */
+.site-footer {
+    font-family: 'Poppins', sans-serif;
+    background-color: black;
+    color: var(--text-light);
+    padding: 5rem 0 2rem 0; /* Top padding increased for space */
+}
+
+.container {
+    width: 90%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* --- Footer Top: Statement and CTA (Inspired by Ref Image) --- */
+.footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 4rem;
+}
+
+.footer-statement {
+    font-size: 2.5rem; /* Large and bold */
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-white);
+    max-width: 60%;
+    animation: fadeInSlideRight 1s ease-out;
+}
+.statement-line-2 {
+    display: block;
+    color: var(--primary-red);
+}
+
+@keyframes fadeInSlideRight {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Red CTA Button (Matching Reference Image) */
+.cta-button {
+    background-color: var(--primary-red);
+    color: var(--text-white);
+    padding: 1.2rem 2.5rem;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 8px 25px rgba(224, 58, 62, 0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cta-button:hover {
+    background-color: var(--primary-red-hover);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(224, 58, 62, 0.8);
+}
+
+/* --- Divider and Links Grid --- */
+.footer-divider {
+    border: none;
+    height: 1px;
+    background-color: var(--divider-color);
+    margin: 0 0 3rem 0;
+}
+
+.footer-links-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr); /* Logo section takes more space */
+    gap: 2rem;
+    padding-bottom: 3rem; /* Reduced padding bottom to make space for social bar */
+}
+
+/* Logo Section Styling (Matching Navbar Logo) */
+.footer-logo-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-logo-section .logo-link {
+    display: block;
+    text-decoration: none;
+    font-size: 2rem; /* Logo size */
+    font-weight: 900;
+    color: var(--text-white);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+.footer-logo-section .logo-accent {
+    color: var(--primary-red); /* Accent color */
+}
+
+/* --- NEW: Jalebi-like Animated Circle Design --- */
+.animated-circle-design {
+    position: relative;
+    width: 100px; /* Base size */
+    height: 100px;
+    margin: 1.5rem 0 2rem 0; /* Add some space around it */
+}
+
+/* The growing/pulsing "Ghera" (Spiral-like border effect) */
+.circle-border {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(224, 58, 62, 0.4); /* Primary Red (E03A3E) with transparency */
+    border-radius: 50%; /* Start as a circle */
+    animation: 
+        spiral-pulse 8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), /* Slow, smooth breathing */
+        jalebi-effect 4s linear infinite alternate; /* Alternating "jalebi" shape */
+}
+
+/* Jalebi shape animation (mimics a winding path by distorting the circle) */
+@keyframes jalebi-effect {
+    0% { border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%; }
+    50% { border-radius: 60% 40% 30% 70% / 60% 40% 50% 50%; }
+    100% { border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%; }
+}
+
+/* Slow Pulse/Breathing effect for the main shape */
+@keyframes spiral-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+/* The 'Bindu' (Dot) on the rotating path */
+.circle-dot {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background-color: var(--text-white); /* Best color for visibility: White */
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-red); /* Glowing effect */
+    transform-origin: 50% 50px; /* Center of rotation is 50px down (center of the 100x100 container) */
+    animation: 
+        dot-orbit 6s linear infinite,
+        dot-color-pulse 2s infinite alternate;
+}
+
+/* Animation for the dot to orbit around the center */
+@keyframes dot-orbit {
+    from { transform: rotate(0deg) translateX(-50%); }
+    to { transform: rotate(360deg) translateX(-50%); }
+}
+
+/* Animation to change the dot color/glow slightly (Best Color Effect) */
+@keyframes dot-color-pulse {
+    0% { background-color: var(--text-white); box-shadow: 0 0 10px 2px var(--primary-red); }
+    100% { background-color: var(--primary-red-hover); box-shadow: 0 0 15px 5px var(--text-white); }
+}
+/* --- END NEW: Animated Circle --- */
+
+
+.tagline {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.contact-email {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+.contact-email:hover {
+    color: var(--primary-red);
+}
+
+/* Link Groups */
+.group-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 1.5rem;
+    border-left: 3px solid var(--primary-red); /* Small accent border */
+    padding-left: 10px;
+}
+.footer-link-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.footer-link-group li {
+    margin-bottom: 0.75rem;
+}
+.footer-link-group a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+}
+.footer-link-group a:hover {
+    color: var(--primary-red);
+    transform: translateX(5px);
+}
+.badge {
+    background-color: var(--primary-red);
+    color: var(--text-white);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    margin-left: 8px;
+    font-weight: 600;
+    animation: pulseBadge 1.5s infinite;
+    display: inline-block;
+}
+@keyframes pulseBadge {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- Social Bar (New section for icons above the line) --- */
+.footer-social-bar {
+    padding-top: 1.5rem; /* Space from links above */
+    padding-bottom: 2rem; /* Space before the final line */
+    text-align: center; /* Center the social icons */
+}
+
+.social-icons {
+    display: inline-block; /* Allows gap to work on the list */
+}
+
+/* --- Bottom Bar: Copyright and Social Media --- */
+.footer-bottom {
+    display: flex;
+    justify-content: center; /* Center copyright since icons are moved */
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--divider-color);
+}
+.copyright {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* --- NEW: Social Icons Styling (Circular, Colorful, Animated) --- */
+.social-icons-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 15px; /* Space between icons */
+}
+
+.icon-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-white);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.icon-link svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor; /* Use the current link color (white) */
+}
+
+/* 1. WhatsApp */
+.icon-link.whatsapp {
+    background-color: var(--whatsapp-color);
+}
+.icon-link.whatsapp:hover {
+    background-color: var(--text-white);
+    color: var(--whatsapp-color);
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* 2. Instagram (Gradient-like effect on hover) */
+.icon-link.instagram {
+    background: var(--instagram-color); /* Fallback */
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    box-shadow: 0 4px 10px rgba(225, 48, 108, 0.6);
+}
+.icon-link.instagram:hover {
+    background: var(--text-white);
+    color: var(--instagram-color);
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* 3. Twitter */
+.icon-link.twitter {
+    background-color: var(--twitter-color);
+}
+.icon-link.twitter:hover {
+    background-color: var(--text-white);
+    color: var(--twitter-color);
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* 4. Facebook */
+.icon-link.facebook {
+    background-color: var(--facebook-color);
+}
+.icon-link.facebook:hover {
+    background-color: var(--text-white);
+    color: var(--facebook-color);
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* 5. YouTube */
+.icon-link.youtube {
+    background-color: var(--youtube-color);
+}
+.icon-link.youtube:hover {
+    background-color: var(--text-white);
+    color: var(--youtube-color);
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* --- Scroll to Top Button (Visibility controlled by isScrolled) --- */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-red);
+    color: var(--text-white);
+    border: none;
+    border-radius: 0.5rem; /* Slightly rounded rectangle */
+    box-shadow: 0 4px 15px rgba(224, 58, 62, 0.5);
+    cursor: pointer;
+    opacity: 0; /* Default hidden using opacity for smooth transition */
+    pointer-events: none; /* Disable interaction when hidden */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it is above all other floating elements (1000) */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.scroll-to-top.visible {
+    opacity: 1;
+    pointer-events: auto; /* Enable interaction when visible */
+    display: flex; /* Ensure it is visible */
+}
+.scroll-to-top:hover {
+    background-color: var(--primary-red-hover);
+    transform: translateY(-5px); /* Stronger lift effect */
+    box-shadow: 0 8px 25px rgba(224, 58, 62, 0.8);
+}
+.scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1024px) {
+    .footer-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+    .footer-statement {
+        max-width: 100%;
+        font-size: 2.2rem;
+    }
+    .cta-button {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+    }
+    .footer-links-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .footer-bottom {
+        /* Removed flex-direction: column; and gap: 1.5rem; as icons are moved */
+        /* Center content on small screens (now only copyright) */
+        justify-content: center;
+        padding: 1rem 0 0 0;
+    }
+
+    /* Old style removed:
+    .social-icons {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    */
+    .footer-social-bar {
+        padding-top: 2rem; /* Ensure good spacing */
+        padding-bottom: 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .site-footer {
+        padding: 4rem 0 1.5rem 0;
+    }
+    .footer-statement {
+        font-size: 1.8rem;
+    }
+    .footer-links-grid {
+        grid-template-columns: 1fr; /* Stacked links on mobile */
+        gap: 3rem;
+    }
+    .footer-logo-section {
+        margin-bottom: 1rem;
+    }
+    
+    /* Responsive adjustment for the animated design */
+    .animated-circle-design {
+        width: 80px;
+        height: 80px;
+        margin: 1rem 0 1.5rem 0;
+    }
+    .circle-dot {
+        width: 10px;
+        height: 10px;
+        transform-origin: 50% 40px; /* Adjust transform-origin for new size (40px) */
+    }
+
+    /* Social icons spacing for very small screens */
+    .social-icons-list {
+        gap: 10px;
+    }
+    .icon-link {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* Scroll to Top Button responsive fix */
+    .scroll-to-top {
+        width: 45px;
+        height: 45px;
+        bottom: 15px;
+        right: 15px;
+    }
+}

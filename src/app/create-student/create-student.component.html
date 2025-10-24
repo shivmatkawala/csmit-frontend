@@ -1,0 +1,338 @@
+<div class="main-container">
+  <header class="header">
+    <h1>ATS-Optimized Resume Builder</h1>
+    <p>Fill all required fields for best ATS compatibility. Fields marked with <span class="mandatory">*</span> are mandatory.</p>
+  </header>
+
+  <!-- STEPPER HEADER / PROGRESS BAR (Improved Look) -->
+  <div class="stepper-header">
+    <div *ngFor="let step of steps; trackBy: trackStepId; let isLast = last"
+      class="step" 
+      [class.active]="step.id === currentStep()"
+      [class.completed]="step.id < currentStep()"
+    >
+      <div class="step-icon">{{ step.id }}</div>
+      <div class="step-label">{{ step.name }}</div>
+      <div class="step-separator" *ngIf="!isLast"></div>
+    </div>
+  </div>
+
+  <form [formGroup]="resumeForm" (ngSubmit)="onSubmit()" class="form-body">
+    
+    <!-- STEP 1: PERSONAL DETAILS -->
+    <section class="form-section fade-in" *ngIf="currentStep() === 1">
+      <h2>Personal Details</h2>
+      <div class="grid-2-cols">
+        <label class="input-group">
+          Full Name<span class="mandatory">*</span>
+          <input type="text" formControlName="fullName" placeholder="Your full name" />
+          <div *ngIf="isInvalid('fullName')" class="error-message">Full Name is required.</div>
+        </label>
+
+        <label class="input-group">
+          Email<span class="mandatory">*</span>
+          <input type="email" formControlName="email" placeholder="you@example.com" />
+          <div *ngIf="isInvalid('email')" class="error-message">A valid email is required.</div>
+        </label>
+      </div>
+
+      <div class="grid-2-cols">
+        <label class="input-group">
+          Phone Number<span class="mandatory">*</span>
+          <input type="tel" formControlName="phone" placeholder="+91 9876543210" />
+          <div *ngIf="isInvalid('phone')" class="error-message">A valid phone number is required.</div>
+        </label>
+        
+        <label class="input-group">
+          LinkedIn URL<span class="mandatory">*</span>
+          <input type="url" formControlName="linkedin" placeholder="https://linkedin.com/in/username" />
+          <div *ngIf="isInvalid('linkedin')" class="error-message">LinkedIn profile URL is required.</div>
+        </label>
+      </div>
+      
+      <!-- FIX: ADDED PORTFOLIO/GITHUB FIELD (Required in your JSON payload) -->
+      <label class="input-group full-width">
+        Portfolio/GitHub URL
+        <input type="url" formControlName="portfolio" placeholder="https://github.com/username/portfolio" />
+      </label>
+
+      <label class="input-group full-width">
+        Address (City, State, Country)<span class="mandatory">*</span>
+        <input type="text" formControlName="address" placeholder="Mumbai, India" />
+        <div *ngIf="isInvalid('address')" class="error-message">Address is required.</div>
+      </label>
+
+      <div class="button-row">
+        <button type="button" class="btn btn-primary" (click)="nextStep()">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 2: EDUCATION -->
+    <section class="form-section fade-in" *ngIf="currentStep() === 2">
+      <h2>Education</h2>
+      
+      <div *ngIf="educationControls.length === 0 && isSubmitted()" class="error-message mb-4">
+        At least one education entry is required.
+      </div>
+      
+      <!-- FIX: Added formArrayName="education" wrapper -->
+      <div formArrayName="education">
+        <!-- NOTE: trackBy: trackByIndex is not available, using index instead -->
+        <div class="item-card" [formGroupName]="i" *ngFor="let educationControl of educationControls.controls; let i = index">
+          <h3>Entry {{ i + 1 }}</h3>
+          <div class="grid-2-cols">
+            <label class="input-group">
+              Degree/Certification<span class="mandatory">*</span>
+              <input formControlName="degree" placeholder="B.Tech, M.Sc, Diploma, etc." />
+              <!-- Validation Added -->
+              <div *ngIf="educationControl.get('degree')?.invalid && (educationControl.get('degree')?.touched || isSubmitted())" class="error-message">Degree/Certification is required.</div>
+            </label>
+            <label class="input-group">
+              Institution/University<span class="mandatory">*</span>
+              <input formControlName="institution" placeholder="University Name" />
+              <!-- Validation Added: THIS IS LIKELY THE MISSING FIELD IN YOUR SCREENSHOT -->
+              <div *ngIf="educationControl.get('institution')?.invalid && (educationControl.get('institution')?.touched || isSubmitted())" class="error-message">Institution name is required.</div>
+            </label>
+          </div>
+          <div class="grid-3-cols">
+            <label class="input-group">
+              Start Date<span class="mandatory">*</span>
+              <input type="month" formControlName="startDate" />
+              <!-- Validation Added -->
+              <div *ngIf="educationControl.get('startDate')?.invalid && (educationControl.get('startDate')?.touched || isSubmitted())" class="error-message">Start Date is required.</div>
+            </label>
+            <div class="input-group date-group">
+              <label>End Date/Current<span class="mandatory">*</span></label>
+              <div class="date-inputs">
+                <input type="month" formControlName="endDate" [disabled]="educationControl.get('isCurrent')?.value" />
+                <!-- UPDATED VALIDATION: Checks if endDate is required and invalid (i.e., when isCurrent is false and date is missing) -->
+                <div *ngIf="educationControl.get('endDate')?.invalid && educationControl.get('endDate')?.enabled && (educationControl.get('endDate')?.touched || isSubmitted())" class="error-message">End Date is required, or check 'Currently Studying'.</div>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" formControlName="isCurrent" [id]="'edu-current-' + i" />
+                <label [for]="'edu-current-' + i">Currently Studying</label>
+              </div>
+            </div>
+            <!-- ADDED: Grade/CGPA field as it was in the required JSON -->
+            <label class="input-group">
+              Grade/CGPA
+              <input formControlName="grade" placeholder="9.0 CGPA or 90%" />
+            </label>
+          </div>
+          <button type="button" (click)="removeEducation(i)" class="btn btn-remove remove-item-btn">Remove Entry</button>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-secondary add-btn" (click)="addEducation()">+ Add Education</button>
+      
+      <div class="button-row">
+        <button type="button" class="btn btn-secondary" (click)="prevStep()">Previous</button>
+        <button type="button" class="btn btn-primary" (click)="nextStep()">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 3: EXPERIENCE -->
+    <section class="form-section fade-in" *ngIf="currentStep() === 3">
+      <h2>Work Experience</h2>
+      
+      <!-- Experience Type Selection -->
+      <label class="input-group full-width">
+        Experience Type<span class="mandatory">*</span>
+        <div class="radio-group">
+          <label *ngFor="let level of experienceLevels">
+            <input type="radio" formControlName="experienceType" [value]="level" />
+            {{ level }}
+          </label>
+        </div>
+      </label>
+      
+      <!-- Only show experience array if type is Intern or Experienced -->
+      <div *ngIf="selectedExperienceType() !== 'Fresher'">
+        <h3 class="mb-4">Work History <span class="mandatory">*</span></h3>
+        
+        <!-- General error check if required fields are missing in an array item -->
+        <div *ngIf="experienceControls.controls.length === 0 && selectedExperienceType() !== 'Fresher' && isSubmitted()" class="error-message mb-4">
+          At least one experience entry is required for your selected experience type.
+        </div>
+
+        <!-- FIX: Added formArrayName="experience" wrapper -->
+        <div formArrayName="experience">
+          <div class="item-card" [formGroupName]="i" *ngFor="let experienceControl of experienceControls.controls; let i = index">
+            <h4>Position/Internship {{ i + 1 }}</h4>
+            <div class="grid-2-cols">
+              <label class="input-group">
+                Title<span class="mandatory">*</span>
+                <input formControlName="title" placeholder="Software Engineer, Intern, etc." />
+                <!-- Validation Added -->
+                <div *ngIf="experienceControl.get('title')?.invalid && (experienceControl.get('title')?.touched || isSubmitted())" class="error-message">Title is required.</div>
+              </label>
+              <label class="input-group">
+                Company<span class="mandatory">*</span>
+                <input formControlName="company" placeholder="Company Name" />
+                <!-- Validation Added -->
+                <div *ngIf="experienceControl.get('company')?.invalid && (experienceControl.get('company')?.touched || isSubmitted())" class="error-message">Company name is required.</div>
+              </label>
+            </div>
+            <div class="grid-2-cols">
+              <label class="input-group">
+                Start Date<span class="mandatory">*</span>
+                <input type="month" formControlName="startDate" />
+                <!-- Validation Added -->
+                <div *ngIf="experienceControl.get('startDate')?.invalid && (experienceControl.get('startDate')?.touched || isSubmitted())" class="error-message">Start Date is required.</div>
+              </label>
+              <div class="input-group date-group">
+                <label>End Date/Currently Working<span class="mandatory">*</span></label>
+                <div class="date-inputs">
+                  <input type="month" formControlName="endDate" [disabled]="experienceControl.get('isCurrent')?.value" />
+                  <!-- UPDATED VALIDATION: Checks if endDate is required and invalid (i.e., when isCurrent is false and date is missing) -->
+                  <div *ngIf="experienceControl.get('endDate')?.invalid && experienceControl.get('endDate')?.enabled && (experienceControl.get('endDate')?.touched || isSubmitted())" class="error-message">End Date is required, or check 'Currently Working'.</div>
+                </div>
+                <div class="checkbox-group">
+                  <input type="checkbox" formControlName="isCurrent" [id]="'exp-current-' + i" />
+                  <label [for]="'exp-current-' + i">Currently Working</label>
+                </div>
+              </div>
+            </div>
+            <label class="input-group full-width">
+              Description / Responsibilities<span class="mandatory" *ngIf="experienceControl.get('description')?.hasValidator(Validators.required)">*</span>
+              <textarea formControlName="description" rows="3" placeholder="Key achievements and responsibilities"></textarea>
+              <!-- Validation Added (conditional required for experienced/intern) -->
+              <div *ngIf="experienceControl.get('description')?.invalid && (experienceControl.get('description')?.touched || isSubmitted())" class="error-message">Description is required.</div>
+            </label>
+            <button type="button" (click)="removeExperience(i)" class="btn btn-remove remove-item-btn">Remove Entry</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary add-btn" (click)="addExperience()">+ Add Experience</button>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="btn btn-secondary" (click)="prevStep()">Previous</button>
+        <button type="button" class="btn btn-primary" (click)="nextStep()">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 4: SKILLS -->
+    <section class="form-section fade-in" *ngIf="currentStep() === 4">
+      <h2>Skills</h2>
+      <p class="section-description">Add your core technical and soft skills here. (Remove if empty, but at least one skill is recommended.)</p>
+      
+      <div class="skill-input-row">
+        <label class="input-group skill-input">
+          Search Skill
+          <!-- FIXED: Changed to use [formControl] instead of [ngModel] / (ngModelChange) -->
+          <input type="text" 
+                 [formControl]="skillSearchControl"
+                 placeholder="E.g., Angular, Python, Communication" />
+        </label>
+        <div class="skill-suggestions-dropdown" *ngIf="filteredSuggestions().length > 0">
+          <button *ngFor="let suggestion of filteredSuggestions()" 
+                  type="button" 
+                  class="btn-suggestion" 
+                  (click)="selectSkillSuggestion(suggestion)">
+            {{ suggestion }}
+          </button>
+        </div>
+      </div>
+
+
+      <!-- FIX: Added formArrayName="skills" wrapper to the container -->
+      <div class="skill-card-container" formArrayName="skills">
+        <div class="skill-card" [formGroupName]="i" *ngFor="let skillControl of skillsControls.controls; let i = index">
+          <div class="grid-2-cols">
+            <label class="input-group">
+              Skill Name<span class="mandatory">*</span>
+              <input type="text" formControlName="name" placeholder="E.g., JavaScript, Python" />
+              <!-- Validation Added -->
+              <div *ngIf="skillControl.get('name')?.invalid && (skillControl.get('name')?.touched || isSubmitted())" class="error-message">Skill Name is required.</div>
+            </label>
+            <label class="input-group">
+              Proficiency Level<span class="mandatory">*</span>
+              <select formControlName="level">
+                <option value="" disabled>Select Level</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Expert">Expert</option>
+              </select>
+              <!-- Validation Added -->
+              <div *ngIf="skillControl.get('level')?.invalid && (skillControl.get('level')?.touched || isSubmitted())" class="error-message">Proficiency Level is required.</div>
+            </label>
+          </div>
+          <button type="button" (click)="removeSkill(i)" class="btn btn-remove remove-item-btn">Remove Skill</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary add-btn" (click)="addSkill()">+ Add New Skill</button>
+      
+      <div class="button-row">
+        <button type="button" class="btn btn-secondary" (click)="prevStep()">Previous</button>
+        <button type="button" class="btn btn-primary" (click)="nextStep()">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 5: PROJECTS -->
+    <section class="form-section fade-in" *ngIf="currentStep() === 5">
+      <h2>Projects</h2>
+      <p class="section-description">Detail your most important projects.</p>
+
+      <!-- FIX: Added formArrayName="projects" wrapper -->
+      <div formArrayName="projects">
+        <div class="item-card" [formGroupName]="i" *ngFor="let projectControl of projectsControls.controls; let i = index">
+          <h3>Project {{ i + 1 }}</h3>
+          <label class="input-group full-width">
+            Project Title<span class="mandatory">*</span>
+            <input formControlName="title" placeholder="ATS-Optimized Resume Builder" />
+            <!-- Validation Added -->
+            <div *ngIf="projectControl.get('title')?.invalid && (projectControl.get('title')?.touched || isSubmitted())" class="error-message">Project Title is required.</div>
+          </label>
+
+          <!-- FIX: ADDED TECHUSED INPUT FIELD -->
+          <label class="input-group full-width">Technology Used (e.g., Angular, Django)
+            <input formControlName="techUsed" placeholder="E.g., Angular, Django" /> 
+          </label>
+          
+          <label class="input-group full-width">Project URL
+            <input formControlName="url" placeholder="https://github.com/user/project" />
+          </label>
+          
+          <label class="input-group full-width">Description
+            <textarea formControlName="description" rows="3" placeholder="Key role, what you built, and main achievement"></textarea>
+          </label>
+          
+          <!-- Optional Fields (Duration/Role - keeping them for better UX, even if not in API payload) -->
+          <div class="grid-2-cols">
+            <label class="input-group">Duration</label>
+            <label class="input-group">Role</label>
+          </div>
+          <div class="grid-2-cols">
+            <input formControlName="duration" placeholder="3 Months" />
+            <input formControlName="role" placeholder="Lead Developer" />
+          </div>
+
+
+          <button type="button" (click)="removeProject(i)" class="btn btn-remove remove-item-btn">Remove Project</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary add-btn" (click)="addProject()">+ Add Project</button>
+      <div class="button-row">
+        <button type="button" class="btn btn-secondary" (click)="prevStep()">Previous</button>
+        <button type="submit" class="btn btn-submit">Generate Resume</button>
+      </div>
+    </section>
+
+    <!-- FINAL SUBMIT MESSAGE -->
+    <div class="text-center mt-5" *ngIf="isSubmitted() && resumeForm.valid">
+      <p class="text-success">Form submitted successfully. Check console for data.</p>
+    </div>
+
+  </form>
+  
+  <!-- Custom Modal/Message Box (Replaces alert()) -->
+  <div *ngIf="modalMessage()" class="custom-modal-backdrop" (click)="modalMessage.set('')">
+    <div class="custom-modal" (click)="$event.stopPropagation()">
+      <h3>Notification</h3>
+      <p>{{ modalMessage() }}</p>
+      <button class="btn btn-primary" (click)="modalMessage.set('')">OK</button>
+    </div>
+  </div>
+
+</div>

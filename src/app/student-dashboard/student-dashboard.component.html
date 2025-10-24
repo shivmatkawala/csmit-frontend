@@ -1,0 +1,134 @@
+<!-- Main Dashboard Container -->
+<div class="dashboard-container">
+  <div class="dashboard-wrapper">
+
+    <!-- Header and Greeting - Tech Theme Accent -->
+    <header class="header-card">
+      <div class="header-content">
+        <h1 class="greeting-text">
+          Hello, {{ studentName }}! 
+        </h1>
+        <!-- Image of the Profile avatar with futuristic glowing border -->
+        <img [src]="profileImageUrl" alt="Profile" class="profile-image"/> 
+        <button type="button" (click)="goToAtsResume()">Download ATS-Resume</button>
+      </div>
+      <p class="welcome-message">Focus on your next coding challenge and course progress.</p>
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+
+      <!-- COLUMN 1 (main-courses): Courses Section (takes 1.5fr height-wise) -->
+      <div class="main-content-area">
+
+        <!-- 2. My Courses Section - Enhanced Course Cards -->
+        <section class="section-card">
+          <h2 class="section-title">My Courses</h2>
+          <div class="courses-list">
+            <div *ngFor="let course of courses; let i = index" class="course-item" [ngClass]="getCourseColorClass(course)">
+              <!-- Course Info -->
+              <div class="course-info">
+                <span class="course-code-badge">{{ course.code }}</span>
+                <h3 class="course-title">{{ course.title }}</h3>
+                <p class="course-instructor">Mentor: {{ course.instructor }}</p>
+              </div>
+
+              <!-- Course Category Tag -->
+              <span class="category-tag">{{ course.category }}</span>
+
+              <!-- Progress Bar -->
+              <div class="progress-container">
+                <div class="progress-text-row">
+                  <span>Progress</span>
+                  <span>{{ course.progress }}%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="course.progress" [ngClass]="getProgressClass(course.progress)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUMN 2 (quick-info & challenge): Metrics and Quick Challenge -->
+      <div class="quick-info-and-challenge-area">
+        
+        <!-- 1. Performance Metrics/Quick Stats (quick-info) -->
+        <section class="section-card quick-info-area">
+          <h2 class="section-title">Quick Stats</h2>
+          <div class="metrics-grid">
+            <div *ngFor="let metric of metrics" class="metric-item">
+              <div class="metric-icon">{{ metric.icon }}</div>
+              <p class="metric-label">{{ metric.label }}</p>
+              <p class="metric-value">{{ metric.value }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- NEW: Quick Challenge Section (challenge) -->
+        <section class="section-card challenge-area">
+            <h2 class="section-title">Daily Code Challenge</h2>
+            <div class="challenge-card">
+                <div class="challenge-details">
+                    <p class="challenge-status">Current Level: <span class="level-indicator">Intermediate</span></p>
+                    <h3 class="challenge-title">Find the longest common prefix in an array of strings.</h3>
+                    <p class="challenge-description">Topic: String Manipulation, Algorithms</p>
+                </div>
+                <button class="challenge-btn">
+                    Start Challenge →
+                </button>
+            </div>
+        </section>
+      </div>
+
+
+      <!-- COLUMN 3 (sidebar): Assignments and Notifications -->
+      <div class="sidebar-area">
+
+        <!-- 3. Upcoming Assignments/Tasks -->
+        <section class="sidebar-card">
+          <h2 class="sidebar-title">
+            <span class="sidebar-icon">📅</span> Upcoming Deadlines
+          </h2>
+          <div class="assignments-list">
+            <div *ngFor="let assignment of assignments" class="assignment-item">
+              <div class="assignment-header">
+                <p class="assignment-name">{{ assignment.name }}</p>
+                <span class="priority-badge" [ngClass]="assignment.priorityClass">
+                  {{ assignment.priority }}
+                </span>
+              </div>
+              <div class="assignment-footer">
+                <span class="assignment-date">Due Date: {{ assignment.dueDate }}</span>
+                <span class="assignment-status status-{{ assignment.status.toLowerCase() }}">
+                  Status: {{ assignment.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button class="full-width-button">
+            Go to Submission Portal
+          </button>
+        </section>
+
+        <!-- 4. Important Announcements -->
+        <section class="sidebar-card announcement-card">
+          <h2 class="sidebar-title">
+            <span class="sidebar-icon">📢</span> Important Announcements
+          </h2>
+          <ul class="announcements-list">
+            <li *ngFor="let announcement of announcements">{{ announcement }}</li>
+          </ul>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+      <p>Student ID: {{ studentId }} | Build your future, line by line of code.</p>
+    </footer>
+
+  </div>
+</div>

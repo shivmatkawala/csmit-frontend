@@ -1,0 +1,261 @@
+/* Google Fonts Import for clean, modern typography */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap'); /* Added 900 weight */
+
+/* FIX: Set global box-sizing to border-box to prevent padding/border from causing overflow. */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* --- Colors & Variables (Matching the image theme) --- */
+:host {
+    /* Primary color is a deep, strong green */
+    --primary-green: #1a4d2e;
+    /* Secondary/Accent color is a light gold/orange for Ayurveda logo type elements */
+    --accent-color: #e09f3e;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --input-background: #ffffff; /* CHANGE: Input background set to white for better visibility over logo */
+    --card-background: #ffffff;
+    --border-light: #e0e0e0;
+}
+
+/* --- Main Page Layout: Center the Form --- */
+.login-page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    /* CHANGE: Entire page background made pure white as requested */
+    background-color: #ffffff; 
+    font-family: 'Roboto', sans-serif;
+}
+
+/* --- Login Card Styling --- */
+.login-card {
+    width: 100%;
+    max-width: 400px; /* Standard login form width */
+    background-color: var(--card-background);
+    border-radius: 12px;
+    /* Added a more prominent shadow since the background is now white */
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1); 
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+.login-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Back Button Styling (Circle Design Update) --- */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    /* Circle Properties */
+    width: 44px; /* Increased size for better touch target */
+    height: 44px;
+    border-radius: 50%; /* Make it a perfect circle */
+    background-color: var(--card-background); /* White background */
+    border: 1px solid var(--border-light); /* Light border */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+    
+    /* Centering the content (SVG) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+    padding: 0; /* Remove unnecessary padding */
+    color: var(--primary-green); /* Use primary green for the icon color */
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+.back-button:hover {
+    color: white; /* Change icon color to white on hover */
+    background-color: var(--primary-green); /* Change background to dark green on hover */
+    transform: translateY(-1px); /* Slight lift effect */
+    box-shadow: 0 6px 15px rgba(26, 77, 46, 0.2);
+}
+.back-button svg {
+    width: 24px; /* Adjusted SVG size to fit nicely */
+    height: 24px;
+    /* The color is now controlled by the parent .back-button */
+}
+
+/* --- Logo/Background Image Effect (Main Requirement) --- */
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* User's logo.png image URL used here with reduced opacity */
+    /* IMPORTANT: Replace with the actual URL/path for 'logo.png' in your assets */
+    background-image: url('/assets/logo.jpg'); 
+    background-size: 80%; /* Adjusted size to be slightly smaller */
+    background-repeat: no-repeat;
+    background-position: center 75%; /* Adjusted position to center better in the form area */
+    opacity: 0.05; /* FIX: Reduced opacity significantly for better text visibility */
+    z-index: -1; /* Place behind form elements */
+    filter: grayscale(100%) blur(0.5px); /* Slightly less blur */
+}
+
+
+/* --- Header Content Styling (Logo and Heading) --- */
+.header-content {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-top: 10px;
+}
+
+/* NEW STYLE: "Welcome to" text */
+.welcome-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light); /* Lighter grey for subtle text */
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* IMPROVED STYLE: Main Heading "CSMTTI" */
+.main-heading {
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.5rem; /* Larger font size for impact */
+    font-weight: 900; /* Extra bold for prominence */
+    color: var(--primary-green);
+    margin: 0;
+    padding: 0;
+    letter-spacing: 3px; /* Wide spacing for a premium look */
+    /* Added a bold underline using the accent color */
+    border-bottom: 4px solid var(--accent-color); 
+    display: inline-block; 
+    padding-bottom: 8px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+}
+
+
+/* --- Form Fields --- */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2; /* Ensure form elements are above the background image */
+}
+label {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-dark); /* Changed label to dark color for better contrast */
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.text-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: var(--input-background); /* FIX: Now uses white background variable */
+    color: var(--text-dark);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.text-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4); /* Stronger focus ring */
+    background-color: var(--card-background);
+}
+
+/* --- Improved Select Role Styling (New Style) --- */
+
+/* Wrapper to hold the select and the custom arrow */
+.custom-select-wrapper {
+    position: relative;
+}
+
+/* Hide the default OS arrow and apply base input styles */
+.custom-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 40px !important; /* Make space for the custom arrow */
+    cursor: pointer;
+}
+
+/* Styling for the custom arrow (down arrow) */
+.select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--text-light);
+    pointer-events: none; /* Allows clicks to pass through to the select element */
+    transition: color 0.2s;
+}
+
+/* Change arrow color when select is focused */
+.custom-select:focus + .select-arrow {
+    color: var(--primary-green);
+}
+
+/* Styling the option that is selected but has no value (placeholder) */
+.custom-select option[value=""][disabled] {
+    color: #999; 
+}
+
+/* Styling for regular options */
+.custom-select option {
+    color: var(--text-dark);
+    background-color: var(--card-background);
+    padding: 5px;
+}
+
+
+/* --- Submit Button --- */
+.login-button {
+    width: 100%;
+    padding: 14px; /* Slightly larger button */
+    border: none;
+    border-radius: 10px; /* More rounded corners */
+    background-color: var(--primary-green);
+    color: white;
+    font-size: 1.2rem; /* Larger font on button */
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(26, 77, 46, 0.4); /* Stronger button shadow */
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+    margin-top: 15px; /* More margin */
+    position: relative;
+    z-index: 2;
+}
+.login-button:hover {
+    background-color: #0d341c; /* Slightly darker green on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 10px 25px rgba(26, 77, 46, 0.5); 
+}
+.login-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(26, 77, 46, 0.3);
+}
+
+/* Optional: Additional Links */
+.links-container {
+    text-align: center;
+    margin-top: 30px; /* More margin */
+    font-size: 0.95rem;
+}
+.links-container a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.links-container a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}

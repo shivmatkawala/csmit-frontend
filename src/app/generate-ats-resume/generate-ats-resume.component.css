@@ -1,0 +1,53 @@
+/*
+Note: Most of the styling is now handled by Tailwind CSS classes in the HTML file.
+This CSS is primarily for print media optimization (A4 paper layout).
+*/
+
+@media print {
+/* Hide the action buttons when printing */
+.print:hidden {
+display: none !important;
+}
+
+/* Ensure the A4 page size and margins for clean PDF generation */
+@page {
+size: A4;
+margin: 1cm;
+}
+
+/* Remove all shadows and non-essential backgrounds for professional print quality */
+body, html {
+margin: 0;
+padding: 0;
+background: white;
+}
+
+/* Reset the main container to behave like a document page /
+.bg-white, .shadow-2xl, .border, .rounded-lg {
+all: unset !important; / Remove all applied Tailwind styles for the print container */
+}
+
+#resume-content {
+width: 100%;
+margin: 0;
+padding: 0;
+box-shadow: none;
+font-size: 11pt; /* Adjust font size for print legibility */
+}
+
+/* Make sure all elements fit tightly on the page */
+.p-6, .sm:p-8 {
+padding: 0 !important;
+}
+
+/* Resetting font and layout to ensure print consistency */
+h1, h2, p, div, span {
+color: black !important;
+line-height: 1.4 !important;
+}
+
+/* Headers in print should be simple */
+.border-b-2 {
+border-color: #ccc !important;
+border-width: 1px !important;
+}
