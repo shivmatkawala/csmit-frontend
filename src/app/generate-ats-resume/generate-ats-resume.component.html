@@ -1,0 +1,79 @@
+<div id="resume-content" class="resume-a4" *ngIf="resumeData">
+  <header class="resume-header">
+    <h1>{{ resumeData.first_name }} {{ resumeData.last_name }}</h1>
+    <p>{{ resumeData.address }}</p>
+    <p>{{ resumeData.phone }} | {{ resumeData.email }} | <a href="#">linkedin.com</a></p>
+  </header>
+
+  <section class="resume-summary">
+    <h2>Professional Summary</h2>
+    <p>
+      Dynamic and detail-oriented full stack developer with hands-on experience in Python, Java, and modern web
+      frameworks.
+      Passionate about building scalable applications and mentoring learners through practical DevOps and automation.
+    </p>
+  </section>
+
+  <section class="resume-education">
+    <h2>Education</h2>
+    <p><strong>Course:</strong> {{ resumeData.course }}</p>
+    <p><strong>Institution:</strong> Your Institute Name</p>
+    <p><strong>Graduation:</strong> Month Year</p>
+  </section>
+  <section class="resume-projects">
+    <h2>Personal Projects</h2>
+    <ul>
+      <li>
+        <strong>ATS Resume Generator</strong> – Django + Angular<br>
+        Architected a modular resume builder with A4 rendering, print/download support, and RESTful API integration.
+        Designed for scalability and classroom demos.
+      </li>
+      <li>
+        <strong>CI/CD Classroom Docker Pipeline</strong><br>
+        Built reproducible Docker images and Jenkins pipelines for hands-on DevOps training. Includes automated testing
+        and rollback strategies.
+      </li>
+      <li>
+        <strong>Flask Metrics Dashboard</strong><br>
+        Integrated Prometheus with Flask via ngrok for real-time metrics scraping. Debugged YAML configs and modularized
+        the setup for reuse.
+      </li>
+    </ul>
+  </section>
+
+  <section class="resume-experience">
+    <h2>Experience</h2>
+    <ul>
+      <li>
+        <strong>Software Trainer | Your Company</strong> – Jan 2023 to Present<br>
+        Delivered hands-on training in Python, Docker, and CI/CD pipelines. Designed modular lecture series and
+        troubleshooting labs.
+      </li>
+      <li>
+        <strong>DevOps Engineer | Previous Company</strong> – Jun 2021 to Dec 2022<br>
+        Built reproducible Jenkins pipelines, optimized Docker images, and led system audits for developer hygiene.
+      </li>
+    </ul>
+  </section>
+
+  <section class="resume-skills">
+    <h2>Skills</h2>
+    <div class="skills-grid">
+      <ul>
+        <li>Python & Flask</li>
+        <li>Docker & Jenkins</li>
+        <li>Linux & Bash</li>
+      </ul>
+      <ul>
+        <li>CI/CD Automation</li>
+        <li>Angular & Django</li>
+        <li>Prometheus & YAML</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<div class="resume-actions" *ngIf="resumeData">
+  <button (click)="printResume()">🖨️ Print</button>
+  <button (click)="downloadResume()">⬇️ Download</button>
+</div>

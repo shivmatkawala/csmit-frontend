@@ -1,0 +1,210 @@
+<!-- Main Container -->
+<div class="main-container">
+  <div class="form-card">
+
+    <!-- Header -->
+    <h1 class="form-header-title">
+      Create New Batch
+    </h1>
+    <p class="form-header-subtitle">
+      Configure and upload a new training batch for the technical institute.
+    </p>
+
+    <!-- Form Area - Template Driven Form (TDF) -->
+    <form #batchForm="ngForm" (ngSubmit)="onSubmit(batchForm)" class="batch-form">
+
+      <!-- Section 1: Batch Details (2 Columns on Desktop) -->
+      <div class="form-section-group">
+        
+        <!-- Batch Name -->
+        <div class="form-group">
+          <label for="batchName" class="input-label">Batch Name</label>
+          <input
+            id="batchName"
+            name="batchName"
+            type="text"
+            required
+            minlength="5"
+            [(ngModel)]="batchData.batchName"
+            #batchName="ngModel"
+            class="input-field"
+            placeholder="e.g. Full Stack Dev - Evening"
+          />
+          <div *ngIf="batchName.invalid && (batchName.dirty || batchName.touched)" class="error-message">
+            <div *ngIf="batchName.errors?.['required']">Batch Name is required.</div>
+            <div *ngIf="batchName.errors?.['minlength']">Name must be at least 5 characters long.</div>
+          </div>
+        </div>
+
+        <!-- Course Selection -->
+        <div class="form-group">
+          <label for="course" class="input-label">Select Course</label>
+          <select
+            id="course"
+            name="course"
+            required
+            [(ngModel)]="batchData.course"
+            #course="ngModel"
+            class="input-field select-field"
+          >
+            <option value="" disabled>-- Select a Course --</option>
+            <option *ngFor="let c of courses" [value]="c">{{ c }}</option>
+          </select>
+          <div *ngIf="course.invalid && (course.dirty || course.touched)" class="error-message">
+            Course selection is required.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Timing and Capacity (3 Columns on Desktop) -->
+      <div class="form-section-group three-cols">
+        
+        <!-- Start Date -->
+        <div class="form-group">
+          <label for="startDate" class="input-label">Start Date</label>
+          <input
+            id="startDate"
+            name="startDate"
+            type="date"
+            required
+            [(ngModel)]="batchData.startDate"
+            #startDate="ngModel"
+            class="input-field"
+          />
+          <div *ngIf="startDate.invalid && (startDate.dirty || startDate.touched)" class="error-message">
+            Start Date is required.
+          </div>
+        </div>
+
+        <!-- Batch Timing (REPLACES End Date) -->
+        <div class="form-group">
+          <label for="batchTiming" class="input-label">Batch Timing</label>
+          <input
+            id="batchTiming"
+            name="batchTiming"
+            type="text"
+            required
+            minlength="5"
+            [(ngModel)]="batchData.batchTiming"
+            #batchTiming="ngModel"
+            class="input-field"
+            placeholder="e.g. 10:00 AM - 12:00 PM (IST)"
+          />
+          <div *ngIf="batchTiming.invalid && (batchTiming.dirty || batchTiming.touched)" class="error-message">
+            <div *ngIf="batchTiming.errors?.['required']">Batch Timing is required.</div>
+            <div *ngIf="batchTiming.errors?.['minlength']">Timing must be at least 5 characters long.</div>
+          </div>
+        </div>
+
+        <!-- Capacity -->
+        <div class="form-group">
+          <label for="capacity" class="input-label">Capacity (Seats)</label>
+          <input
+            id="capacity"
+            name="capacity"
+            type="number"
+            required
+            min="5"
+            [(ngModel)]="batchData.capacity"
+            #capacity="ngModel"
+            class="input-field"
+            placeholder="e.g. 40"
+          />
+          <div *ngIf="capacity.invalid && (capacity.dirty || capacity.touched)" class="error-message">
+            <div *ngIf="capacity.errors?.['required']">Capacity is required.</div>
+            <div *ngIf="capacity.errors?.['min']">Capacity must be at least 5.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Pricing and Mode (2 Columns on Desktop) -->
+      <div class="form-section-group">
+
+        <!-- Price -->
+        <div class="form-group">
+          <label for="price" class="input-label">Price (₹)</label>
+          <input
+            id="price"
+            name="price"
+            type="number"
+            required
+            min="0"
+            [(ngModel)]="batchData.price"
+            #price="ngModel"
+            class="input-field"
+            placeholder="e.g. 25000"
+          />
+          <div *ngIf="price.invalid && (price.dirty || price.touched)" class="error-message">
+            Price is required.
+          </div>
+        </div>
+
+        <!-- Mode Selection: Online/Offline Buttons (Segmented Control) -->
+        <div class="form-group">
+          <label class="input-label">Batch Mode</label>
+          <div class="mode-segmented-control">
+            <!-- Offline Button (isOnline: false) -->
+            <button
+              type="button"
+              class="mode-option"
+              [class.active]="!batchData.isOnline"
+              (click)="batchData.isOnline = false"
+            >
+              Offline (In-person)
+            </button>
+            
+            <!-- Online Button (isOnline: true) -->
+            <button
+              type="button"
+              class="mode-option"
+              [class.active]="batchData.isOnline"
+              (click)="batchData.isOnline = true"
+            >
+              Online (Remote)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Description (Single Column) -->
+      <div class="form-section-group single-col">
+        <label for="description" class="input-label">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="3"
+          required
+          minlength="20"
+          [(ngModel)]="batchData.description"
+          #description="ngModel"
+          class="input-field textarea-field"
+          placeholder="Write a concise and engaging description about the batch."
+        ></textarea>
+        <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
+          <div *ngIf="description.errors?.['required']">Description is required.</div>
+          <div *ngIf="description.errors?.['minlength']">Description must be at least 20 characters long.</div>
+        </div>
+      </div>
+
+      <!-- Form Submission Status -->
+      <div *ngIf="formSubmitted" class="submission-success-message">
+        <p class="message-title">Submission Successful!</p>
+        <p class="message-content">Batch data logged to console.</p>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="submit-button-container">
+        <button
+          type="submit"
+          [disabled]="batchForm.invalid || isSubmitting"
+          class="submit-button"
+          [class.enabled]="batchForm.valid && !isSubmitting"
+          [class.disabled]="batchForm.invalid || isSubmitting"
+        >
+          {{ isSubmitting ? 'Uploading...' : 'Upload Batch' }}
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>

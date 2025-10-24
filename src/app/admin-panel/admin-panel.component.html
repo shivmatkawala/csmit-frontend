@@ -1,0 +1,126 @@
+<div class="admin-panel-container">
+
+    <!-- Header Section -->
+    <header class="header">
+        <h1 class="title">Admin Dashboard</h1>
+        <p class="subtitle">Quick access to administrative functions for managing the system.</p>
+    </header>
+
+    <!-- Card Grid Layout -->
+    <div class="card-grid">
+
+        <!-- Card 1: Create Student (Blue) -->
+        <!-- Navigation function pehle se hi laga hua hai -->
+        <div class="card card-blue" tabindex="0" (click)="navigateToCreateStudent()">
+            <div class="card-content">
+                <!-- Icon Container - Using pure SVG for simplicity -->
+                <div class="card-icon icon-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m8-11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm10 5v-2a4 4 0 0 0-3-3.87M23 3l-3 3-3-3"/>
+                    </svg>
+                </div>
+
+                <h2>Create Student</h2>
+                <p>Register new student accounts and profiles in the system.</p>
+            </div>
+
+            <div class="card-action">
+                <button class="btn-blue">Go to Create Student</button>
+            </div>
+        </div>
+
+        <!-- Card 2: Create Trainer (Green) -->
+        <!-- Navigation function pehle se hi laga hua hai -->
+        <div class="card card-green" tabindex="0" (click)="navigateToTrainerForm()">
+            <div class="card-content">
+                <!-- Icon Container -->
+                <div class="card-icon icon-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8h6M22 5v6"/>
+                    </svg>
+                </div>
+
+                <h2>Create Trainer</h2>
+                <p>Add new faculty or professional trainer profiles and credentials.</p>
+            </div>
+
+            <div class="card-action">
+                <button class="btn-green">Go to Create Trainer</button>
+            </div>
+        </div>
+
+        <!-- Card 3: Create Exam (Amber) -->
+        <!-- FIX: 'navigateToCreateExam()' function call add kiya gaya hai -->
+        <div class="card card-amber" tabindex="0" (click)="navigateToCreateExam()">
+            <div class="card-content">
+                <!-- Icon Container -->
+                <div class="card-icon icon-amber">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-7M9 15h3m-3-4h6M22 2l-3 3-3-3"/>
+                    </svg>
+                </div>
+
+                <h2>Create Exam</h2>
+                <p>Design, configure, and schedule new tests and assessments.</p>
+            </div>
+
+            <div class="card-action">
+                <button class="btn-amber">Go to Create Exam</button>
+            </div>
+        </div>
+
+        <!-- Card 4: Upload Jobs (Red) -->
+        <!-- FIX: 'navigateTouploadJobForm()' function call add kiya gaya hai -->
+        <div class="card card-red" tabindex="0" (click)="navigateTouploadJobForm()">
+            <div class="card-content">
+                <!-- Icon Container -->
+                <div class="card-icon icon-red">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4m12 0h-4M4 8h16M2 8l8 5 8-5"/>
+                    </svg>
+                </div>
+
+                <h2>Upload Jobs</h2>
+                <p>Post and manage new job openings for ongoing placement drives.</p>
+            </div>
+
+            <div class="card-action">
+                <button class="btn-red">Go to Upload Jobs</button>
+            </div>
+        </div>
+
+        <!-- Card 5: Update New Batch (Violet) -->
+        <!-- FIX: 'navigateTocreatebatchForm()' function call add kiya gaya hai -->
+        <div class="card card-violet" tabindex="0" (click)="navigateTocreatebatchForm()">
+            <div class="card-content">
+                <!-- Icon Container -->
+                <div class="card-icon icon-violet">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+
+                <h2>Update New Batch</h2>
+                <p>Manage batch start dates, capacity, and student allocations.</p>
+            </div>
+
+            <div class="card-action">
+                <button class="btn-violet">Go to Create New Batch</button>
+            </div>
+        </div>
+
+        <!-- Placeholder Card (Grey) -->
+        <div class="card card-placeholder" tabindex="0">
+            <div class="card-content center-content">
+                <h2>More Actions...</h2>
+                <p>Future features will be added here.</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="message-box" id="messageBox">
+        <p>Action Successful!</p>
+        <button class="close-btn" onclick="document.getElementById('messageBox').classList.remove('active')">X</button>
+    </div>
+
+</div>

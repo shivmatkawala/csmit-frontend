@@ -1,0 +1,69 @@
+
+.resume-a4 {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm;
+  background: white;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #333;
+}
+
+.resume-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.resume-header h1 {
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.resume-header p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.resume-summary,
+.resume-education,
+.resume-experience,
+.resume-skills {
+  margin-bottom: 20px;
+}
+
+.resume-summary p,
+.resume-education p,
+.resume-experience ul,
+.resume-skills ul {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.resume-experience ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.resume-experience li {
+  margin-bottom: 10px;
+}
+
+.skills-grid {
+  display: flex;
+  gap: 40px;
+}
+
+.skills-grid ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.skills-grid li {
+  margin-bottom: 5px;
+}
+
+.resume-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}

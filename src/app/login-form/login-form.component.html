@@ -1,0 +1,66 @@
+<!-- Main wrapper to center the form on the page -->
+<div class="login-page-wrapper">
+    <!-- Login Card: The container for the form, which holds the background image effect -->
+    <div class="login-card">
+
+        <!-- Back Button (Naya) -->
+        <button class="back-button" (click)="goBack()" title="Pichle page par jaaiye">
+            <!-- Back Arrow Icon (SVG) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!-- Header Content: Logo and Title -->
+        <div class="header-content">
+            <!-- "Welcome to" text with modern styling -->
+            <div class="welcome-text">Welcome to</div>
+
+            <!-- Main Heading (CSMTTI) -->
+            <h1 class="main-heading">CSMTTI</h1>
+        </div>
+
+        <!-- Login Form -->
+        <form (ngSubmit)="login()">
+            <!-- Email Input Group -->
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="text-input" placeholder="your.email@example.com" [(ngModel)]="username" name="username" required>
+            </div>
+
+            <!-- Password Input Group -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="text-input" placeholder="Enter your password" [(ngModel)]="password" name="password" required>
+            </div>
+
+            <!-- role Input Group (Behtar Design) -->
+            <div class="form-group custom-select-group">
+                <label for="role">Select Role</label>
+                <div class="custom-select-wrapper">
+                    <!-- The actual select element -->
+                    <select id="role" class="text-input custom-select" [(ngModel)]="role" name="role" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Trainer">Trainer</option>
+                        <option value="Student">Student</option>
+                    </select>
+                    <!-- Custom Arrow Icon for the select input -->
+                    <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" class="login-button">
+                Login
+            </button>
+        </form>
+
+        <!-- Optional: Forgot Password Link -->
+        <div class="links-container">
+            <a href="#">Forgot Password?</a>
+        </div>
+    </div>
+</div>

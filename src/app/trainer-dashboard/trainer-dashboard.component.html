@@ -1,0 +1,140 @@
+<div class="dashboard-container">
+  <div class="dashboard-wrapper">
+
+    <!-- Header and Greeting - Tech Theme Accent -->
+    <header class="header-card">
+      <div class="header-content">
+        <h1 class="greeting-text">
+          Welcome, {{ trainerName }}! 👩‍💻
+        </h1>
+        <img [src]="profileImageUrl" alt="Profile" class="profile-image"/>
+      </div>
+      <p class="welcome-message">Manage your courses, reviews, and student engagement.</p>
+    </header>
+
+    <div class="content-grid">
+
+      <!-- Main Content Area -->
+      <div class="main-content-area">
+
+        <!-- 1. Key Metrics - Tech Focused -->
+        <section class="section-card">
+          <h2 class="section-title">Key Metrics</h2>
+          <div class="metrics-grid">
+            <div *ngFor="let metric of metrics" class="metric-item">
+              <div class="metric-icon">{{ metric.icon }}</div>
+              <p class="metric-label">{{ metric.label }}</p>
+              <p class="metric-value">{{ metric.value }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. My Courses - Enhanced Progress Display -->
+        <section class="section-card">
+          <h2 class="section-title">My Courses</h2>
+          <div class="courses-list">
+            <div *ngFor="let course of teachingCourses" class="course-item">
+              <div class="course-info">
+                <span class="course-code-badge">{{ course.id }}</span>
+                <h3 class="course-title">{{ course.title }}</h3>
+                <p class="course-instructor">Students: {{ course.totalStudents}}</p>
+              </div>
+
+              <div class="progress-container">
+                <div class="progress-text-row">
+                  <span>Progress</span>
+                  <span>{{ course.completion }}%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <!-- No assignments allowed here, only property access -->
+                  <div class="progress-bar-fill" [style.width.%]="course.completion" [ngClass]="getCompletionClass(course.completion)"></div>
+                </div>
+              </div>
+
+              <span class="course-status" [ngClass]="getStatusClass(course.status)">
+                {{ course.status }}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Recent Student Queries - FIXED: Filtered Queries -->
+        <section class="section-card">
+          <h2 class="section-title">Recent Student Queries</h2>
+          <div class="query-filter-bar">
+            <!-- Fixed: All complex logic moved to getters or simple property access -->
+            <button 
+              (click)="queryFilter = 'All'" 
+              [class.active]="queryFilter === 'All'">All ({{ allRecentStudentQueries.length }})</button>
+            <button 
+              (click)="queryFilter = 'Unresolved'" 
+              [class.active]="queryFilter === 'Unresolved'">Unresolved ({{ unresolvedQueryCount }})</button>
+            <button 
+              (click)="queryFilter = 'High Priority'" 
+              [class.active]="queryFilter === 'High Priority'">High Priority ({{ highPriorityQueryCount }})</button>
+          </div>
+
+          <div class="queries-list">
+            <div *ngFor="let query of filteredQueries" class="query-item" 
+                 [class.resolved-query]="query.resolved" 
+                 [ngClass]="{'border-l-green': query.resolved}">
+              <div class="query-header">
+                <!-- No assignments allowed here -->
+                <p class="query-name">{{ query.name }} - <span class="query-course">({{ query.course }})</span></p>
+                <span class="query-time">{{ query.time }}</span>
+              </div>
+              <p class="query-subject">{{ query.subject }}</p>
+              <div class="query-actions">
+                <span class="priority-tag" [class.high-priority]="query.priority === 'High'">{{ query.priority }}</span>
+                <!-- Assignment is correctly placed inside the (click) handler which calls a function -->
+                <button class="resolve-btn" (click)="toggleQueryResolved(query)">
+                  <span *ngIf="!query.resolved">Mark as Resolved</span>
+                  <span *ngIf="query.resolved">✅ Resolved</span>
+                </button>
+              </div>
+            </div>
+            <p *ngIf="filteredQueries.length === 0" class="no-data-message">No queries matching the current filter.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Sidebar Area -->
+      <div class="sidebar-area">
+
+        <!-- 4. Pending Tasks/Grading -->
+        <section class="sidebar-card action-card">
+          <h2 class="sidebar-title">
+            <span class="sidebar-icon">🚨</span> Pending Code Reviews
+          </h2>
+          <div class="tasks-list">
+            <div *ngFor="let task of pendingTasks" class="task-item" [ngClass]="getTaskPriorityClass(task.daysDue)">
+              <div class="task-details">
+                <p class="task-name">{{ task.name }}</p>
+                <span class="task-course">{{ task.course }}</span>
+              </div>
+              <span class="task-due-date">Due in {{ task.daysDue }} days</span>
+            </div>
+          </div>
+          <button class="full-width-button">
+            Go to Review Center
+          </button>
+        </section>
+
+        <!-- 5. Quick Actions -->
+        <section class="sidebar-card action-card">
+          <h2 class="sidebar-title">
+            <span class="sidebar-icon">🛠️</span> Quick Actions
+          </h2>
+          <div class="actions-grid">
+            <button class="action-button">Create New Code Challenge</button>
+            <button class="action-button">Host Live Q&A Session</button>
+            <button class="action-button">Update Course Curriculum</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</div>

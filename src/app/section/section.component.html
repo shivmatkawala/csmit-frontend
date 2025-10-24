@@ -1,0 +1,117 @@
+<main>
+  <!-- Hero Section: Updated to match the attached image (Left-aligned text, right-side graphics) -->
+  <section class="hero-section">
+    <div class="container hero-container">
+
+      <!-- Left Side: Text Content -->
+      <div class="hero-content-left">
+        <h1 class="hero-title">
+          <!-- Text is now left-aligned and prominent -->
+          <span class="line-1">Your Digital</span>
+          <span class="line-2">Transformation Starts Here.</span>
+        </h1>
+        <p class="hero-subtitle">
+          CSMIT delivers top-tier digital training, professional branding, and placement solutions that align with your career goals, empowering you to achieve success.
+        </p>
+        <div class="hero-cta">
+          <!-- Button style matching the inspiration -->
+          <a href="#" class="cta-button">About CSMIT</a>
+        </div>
+      </div>
+
+      <!-- Right Side: NEW TECH GRAPHICS (Digital Core with 3D animation) -->
+      <div class="hero-graphics-right">
+          <!-- Digital Core: The main animated element -->
+          <div class="digital-core">
+              <div class="core-ring ring-1"></div>
+              <div class="core-ring ring-2"></div>
+              <div class="core-node">
+                  <!-- Central pulsing node -->
+              </div>
+          </div>
+          <!-- Floating Data Flow Lines -->
+          <div class="data-flow flow-1"></div>
+          <div class="data-flow flow-2"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Demo Classes Section: Styling Updated for better design -->
+  <section class="demo-classes-section">
+    <div class="container">
+      <div class="section-heading">
+        <h2 class="section-title">Watch Our Free Demo Classes</h2>
+        <p class="section-subtitle">
+          Get a glimpse of our teaching style and course quality before you enroll.
+        </p>
+      </div>
+    </div>
+
+    <!-- Video Scrollers - Functionality remains the same -->
+    <div class="video-scroller" data-direction="right" data-speed="slow">
+      <div class="scroller-inner">
+        <!-- Loop to create demo video cards -->
+        <div class="demo-card" *ngFor="let video of scrollerVideos1" (click)="openModal(video.youtubeVideoId)">
+          <div class="thumbnail-container">
+            <!-- Using the video.thumbnailUrl directly -->
+            <img [src]="video.thumbnailUrl" [alt]="video.title" class="thumbnail-image">
+            <div class="thumbnail-overlay">
+              <div class="play-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7.5 5.25L15 12l-7.5 6.75V5.25z" />
+                </svg>
+              </div>
+            </div>
+             <span class="video-duration">{{ video.duration }}</span>
+          </div>
+          <div class="video-info">
+            <h3 class="video-title">{{ video.title }}</h3>
+            <p class="video-instructor">by {{ video.instructor }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-scroller" data-direction="left" data-speed="slow">
+      <div class="scroller-inner">
+        <div class="demo-card" *ngFor="let video of scrollerVideos2" (click)="openModal(video.youtubeVideoId)">
+          <div class="thumbnail-container">
+            <!-- Using the video.thumbnailUrl directly -->
+            <img [src]="video.thumbnailUrl" [alt]="video.title" class="thumbnail-image">
+             <div class="thumbnail-overlay">
+              <div class="play-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7.5 5.25L15 12l-7.5 6.75V5.25z" />
+                </svg>
+              </div>
+            </div>
+            <span class="video-duration">{{ video.duration }}</span>
+          </div>
+          <div class="video-info">
+            <h3 class="video-title">{{ video.title }}</h3>
+            <p class="video-instructor">by {{ video.instructor }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Video Player Modal - Functionality remains the same -->
+  <div class="video-modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="video-modal-content" (click)="$event.stopPropagation()">
+      <button class="close-modal-btn" (click)="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="video-wrapper">
+        <iframe width="560" height="315" [src]="selectedVideoUrl"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
+</main>
