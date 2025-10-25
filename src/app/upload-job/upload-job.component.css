@@ -1,0 +1,145 @@
+/* -------------------------------------------------------------------
+ * PREMIUM FORM STYLES
+ * Theme: Modern, Deep Violet Accent
+ * ------------------------------------------------------------------- */
+
+.job-upload-container {
+  /* Soft, modern background with a slight dark texture/gradient feel */
+  min-height: 100vh;
+  background-color: white; /* Very light purple/gray */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.job-upload-card {
+  /* Enhanced card design */
+  width: 100%;
+  max-width: 48rem; /* Wider card */
+  background-color: #ffffff;
+  /* Deep, sophisticated shadow */
+  box-shadow: 0 25px 50px -12px rgba(127, 80, 255, 0.25), 0 10px 15px -3px rgba(0, 0, 0, 0.05); 
+  border-radius: 1.5rem; /* More rounded */
+  padding: 3rem; 
+  border: 1px solid #e0d9ff; /* Light accent border */
+  transition: transform 0.3s ease-in-out;
+}
+
+.job-upload-card:hover {
+    /* Subtle hover effect for the card */
+    transform: translateY(-2px);
+}
+
+/* Header and Text */
+.header-title {
+    color: #7F50FF; /* Deep Violet Accent */
+    border-bottom: 3px solid #7F50FF;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Form Elements Utility Classes */
+
+.input-label {
+  display: block;
+  font-size: 0.95rem; 
+  font-weight: 600; /* Slightly bolder labels */
+  color: #3e2773; /* Darker text for contrast */
+  margin-bottom: 0.35rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1.25rem; /* More padding for a softer look */
+  border: 2px solid #e5e7eb; /* Thicker border */
+  border-radius: 0.75rem; /* More rounded inputs */
+  transition: all 250ms ease-in-out;
+  font-size: 1rem;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #7F50FF; /* Deep Violet Focus */
+  box-shadow: 0 0 0 4px rgba(127, 80, 255, 0.2); /* Soft shadow on focus */
+}
+
+.validation-message {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #ef4444; /* Red for errors */
+  font-weight: 500;
+}
+
+.submit-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 1.5rem; /* Larger button */
+  border: none;
+  border-radius: 0.75rem; 
+  font-size: 1.125rem; 
+  font-weight: 700; 
+  color: #ffffff;
+  transition: all 300ms ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Specific button styles using NgClass logic from HTML */
+.submit-button.active {
+    background-color: #7F50FF; /* Deep Violet */
+    cursor: pointer;
+}
+
+.submit-button.active:hover {
+    background-color: #6a3de0; /* Slightly darker hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 10px 15px -3px rgba(127, 80, 255, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.submit-button.disabled {
+    background-color: #d1c4e9; /* Light purple for disabled state */
+    cursor: not-allowed;
+}
+
+
+/* Submission Status Display */
+
+.submission-status {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #e6ffec; /* Lightest green */
+  border: 1px solid #34d399; /* Green border */
+  border-radius: 0.75rem;
+  font-family: monospace; /* Monospace font for data display */
+}
+
+.submitted-data-display {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px dashed #9ca3af; 
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  color: #1f2937;
+  white-space: pre-wrap; /* Better wrapping for JSON data */
+}
+
+.reset-button {
+  margin-top: 1rem;
+  color: #7F50FF;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.reset-button:hover {
+  color: #6a3de0;
+}

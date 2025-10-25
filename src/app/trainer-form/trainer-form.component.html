@@ -1,0 +1,202 @@
+<div class="page-container">
+    <div class="form-card">
+        <div class="form-header">
+            <button class="back-btn" (click)="goBack()" title="Go to Admin Panel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            
+            <h2 [class.edit-mode-title]="currentTrainerId()">{{ formTitle() }}</h2>
+
+            <button class="menu-btn" (click)="toggleTrainerList()" title="View All Trainers">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- API Message/Notification Area (NEW) -->
+        <div class="api-status-container">
+            <div *ngIf="message().text" class="status-message" [class.success]="message().type === 'success'" [class.error]="message().type === 'error'">
+                {{ message().text }}
+            </div>
+            <div *ngIf="isLoading()" class="loading-indicator">
+                <div class="spinner"></div>
+                <span>{{ currentTrainerId() ? 'Saving changes...' : 'Loading / Submitting data...' }}</span>
+            </div>
+        </div>
+        <!-- End API Message/Notification Area -->
+
+        <form #trainerForm="ngForm" (ngSubmit)="onSubmit(trainerForm)" class="trainer-form">
+
+            <div class="form-group-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" [(ngModel)]="newTrainer().firstName" required #firstName="ngModel" placeholder="e.g., Anjali">
+                    <div *ngIf="firstName.invalid && (firstName.dirty || firstName.touched)" class="error-message">
+                        First Name is required.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" [(ngModel)]="newTrainer().lastName" required #lastName="ngModel" placeholder="e.g., Sharma">
+                    <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)" class="error-message">
+                        Last Name is required.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-row">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" [(ngModel)]="newTrainer().email" required email #email="ngModel" placeholder="e.g., anjali.s@example.com">
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
+                        A valid Email address is required.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" [(ngModel)]="newTrainer().phone" required pattern="[0-9]{10,15}" #phone="ngModel" placeholder="e.g., 9876543210">
+                    <div *ngIf="phone.invalid && (phone.dirty || phone.touched)" class="error-message">
+                        A 10-15 digit phone number is required.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group image-upload-group">
+                <label class="image-label">Profile Image (Optional)</label>
+                <div class="image-preview-area">
+                    <img [src]="newTrainer().imageUrl" alt="Profile Preview" class="profile-preview" onerror="this.src='https://placehold.co/80x80/2ecc71/ffffff?text=P'">
+                    
+                    <div class="upload-btn-container">
+                        <input type="file" id="imageUpload" class="file-input" (change)="handleImageUpload($event)" accept="image/*" #imageInput>
+                        <button type="button" class="btn-upload-file" (click)="imageInput.click()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.7-1.4-2-2.3-3.4-2.4-1.6-4-5.2-6.5-9.4-6-4.1.5-7.4 3.2-8.5 7.6-.7 2.8.7 5.7 3.6 6.8 2.6.9 5.3-.2 7.1-2.1"></path><path d="M11 15v3"></path><path d="M8 15h6"></path><path d="M12 11v-4"></path><polyline points="12 4 12 16 8 12"></polyline></svg>
+                            {{ newTrainer().imageUrl.includes('placehold.co') ? 'Upload Image' : 'Change' }}
+                        </button>
+                        <button type="button" class="btn-remove-file" *ngIf="!newTrainer().imageUrl.includes('placehold.co')" (click)="removeImage()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="courseFilter">Courses / Specializations (Search & Select)</label>
+                <input type="text" id="courseFilter" name="courseFilter" [ngModel]="courseFilter()" (ngModelChange)="courseFilter.set($event)" placeholder="Search for Python, Angular, Cloud, etc." />
+                
+                <div class="course-selection-container selected-courses-display">
+                    <span *ngIf="newTrainer().courses.length === 0" class="no-data-msg">No courses selected.</span>
+                    <span *ngFor="let course of newTrainer().courses" 
+                        class="course-chip selected"
+                        (click)="toggleCourseSelection(course)">
+                        {{ course }}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 5px; transform: scale(1.2);"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </span>
+                </div>
+                
+                <label class="image-label" *ngIf="filteredCourses().length > 0 && courseFilter().length > 0">Suggested Courses:</label>
+                <div class="course-selection-container suggested-courses-display" *ngIf="filteredCourses().length > 0">
+                    <span *ngFor="let course of filteredCourses()" 
+                        class="course-chip"
+                        [class.selected]="newTrainer().courses.includes(course)"
+                        (click)="toggleCourseSelection(course)">
+                        {{ course }}
+                    </span>
+                </div>
+                
+                <div *ngIf="filteredCourses().length === 0 && courseFilter().length > 0" class="error-message">
+                    No matching courses found.
+                </div>
+                
+                <div *ngIf="newTrainer().courses.length === 0 && trainerForm.submitted" class="error-message">
+                    At least one course selection is required.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="experienceYears">Years of Experience</label>
+                <input type="number" id="experienceYears" name="experienceYears" [(ngModel)]="newTrainer().experienceYears" min="0" required #experienceYears="ngModel" placeholder="e.g., 5">
+                <div *ngIf="experienceYears.invalid && (experienceYears.dirty || experienceYears.touched)" class="error-message">
+                    Experience (Years) is required. Minimum must be 0.
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="resetForm(trainerForm)">
+                    {{ currentTrainerId() ? 'Reset Form' : 'Cancel / Reset' }}
+                </button>
+                <!-- Disabled when form is invalid OR no courses selected OR an API operation is in progress -->
+                <button type="submit" class="btn-submit" [disabled]="trainerForm.invalid || newTrainer().courses.length === 0 || isLoading()">
+                    {{ currentTrainerId() ? 'Save Changes' : 'Create Trainer' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="trainer-list-sidebar" [class.active]="isTrainerListVisible()">
+    <div class="list-header">
+        <h3>All Trainers ({{ trainers().length }})</h3>
+        <button class="close-list-btn" (click)="toggleTrainerList()" title="Close List">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    
+    <div class="list-content">
+        <!-- Show loading state for list -->
+        <div *ngIf="isLoading() && trainers().length === 0" class="no-data-msg">
+            Loading trainer list from API...
+        </div>
+        
+        <div *ngIf="trainers().length === 0 && !isLoading()" class="no-data-msg">
+            No trainers found.
+        </div>
+
+        <div *ngFor="let trainer of trainers()" 
+             class="trainer-item" 
+             (click)="toggleTrainerActions(trainer)"
+             [class.selected]="selectedTrainerForActions()?.id === trainer.id">
+            
+            <div class="trainer-info">
+                <img [src]="trainer.imageUrl" alt="Profile" class="profile-thumb" onerror="this.src='https://placehold.co/80x80/2ecc71/ffffff?text=P'">
+                <div class="trainer-name">
+                    {{ trainer.firstName }} {{ trainer.lastName }} 
+                    <small style="display: block; color: #bdc3c7;">({{ trainer.id }})</small> <!-- Displaying API ID -->
+                </div>
+            </div>
+
+            <div class="trainer-actions" [class.show]="selectedTrainerForActions()?.id === trainer.id">
+                <button class="action-btn edit" (click)="loadTrainerForEdit(trainer)" title="Edit Trainer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                </button>
+                
+                <button class="action-btn delete" (click)="openDeleteConfirm(trainer)" title="Delete Trainer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="auth-id">
+        <small>Mock User ID: {{ userId }}</small>
+    </div>
+</div>
+
+<div class="modal-overlay" *ngIf="isDeleteModalVisible()">
+    <div class="delete-confirm-card">
+        <h3>Permanent Deletion</h3>
+        <p>
+            Are you sure you want to permanently delete trainer <strong>{{ trainerToDelete()?.firstName }} {{ trainerToDelete()?.lastName }} ({{ trainerToDelete()?.id }})</strong>? 
+            This action cannot be undone.
+        </p>
+        <div class="confirm-actions">
+            <button type="button" class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+            <button type="button" class="btn-delete-confirm" (click)="confirmDelete()">Yes, Delete</button>
+        </div>
+    </div>
+</div>

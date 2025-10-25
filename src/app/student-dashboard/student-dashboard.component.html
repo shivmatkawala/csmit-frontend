@@ -1,0 +1,309 @@
+<!--
+  Student Dashboard HTML
+  Design: Replicates the layout of the HR dashboard (Header, Sidebar, Main Content, Right Schedule/Calendar)
+  Theme: Student-focused data (Study Time, Courses, Deadlines)
+  Responsiveness: Uses CSS for mobile/tablet optimization
+-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<body>
+  <!-- Main container for the dashboard -->
+  <div class="container">
+    <header>
+      <div class="logo-search">
+        <div class="logo">
+          <!-- Student/Tech Logo -->
+          <span class="red">CODE</span><span class="dark">HUB</span>
+        </div>
+        <div class="search-wrapper">
+          <!-- Search for Courses/Assignments -->
+          <input type="search" placeholder="Search Courses, Assignments..." [formControl]="searchControl" />
+          <i class="fas fa-search"></i>
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- 'Submit Work' button ko 'Download Resume' se badla gaya hai -->
+        <button class="btn-request" (click)="downloadResume()">
+          <i class="fas fa-file-download"></i> Download Resume
+        </button>
+        
+        <!-- Profile Picture ya Initial Text -->
+        <div class="user-avatar" title="{{ studentName }}">
+          <ng-container *ngIf="!profileImagePlaceholder && profileImageUrl">
+            <!-- Agar image URL hai to yahan image dikhegi -->
+            <img [src]="profileImageUrl" alt="Student Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+          </ng-container>
+          <ng-container *ngIf="profileImagePlaceholder || !profileImageUrl">
+            <!-- Agar image URL nahi hai to name ka initial dikhega -->
+            <span class="initial-text">{{ profileInitial }}</span>
+          </ng-container>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation (Left) -->
+    <aside class="sidebar">
+      <div>
+        <nav class="sidebar-nav">
+          <!-- RouterLinks ko sirf dummy navigation ke liye rakha gaya hai -->
+          <a routerLink="/student-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><i class="fas fa-chart-line"></i>Dashboard</a>
+          <a routerLink="/courses" routerLinkActive="active"><i class="fas fa-book"></i>Courses</a>
+          <a routerLink="/assignments" routerLinkActive="active"><i class="fas fa-tasks"></i>Assignments</a>
+          <a routerLink="/grades" routerLinkActive="active"><i class="fas fa-star-half-alt"></i>Grades</a>
+          <a routerLink="/career" routerLinkActive="active"><i class="fas fa-briefcase"></i>Career</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="toggle-switch" id="toggleSwitch" [class.active]="notificationsEnabled" (click)="notificationsEnabled = !notificationsEnabled" title="Toggle Notifications">
+          <span></span>
+        </div>
+        <a routerLink="/settings" routerLinkActive="active" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
+    </aside>
+
+    <!-- Right Schedule Card (Calendar and Schedule) -->
+    <section class="right-schedule-card">
+      <div class="current-time-display">
+        <p class="current-time-text">Current Time: {{ currentTime }}</p>
+      </div>
+      <div class="right-schedule-header">
+        <h3>My Academic Schedule</h3>
+        <button aria-label="Open Calendar"><i class="fas fa-calendar-alt"></i></button>
+      </div>
+
+      <!-- Calendar Controls (Monthly View) -->
+      <div class="calendar-controls">
+        <button aria-label="Previous Month" (click)="navigateCalendar(-1)">&lt;</button>
+        <p>{{ selectedMonthYear }}</p>
+        <button aria-label="Next Month" (click)="navigateCalendar(1)">&gt;</button>
+      </div>
+
+      <!-- Calendar Grid -->
+      <div class="calendar-weekdays">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="calendar-days">
+        <!-- Day cell - CLEANED UP TAG DEFINITION -->
+        <div *ngFor="let day of calendarDays"
+          [class.inactive]="day.disabled"
+          [class.active]="day.selected"
+          (click)="!day.disabled && onDateSelect(day.fullDate)"
+          [class.selected-for-leave]="selectedScheduleDate && day.fullDate && day.fullDate.toDateString() === selectedScheduleDate.toDateString()"
+          [title]="day.fullDate ? (day.fullDate | date:'fullDate') : ''">
+          {{ day.date }}
+        </div>
+      </div>
+
+      <!-- Schedule List -->
+      <div class="schedule-list">
+        <h5>Schedule for {{ selectedScheduleDate | date:'dd MMM yyyy' }}</h5>
+        <div *ngIf="scheduleDetails.length === 0" class="no-schedule-message">
+            Select a date to see the schedule, or view your main deadlines below.
+        </div>
+        <div *ngFor="let item of scheduleDetails" class="schedule-section">
+          <div class="schedule-item" [ngClass]="item.type + '-item'">
+            <div class="date">
+              {{ item.dayOfWeekShort }} <br> {{ item.dayOfMonth }}
+            </div>
+            <!-- Removed | replaceLineBreaks pipe usage -->
+            <p class="desc">{{ item.desc }}</p>
+            <button *ngIf="item.joinButton" class="join-button">Join Class</button>
+          </div>
+        </div>
+
+        <!-- Next Deadlines (Summary at bottom of Schedule Card, like holidays) -->
+        <div class="schedule-section" style="margin-top: 20px; border-top: 1px solid #CBD5E1; padding-top: 15px;">
+          <h5>Upcoming Deadlines Summary</h5>
+          <div *ngFor="let deadline of nextDeadlines" class="schedule-item deadline-item">
+            <div class="date">
+              {{ deadline.date | date:'EEE' | uppercase }} <br> {{ deadline.date | date:'dd' }}
+            </div>
+            <p class="desc">
+              {{ deadline.desc }} <br>
+              <!-- Replaced error-causing | dateDifference pipe with standard | date pipe -->
+              <span style="font-style: italic; color: #4338CA;">Due: {{ deadline.date | date:'mediumDate' }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area (Left and Center Columns of HR Dashboard combined) -->
+    <main class="main-content">
+      <ng-container *ngIf="activePage === 'dashboard'">
+        <!-- 1. Good Morning Card (Greeting + Clock) -->
+        <section class="good-morning-card">
+          <p class="small-text">{{ greeting }}</p>
+          <!-- studentName को API service storage से अपडेट किया गया है -->
+          <h2>{{ studentName }}</h2> 
+          <div class="time-row">
+            <i class="fas fa-clock"></i>
+            <span>{{ currentTime }}</span>
+          </div>
+          <p class="small-text" style="margin-bottom: 16px;">Realtime Progress and Study Goals</p>
+          <p class="small-text" style="margin-bottom: 24px;">Today: {{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }} {{ todayDate | date:'yyyy' }}</p>
+          <!-- Button to encourage action -->
+          <button (click)="openAssignmentModal()">Quick Submit Assignment</button>
+        </section>
+
+        <!-- 2. Metrics/Stats Cards (Similar to HR's Leave Cards) -->
+        <section class="metrics-cards-container">
+          <!-- Removed unnecessary optional chaining '?' for courses[i] -->
+          <div *ngFor="let metric of metrics; let i = index" class="metric-card" [style.border-color]="(courses[i]?.colorClass) || '#3b82f6'">
+            <div class="metric-icon" [style.color]="(courses[i]?.colorClass) || '#3b82f6'">
+              {{ metric.icon }}
+            </div>
+            <div class="metric-info">
+              <p class="title">{{ metric.label }}</p>
+              <div class="row">
+                <span class="value" [style.color]="(courses[i]?.colorClass) || '#3b82f6'">{{ metric.value }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Course Progress Card (Replaces the 4th Unpaid Leave Card) -->
+          <div *ngIf="courses.length > 0" class="course-card" [style.border-color]="courses[0].colorClass">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+              <circle class="text-bg" cx="18" cy="18" r="15" stroke-width="3" fill="none" stroke="#CBD5E1"></circle>
+              <circle class="text-fill" cx="18" cy="18" r="15" stroke-width="3" fill="none"
+                      [attr.stroke]="getProgressColor(courses[0].progress)"
+                      [attr.stroke-dasharray]="2 * 3.14159 * 15"
+                      [attr.stroke-dashoffset]="(2 * 3.14159 * 15) * (1 - (courses[0].progress / 100))"
+                      stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+            </svg>
+            <span class="circle-text" [style.color]="getProgressColor(courses[0].progress)">{{ courses[0].progress }}%</span>
+            <div class="metric-info">
+              <p class="title">{{ courses[0].code }} Progress</p>
+              <div class="row"><span>Title:</span><span>{{ courses[0].title }}</span></div>
+              <div class="row"><span>Category:</span><span>{{ courses[0].category }}</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Study Time Tracking Card (Similar to HR's Time Tracking) -->
+        <section class="time-tracking-card">
+          <div class="time-tracking-header">
+            <h3>Daily Study Tracking</h3>
+            <button aria-label="More options"><i class="fas fa-ellipsis-h"></i></button>
+          </div>
+          <div class="timer-wrapper">
+            <svg class="timer-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="bg" cx="60" cy="60" r="54" />
+              <circle class="fg" cx="60" cy="60" r="54" [attr.stroke-dasharray]="studyTimeStrokeDasharray" [attr.stroke-dashoffset]="studyTimeStrokeDashoffset" stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+            </svg>
+            <div class="timer-center">
+              <div class="time">{{ studyTimeTimer }}</div>
+              <div class="timer-controls-buttons">
+                <button id="startBtn" aria-label="Start Study Session" (click)="startStudySession()" [disabled]="isStudying" title="Start Study Session">
+                  <i class="fas fa-play"></i>
+                </button>
+                <button id="stopBtn" aria-label="End Study Session" (click)="endStudySession()" [disabled]="!isStudying" title="End Study Session">
+                  <i class="fas fa-pause"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="time-info">
+            <div class="time-info-item">
+              <p class="label">Total Study Hours</p>
+              <p class="value">{{ totalStudyHours }}</p>
+            </div>
+            <div class="time-info-item">
+              <p class="label">Remaining Target</p>
+              <p class="value">{{ targetRemainingHours }}</p>
+            </div>
+          </div>
+          <!-- No complex break logic needed, simplified for student focus -->
+          <div class="time-details" style="display: flex; justify-content: space-around; font-size: 12px; margin-top: 20px;">
+            <p>Target: {{ MAX_TARGET_HOURS }}:00 hrs</p>
+            <p style="color: #10b981;">Productivity Score: 88%</p>
+          </div>
+        </section>
+
+        <!-- 4. Top 3 Courses/Progress Card (Similar to HR's Next Holidays) -->
+        <section class="next-holidays-card">
+          <div class="next-holidays-header">
+            <h3>Top Courses Progress</h3>
+            <button aria-label="View All Courses"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="holiday-list">
+            <div class="holiday-item" *ngFor="let course of courses | slice:0:3">
+              <!-- Using icon for course category -->
+              <div class="course-icon" [style.background-color]="course.colorClass">
+                <i [ngClass]="{'fas fa-terminal': course.category === 'CS', 'fas fa-server': course.category === 'IT', 'fas fa-graduation-cap': true}" style="color: white; font-size: 1.5rem;"></i>
+              </div>
+              <div class="holiday-info">
+                <p class="title">{{ course.title }} ({{ course.progress }}%)</p>
+                <p class="date">Instructor: {{ course.instructor }}</p>
+                <div class="progress-bar-small">
+                    <div class="fill" [style.width.%]="course.progress" [style.background-color]="getProgressColor(course.progress)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Latest Resources/Video Card (Similar to HR's Video Card) -->
+        <section class="video-card">
+          <!-- Placeholder image with overlay for a tech resource video -->
+          <ng-container>
+            <img src="https://placehold.co/600x300/1f2937/10b981?text=Latest+Tech+Tutorial" alt="Latest Resource Tutorial" />
+            <div class="video-overlay">
+              <p class="title">Latest Resource: Cloud Deployment</p>
+              <p class="subtitle">Quick tutorial on AWS deployment using Docker.</p>
+              <button aria-label="Watch Now"><i class="fas fa-play"></i></button>
+              <span class="duration">12 min</span>
+            </div>
+          </ng-container>
+        </section>
+      </ng-container>
+
+      <!-- Navigation Containers (Placeholders) -->
+      <ng-container *ngIf="activePage !== 'dashboard'">
+        <!-- Dynamic content for other pages like Courses, Assignments, etc. -->
+        <div class="other-page-content">
+          <h1>{{ activePage | uppercase }} Page Content (Not Implemented)</h1>
+          <p>Please navigate back to the dashboard to see the main content.</p>
+        </div>
+      </ng-container>
+    </main>
+
+    <!-- Assignment Submission Modal (Replaces Leave Application Modal) -->
+    <div *ngIf="showAssignmentModal" class="assignment-modal-overlay">
+      <div class="assignment-modal-content">
+        <div class="modal-header">
+          <h3>Submit Assignment</h3>
+          <button class="close-button" (click)="closeAssignmentModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="assignmentTitle">Assignment Title:</label>
+            <select id="assignmentTitle" [formControl]="assignmentTitleControl" required>
+              <option value="">Select Assignment</option>
+              <option value="CS501 - Final Project">CS501 - Final Project</option>
+              <option value="IT402 - Week 8 Quiz">IT402 - Week 8 Quiz</option>
+              <option value="IT303 - DB Schema">IT303 - DB Schema</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="submissionDetails">Submission Details/Link (Optional):</label>
+            <textarea id="submissionDetails" [formControl]="assignmentDetailsControl" rows="4"></textarea>
+          </div>
+          <div class="form-group file-upload">
+            <label>Upload File:</label>
+            <input type="file" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeAssignmentModal()">Cancel</button>
+          <button class="btn-submit" (click)="submitAssignment()" [disabled]="assignmentTitleControl.invalid">Submit Work</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Box for success/error/warning messages -->
+    <div *ngIf="message" [class]="'message-box ' + messageType">
+      {{ message }}
+      <button class="close-message" (click)="clearMessage()">&times;</button>
+    </div>
+  </div>
+</body>

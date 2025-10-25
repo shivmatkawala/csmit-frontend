@@ -1,0 +1,571 @@
+/* --- Global & Layout --- */
+
+.page-container {
+    min-height: 100vh;
+    padding: 20px 0 120px 0; /* Space for fixed footer */
+    background-color: #f5f5f5; /* Light gray background */
+    display: flex;
+    justify-content: center;
+}
+
+.main-content {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+    padding: 0 10px;
+}
+
+.exam-form {
+    padding-top: 10px;
+}
+
+/* --- Utility Classes --- */
+.font-bold { font-weight: 700; }
+.text-lg { font-size: 1.125rem; }
+.text-gray-700 { color: #374151; }
+.text-green-600 { color: #10b981; }
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+
+/* --- Header/Toolbar --- */
+
+.exam-header {
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 4px solid #4f46e5; /* Indigo */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.total-marks-display {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.btn-action {
+    background: #f3f4f6;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    color: #4f46e5;
+    transition: background-color 0.2s;
+}
+
+.btn-action:hover {
+    background-color: #e5e7eb;
+}
+
+/* --- Google Card Base Style --- */
+
+.google-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 12px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+/* --- Title Card --- */
+
+.title-card {
+    border-left: 8px solid #4f46e5; /* Indigo accent */
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.exam-title-input {
+    font-size: 2.25rem;
+    font-weight: 600;
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 5px 0;
+    outline: none;
+    transition: border-bottom-color 0.2s;
+}
+
+.exam-title-input:focus {
+    border-bottom-color: #4f46e5;
+}
+
+textarea.exam-description-input {
+    font-size: 1rem;
+    border: none;
+    padding: 10px 0 5px 0;
+    outline: none;
+    border-bottom: 1px solid #e0e0e0;
+    resize: vertical;
+    color: #616161;
+}
+
+.exam-description-input:focus {
+    border-bottom-color: #4f46e5;
+}
+
+.duration-section label {
+    font-size: 0.9rem;
+    color: #4f46e5;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.duration-input {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    border-radius: 6px;
+    width: 150px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.duration-input:focus {
+    border-color: #4f46e5;
+    outline: 2px solid #c7d2fe;
+}
+
+.title-error, .error-message {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+
+/* --- Question Card (Enhanced for Drag/Drop) --- */
+
+.question-card {
+    padding: 20px;
+    position: relative;
+    display: flex;
+    gap: 15px; /* Space for the drag handle */
+    cursor: grab;
+}
+
+.drag-handle {
+    color: #9e9e9e;
+    cursor: grab;
+    padding: 5px;
+    align-self: flex-start;
+    transition: color 0.2s;
+}
+
+.drag-handle:hover {
+    color: #4f46e5;
+}
+
+/* Drag State Feedback */
+.question-card.is-dragging {
+    opacity: 0.5;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.01);
+}
+
+.question-card.is-drag-target {
+    border: 2px dashed #4f46e5;
+    box-shadow: none;
+}
+
+.card-content {
+    flex-grow: 1;
+}
+
+.question-number {
+    font-size: 0.8rem;
+    color: #9e9e9e;
+    margin-bottom: 5px;
+}
+
+.question-text {
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-bottom: 15px;
+}
+
+.options-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-preview-item {
+    font-size: 1rem;
+    color: #424242;
+    display: flex;
+    align-items: center;
+}
+
+.option-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    margin-right: 10px;
+    background-color: transparent;
+    transition: all 0.2s;
+}
+
+.option-indicator.is-correct {
+    background-color: #10b981; /* Green color for correct answer */
+    border-color: #10b981;
+}
+
+.correct-preview {
+    color: #10b981; /* Green color for correct answer */
+    font-weight: 600;
+}
+
+.marks-display {
+    font-size: 0.9rem;
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+.question-actions {
+    display: flex;
+    gap: 5px;
+    padding: 5px 0;
+}
+
+.btn-icon {
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: #616161;
+}
+
+.btn-icon:hover {
+    background-color: #f0f2f5;
+}
+
+.edit-btn:hover {
+    color: #4f46e5;
+}
+.duplicate-btn:hover {
+    color: #f59e0b; /* Amber/Yellow for duplicate */
+}
+
+.delete-btn:hover {
+    color: #ef4444;
+}
+
+/* --- Floating Add Button --- */
+
+.floating-toolbar {
+    position: fixed;
+    bottom: 100px; /* Position above the fixed footer */
+    right: 30px;
+    z-index: 30;
+}
+
+.btn-floating-add {
+    padding: 15px;
+    border: none;
+    background-color: #4f46e5;
+    color: white;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.btn-floating-add:hover {
+    background-color: #4338ca;
+    transform: scale(1.05);
+}
+
+/* --- Final Actions Footer (Sticky Submit) --- */
+
+.final-actions-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.btn-save-exam {
+    background-color: #10b981; /* Green */
+    color: white;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.4);
+}
+
+.btn-save-exam:hover:not(:disabled) {
+    background-color: #059669;
+}
+
+.btn-save-exam:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Modal Styles (Question Editor) --- */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+}
+
+.modal-card {
+    max-width: 650px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0; 
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    color: #757575;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.btn-close-modal:hover {
+    color: #212121;
+    background-color: #f5f5f5;
+}
+
+.modal-form {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.form-group-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: #4f46e5;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-input {
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 3px #c7d2fe;
+}
+
+textarea.form-input {
+    resize: vertical;
+}
+
+.marks-group {
+    flex-shrink: 0;
+    width: 120px;
+}
+
+/* --- Modal Options --- */
+
+.options-container {
+    padding: 15px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.options-label {
+    font-size: 1rem;
+    color: #212121;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.option-letter {
+    font-weight: 700;
+    color: #4f46e5;
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.option-input {
+    flex-grow: 1;
+    padding: 8px 10px;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    outline: none;
+    transition: border-bottom-color 0.2s;
+}
+
+.option-input:focus {
+    border-bottom-color: #4f46e5;
+}
+
+.correct-radio-label {
+    flex-shrink: 0;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.correct-radio {
+    accent-color: #10b981; /* Green for correct answer selection */
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.btn-remove-option {
+    color: #9e9e9e;
+    transition: color 0.2s;
+}
+
+.btn-remove-option:hover {
+    color: #ef4444;
+}
+
+.btn-add-option {
+    color: #4f46e5;
+    transition: color 0.2s;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+.btn-add-option:hover {
+    color: #4338ca;
+}
+
+/* --- Modal Actions --- */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+}
+
+.btn-modal-cancel, .btn-modal-save {
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-modal-cancel {
+    background-color: #e0e0e0;
+    color: #424242;
+}
+.btn-modal-cancel:hover {
+    background-color: #d1d5db;
+}
+
+.btn-modal-save {
+    background-color: #4f46e5;
+    color: white;
+}
+.btn-modal-save:hover:not(:disabled) {
+    background-color: #4338ca;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    .main-content {
+        padding: 0 5px;
+    }
+    .exam-title-input {
+        font-size: 1.75rem;
+    }
+    .form-group-row {
+        flex-direction: column;
+    }
+    .marks-group {
+        width: 100%;
+    }
+    .floating-toolbar {
+        right: 15px;
+    }
+}
