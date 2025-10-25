@@ -43,7 +43,8 @@ export interface Student {
 export class ApiService {
 
   private baseUrl = 'http://127.0.0.1:8000/api'; 
-  private loggedInStudentData: LoginResponse | null = null; 
+  // private loggedInStudentData: LoginResponse | null = null; // अब इसकी ज़रूरत नहीं है, sessionStorage का इस्तेमाल करेंगे
+  private readonly STORAGE_KEY = 'cshub_student_login_data'; // SessionStorage key
 
   constructor(private http: HttpClient) {}
 
@@ -52,17 +53,35 @@ export class ApiService {
     return this.http.post<LoginResponse>(`${this.baseUrl}/login/`, { username, password, role })
       .pipe(
         tap(res => {
-          this.loggedInStudentData = res; 
+          // SUCCESSFUL LOGIN: Store data in sessionStorage
+          try {
+            sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(res));
+          } catch (e) {
+            console.error('Error storing login data in sessionStorage', e);
+          }
         }),
         catchError(this.handleError)
       );
   }
 
   /** GET Stored Login Data */
-  getStoredStudentData(): LoginResponse | null {
-    return this.loggedInStudentData;
+  getStoredStudentData(): LoginResponse | null { // Is function ka upyog student-dashboard.component.ts mein hoga
+    try {
+      const data = sessionStorage.getItem(this.STORAGE_KEY);
+      if (data) {
+        return JSON.parse(data) as LoginResponse;
+      }
+    } catch (e) {
+      console.error('Error retrieving or parsing login data from sessionStorage', e);
+    }
+    return null;
   }
   
+  /** LOGOUT - Data remove karne ke liye */
+  clearStoredStudentData(): void {
+      sessionStorage.removeItem(this.STORAGE_KEY);
+  }
+
   /** CREATE (POST) Resume/Student (Form Submission) - URL FIX: students/ */
   submitResume(resumeData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -122,7 +141,8 @@ export class ApiService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Client Error: ${error.error.message}`;
     } else {
-      errorMessage = error.error || error.message; 
+      // Check if error.error is a string or an object with a message property
+      errorMessage = error.error?.message || error.error || error.message; 
     }
     console.error('API Error:', errorMessage);
     return throwError(() => error); 
