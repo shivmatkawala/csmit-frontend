@@ -28,9 +28,15 @@ export class ApiService {
   }
 
   /** CREATE (POST) Resume */
-  submitResume(resumeData: any): Observable<any> {
+  // submitResume(resumeData: any): Observable<any> {
+  //   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+  //   return this.http.post(`${this.baseUrl}/create-student/`, resumeData, { headers })
+  //     .pipe(catchError(this.handleError));
+  // }
+
+    submitResume(resumeData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(`${this.baseUrl}/create-student/`, resumeData, { headers })
+    return this.http.post(`${this.baseUrl}/students/`, resumeData, { headers })
       .pipe(catchError(this.handleError));
   }
 
@@ -47,8 +53,12 @@ export class ApiService {
   }
 
     // Create new student
+  // createStudent(student: Student): Observable<any> {
+  //   return this.http.post(`${this.baseUrl}/create-student/`, student);
+  // }
+
   createStudent(student: Student): Observable<any> {
-    return this.http.post(`${this.baseUrl}/create-student/`, student);
+    return this.http.post(`${this.baseUrl}/students/`, student);
   }
 
   // Get all students (you can implement this in Django later)
