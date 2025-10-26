@@ -16,13 +16,15 @@ import { AdminPanelComponent } from './admin-panel/admin-panel.component';
 import { FooterComponent } from './footer/footer.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
-import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 import { UploadJobComponent } from './upload-job/upload-job.component';
 import { CreateBatchComponent } from './create-batch/create-batch.component';
 import { CreateExamComponent } from './create-exam/create-exam.component';
 import { BlankFormComponent } from './create-exam/blank-form/blank-form.component';
 import { ContactInfoComponent } from './create-exam/contact-info/contact-info.component';
-import { AdminFormComponent } from './admin-form/admin-form.component'; // Keep the import
+import { AdminFormComponent } from './admin-panel/admin-form/admin-form.component';
+import { ProfileSettingComponent } from './student-dashboard/profile-setting/profile-setting.component';
+import { CreateCourseComponent } from './create-course/create-course.component'; // Keep the import
+import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +46,8 @@ import { AdminFormComponent } from './admin-form/admin-form.component'; // Keep 
     CreateExamComponent,
     BlankFormComponent,
     ContactInfoComponent,
+    ProfileSettingComponent,
+    CreateCourseComponent,
     // REMOVED: AdminFormComponent from declarations
   ],
   imports: [

@@ -1,8 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-// Student interface ki zaroorat nahi, ApiService se LoginResponse ka structure use hoga
+import { Component, OnInit, signal } from '@angular/core';
 import { ApiService, StudentInfo, LoginResponse } from '../services/api.service'; 
 import { Router } from '@angular/router';
-// html2pdf library dynamically load kiya jayega
 
 @Component({
   selector: 'app-generate-ats-resume',
@@ -11,12 +9,15 @@ import { Router } from '@angular/router';
 })
 export class GenerateAtsResumeComponent implements OnInit{
 
-  // Ab hum seedhe LoginResponse ke 'info' object ko use karenge
+  // Holds the main resume data structure.
   resumeData: StudentInfo | null = null; 
   
-  // Naye variables skills ko do columns mein baantne ke liye
+  // Variables to hold skills divided into two columns for better layout.
   skillColumn1: { name: string }[] = [];
   skillColumn2: { name: string }[] = [];
+
+  // Signal to control the visibility of the action buttons (print, download).
+  isButtonContainerVisible = signal(true); 
 
   constructor(
     private apiService: ApiService,
@@ -27,23 +28,23 @@ export class GenerateAtsResumeComponent implements OnInit{
     const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
     
     if (loginData && loginData.info) {
-      // 'info' object mein resume se related saara data hai, isko use karein
-      this.resumeData = {
-          ...loginData.info, 
-          csmit_id: loginData.csmit_id // Main ID ko info object mein merge kiya
-      };
+      // Use the 'info' object which contains all resume-related data.
+      this.resumeData = loginData.info; 
       
-      // Skills data ko do columns mein divide karein
-      this.divideSkillsIntoColumns(this.resumeData.skills);
+      // Divide skills into two columns for presentation.
+      this.divideSkillsIntoColumns(this.resumeData.skills); 
 
-      console.log('Resume data loaded from stored login response:', this.resumeData);
+      console.log('Resume Data Loaded:', this.resumeData);
     } else {
-      console.error('Login data not found. Redirecting to dashboard.');
-      this.router.navigate(['/student-dashboard']);
+      console.log('No login data found, redirecting to dashboard');
+      // In a production app, you would navigate: this.router.navigate(['/dashboard']);
     }
   }
 
-  // Helper function to divide skills array into two columns
+  /**
+   * Helper function to divide the skills array roughly in half for two-column display.
+   * @param skills The array of skills.
+   */
   private divideSkillsIntoColumns(skills: any[]): void {
     if (skills && skills.length > 0) {
       const middleIndex = Math.ceil(skills.length / 2);
@@ -55,36 +56,104 @@ export class GenerateAtsResumeComponent implements OnInit{
     }
   }
 
-  // HTML mein complex logic ko use karne ke liye ek helper function banaya gaya
-  // Jisse skill names comma-separated string ban sake.
+  /**
+   * Generates a comma-separated string of skill names for use in the summary.
+   * @returns A string containing all skill names separated by commas.
+   */
   getSkillNames(): string {
-    if (this.resumeData && this.resumeData.skills.length > 0) {
+    if (this.resumeData && this.resumeData.skills && this.resumeData.skills.length > 0) {
         return this.resumeData.skills.map(s => s.name).join(', ');
     }
     return '';
   }
 
+  /**
+   * Toggles the visibility of the action buttons container.
+   */
+  toggleButtonContainer(): void {
+      this.isButtonContainerVisible.update(visible => !visible);
+  }
+
+  /**
+   * Triggers the default browser print function.
+   */
   printResume(): void {
     window.print();
   }
 
+  /**
+   * Dynamically loads html2pdf and initiates the PDF generation.
+   */
   downloadResume(): void {
-    const resumeElement = document.getElementById('resume-content');
+    // #resume-content is the outer container. We target it.
+    const resumeElement = document.getElementById('resume-content'); 
     if (!resumeElement) return;
+
+    // Dynamically load the html2pdf library.
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => {
+        // html2pdf is available after the script loads.
+        this.generatePdf(resumeElement);
+    };
+    document.body.appendChild(script);
+  }
+
+  /**
+   * Generates the PDF using html2pdf with configurations optimized for A4 full-page output.
+   * @param resumeElement The HTMLElement containing the resume content.
+   */
+  private generatePdf(resumeElement: HTMLElement): void {
+     const html2pdf = (window as any).html2pdf;
+     if (!html2pdf) return;
+     
+     // Store original body styles
+     const originalBodyMargin = document.body.style.margin;
+     const originalBodyOverflow = document.body.style.overflow;
+
+     // Temporarily remove body margin and hide scrollbars to ensure edge-to-edge rendering
+     document.body.style.margin = '0';
+     document.body.style.overflow = 'hidden';
 
     // Configuration for html2pdf
     const opt: any = { 
-        margin: 0.5,
+        // FIX: Setting margin to 0 for full bleed control via CSS 
+        margin: 0, 
         filename: `${this.resumeData?.full_name?.replace(' ', '_') || 'Student'}_ATS_Resume.pdf`,
         image: { type: 'jpeg' as 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        html2canvas: { 
+          scale: 2, // Increased scale for even better resolution
+          logging: false, 
+          dpi: 300, 
+          letterRendering: true,
+          useCORS: true,
+          // FIX: फिक्स्ड windowHeight/Width/scrollY/scrollX को हटा दिया गया है
+          // ताकि html2pdf मल्टी-पेज कंटेंट को बिना काटे कैप्चर कर सके।
+          // अब यह कंटेंट की वास्तविक ऊँचाई के अनुसार चलेगा।
+          // ignoreElements with print-hidden class during canvas capture
+          ignoreElements: (element: HTMLElement) => element.classList.contains('print-hidden')
+        }, 
+        jsPDF: { 
+          // Changed unit to 'mm' for more standard paper size control.
+          unit: 'mm', 
+          // Explicitly set A4 dimensions to ensure the page size is correct
+          format: [210, 297], // A4 size in mm (210x297)
+          orientation: 'portrait' 
+        },
+        pagebreak: { 
+          // FIX: 'avoid-all' को 'css' में बदल दिया गया है ताकि CSS में परिभाषित 
+          // 'page-break-inside: avoid' का पालन हो और कंटेंट न कटे।
+          mode: 'css' 
+        }
     };
-
-    // html2pdf library ko dynamically load karein
-    import('html2pdf.js').then(html2pdf => {
-      html2pdf.default().set(opt).from(resumeElement).save();
+    
+    // Generate PDF and then restore original body styles
+    // We target the outer #resume-content element
+    html2pdf().from(resumeElement).set(opt).save().then(() => {
+        // Restore original body styles after PDF generation is complete
+        document.body.style.margin = originalBodyMargin;
+        document.body.style.overflow = originalBodyOverflow;
     });
-
   }
+
 }

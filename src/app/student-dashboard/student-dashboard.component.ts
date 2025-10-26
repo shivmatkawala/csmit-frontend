@@ -14,10 +14,14 @@ interface Course {
   colorClass: string;
 }
 
-interface Metric {
+// Interface for new Feature Cards
+interface FeatureCard {
   label: string;
-  value: string;
   icon: string;
+  value: any; // Can be string, number, or object
+  info: string;
+  color: string; // Used for icon/text color
+  route: string;
 }
 
 interface ScheduleItem {
@@ -28,6 +32,19 @@ interface ScheduleItem {
   dayOfMonth?: string;
   joinButton?: boolean;
 }
+
+// ProfileSettingComponent को डेटा पास करने के लिए एक नया Interface
+export interface StudentProfileData {
+  full_name: string;
+  email: string; // Dummy email added
+  student_id: string; // Dummy student_id added
+  profileImageUrl: string;
+  profileInitial: string;
+  profileImagePlaceholder: boolean; // <-- FIX: Added missing property
+  courses: Course[];
+  featureCards: FeatureCard[];
+}
+
 
 @Component({
   selector: 'app-student-dashboard',
@@ -42,7 +59,19 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   notificationsEnabled: boolean = true; // Default notifications ON
 
   // --- Page Navigation ---
-  activePage: string = 'dashboard';
+  activePage: string = 'dashboard'; // Default page is dashboard
+  
+  // --- Profile Data for settings component ---
+  studentProfileData: StudentProfileData = {
+    full_name: 'Loading...',
+    email: 'loading@example.com',
+    student_id: 'STU-0000',
+    profileImageUrl: '',
+    profileInitial: '',
+    profileImagePlaceholder: true, // Default value
+    courses: [],
+    featureCards: []
+  };
 
   // --- User & Clock Data (Real-time updates ke liye) ---
   studentName: string = 'Loading...'; // Default value
@@ -72,9 +101,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   readonly MAX_TARGET_HOURS: number = 5; // Target study hours for the day (e.g., 5 hours)
   readonly MAX_TARGET_MINUTES: number = this.MAX_TARGET_HOURS * 60;
 
-  // --- Metrics, Courses, Assignments (Dummy Data) ---
-  metrics: Metric[] = [];
-  courses: Course[] = [];
+  // --- Feature Cards, Courses, Assignments (Dummy Data) ---
+  featureCards: FeatureCard[] = []; // Naye feature cards
+  courses: Course[] = []; // Courses for progress card
   nextDeadlines: ScheduleItem[] = []; // Next Deadlines and Classes
 
   // --- Calendar and Schedule ---
@@ -100,11 +129,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
 
   ngOnInit(): void {
-    // 1. Fetch Student Data (Backend storage se)
+    // 1. Initialize dummy data first
+    this.initializeDummyData();
+    
+    // 2. Fetch Student Data (Backend storage se)
     this.fetchStudentDataFromStorage();
 
-    // 2. Initialize data
-    this.initializeDummyData();
 
     // 3. Start real-time clock
     this.updateClock();
@@ -140,17 +170,27 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       
       this.studentName = studentInfo.full_name || 'Student'; // Full name use kiya
       
-      // Backend response mein 'image_url' property nahi hai to humesha placeholder dikhayenge
-      // Agar 'image_url' property backend से आ रही है और उसमें URL है:
-      // const imageUrl = (studentInfo as any).image_url; 
-      
       // Filhaal, image nahi aa rahi hai, toh humesha placeholder use karein
       this.profileImageUrl = ''; 
       this.profileImagePlaceholder = true;
 
+      const initial = this.getProfileInitial(this.studentName);
+
+      // StudentProfileData object ko update karein
+      this.studentProfileData = {
+          full_name: this.studentName,
+          email: studentInfo.email || 'johndoe@university.edu', // Dummy/Default email
+           student_id: 'STU-0000',
+          profileImageUrl: this.profileImageUrl,
+          profileInitial: initial,
+          profileImagePlaceholder: this.profileImagePlaceholder, // <-- FIX: Assign value
+          courses: this.courses, // Dummy data use kar rahe hain
+          featureCards: this.featureCards // Dummy data use kar rahe hain
+      };
+
       if (this.profileImagePlaceholder) {
         // Image URL nahi hai, toh initials dikhao
-        this.profileInitial = this.getProfileInitial(this.studentName);
+        this.profileInitial = initial;
       }
       
       this.loadingDashboardData = false;
@@ -165,6 +205,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       this.profileImagePlaceholder = true;
       this.loadingDashboardData = false;
       this.showMessage('Login data not found. Showing default content.', 'warning');
+      
+      // Default data set karein
+      this.studentProfileData = {
+          full_name: this.studentName,
+          email: 'guest@university.edu',
+          student_id: 'STU-0000',
+          profileImageUrl: '',
+          profileInitial: this.profileInitial,
+          profileImagePlaceholder: true, // <-- FIX: Assign default value
+          courses: this.courses,
+          featureCards: this.featureCards
+      };
     }
   }
 
@@ -188,15 +240,43 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
 
   private initializeDummyData(): void {
-    // Student Metrics (similar to HR's Leave Cards)
-    this.metrics = [
-      { label: 'Avg. Course Grade', value: 'A-', icon: 'A' },
-      { label: 'Classes Attended', value: '95%', icon: 'C' },
-      { label: 'Projects Submitted', value: '5', icon: 'P' },
-      { label: 'Current Semester Load', value: '15 Cr', icon: 'L' },
+    // 1. Student Feature Cards (Real-time utility for tech students)
+    this.featureCards = [
+      {
+        label: 'Recording Classes', // वीडियो रिकॉर्डिंग
+        icon: 'fas fa-video', // वीडियो/क्लास रिकॉर्डिंग आइकन
+        value: { watched: 4, total: 10 }, // 10 में से 4 क्लासेज देखीं
+        info: '4/10 recordings watched. Keep up the pace!', // फुटर टेक्स्ट
+        color: '#4338CA', // Blue
+        route: '/recordings' // Recordings पेज पर जाने का रूट
+      },
+      {
+        label: 'Skill Score',
+        icon: 'fas fa-bolt', // Skill/Speed icon
+        value: { score: 78, level: 'Advanced' },
+        info: 'Targeting 90+ in Core Java competency test.',
+        color: '#10B981', // Green
+        route: '/skills'
+      },
+      {
+        label: 'Daily Coding Streak',
+        icon: 'fas fa-fire', // Fire/Streak icon
+        value: { streak: 12, target: 30 },
+        info: 'You have solved 12 problems in a row!',
+        color: '#F43F5E', // Red/Rose
+        route: '/dsa'
+      },
+      {
+        label: 'Current Focus',
+        icon: 'fas fa-laptop-code', // Coding focus icon
+        value: { course: 'React Framework', progress: 65 },
+        info: '65% complete. Next lesson: Hooks deep dive.',
+        color: '#F59E0B', // Yellow/Orange
+        route: '/courses/IT402'
+      },
     ];
 
-    // Student Courses (similar to HR's Leave Cards structure for consistency)
+    // 2. Student Courses (kept for 'Top Courses Progress' section)
     this.courses = [
       { title: 'Advanced Algorithms', progress: 75, instructor: 'Dr. A. Sharma', category: 'CS', code: 'CS501', colorClass: '#3b82f6' },
       { title: 'Data Structures', progress: 92, instructor: 'Prof. J. Singh', category: 'CS', code: 'CS301', colorClass: '#10b981' },
@@ -204,7 +284,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       { title: 'Database Management', progress: 85, instructor: 'Mr. K. Khan', category: 'IT', code: 'IT303', colorClass: '#f59e0b' },
     ];
 
-    // Next Deadlines (similar to HR's Next Holidays)
+    // 3. Next Deadlines (similar to HR's Next Holidays)
     const today = new Date();
     this.nextDeadlines = [
       // Ensure date is a string to match the ScheduleItem interface
@@ -510,8 +590,27 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================================
-  // NAVIGATION (for Download Resume button)
+  // NAVIGATION (for Download Resume button and Sidebar)
   // =========================================================================
+  
+  // New method to change the active page
+  setActivePage(page: string): void {
+    // Check if the page is valid before setting
+    const validPages = ['dashboard', 'courses', 'assignments', 'career', 'profile-setting'];
+    if (validPages.includes(page)) {
+      this.activePage = page;
+      this.clearMessage();
+    } else {
+      this.showMessage(`Invalid page requested: ${page}`, 'error');
+    }
+  }
+
+  // New method to handle feature card click/redirection
+  openFeature(route: string): void {
+    // Note: In a real app, this would use Angular Router.
+    this.showMessage(`Navigating to feature: ${route}`, 'success');
+    // window.location.href = route;
+  }
   
   // New method to handle resume download redirection
   downloadResume(): void {

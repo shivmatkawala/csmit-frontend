@@ -36,17 +36,27 @@ header {
     align-items: center;
     gap: 16px;
 }
+/* Logo CSS update for circular image */
 .logo {
-    font-weight: 800;
-    font-size: 24px;
-    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
-.logo .red {
-    color: #F43F5E; /* Accent color */
+.institute-logo {
+    width: 48px; 
+    height: 48px;
+    border-radius: 50%; /* Circular */
+    object-fit: cover;
+    border: 3px solid #E0E7FF; /* Light blue border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
 }
-.logo .dark {
-    color: #334155;
+.institute-logo:hover {
+    border-color: #F43F5E; /* Accent color on hover */
+    transform: scale(1.05);
 }
+
 .search-wrapper {
     position: relative;
     flex-grow: 1;
@@ -222,6 +232,11 @@ nav.sidebar-nav a i {
 .sidebar-bottom a:hover {
     color: #F43F5E;
 }
+.sidebar-bottom a.active { /* Profile Settings active state */
+    color: #F43F5E;
+    font-weight: 600;
+}
+
 
 /* --- Main Content Area (Layout matching HR) --- */
 .main-content {
@@ -233,7 +248,309 @@ nav.sidebar-nav a i {
     /* Removed padding/margin to allow internal card positioning to take over */
 }
 
+/* -------------------------------------------------------- */
+/* --- NEW: PROFILE SETTING WRAPPER AND STYLES --- */
+/* -------------------------------------------------------- */
+.profile-setting-wrapper {
+    /* Main Content Area (800px wide) ke andar isko center karne ke liye */
+    width: 100%; 
+    height: 100%; /* FIX: Height ko parent (main-content) ke barabar set kiya */
+    display: flex;
+    justify-content: center; /* Center horizontally in the 800px space */
+    align-items: flex-start; /* Align to the top of the main-content */
+    padding-top: 20px; /* Thoda space upar se */
+    padding-bottom: 20px; /* FIX: Bottom padding diya taki content overlap na kare */
+    box-sizing: border-box;
+    overflow-y: auto; /* FIX: Content agar bada ho to sirf yeh wrapper scroll ho */
+}
+.profile-setting-card {
+    width: 95%; /* 800px area ka 95% */
+    max-width: 750px; /* Maximum readable width */
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.profile-setting-card .header {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #E2E8F0;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+.profile-setting-card .header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: #334155;
+    flex-grow: 1;
+    text-align: center;
+}
+.profile-setting-card .back-btn {
+    background: none;
+    border: none;
+    color: #4338CA;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+.profile-setting-card .back-btn:hover {
+    color: #3730a3;
+    background-color: #f0f4ff;
+}
+
+.profile-setting-card .content-grid {
+    /* FIX: Layout ko single column (left-right) se stacked columns (top-bottom) me badla gaya hai */
+    /* Taki course list aur settings vertically adjust ho saken */
+    display: flex;
+    gap: 30px;
+}
+
+.profile-setting-card .col-left {
+    flex-basis: 35%; /* Left column smaller */
+    flex-shrink: 0;
+    /* FIX: Vertical flow, agar courses left me aayein to */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.profile-setting-card .col-right {
+    flex-basis: 65%; /* Right column wider */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Profile Summary Styles */
+.profile-summary {
+    background-color: #F8FAFC;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    /* FIX: margin-bottom removed as gap is handled by col-left/col-right gap */
+    margin-bottom: 0; 
+    border: 1px solid #E2E8F0;
+}
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F43F5E;
+    color: white;
+    font-size: 40px;
+    font-weight: 700;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.profile-summary .name {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    color: #334155;
+}
+.profile-summary .student-id {
+    font-size: 14px;
+    color: #64748B;
+    margin: 0 0 2px 0;
+}
+.profile-summary .email {
+    font-size: 14px;
+    color: #4338CA;
+    font-weight: 500;
+    margin: 0 0 20px 0;
+}
+.profile-summary .btn-primary {
+    background-color: #4338CA;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+.profile-summary .btn-primary:hover {
+    background-color: #3730a3;
+}
+
+/* Stats Summary Card */
+.stats-summary-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.stats-summary-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #E2E8F0;
+}
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.stat-item i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.stat-info {
+    flex-grow: 1;
+}
+.stat-label {
+    font-size: 12px;
+    color: #64748B;
+    margin: 0;
+}
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+}
+
+/* Right Column Sections */
+.card-section {
+    background-color: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.card-section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    color: #334155;
+}
+
+/* General Settings Form */
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    font-size: 13px;
+    color: #64748B;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #CBD5E1;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #334155;
+    background-color: #F8FAFC;
+}
+.form-group input:disabled {
+    background-color: #E2E8F0;
+    color: #94A3B8;
+    cursor: not-allowed;
+}
+
+/* Courses Section */
+.course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.course-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background-color: #F8FAFC;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+}
+.course-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.course-details {
+    flex-grow: 1;
+    min-width: 0;
+}
+.course-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.course-instructor {
+    font-size: 11px;
+    color: #94A3B8;
+    margin: 0;
+}
+.course-progress {
+    text-align: right;
+    flex-shrink: 0;
+    width: 120px;
+}
+.progress-text {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: #4338CA;
+    margin-bottom: 4px;
+}
+.progress-bar-small {
+    width: 100%;
+    height: 6px;
+    background-color: #E2E8F0;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+.progress-bar-small .fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.4s ease-in-out;
+}
+.loading-message {
+    text-align: center;
+    padding: 50px;
+    font-size: 16px;
+    color: #94A3B8;
+}
+
+
 /* --- Content Card Positioning (HR Layout Replicated) --- */
+/* Dashboard content ke liye existing styles */
 .good-morning-card {
     position: absolute;
     top: 0;
@@ -250,6 +567,7 @@ nav.sidebar-nav a i {
     flex-direction: column;
     align-items: center;
 }
+/* ... (Other dashboard card styles remain the same) ... */
 .good-morning-card p.small-text {
     font-size: 12px;
     color: #94A3B8;
@@ -289,7 +607,7 @@ nav.sidebar-nav a i {
     background-color: #dc374f;
 }
 
-/* Metrics/Stats Cards Container (Replicated Leave Card Layout) */
+/* Metrics/Stats Cards Container (Feature Card Styles) */
 .metrics-cards-container {
     position: absolute;
     top: 0;
@@ -301,80 +619,123 @@ nav.sidebar-nav a i {
     grid-template-rows: repeat(2, 134px);
     gap: 20px;
 }
-.metric-card, .course-card {
+
+/* --- Feature Card Styling (Compact for data inside card) --- */
+.feature-card {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
     width: 100%;
-    height: 134px;
-    display: flex;
-    padding: 16px;
+    height: 100%;
+    padding: 16px 20px; /* Adjusted padding */
     box-sizing: border-box;
-    align-items: center;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
     position: relative;
-    border: 1px solid #E2E8F0;
-    border-left: 4px solid var(--border-color); /* Dynamically set in HTML/TS */
-    transition: border-color 0.2s ease;
+    overflow: hidden;
+    border: 2px solid #E2E8F0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
 }
-.metric-card .metric-icon {
-    font-size: 2.5rem;
-    line-height: 1;
-    flex-shrink: 0;
-    width: 60px;
-    height: 60px;
+
+/* Hover effect */
+.feature-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    /* data-color attribute se dynamic border color aayega */
+    border-color: var(--border-color); 
+}
+
+/* Hover and Click effects (to simulate click state) - Updated to use custom property if possible, else hardcoded for safety */
+.feature-card:hover[data-color='\#4338CA'] { border-color: #4338CA; }
+.feature-card:hover[data-color='\#10B981'] { border-color: #10B981; }
+.feature-card:hover[data-color='\#F43F5E'] { border-color: #F43F5E; }
+.feature-card:hover[data-color='\#F59E0B'] { border-color: #F59E0B; }
+
+.feature-card:active {
+    transform: translateY(-1px) scale(1.0);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Inner structure for new cards */
+.feature-card .card-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 5px; /* Reduced gap to accommodate large text */
+}
+.feature-card .card-icon {
+    font-size: 1.8rem; /* Smaller icon size */
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background-color: #E0E7FF; /* Light background for the icon */
+    flex-shrink: 0;
+    background-color: var(--icon-bg-color); /* Dynamic background from TS */
+    color: var(--icon-color);
 }
-.metric-card .metric-icon i {
-    color: inherit !important; /* Icon color from parent style */
+.feature-card .card-top-row .title {
+    font-weight: 700;
+    font-size: 13px; /* *COMPACT: Slightly smaller title* */
+    margin: 0;
+    color: #334155;
+}
+.feature-card .card-main-data {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align data to top */
+  padding: 5px 0 10px 0;
+}
+.feature-card .large-value {
+  font-size: 2.5rem; /* *COMPACT: Reduced size* to fit better inside the card */
+  font-weight: 800;
+  line-height: 1.1;
+  margin-left: 0;
+}
+.feature-card .small-text-unit {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94A3B8;
+  vertical-align: super;
+  margin-left: 5px;
+}
+.feature-card .card-footer-info {
+    font-size: 11px; /* Smaller footer text */
+    color: #64748B;
+    border-top: 1px dashed #E2E8F0;
+    padding-top: 8px;
+    line-height: 1.3;
 }
 
-.metric-info {
-    font-size: 12px;
-    color: #334155;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-    user-select: none;
+/* Specific Focus Card Styles (for progress bar) */
+.focus-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+  display: block;
+  line-height: 1.2;
 }
-.metric-info .title {
-    font-weight: 600;
-    margin-bottom: 4px;
+.focus-progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #E2E8F0;
+  border-radius: 9999px;
+  overflow: hidden;
 }
-.metric-info .row {
-    display: flex;
-    justify-content: space-between;
-    color: #64748B;
+.focus-progress-bar .fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s ease-in-out;
 }
-.metric-info .row .value {
-    font-weight: 600;
-    color: #4338CA;
-    font-size: 1.2rem;
-}
-.course-card svg {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-}
-.course-card svg circle.text-bg {
-    stroke: #CBD5E1;
-}
-.course-card .circle-text {
-    position: absolute;
-    top: 50%;
-    left: 48px;
-    transform: translate(-50%, -50%);
-    font-weight: 600;
-    font-size: 14px;
-}
-.course-card .metric-info {
-    justify-content: space-between;
+
+/* Removed old .metric-card and .course-card specific styles to use .feature-card */
+.metric-card, .course-card {
+    display: none; /* Hide old cards if they still exist for fallback */
 }
 
 
@@ -532,7 +893,7 @@ nav.sidebar-nav a i {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px; /* *COMPACT: Reduced gap* */
     user-select: none;
 }
 .next-holidays-header {
@@ -559,7 +920,7 @@ nav.sidebar-nav a i {
 .holiday-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px; /* *COMPACT: Reduced gap* */
 }
 .holiday-item {
     display: flex;
@@ -590,11 +951,11 @@ nav.sidebar-nav a i {
 }
 .holiday-info .title {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px; /* *COMPACT: Smaller font for title* */
     color: #334155;
 }
 .holiday-info .date {
-    font-size: 12px;
+    font-size: 11px; /* *COMPACT: Smaller font for instructor* */
     color: #94A3B8;
     margin-bottom: 4px;
 }
@@ -1095,6 +1456,29 @@ nav.sidebar-nav a i {
   .video-card {
     order: 5;
   }
+  
+  /* Profile Setting Responsive */
+  .profile-setting-wrapper {
+      padding: 0; /* Remove top padding on mobile */
+  }
+  .profile-setting-card {
+      width: 100%;
+      max-width: none;
+      border-radius: 0;
+      padding: 20px;
+      box-shadow: none;
+  }
+  .profile-setting-card .content-grid {
+      flex-direction: column;
+  }
+  .profile-setting-card .col-left,
+  .profile-setting-card .col-right {
+      flex-basis: auto;
+      width: 100%;
+  }
+  .profile-summary {
+      margin-bottom: 15px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1116,6 +1500,9 @@ nav.sidebar-nav a i {
   }
   nav.sidebar-nav a i {
     font-size: 18px;
+  }
+  .profile-setting-card .header h2 {
+    font-size: 20px;
   }
 }
 
@@ -1154,5 +1541,16 @@ nav.sidebar-nav a i {
     min-width: unset;
     width: 95%;
     padding: 10px 15px;
+  }
+  .profile-setting-card {
+      padding: 15px;
+  }
+  .profile-setting-card .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .profile-setting-card .header h2 {
+    text-align: left;
   }
 }

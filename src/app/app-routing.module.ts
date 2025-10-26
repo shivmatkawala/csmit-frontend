@@ -7,12 +7,13 @@ import { CreateStudentComponent } from './create-student/create-student.componen
 import { TrainerFormComponent } from './trainer-form/trainer-form.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
-import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 import { CreateBatchComponent } from './create-batch/create-batch.component';
 import { UploadJobComponent } from './upload-job/upload-job.component';
 import { CreateExamComponent } from './create-exam/create-exam.component';
 import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
-import { AdminFormComponent } from './admin-form/admin-form.component';
+import { AdminFormComponent } from './admin-panel/admin-form/admin-form.component';
+import { CreateCourseComponent } from './create-course/create-course.component';
+import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -27,7 +28,8 @@ const routes: Routes = [
   {path:'create-batch',component:CreateBatchComponent},
   {path:'upload-job',component:UploadJobComponent},
   {path:'create-exam',component:CreateExamComponent},
-  {path:'admin-form',component:AdminFormComponent}
+  {path:'admin-form',component:AdminFormComponent},
+  {path:'create-course',component:CreateCourseComponent}
 ];
 
 @NgModule({

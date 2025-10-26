@@ -1,0 +1,247 @@
+<!-- Main Container -->
+<div class="main-container">
+  <div class="form-card">
+
+    <!-- Header -->
+    <div class="form-header">
+      <h1 class="form-header-title">
+        Create New Course
+      </h1>
+      <p class="form-header-subtitle">
+        Define a new curriculum structure, assign a trainer, and set its details.
+      </p>
+    </div>
+
+    <!-- Form Area - Template Driven Form (TDF) -->
+    <form #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)" class="batch-form">
+
+      <!-- Section 1: Course Details (2 Columns on Desktop) -->
+      <div class="form-section-group">
+        
+        <!-- Course Name -->
+        <div class="form-group">
+          <label for="courseName" class="input-label">Course Name</label>
+          <input
+            id="courseName"
+            name="courseName"
+            type="text"
+            required
+            minlength="5"
+            [(ngModel)]="courseData.courseName"
+            #courseName="ngModel"
+            class="input-field"
+            placeholder="e.g. Full Stack Web Development"
+          />
+          <div *ngIf="courseName.invalid && (courseName.dirty || courseName.touched)" class="error-message">
+            <div *ngIf="courseName.errors?.['required']">Course Name is required.</div>
+            <div *ngIf="courseName.errors?.['minlength']">Name must be at least 5 characters long.</div>
+          </div>
+        </div>
+
+        <!-- Course Code (New Field) -->
+        <div class="form-group">
+          <label for="courseCode" class="input-label">Course Code (Short Form)</label>
+          <input
+            id="courseCode"
+            name="courseCode"
+            type="text"
+            required
+            minlength="2"
+            maxlength="10"
+            [(ngModel)]="courseData.courseCode"
+            #courseCode="ngModel"
+            class="input-field"
+            placeholder="e.g. FSWD, DSML"
+          />
+          <div *ngIf="courseCode.invalid && (courseCode.dirty || courseCode.touched)" class="error-message">
+            <div *ngIf="courseCode.errors?.['required']">Course Code is required.</div>
+            <div *ngIf="courseCode.errors?.['minlength']">Code must be 2-10 characters long.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Trainer, Duration, and Timing (3 Columns on Desktop) -->
+      <div class="form-section-group three-cols">
+        
+        <!-- Trainer Selection (New Field) -->
+        <div class="form-group">
+          <label for="selectedTrainerId" class="input-label">Select Trainer</label>
+          <select
+            id="selectedTrainerId"
+            name="selectedTrainerId"
+            required
+            [(ngModel)]="courseData.selectedTrainerId"
+            #selectedTrainerId="ngModel"
+            class="input-field select-field"
+            [disabled]="trainers.length === 0"
+          >
+            <option value="" disabled>-- Select a Trainer --</option>
+            <option *ngFor="let trainer of trainers" [value]="trainer.id">
+              {{ getTrainerFullName(trainer) }} ({{ trainer.id }})
+            </option>
+          </select>
+          <!-- Error message if fetching trainers failed -->
+          <div *ngIf="errorMessage && trainers.length === 0" class="error-message">
+            {{ errorMessage }}
+          </div>
+          <div *ngIf="selectedTrainerId.invalid && (selectedTrainerId.dirty || selectedTrainerId.touched)" class="error-message">
+            Trainer selection is required.
+          </div>
+        </div>
+
+        <!-- Duration in Months -->
+        <div class="form-group">
+          <label for="durationMonths" class="input-label">Duration (Months)</label>
+          <input
+            id="durationMonths"
+            name="durationMonths"
+            type="number"
+            required
+            min="1"
+            max="24"
+            [(ngModel)]="courseData.durationMonths"
+            #durationMonths="ngModel"
+            class="input-field"
+            placeholder="e.g. 6"
+          />
+          <div *ngIf="durationMonths.invalid && (durationMonths.dirty || durationMonths.touched)" class="error-message">
+            <div *ngIf="durationMonths.errors?.['required']">Duration is required.</div>
+            <div *ngIf="durationMonths.errors?.['min']">Min duration is 1 month.</div>
+            <div *ngIf="durationMonths.errors?.['max']">Max duration is 24 months.</div>
+          </div>
+        </div>
+
+        <!-- Course Timing (BatchTiming ki jagah) -->
+        <div class="form-group">
+          <label for="courseTiming" class="input-label">Daily Timing</label>
+          <input
+            id="courseTiming"
+            name="courseTiming"
+            type="text"
+            required
+            minlength="5"
+            [(ngModel)]="courseData.courseTiming"
+            #courseTiming="ngModel"
+            class="input-field"
+            placeholder="e.g. 2 Hours/Day"
+          />
+          <div *ngIf="courseTiming.invalid && (courseTiming.dirty || courseTiming.touched)" class="error-message">
+            <div *ngIf="courseTiming.errors?.['required']">Timing is required.</div>
+            <div *ngIf="courseTiming.errors?.['minlength']">Timing must be at least 5 characters long.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Pricing and Mode (2 Columns on Desktop) -->
+      <div class="form-section-group">
+
+        <!-- Price -->
+        <div class="form-group">
+          <label for="price" class="input-label">Price (₹)</label>
+          <input
+            id="price"
+            name="price"
+            type="number"
+            required
+            min="0"
+            [(ngModel)]="courseData.price"
+            #price="ngModel"
+            class="input-field"
+            placeholder="e.g. 35000"
+          />
+          <div *ngIf="price.invalid && (price.dirty || price.touched)" class="error-message">
+            Price is required.
+          </div>
+        </div>
+
+        <!-- Mode Selection: Online/Offline Buttons (Segmented Control) -->
+        <div class="form-group">
+          <label class="input-label">Course Mode</label>
+          <div class="mode-segmented-control">
+            <!-- Offline Button (isOnline: false) -->
+            <button
+              type="button"
+              class="mode-option"
+              [class.active]="!courseData.isOnline"
+              (click)="courseData.isOnline = false"
+            >
+              Offline (In-person)
+            </button>
+            
+            <!-- Online Button (isOnline: true) -->
+            <button
+              type="button"
+              class="mode-option"
+              [class.active]="courseData.isOnline"
+              (click)="courseData.isOnline = true"
+            >
+              Online (Remote)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Capacity and Description (Single Column for Description) -->
+      <div class="form-section-group single-col">
+        
+        <!-- Capacity -->
+        <div class="form-group" style="width: 50%;">
+          <label for="capacity" class="input-label">Max Capacity (Seats)</label>
+          <input
+            id="capacity"
+            name="capacity"
+            type="number"
+            required
+            min="10"
+            [(ngModel)]="courseData.capacity"
+            #capacity="ngModel"
+            class="input-field"
+            placeholder="e.g. 40"
+          />
+          <div *ngIf="capacity.invalid && (capacity.dirty || capacity.touched)" class="error-message">
+            <div *ngIf="capacity.errors?.['required']">Capacity is required.</div>
+            <div *ngIf="capacity.errors?.['min']">Capacity must be at least 10.</div>
+          </div>
+        </div>
+        
+        <!-- Description -->
+        <label for="description" class="input-label" style="margin-top: 20px;">Detailed Course Description / Curriculum Summary</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="5"
+          required
+          minlength="50"
+          [(ngModel)]="courseData.description"
+          #description="ngModel"
+          class="input-field textarea-field"
+          placeholder="Write a comprehensive description covering key topics, outcomes, and prerequisites."
+        ></textarea>
+        <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
+          <div *ngIf="description.errors?.['required']">Description is required.</div>
+          <div *ngIf="description.errors?.['minlength']">Description must be at least 50 characters long.</div>
+        </div>
+      </div>
+
+      <!-- Form Submission Status -->
+      <div *ngIf="formSubmitted" class="submission-success-message">
+        <p class="message-title">Submission Successful!</p>
+        <p class="message-content">New course data has been logged to the console (API call simulated).</p>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="submit-button-container">
+        <button
+          type="submit"
+          [disabled]="courseForm.invalid || isSubmitting"
+          class="submit-button"
+          [class.enabled]="courseForm.valid && !isSubmitting"
+          [class.disabled]="courseForm.invalid || isSubmitting"
+        >
+          {{ isSubmitting ? 'Creating Course...' : 'Create Course' }}
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>

@@ -1,53 +1,427 @@
-/*
-Note: Most of the styling is now handled by Tailwind CSS classes in the HTML file.
-This CSS is primarily for print media optimization (A4 paper layout).
-*/
-
-@media print {
-/* Hide the action buttons when printing */
-.print:hidden {
-display: none !important;
+:host {
+  display: block;
+  /* Removed min-height: 100vh from :host */
+  background-color: #f9fafb; /* bg-gray-50 */
+  padding: 0;
 }
 
-/* Ensure the A4 page size and margins for clean PDF generation */
-@page {
-size: A4;
-margin: 1cm;
+/* FIX: Added style for app-container (the Angular wrapper) to fill the screen and vertically align content to the top (start). */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  /* FIX: Horizontally center the content again */
+  align-items: center; 
+  justify-content: flex-start; /* Vertically align to the top of the viewport */
+  min-height: 100vh; /* Ensure it takes full viewport height */
+  /* FIX: Removed padding-top: 2rem; to eliminate the fixed gap at the top */
+  padding-top: 0;
+  padding-bottom: 5rem; /* Ensure space for fixed action buttons */
+  width: 100%; 
+  padding-left: 0;
+  padding-right: 0;
 }
 
-/* Remove all shadows and non-essential backgrounds for professional print quality */
-body, html {
-margin: 0;
-padding: 0;
-background: white;
+@media (min-width: 640px) {
+  :host { padding: 0; }
+}
+@media (min-width: 768px) {
+  :host { padding: 0; }
 }
 
-/* Reset the main container to behave like a document page /
-.bg-white, .shadow-2xl, .border, .rounded-lg {
-all: unset !important; / Remove all applied Tailwind styles for the print container */
-}
-
+/* Resume Container - SCREEN VIEW ONLY: MODIFIED TO FILL MORE WIDTH AND BE CENTERED */
 #resume-content {
-width: 100%;
-margin: 0;
-padding: 0;
-box-shadow: none;
-font-size: 11pt; /* Adjust font size for print legibility */
+  background-color: #ffffff; /* bg-white */
+  /* FIX: Set a large max-width to prevent content cutting and ensure good readability on wide screens */
+  max-width: 1000px; 
+  width: 95%; /* ensure responsiveness */
+  margin-left: auto; 
+  margin-right: auto; /* Center it */
+  
+  /* Screen shadow and border */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 0; 
+  /* Screen padding: REDUCED for tighter screen view */
+  padding: 0; /* Outer padding is removed */
+  border: none; /* Removed border */
+  /* min-height is now handled by content size, not viewport size */
+  min-height: auto;
 }
 
-/* Make sure all elements fit tightly on the page */
-.p-6, .sm:p-8 {
-padding: 0 !important;
+/* New internal container for padding, used in both screen and print for consistent internal margins */
+.resume-page {
+    /* Set internal padding that acts as the margin within the A4 page */
+    padding: 0.5in; /* 0.5 इंच आंतरिक पैडिंग */
+    display: block; /* Ensure it behaves like a container */
 }
 
-/* Resetting font and layout to ensure print consistency */
-h1, h2, p, div, span {
-color: black !important;
-line-height: 1.4 !important;
+
+/* Header Section */
+#resume-content header {
+  text-align: center;
+  padding-bottom: 0.5rem; /* 0.8rem से कम किया गया */
+  margin-bottom: 0.5rem; /* 0.8rem से कम किया गया */
+  border-bottom: 2px solid #4f46e5; /* border-b-2 border-indigo-600 */
 }
 
-/* Headers in print should be simple */
-.border-b-2 {
-border-color: #ccc !important;
-border-width: 1px !important;
+#resume-content header h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  font-weight: 800; /* font-extrabold */
+  color: #1f2937; /* text-gray-800 */
+  letter-spacing: 0.02em;
+  margin: 0 0 0.2rem 0;
 }
+@media (min-width: 640px) {
+  #resume-content header h1 { font-size: 2.2rem; }
+}
+
+/* Contact Info */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-top: 0.2rem; /* Reduced from 0.25rem */
+  font-weight: 500;
+  gap: 0.2rem; /* Reduced from 0.25rem */
+}
+@media (min-width: 640px) {
+  .contact-info {
+    flex-direction: row;
+    gap: 0;
+    column-gap: 0.5rem; /* 0.75rem से कम किया गया */
+    font-size: 0.75rem; /* 0.8rem से कम किया गया */
+  }
+  .contact-info > span:not(:first-child) {
+    border-left: 1px solid #d1d5db;
+    padding-left: 0.5rem; /* 0.75rem से कम किया गया */
+    margin-left: 0;
+  }
+}
+.contact-info span:hover, .contact-info a:hover {
+  color: #4f46e5;
+}
+.contact-info a {
+  color: #4f46e5;
+  transition: color 150ms;
+}
+.contact-info a:hover {
+  color: #3730a3;
+}
+
+
+/* Section Styles */
+#resume-content section {
+  margin-bottom: 0.8rem; /* 1.2rem से कम करके 0.8rem किया गया */
+}
+#resume-content section h2 {
+  font-size: 1.1rem; /* 1.15rem से कम किया गया */
+  font-weight: 700; /* font-bold */
+  border-bottom: 2px solid #e5e7eb; /* border-b-2 border-gray-200 */
+  padding-bottom: 0.15rem; /* 0.2rem से कम किया गया */
+  margin-bottom: 0.3rem; /* 0.5rem से कम करके 0.3rem किया गया */
+  color: #4338ca; /* text-indigo-700 */
+}
+
+/* Paragraph/List Text */
+#resume-content p {
+  font-size: 0.8rem; /* 0.85rem से कम करके 0.8rem किया गया */
+  line-height: 1.4; /* 1.5 से कम किया गया */
+  color: #374151; /* text-gray-700 */
+}
+
+/* Skills/General List Item Style */
+.skill-grid {
+    margin-top: 0.4rem; /* Reduced from 0.5rem */
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1.5rem; /* 2rem से कम किया गया */
+}
+
+.skill-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0.2rem; /* Reduced from 0.3rem */
+  color: #374151;
+  font-size: 0.8rem; /* 0.85rem से कम करके 0.8rem किया गया */
+  flex: 1 1 48%; /* 48% width for two columns */
+  min-width: 15rem;
+}
+
+.skill-list.col-2-start {
+  margin-top: 0;
+}
+@media (max-width: 639px) {
+    .skill-list + .skill-list {
+        margin-top: 0.5rem; /* Reduced from 0.75rem */
+    }
+}
+
+.skill-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.1rem; /* 0.15rem से कम किया गया */
+}
+.skill-bullet {
+  color: #6366f1;
+  margin-right: 0.5rem;
+  font-weight: 900;
+}
+
+/* Experience List Style */
+.experience-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 0.8rem से कम किया गया */
+}
+.experience-item {
+  border-left: 4px solid #818cf8;
+  padding-left: 0.8rem; /* 1rem से कम किया गया */
+  padding-top: 0.1rem; /* 0.2rem से कम किया गया */
+  padding-bottom: 0.1rem; /* 0.2rem से कम किया गया */
+}
+
+.experience-item .title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.experience-item strong {
+  font-size: 0.9rem; /* 0.95rem से कम किया गया */
+  font-weight: 600;
+  color: #1f2937;
+}
+.experience-item span {
+  font-size: 0.75rem; /* 0.8rem से कम किया गया */
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.experience-item p {
+  margin-top: 0.1rem; /* 0.15rem से कम किया गया */
+  color: #4b5563;
+}
+
+/* Projects List Style */
+.project-list {
+  list-style: disc;
+  list-style-position: inside;
+  padding-left: 0.5rem;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem; /* 0.5rem से कम किया गया */
+  font-size: 0.8rem; /* 0.85rem से कम करके 0.8rem किया गया */
+}
+.project-list strong {
+  color: #1f2937;
+}
+.project-list .tech-used {
+  color: #4f46e5;
+}
+.project-list .project-desc {
+  color: #4b5563;
+  display: inline;
+}
+.project-link {
+  margin-left: 0.5rem;
+  color: #3b82f6;
+  font-size: 0.7rem; /* 0.75rem से कम किया गया */
+  text-decoration: underline;
+  transition: color 150ms;
+}
+.project-link:hover {
+  color: #1d4ed8;
+}
+
+/* Education Style */
+.education-item {
+  margin-bottom: 0.4rem; /* 0.5rem से कम किया गया */
+}
+.education-item .title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 0.8rem; /* 0.85rem से कम किया गया */
+}
+.education-item .title-row p {
+  font-weight: 600;
+  color: #1f2937;
+}
+.education-item .title-row span {
+  color: #6b7280;
+  white-space: nowrap;
+}
+.education-item .grade {
+  font-size: 0.7rem; /* 0.75rem से कम किया गया */
+  color: #4b5563;
+  margin-top: 0.05rem; /* 0.1rem से कम किया गया */
+}
+.education-item .grade span {
+  font-weight: 500;
+  color: #374151;
+}
+.no-data {
+    font-style: italic;
+    color: #6b7280 !important;
+    margin-top: 0.5rem;
+}
+
+
+/* Action Button Container (Fixed at the bottom) */
+.action-buttons-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-top: 2px solid #e5e7eb;
+  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+/* Button Base Style */
+.action-button {
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 300ms;
+  transform: scale(1);
+}
+.action-button:hover {
+  transform: scale(1.05);
+}
+.action-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5);
+}
+
+/* Primary Button (Download PDF) */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+/* Secondary Button (Print Resume) */
+.btn-secondary {
+  border: 2px solid #6366f1;
+  color: #4338ca;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.btn-secondary:hover {
+  background-color: #eef2ff;
+}
+
+/* Toggle Button */
+.btn-toggle {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: #10b981;
+    color: white;
+    font-weight: 600;
+    border-radius: 9999px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 50;
+    transition: background-color 0.3s, transform 0.3s;
+}
+.btn-toggle:hover {
+    background-color: #059669;
+    transform: scale(1.1);
+}
+
+
+/* --- PDF/PRINT OPTIMIZATION START --- */
+
+/* Print Styles: Optimized for clean PDF output */
+@media print {
+  /* FIX: Ensure host, body, and app-container have no top margin/padding that could interfere */
+  :host, body {
+    background: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  
+  /* FIX: To ensure that the content starts precisely at the top edge for the .resume-page padding to take effect */
+  .app-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Resume content (the outer box) fills the A4 page, removing screen-only borders/shadows/padding */
+  #resume-content {
+    /* FIX: In print mode, it must be 100% width */
+    max-width: 100% !important;
+    width: 100% !important; /* Full width */
+    height: auto;
+    /* FIX: मार्जिन को 0 पर सेट करें */
+    margin: 0 !important;
+    /* FIX: Remove all padding from the outer container in print mode */
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white;
+    /* Ensure the content is printed without any unnecessary space */
+    position: relative;
+    top: 0;
+    left: 0;
+    
+    /* FIX: A4 min-height और Flexbox प्रॉपर्टीज हटा दी गई हैं ताकि मल्टी-पेज कंटेंट बिना कटे फ्लो हो सके */
+    min-height: auto !important; 
+    display: block; 
+    flex-direction: unset;
+    justify-content: unset;
+  }
+
+  /* The actual padding/margins for the resume content are now applied to the internal .resume-page */
+  .resume-page {
+      /* FIX: 0.5in की पैडिंग (लगभग 12.7mm) टॉप, बॉटम, लेफ्ट और राइट में समान मार्जिन सुनिश्चित करती है */
+      padding: 0.5in !important; 
+      
+      /* FIX: min-height और flex-grow हटा दिए गए हैं ताकि कंटेंट आसानी से पेज ब्रेक कर सके */
+      min-height: auto !important; 
+      flex-grow: unset;
+  }
+  
+  /* Attempt to prevent content sections from splitting across pages */
+  #resume-content section {
+    /* यह महत्वपूर्ण है: यह सुनिश्चित करता है कि सेक्शन बीच से न कटे */
+    page-break-inside: avoid !important;
+    margin-bottom: 0.8rem !important; /* प्रिंट मोड के लिए कम मार्जिन */
+  }
+  
+  /* यह सुनिश्चित करता है कि अगर section लंबा हो तो उसके बाद एक नया पेज शुरू हो */
+  #resume-content section h2 {
+    page-break-after: avoid !important;
+  }
+
+  /* Prevent a page break immediately after the last section */
+  #resume-content .last-section {
+    page-break-after: avoid !important;
+  }
+
+  /* Hide the action buttons during print/PDF generation */
+  .print-hidden {
+    display: none !important;
+  }
+}
+/* --- PDF/PRINT OPTIMIZATION END --- */

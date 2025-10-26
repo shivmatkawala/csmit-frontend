@@ -39,6 +39,15 @@ export class AdminPanelComponent {
     }
     );
   }
+  
+  // NEW: Create Course Form page par navigate karne ka function
+  navigateToCreateCourseForm():void{
+    // '/create-course' route path par jaana hai.
+    this.router.navigate(["/create-course"]).catch(err=>{
+      console.error('Navigation Error: Could not navigate to /create-course. Please ensure this route is configured in your routing module.',err);
+    }
+    );
+  }
 
   navigateTouploadJobForm():void{
     // Note: Assumed route is /upload-job.

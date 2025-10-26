@@ -1,0 +1,164 @@
+<!-- Profile Setting Page Design - Attractive and Functional -->
+<div class="profile-setting-card">
+  <div class="header">
+    <button class="back-btn" (click)="navigateToDashboard()" title="Go back to Dashboard">
+      <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </button>
+    <h2>Student Profile & Settings</h2>
+  </div>
+
+  <!-- Message Box for notifications (Top-right corner) -->
+  <div *ngIf="message" [class]="'message-box ' + message.type">
+    {{ message.text }}
+    <button class="close-message" (click)="message = null">&times;</button>
+  </div>
+
+  <div *ngIf="profileData" class="content-grid">
+    
+    <!-- 1. Left Column: Profile Summary & Image Upload (Primary Focus) -->
+    <div class="col-left">
+      <div class="profile-summary">
+        <!-- Profile Picture or Initial Text -->
+        <div class="profile-avatar" title="{{ profileData.full_name }}">
+          <!-- Show New Profile Image Previews -->
+          <ng-container *ngIf="newProfileImage">
+            <img [src]="newProfileImage" alt="New Profile" class="w-full h-full object-cover rounded-full">
+          </ng-container>
+          <!-- Show Existing Profile Image -->
+          <ng-container *ngIf="!newProfileImage && profileData.profileImageUrl">
+            <img [src]="profileData.profileImageUrl" alt="Student Profile" class="w-full h-full object-cover rounded-full">
+          </ng-container>
+          <!-- Show Initial Text -->
+          <ng-container *ngIf="!newProfileImage && !profileData.profileImageUrl">
+            <span class="initial-text">{{ profileData.profileInitial }}</span>
+          </ng-container>
+          
+          <!-- File Upload Icon/Button overlay -->
+          <label for="profileImageUpload" class="upload-overlay">
+            <i class="fas fa-camera"></i>
+          </label>
+          <input type="file" id="profileImageUpload" (change)="onFileChange($event)" accept="image/png, image/jpeg" style="display: none;">
+        </div>
+        
+        <h3 class="name">{{ profileData.full_name }}</h3>
+        <p class="student-id">Student ID: <span>{{ profileData.student_id }}</span></p>
+        
+        <!-- Save button for Profile/General changes -->
+        <button class="btn-primary" (click)="saveProfileChanges()" [disabled]="profileForm.invalid">
+          <i class="fas fa-save"></i> Update Profile Settings
+        </button>
+      </div>
+
+      <!-- Quick Stats / Feature Cards Summary -->
+      <div class="stats-summary-card">
+        <h4><i class="fas fa-chart-bar"></i> Key Metrics Summary</h4>
+        <div class="stats-list">
+            <div *ngFor="let card of profileData.featureCards" class="stat-item">
+                <i [class]="card.icon" [style.color]="card.color"></i>
+                <div class="stat-info">
+                    <p class="stat-label">{{ card.label }}</p>
+                    <p class="stat-value">{{ card.info }}</p>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Right Column: Settings, Security and Courses -->
+    <div class="col-right">
+      
+      <!-- General Settings Form -->
+      <div class="settings-form card-section" [formGroup]="profileForm">
+        <h3><i class="fas fa-user-edit"></i> General Settings</h3>
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" formControlName="fullName" [class.is-invalid]="profileForm.controls.fullName.invalid && profileForm.controls.fullName.touched">
+          <p *ngIf="profileForm.controls.fullName.invalid && profileForm.controls.fullName.touched" class="error-message">Name is required.</p>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" formControlName="email" [class.is-invalid]="profileForm.controls.email.invalid && profileForm.controls.email.touched">
+          <!-- FIX: Bracket notation used for required and email errors -->
+          <p *ngIf="profileForm.controls.email.errors?.['required'] && profileForm.controls.email.touched" class="error-message">Email is required.</p>
+          <p *ngIf="profileForm.controls.email.errors?.['email'] && profileForm.controls.email.touched" class="error-message">Invalid email format.</p>
+        </div>
+        <div class="form-group">
+          <label for="language">Preferred Language</label>
+          <select id="language" formControlName="language">
+            <option>Hindi</option>
+            <option>English</option>
+            <option>Spanish</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="notifications">Email Notifications</label>
+          <select id="notifications" formControlName="notifications">
+            <option value="Receive All">Receive All</option>
+            <option value="Deadlines Only">Deadlines Only</option>
+            <option value="None">None</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Security Settings -->
+      <div class="security-section card-section" [formGroup]="securityForm">
+        <h3><i class="fas fa-lock"></i> Security & Privacy</h3>
+        
+        <!-- Password Change -->
+        <div class="form-group password-group">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" formControlName="currentPassword" placeholder="Enter current password">
+        </div>
+        <div class="form-group password-group">
+          <label for="newPassword">New Password (Min 6 characters)</label>
+          <input type="password" id="newPassword" formControlName="newPassword" placeholder="Enter new password">
+          <!-- FIX: Bracket notation used for minlength error -->
+          <p *ngIf="securityForm.controls.newPassword.errors?.['minlength'] && securityForm.controls.newPassword.touched" class="error-message">Password must be at least 6 characters.</p>
+        </div>
+        <div class="form-group password-group">
+          <label for="confirmPassword">Confirm New Password</label>
+          <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="Confirm new password">
+        </div>
+        
+        <!-- Two Factor Authentication Toggle -->
+        <div class="form-group toggle-setting">
+          <label for="twoFactorEnabled">Two-Factor Authentication (2FA)</label>
+          <div class="toggle-switch" [class.active]="securityForm.controls.twoFactorEnabled.value" (click)="securityForm.controls.twoFactorEnabled.setValue(!securityForm.controls.twoFactorEnabled.value)">
+            <span></span>
+          </div>
+          <p class="small-info-text">Extra layer of security for your account.</p>
+        </div>
+        
+        <button class="btn-secondary" (click)="saveSecurityChanges()" [disabled]="securityForm.invalid">
+          <i class="fas fa-key"></i> Update Security
+        </button>
+      </div>
+
+      <!-- Enrolled Courses List -->
+      <div class="courses-section card-section">
+        <h3><i class="fas fa-book"></i> Enrolled Courses ({{ profileData.courses.length }})</h3>
+        <div class="course-list">
+          <div *ngFor="let course of profileData.courses" class="course-item">
+            <div class="course-icon" [style.background-color]="course.colorClass">
+              <i [class]="getCourseIcon(course.category)" style="color: white; font-size: 1.2rem;"></i>
+            </div>
+            <div class="course-details">
+              <p class="course-title">{{ course.title }} ({{ course.code }})</p>
+              <p class="course-instructor">Instructor: {{ course.instructor }}</p>
+            </div>
+            <div class="course-progress">
+              <span class="progress-text">{{ course.progress }}% Complete</span>
+              <div class="progress-bar-small">
+                <div class="fill" [style.width.%]="course.progress" [style.background-color]="course.colorClass"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!profileData" class="loading-message">
+    <p><i class="fas fa-spinner fa-spin"></i> Loading profile data...</p>
+  </div>
+</div>

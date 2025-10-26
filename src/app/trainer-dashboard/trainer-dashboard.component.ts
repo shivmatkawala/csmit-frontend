@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
+// This component uses a dark, modern design inspired by the user's request,
+// utilizing vibrant sky blue and emerald green accents, deep shadows, and better card separation.
+
 @Component({
   selector: 'app-trainer-dashboard',
   templateUrl: './trainer-dashboard.component.html',
@@ -9,10 +12,11 @@ export class TrainerDashboardComponent implements OnInit {
 
   trainerName: string = 'Dr. Vivian Lee';
   trainerId: string = 'T704';
-  profileImageUrl: string = 'https://placehold.co/100x100/10b981/ffffff?text=VL'; // Green accent
+  // Updated placeholder color to match the new Sky Blue primary color
+  profileImageUrl: string = 'https://placehold.co/80x80/0ea5e9/ffffff?text=VL';
 
   // State for filtering queries
-  queryFilter: 'All' | 'High Priority' | 'Unresolved' = 'All';
+  queryFilter: 'All' | 'High Priority' | 'Unresolved' = 'Unresolved'; // Default to show Unresolved for urgency
 
   metrics: any[] = [];
   teachingCourses: any[] = [];
@@ -20,48 +24,55 @@ export class TrainerDashboardComponent implements OnInit {
   allRecentStudentQueries: any[] = [];
 
   ngOnInit(): void {
+    // 1. Key Metrics Data - Updated Icons for modern look
     this.metrics = [
-      { label: 'Active Students', value: '85', icon: '🧑‍💻' },
-      { label: 'Courses Mentored', value: '3', icon: '☁️' },
-      { label: 'Pending PR Reviews', value: '7', icon: '🛠️' },
-      { label: 'Avg. Course Rating', value: '4.8/5', icon: '⭐' },
+      { label: 'Active Students', value: '85', icon: '🧑‍🚀' }, // Active Students
+      { label: 'Courses Mentored', value: '3', icon: '🌐' }, // Courses
+      { label: 'Pending PR Reviews', value: '7', icon: '⚙️' }, // Pending Work
+      { label: 'Avg. Course Rating', value: '4.8/5', icon: '🏆' }, // Rating
     ];
 
-    // Tech Courses Data
+    // 2. Tech Courses Data
     this.teachingCourses = [
       { id: 'FSD501', title: 'Full Stack JavaScript', totalStudents: 40, completion: 75, status: 'Active' },
-      { id: 'DVE402', title: 'AWS DevOps Engineering', totalStudents: 25, completion: 90, status: 'Active' },
-      { id: 'AIS605', title: 'AI & Data Science (Advanced)', totalStudents: 20, completion: 40, status: 'Upcoming' },
+      { id: 'DVE402', title: 'AWS DevOps Engineering', totalStudents: 22, completion: 92, status: 'Active' },
+      { id: 'ADS603', title: 'Advanced Data Structures', totalStudents: 15, completion: 45, status: 'Upcoming' },
+      { id: 'PYM410', title: 'Python Machine Learning', totalStudents: 55, completion: 88, status: 'Active' },
     ];
 
+    // 4. Pending Tasks Data
     this.pendingTasks = [
-      { name: 'Grade FSD501 Mid-Module Challenge', course: 'FSD501', daysDue: 2 },
-      { name: 'Review DVE402 CI/CD Pipeline PR', course: 'DVE402', daysDue: 5 },
-      { name: 'Prepare AIS605 Week 1 Lab', course: 'AIS605', daysDue: 10 },
+      { name: 'Review Sprint 3 Code', course: 'FSD501', daysDue: 2 },
+      { name: 'Grade Final Project Proposal', course: 'ADS603', daysDue: 5 },
+      { name: 'Review CI/CD Pipeline Setup', course: 'DVE402', daysDue: 1 },
+      { name: 'Check Module 2 Quiz Scores', course: 'PYM410', daysDue: 7 },
     ];
 
+    // 3. Student Queries Data
     this.allRecentStudentQueries = [
-      { name: 'Rohan Verma', course: 'FSD501', subject: 'Error in React Hook lifecycle', time: '12 mins ago', priority: 'High', resolved: false },
-      { name: 'Sneha Gupta', course: 'DVE402', subject: 'Doubt about Kubernetes deployment', time: '1 hour ago', priority: 'High', resolved: false },
-      { name: 'Amit Singh', course: 'AIS605', subject: 'Suggest a good ML library for NLP', time: '3 hours ago', priority: 'Low', resolved: true },
-      { name: 'Priya Khan', course: 'FSD501', subject: 'Issue with MongoDB connection string', time: '1 day ago', priority: 'Medium', resolved: false },
+      { id: 1, title: 'Issue with Express routing in FSD501', studentName: 'Ravi S.', courseId: 'FSD501', priority: 'High', resolved: false, date: '2025-10-25' },
+      { id: 2, title: 'Clarification on CloudFormation template syntax', studentName: 'Jane D.', courseId: 'DVE402', priority: 'Medium', resolved: false, date: '2025-10-25' },
+      { id: 3, title: 'Optimal data structure for large datasets', studentName: 'Amit V.', courseId: 'ADS603', priority: 'Low', resolved: true, date: '2025-10-24' },
+      { id: 4, title: 'Request for extension on homework 4', studentName: 'Sarah M.', courseId: 'FSD501', priority: 'Medium', resolved: false, date: '2025-10-23' },
+      { id: 5, title: 'In-depth explanation of backpropagation', studentName: 'Priya K.', courseId: 'PYM410', priority: 'High', resolved: false, date: '2025-10-23' },
     ];
   }
 
+  // --- Methods for UI Logic (No functional change) ---
+
   /**
-   * Getter to filter queries dynamically for the main list.
-   * Template uses 'filteredQueries' for its *ngFor.
+   * Filters the list of queries based on the current filter state.
    */
   get filteredQueries(): any[] {
     switch (this.queryFilter) {
       case 'High Priority':
-        // Only show High Priority and Unresolved queries
         return this.allRecentStudentQueries.filter(q => q.priority === 'High' && !q.resolved);
       case 'Unresolved':
         return this.allRecentStudentQueries.filter(q => !q.resolved);
       case 'All':
       default:
-        return this.allRecentStudentQueries;
+        // Sorts unresolved items first for better visibility on the 'All' tab
+        return [...this.allRecentStudentQueries].sort((a, b) => (a.resolved === b.resolved) ? 0 : a.resolved ? 1 : -1);
     }
   }
 
@@ -69,7 +80,6 @@ export class TrainerDashboardComponent implements OnInit {
    * Getter to calculate the count of *all* unresolved queries for the button label.
    */
   get unresolvedQueryCount(): number {
-    // This calculation was moved from the HTML interpolation to a getter.
     return this.allRecentStudentQueries.filter(q => !q.resolved).length;
   }
   
@@ -77,7 +87,7 @@ export class TrainerDashboardComponent implements OnInit {
    * Getter to calculate the count of *all* high priority queries for the button label.
    */
   get highPriorityQueryCount(): number {
-    // This new getter is required for the button label.
+    // Counts high priority queries that are NOT resolved
     return this.allRecentStudentQueries.filter(q => q.priority === 'High' && !q.resolved).length;
   }
 
@@ -86,6 +96,9 @@ export class TrainerDashboardComponent implements OnInit {
     query.resolved = !query.resolved;
   }
 
+  /**
+   * Returns a CSS class based on course completion percentage.
+   */
   getCompletionClass(completion: number): string {
     if (completion >= 80) {
       return 'completion-green';
@@ -96,19 +109,24 @@ export class TrainerDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Returns a CSS class based on course status.
+   */
   getStatusClass(status: string): string {
     const statusLower = status.toLowerCase();
     switch (statusLower) {
       case 'active':
         return 'status-active';
       case 'upcoming':
-      case 'upcoming': // Duplicate case removed for clean code
         return 'status-upcoming';
       default:
         return 'status-default';
     }
   }
 
+  /**
+   * Returns a CSS class based on task urgency (days due).
+   */
   getTaskPriorityClass(daysDue: number): string {
     if (daysDue <= 3) {
       return 'priority-high';

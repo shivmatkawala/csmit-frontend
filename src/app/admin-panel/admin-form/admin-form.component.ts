@@ -2,7 +2,7 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http'; // Required for API calls
-import { Admin, AdminApiService } from '../services/admin.service';
+import { Admin, AdminApiService } from '../../services/admin.service';
 @Component({
   selector: 'app-admin-form',
   standalone: true,

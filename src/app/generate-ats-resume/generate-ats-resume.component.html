@@ -1,117 +1,130 @@
-<!-- Tailwind CSS is assumed to be available in the Angular environment -->
-<div class="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
-  <!-- Resume Container: Max width on desktop, full width on mobile -->
-  <div id="resume-content" class="bg-white max-w-4xl mx-auto shadow-2xl rounded-lg p-6 sm:p-8 border border-gray-100" *ngIf="resumeData">
-
-    <!-- Header Section (Clean and Centered) -->
-    <header class="text-center pb-4 mb-4 border-b-2 border-indigo-600">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-wide">{{ resumeData.full_name }}</h1>
-      
-      <!-- Contact Info: Responsive layout -->
-      <div class="flex flex-col sm:flex-row justify-center items-center text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0 sm:space-x-4 mt-1 font-medium">
-        <span *ngIf="resumeData.location" class="hover:text-indigo-600">{{ resumeData.location }}</span>
-        <span *ngIf="resumeData.phone" class="sm:border-l sm:border-gray-300 sm:pl-4 hover:text-indigo-600">{{ resumeData.phone }}</span>
-        <span *ngIf="resumeData.email" class="sm:border-l sm:border-gray-300 sm:pl-4 hover:text-indigo-600">{{ resumeData.email }}</span>
-        
-        <span *ngIf="resumeData.linkedin" class="sm:border-l sm:border-gray-300 sm:pl-4">
-          <a [href]="resumeData.linkedin" target="_blank" class="text-indigo-600 hover:text-indigo-800 transition duration-150">LinkedIn</a>
-        </span>
-        <span *ngIf="resumeData.portfolio" class="sm:border-l sm:border-gray-300 sm:pl-4">
-          <a [href]="resumeData.portfolio" target="_blank" class="text-indigo-600 hover:text-indigo-800 transition duration-150">Portfolio</a>
-        </span>
-      </div>
-      
-      <!-- CSMIT ID (hidden on print) -->
-      <p class="text-xs text-gray-400 mt-2 print:hidden">CSMIT ID: {{ resumeData.csmit_id }}</p>
-    </header>
-
-    <!-- Professional Summary -->
-    <section class="mb-6">
-      <h2 class="text-xl font-bold border-b-2 border-gray-200 pb-1 mb-2 text-indigo-700">Professional Summary</h2>
-      <p class="text-sm leading-relaxed text-gray-700">
-        {{ resumeData.experience_type }} candidate with a strong foundation in 
-        <span *ngIf="resumeData.skills.length > 0" class="font-semibold">{{ getSkillNames() }}</span>.
-        Experienced in building scalable applications and leveraging modern software development practices.
-      </p>
-    </section>
+<!-- Tailwind CSS classes have been removed and migrated to generate-ats-resume.component.css -->
+<div class="app-container" *ngIf="resumeData">
+  
+  <!-- Resume Container (Outer border for screen, full bleed container for print/PDF) -->
+  <div id="resume-content">
     
-    <!-- Skills Section (Responsive Grid) -->
-    <section class="mb-6">
-      <h2 class="text-xl font-bold border-b-2 border-gray-200 pb-1 mb-2 text-indigo-700">Skills</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 mt-3 text-sm text-gray-700">
-        <!-- First column for skills -->
-        <ul class="list-none p-0 space-y-1" *ngIf="skillColumn1.length > 0">
-          <li *ngFor="let skill of skillColumn1" class="flex items-center">
-            <span class="text-indigo-500 mr-2">•</span> {{ skill.name }}
-          </li>
-        </ul>
-        <!-- Second column for skills -->
-        <ul class="list-none p-0 space-y-1 mt-3 sm:mt-0" *ngIf="skillColumn2.length > 0">
-          <li *ngFor="let skill of skillColumn2" class="flex items-center">
-            <span class="text-indigo-500 mr-2">•</span> {{ skill.name }}
-          </li>
-        </ul>
-        <p *ngIf="!resumeData.skills || resumeData.skills.length === 0" class="text-sm text-gray-500 col-span-2">No skills listed in the profile data.</p>
-      </div>
-    </section>
-
-    <!-- Experience Section (Dynamic) -->
-    <section class="mb-6">
-      <h2 class="text-xl font-bold border-b-2 border-gray-200 pb-1 mb-2 text-indigo-700">Experience</h2>
-      
-      <div *ngIf="!resumeData.experience || resumeData.experience.length === 0">
-        <p class="text-sm text-gray-500">No formal work experience listed ({{ resumeData.experience_type }}).</p>
-      </div>
-      
-      <ul class="list-none p-0 space-y-4">
-        <li *ngFor="let exp of resumeData.experience" class="border-l-4 border-indigo-400 pl-4 py-1">
-          <div class="flex justify-between items-start">
-            <strong class="text-base font-semibold text-gray-800">{{ exp.title }} | {{ exp.company }}</strong>
-            <span class="text-sm text-gray-500 font-medium whitespace-nowrap">{{ exp.start_date }} to {{ exp.end_date || 'Present'}}</span>
+    <!-- New wrapper for all content to apply controlled internal padding/margin -->
+    <div class="resume-page">
+    
+        <!-- Header Section (Clean and Centered) -->
+        <header>
+          <h1>{{ resumeData.full_name }}</h1>
+          
+          <!-- Contact Info: Responsive layout -->
+          <div class="contact-info">
+            <span *ngIf="resumeData.location">{{ resumeData.location }}</span>
+            <span *ngIf="resumeData.phone">{{ resumeData.phone }}</span>
+            <span *ngIf="resumeData.email">{{ resumeData.email }}</span>
+            
+            <span *ngIf="resumeData.linkedin">
+              <a [href]="resumeData.linkedin" target="_blank">LinkedIn</a>
+            </span>
+            <span *ngIf="resumeData.portfolio">
+              <a [href]="resumeData.portfolio" target="_blank">Portfolio</a>
+            </span>
           </div>
-          <p class="text-sm mt-1 text-gray-600">{{ exp.description }}</p>
-        </li>
-      </ul>
-    </section>
+        </header>
 
-    <!-- Projects Section (Dynamic) -->
-    <section class="mb-6">
-      <h2 class="text-xl font-bold border-b-2 border-gray-200 pb-1 mb-2 text-indigo-700">Personal Projects</h2>
-      <ul class="list-disc list-inside space-y-3 text-sm pl-2">
-        <li *ngFor="let project of resumeData.projects">
-          <strong class="text-gray-800">{{ project.title }}</strong> – <span class="text-indigo-600">{{ project.tech_used }}</span><br>
-          <span class="text-gray-600">{{ project.description }}</span>
-          <span *ngIf="project.url" class="ml-2"> 
-            <a [href]="project.url" target="_blank" class="text-blue-500 hover:text-blue-700 underline transition duration-150 text-xs">(View Project)</a>
-          </span>
-        </li>
-      </ul>
-      <p *ngIf="!resumeData.projects || resumeData.projects.length === 0" class="text-sm text-gray-500">No projects listed in the profile data.</p>
-    </section>
-
-    <!-- Education Section (Dynamic) -->
-    <section class="mb-0">
-      <h2 class="text-xl font-bold border-b-2 border-gray-200 pb-1 mb-2 text-indigo-700">Education</h2>
-      <div *ngFor="let edu of resumeData.education" class="mb-2">
-        <div class="flex justify-between items-start text-sm">
-          <p class="font-semibold text-gray-800">
-            {{ edu.degree }} - {{ edu.institution }} 
+        <!-- Professional Summary -->
+        <section>
+          <h2>Professional Summary</h2>
+          <p>
+            {{ resumeData.experience_type }} candidate with a strong foundation in 
+            <span *ngIf="resumeData.skills.length > 0">{{ getSkillNames() }}</span>.
+            Experienced in building scalable applications and leveraging modern software development practices.
           </p>
-          <span class="text-gray-500 whitespace-nowrap" *ngIf="edu.start_year && edu.end_year"> ({{ edu.start_year }} - {{ edu.end_year }})</span>
-        </div>
-        <p class="text-xs text-gray-600 mt-0.5">Grade/CGPA: <span class="font-medium text-gray-700">{{ edu.grade }}</span></p>
-      </div>
-      <p *ngIf="!resumeData.education || resumeData.education.length === 0" class="text-sm text-gray-500">No education details available.</p>
-    </section>
-  </div>
+        </section>
+        
+        <!-- Skills Section (Responsive Grid) -->
+        <section>
+          <h2>Skills</h2>
+          <div class="skill-grid">
+            <!-- First column for skills -->
+            <ul class="skill-list" *ngIf="skillColumn1.length > 0">
+              <li *ngFor="let skill of skillColumn1" class="skill-item">
+                <span class="skill-bullet">•</span> {{ skill.name }}
+              </li>
+            </ul>
+            <!-- Second column for skills -->
+            <ul class="skill-list col-2-start" *ngIf="skillColumn2.length > 0">
+              <li *ngFor="let skill of skillColumn2" class="skill-item">
+                <span class="skill-bullet">•</span> {{ skill.name }}
+              </li>
+            </ul>
+            <p *ngIf="!resumeData.skills || resumeData.skills.length === 0" class="no-data">No skills listed in the profile data.</p>
+          </div>
+        </section>
+
+        <!-- Experience Section (Dynamic) -->
+        <section>
+          <h2>Experience</h2>
+          
+          <div *ngIf="!resumeData.experience || resumeData.experience.length === 0">
+            <p class="no-data">No formal work experience listed ({{ resumeData.experience_type }}).</p>
+          </div>
+          
+          <ul class="experience-list">
+            <li *ngFor="let exp of resumeData.experience" class="experience-item">
+              <div class="title-row">
+                <strong>{{ exp.title }} | {{ exp.company }}</strong>
+                <span>{{ exp.start_date }} to {{ exp.end_date || 'Present'}}</span>
+              </div>
+              <p>{{ exp.description }}</p>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Projects Section (Dynamic) -->
+        <section>
+          <h2>Personal Projects</h2>
+          <ul class="project-list">
+            <li *ngFor="let project of resumeData.projects">
+              <strong>{{ project.title }}</strong> – <span class="tech-used">{{ project.tech_used }}</span><br>
+              <span class="project-desc">{{ project.description }}</span>
+              <span *ngIf="project.url"> 
+                <a [href]="project.url" target="_blank" class="project-link">(View Project)</a>
+              </span>
+            </li>
+          </ul>
+          <p *ngIf="!resumeData.projects || resumeData.projects.length === 0" class="no-data">No projects listed in the profile data.</p>
+        </section>
+
+        <!-- Education Section (Dynamic) -->
+        <section class="last-section">
+          <h2>Education</h2>
+          <div *ngFor="let edu of resumeData.education" class="education-item">
+            <div class="title-row">
+              <p>
+                {{ edu.degree }} - {{ edu.institution }} 
+              </p>
+              <span *ngIf="edu.start_year && edu.end_year"> ({{ edu.start_year }} - {{ edu.end_year }})</span>
+            </div>
+            <p class="grade">Grade/CGPA: <span>{{ edu.grade }}</span></p>
+          </div>
+          <p *ngIf="!resumeData.education || resumeData.education.length === 0" class="no-data">No education details available.</p>
+        </section>
+    
+    </div> <!-- End .resume-page -->
+  </div> <!-- End #resume-content -->
 
   <!-- Action Buttons (Fixed at the bottom of the viewport on larger screens for easy access) -->
-  <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t-2 border-gray-200 shadow-xl flex justify-center space-x-4 print:hidden" *ngIf="resumeData">
-    <button (click)="printResume()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105">
-      <span class="text-xl mr-2">🖨️</span> Print Resume
-    </button>
-    <button (click)="downloadResume()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105">
-      <span class="text-xl mr-2">⬇️</span> Download as PDF
+  <div class="print-hidden">
+    <!-- Action buttons container (Toggle on/off) -->
+    <div class="action-buttons-container" *ngIf="isButtonContainerVisible()">
+      <!-- Print Button (Secondary/Outlined Style) -->
+      <button (click)="printResume()" class="action-button btn-secondary">
+        <span class="text-xl mr-2">🖨️</span> Print Resume
+      </button>
+      <!-- Download as PDF Button (Primary/Solid Style) -->
+      <button (click)="downloadResume()" class="action-button btn-primary">
+        <span class="text-xl mr-2">⬇️</span> Download as PDF
+      </button>
+    </div>
+
+    <!-- Toggle Button -->
+    <button (click)="toggleButtonContainer()" class="btn-toggle">
+        {{ isButtonContainerVisible() ? 'Hide Actions' : 'Show Actions' }}
     </button>
   </div>
 </div>

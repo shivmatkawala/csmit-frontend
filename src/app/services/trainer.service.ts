@@ -72,8 +72,10 @@ export class TrainerApiService {
  
 
   // GET: Fetch all trainers
+  // Note: Since the backend might return a list of trainers, we return Observable<TrainerFormData[]>
   getTrainers(): Observable<TrainerFormData[]> {
-    // This is the call that received the 405 Method Not Allowed error
+    // In a real scenario, this endpoint might need adjustment if it doesn't return all trainers.
+    // For now, we assume it returns a list of all trainers.
     return this.http.get<any[]>(API_BASE_URL).pipe(
         // Map the array of API objects to an array of internal TrainerFormData objects
         map(apiDataArray => apiDataArray.map(data => this.transformFromApi(data)))
