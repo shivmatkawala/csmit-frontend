@@ -1,586 +1,1011 @@
-/* Google Font Import - Inter is kept for professionalism */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-/* --- Unified Color Palette (Premium Dark Mode) --- */
-:root {
-  --primary-color: #0ea5e9; /* Sky Blue - Action/Accent */
-  --primary-dark: #0284c7;
-  --secondary-color: #34d399; /* Emerald Green - Success/Highlight */
-  --background-dark: #0f172a; /* Slate Black - Deep Background */
-  --card-bg: #1e293b; /* Dark Slate - Card Base */
-  --text-light: #e2e8f0; /* Off-White Text */
-  --text-secondary: #94a3b8; /* Muted Text */
-  --border-color: #334155; /* Dark Border */
-  --shadow-glow-blue: 0 0 20px rgba(14, 165, 233, 0.4); /* Stronger Blue Glow */
-  --shadow-glow-green: 0 0 20px rgba(52, 211, 153, 0.3); /* Stronger Green Glow */
-  --shadow-lift: 0 10px 40px rgba(0, 0, 0, 0.7); /* Deep Lift Shadow */
-  --accent-gradient: linear-gradient(90deg, #3b82f6, #0ea5e9); /* Blue-to-Sky Gradient */
-}
-
-/* --- Base Container & Background --- */
-.dashboard-container {
-  min-height: 100vh;
-  /* Subtle dark gradient for depth */
-  background: var(--background-dark);
-  padding: 2rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-light);
-}
-
-.dashboard-wrapper {
-  max-width: 1400px; /* Slightly wider wrapper */
-  margin: 0 auto;
-  padding: 0;
-}
-
-/* --- Header --- */
-.header-card {
-  background: var(--card-bg);
-  border-radius: 1.25rem; /* Larger border radius */
-  padding: 2rem 2.5rem;
-  margin-bottom: 2.5rem;
-  box-shadow: var(--shadow-lift);
-  border: 1px solid var(--border-color);
-  position: relative;
-  overflow: hidden; /* For header background effect */
-}
-
-.header-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  /* subtle glow effect in header */
-  background: radial-gradient(circle at 10% 90%, rgba(14, 165, 233, 0.1) 0%, transparent 40%);
-  opacity: 0.8;
-  pointer-events: none;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative; /* Ensure content is above ::before */
-  z-index: 10;
-}
-
-.greeting-text {
-  font-size: 3rem; /* Bigger, bolder greeting */
-  font-weight: 900;
-  letter-spacing: -0.06em;
-  /* Updated gradient for modern, bright look */
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.welcome-message {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  margin-top: 0.5rem;
-  font-weight: 500;
-}
-
-.profile-image {
-  width: 80px; /* Slightly larger profile image */
-  height: 80px;
-  border-radius: 50%;
-  border: 4px solid var(--secondary-color);
-  object-fit: cover;
-  box-shadow: var(--shadow-glow-green);
-}
-
-
-/* --- Grid Layout --- */
-.content-grid {
-  display: grid;
-  gap: 2.5rem;
-  grid-template-columns: 3fr 1fr; /* Retained 3/4, 1/4 layout */
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr; /* Stack on mobile/tablet */
-  }
-}
-
-/* --- General Card Styling --- */
-.section-card,
-.sidebar-card {
-  background-color: var(--card-bg);
-  padding: 2rem; /* Increased padding */
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-lift);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  margin-bottom: 2.5rem; /* Space between main cards */
-}
-
-.section-card:last-child, .sidebar-card:last-child {
-  margin-bottom: 0;
-}
-
-.section-card:hover,
-.sidebar-card:hover {
-  transform: translateY(-8px); /* Deeper lift on hover */
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
-  border-color: var(--primary-color); /* Highlight border on hover */
-}
-
-.section-title {
-  font-size: 1.75rem; /* Larger title */
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-  color: var(--primary-color);
-  padding-bottom: 0.75rem;
-  /* Use a subtle line with gradient effect */
-  border-bottom: 2px solid var(--border-color);
-  position: relative;
-}
-
-.sidebar-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-light);
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed var(--border-color); /* Dashed border for sidebar */
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-
-/* --- 1. Key Metrics --- */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem; /* Increased gap */
-}
-
-@media (max-width: 1200px) {
-  .metrics-grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 per row on smaller desktops */
-  }
-}
-@media (max-width: 768px) {
-  .metrics-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 per row on tablets/mobiles */
-  }
-}
-
-.metric-item {
-  background: var(--background-dark);
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  transition: all 0.3s ease;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-}
-
-.metric-item:hover {
-  border-color: var(--primary-color);
-  background-color: #172545; /* Slightly lighter dark on hover */
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.7);
-  transform: translateY(-5px);
-}
-
-.metric-icon {
-  font-size: 2.2rem; /* Larger icon */
-  margin-bottom: 0.75rem;
-  line-height: 1;
-}
-
-.metric-label {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.metric-value {
-  font-size: 2.5rem; /* Larger value */
-  font-weight: 900;
-  color: var(--text-light);
-  /* Apply subtle text shadow for lift */
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
-}
-
-/* --- 2. My Courses --- */
-.courses-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.course-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem;
-  background-color: var(--background-dark);
-  border-radius: 0.75rem;
-  border-left: 6px solid var(--primary-color);
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-}
-
-.course-item:hover {
-  transform: scale(1.01);
-  background-color: #172545;
-  border-left-color: var(--secondary-color);
-}
-
-.course-info {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.course-code-badge {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--secondary-color);
-  border: 1px solid var(--secondary-color);
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.5rem;
-  align-self: flex-start;
-  margin-bottom: 0.5rem;
-  background-color: rgba(52, 211, 153, 0.05);
-}
-
-.course-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-light);
-}
-
-.course-stats {
-  text-align: right;
-  min-width: 120px;
-}
-
-.status-badge {
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  border-radius: 9999px;
-}
-
-.status-active {
-  background-color: rgba(52, 211, 153, 0.15);
-  color: var(--secondary-color);
-}
-.status-upcoming {
-  background-color: rgba(14, 165, 233, 0.15);
-  color: var(--primary-color);
-}
-.status-default {
-  background-color: rgba(156, 163, 175, 0.1);
-  color: var(--text-secondary);
-}
-
-.completion-bar-container {
-  width: 100%;
-  max-width: 150px; /* Fixed width for alignment */
-  height: 10px;
-  background-color: var(--border-color);
-  border-radius: 9999px;
-  overflow: hidden;
-  margin-top: 0.75rem;
-  margin-left: auto; /* Align bar to the right */
-}
-
-.completion-bar {
-  height: 100%;
-  transition: width 0.5s ease-out;
-  border-radius: 9999px 0 0 9999px;
-}
-
-.completion-green {
-  background-color: var(--secondary-color);
-}
-.completion-yellow {
-  background-color: #f59e0b; /* Amber */
-}
-.completion-red {
-  background-color: #ef4444; /* Red */
-}
-
-.completion-text {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-top: 0.25rem;
-}
-
-/* --- 3. Student Queries --- */
-.filter-bar {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 0.5rem 0;
-}
-
-.filter-button {
-  padding: 0.7rem 1.2rem;
-  background-color: transparent;
-  color: var(--text-secondary);
-  border: 2px solid var(--border-color); /* Thicker border */
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex-grow: 1; /* Make buttons fill space */
-  text-align: center;
-}
-
-.filter-button:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.filter-button.active {
-  background-color: var(--primary-color);
-  color: var(--background-dark); /* Dark text on bright button */
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow-glow-blue);
-  transform: translateY(-2px);
-}
-
-.queries-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.query-item {
-  padding: 1.25rem;
-  background-color: var(--background-dark);
-  border-radius: 0.75rem;
-  border-left: 6px solid transparent;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem 1.5rem;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.query-item:hover {
-  background-color: #172545;
-  box-shadow: 0 0 10px rgba(14, 165, 233, 0.1);
-}
-
-.query-item.priority-high {
-  border-left-color: #ef4444; /* Red for high priority */
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-}
-
-.query-item.resolved {
-  opacity: 0.6;
-  border-left-color: var(--secondary-color);
-}
-
-.query-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.query-title {
-  font-weight: 700;
-  color: var(--text-light);
-  margin-bottom: 0.25rem;
-  font-size: 1.1rem;
-}
-
-.query-meta {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.query-meta span {
-  font-weight: 600;
-  margin-right: 0.5rem;
-}
-
-.query-action-button {
-  padding: 0.7rem 1.4rem;
-  background-color: var(--primary-color);
-  color: var(--background-dark);
-  font-weight: 700;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: none;
-  white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+/* * Trainer Dashboard Styles - Synchronization with Student Theme 
+ * Theme: Light background, Indigo Primary (#4338CA), Rose Accent (#F43F5E)
+ * Font: Inter, sans-serif
+ * Layout: Fixed Container with Left Sidebar and Right Schedule Card (Matching Student Layout)
+ */
+
+/* --- Base Theme & Global Styles (Matching Student) --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F8FAFC; /* Light background for clean look */
+    color: #334155;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* --- Container and Header Layout (Matching Student) --- */
+.container {
+    position: relative;
+    max-width: 1440px;
+    width: 100%;
+    height: 979px; /* Fixed height for the immersive container structure */
+    margin: 0 auto;
+    background-color: #F8FAFC;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); /* Soft shadow for container */
+}
+header {
+    position: relative;
+    width: 100%;
+    height: 64px;
+    background-color: white;
+    border-bottom: 1px solid #CBD5E1;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+.logo-search {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+/* Trainer Logo style matching Student */
+.institute-logo {
+    width: 48px; 
+    height: 48px;
+    border-radius: 50%; /* Circular */
+    object-fit: cover;
+    border: 3px solid #E0E7FF; /* Light blue border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+}
+.institute-logo:hover {
+    border-color: #F43F5E; /* Accent color on hover */
+    transform: scale(1.05);
+}
+
+.search-wrapper {
+    position: relative;
+    flex-grow: 1;
+    max-width: 400px;
+}
+.search-wrapper input {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #64748B;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-wrapper input:focus {
+    border-color: #4338CA;
+    box-shadow: 0 0 0 2px rgba(67, 56, 202, 0.2); /* Soft blue glow */
+}
+.search-wrapper i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: 14px;
+    pointer-events: none;
+}
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px; 
+    flex-shrink: 0;
+}
+/* Replaced Student's 'Download Resume' with Trainer's 'Create Announcement' button style */
+.btn-request {
+    background-color: #4338CA; /* Blue accent for Action */
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, transform 0.1s;
+}
+.btn-request:hover {
+    background-color: #3730a3;
+    transform: translateY(-1px);
+}
+/* Trainer Avatar matching Student Avatar style */
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid #E0E7FF; /* Light blue border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    background-color: #F43F5E; /* Default background for initials (Red accent) */
+    color: white;
+    font-weight: 600;
+    font-size: 18px; 
+    user-select: none;
+}
+.user-avatar:hover {
+    transform: scale(1.05);
+    border-color: #F43F5E; /* Accent color on hover */
+}
+.initial-text {
+    line-height: 1; 
+}
+
+
+/* --- Sidebar (Matching Student) --- */
+aside.sidebar {
+    position: absolute;
+    top: 88px;
+    left: 34px;
+    width: 121px;
+    height: 874px;
+    background-color: white;
+    border: 1px solid #E2E8F0; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 8px;
+    box-sizing: border-box;
+    z-index: 10; 
+}
+nav.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    align-items: center;
+}
+nav.sidebar-nav a {
+    background: none;
+    border: none;
+    color: #64748B;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease, font-weight 0.2s;
+    user-select: none;
+    text-decoration: none;
+}
+nav.sidebar-nav a.active,
+nav.sidebar-nav a:hover {
+    color: #F43F5E; /* Red/Rose accent for active/hover */
+    font-weight: 600;
+}
+nav.sidebar-nav a i {
+    font-size: 20px;
+}
+.sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+}
+/* Toggle Switch - Matching Student Style */
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    background-color: #E0E7FF;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.toggle-switch span {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: #4338CA;
+    border-radius: 9999px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s ease, background-color 0.3s;
+}
+.toggle-switch.active {
+    background-color: #22C55E; /* Green when active */
+}
+.toggle-switch.active span {
+    left: 26px;
+    background-color: white;
+}
+.sidebar-bottom a {
+    background: none;
+    border: none;
+    color: #64748B;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-decoration: none;
+}
+.sidebar-bottom a:hover,
+.sidebar-bottom a.active {
+    color: #F43F5E;
+}
+
+
+/* --- Main Content Area (Layout matching Student) --- */
+.main-content {
+    position: absolute;
+    top: 88px;
+    left: 180px; /* Start after sidebar */
+    width: 800px; /* Width for left and middle columns combined in student design */
+    height: 874px;
+    /* Removed padding/margin to allow internal card positioning to take over */
+}
+
+
+/* -------------------------------------------------------- */
+/* --- CARD STYLES (ADAPTING TRAINER CONTENT TO STUDENT POSITIONS) --- */
+/* -------------------------------------------------------- */
+
+/* --- CARD 1: Trainer/Batch Info Card (Replaces Student's Good Morning Card) --- */
+.trainer-info-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 251px;
+    height: 288px;
+    background-color: white;
+    border-radius: 8px; /* Consistent rounded corners */
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    padding: 24px;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between; /* Space content vertically */
+}
+.trainer-info-card .profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #4338CA; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;
+}
+.trainer-info-card h2 {
+    font-weight: 700;
+    font-size: 18px;
+    margin: 0 0 4px 0;
+    color: #334155;
+}
+.trainer-info-card p.role {
+    font-size: 14px;
+    color: #64748B;
+    margin: 0 0 16px 0;
+}
+.trainer-info-card .batch-details {
+    margin-top: auto;
+    width: 100%;
+    padding-top: 16px;
+    border-top: 1px dashed #E2E8F0;
+}
+.trainer-info-card .batch-details p {
+    margin: 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4338CA;
+}
+.trainer-info-card .batch-details span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #94A3B8;
+}
+.trainer-info-card .time-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #F43F5E; /* Red accent for clock time */
+    font-weight: 600;
+    font-size: 20px;
+}
+
+/* --- CARD 2: 4 Stats Grid (Replaces Student's Metrics Container) --- */
+.stats-cards-container {
+    position: absolute;
+    top: 0;
+    left: 271px; 
+    width: 480px;
+    height: 288px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 134px);
+    gap: 20px;
+}
+.stat-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+    padding: 16px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 2px solid #E2E8F0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
+}
+.stat-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+.stat-card .title {
+    font-weight: 700;
+    font-size: 13px;
+    margin: 0;
+    color: #334155;
+}
+.stat-card .value {
+    font-size: 2.5rem; 
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 8px 0;
+}
+.stat-card .value-small { /* For Active Batch Name */
+    font-size: 1.25rem; 
+    font-weight: 700;
+    margin: 15px 0 10px 0;
+    line-height: 1.3;
+    color: #334155;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.stat-card .footer-info {
+    font-size: 11px;
+    color: #64748B;
+    border-top: 1px dashed #E2E8F0;
+    padding-top: 8px;
+    line-height: 1.3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Stat Card Colors (Using Student Feature Card Colors) */
+.stat-blue .value { color: #4338CA; }
+.stat-yellow .value { color: #F59E0B; }
+.stat-green .value { color: #10B981; }
+.stat-red .value { color: #F43F5E; }
+.stat-purple .value-small { color: #9F7AEA; } /* Active Batch */
+
+.quick-review-button {
+    background-color: #F59E0B; /* Yellow */
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* --- CARD 3: Quick Actions (Replaces Student's Study Time Tracking Card) --- */
+.quick-actions-card {
+    position: absolute;
+    top: 308px;
+    left: 0;
+    width: 751px; /* Combining student time tracking and half of next-holidays width */
+    height: 250px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    padding: 24px;
+    box-sizing: border-box;
 }
-
-.query-item.resolved .query-action-button {
-  background-color: var(--secondary-color);
-  color: var(--background-dark);
-  box-shadow: 0 4px 10px rgba(52, 211, 153, 0.3);
-}
-
-.query-action-button:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-}
-
-.query-data-message {
-  padding: 3rem;
-  text-align: center;
-  color: var(--text-secondary);
-  font-style: italic;
-  background-color: #1a2434;
-  border-radius: 0.75rem;
-}
-
-
-/* --- 4. Pending Tasks / Sidebar --- */
-.action-card {
-  /* Removed margin-bottom here as it's handled by .section-card/.sidebar-card styles */
-}
-
-.tasks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.task-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: var(--background-dark);
-  border-radius: 0.75rem;
-  border-left: 4px solid var(--border-color);
-  transition: all 0.2s ease;
-}
-
-.task-item:hover {
-  background-color: #172545;
-}
-
-.task-item.priority-high {
-  border-left-color: #ef4444; /* Red */
-}
-.task-item.priority-medium {
-  border-left-color: #f59e0b; /* Amber */
-}
-.task-item.priority-low {
-  border-left-color: var(--secondary-color); /* Green */
-}
-
-.task-details {
-  flex-grow: 1;
-}
-
-.task-name {
-  font-weight: 700;
-  color: var(--text-light);
-  font-size: 1rem;
-}
-
-.task-course {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.task-due-date {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.task-item.priority-high .task-due-date {
-  color: #ef4444;
-}
-
-
-/* --- Buttons (Enhanced) --- */
-.full-width-button {
-  width: 100%;
-  padding: 1.1rem;
-  background-color: var(--secondary-color); /* Use Green for main action */
-  color: var(--background-dark);
-  font-weight: 800;
-  border-radius: 0.75rem;
-  transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
-  cursor: pointer;
-  border: none;
-  box-shadow: var(--shadow-glow-green);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.full-width-button:hover {
-  background-color: #10b981; /* Darker green on hover */
-  box-shadow: 0 0 25px rgba(52, 211, 153, 0.8);
-  transform: translateY(-4px);
-}
-
 .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+.action-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #F8FAFC;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.action-button i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: #4338CA;
+}
+.action-button:hover {
+    background-color: #4338CA;
+    color: white;
+    border-color: #4338CA;
+    box-shadow: 0 4px 10px rgba(67, 56, 202, 0.3);
+    transform: translateY(-2px);
+}
+.action-button:hover i {
+    color: white;
+}
+
+/* --- CARD 4: Performance Analysis (Replaces Student's Top Courses Progress) --- */
+.performance-analysis-card {
+    position: absolute;
+    top: 578px;
+    left: 0;
+    width: 402px; /* Same width as student time tracking */
+    height: 374px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+.performance-analysis-card h3,
+.quick-actions-card h3 {
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E2E8F0;
+}
+.performance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+.performance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #F8FAFC;
+    border-left: 4px solid #4338CA;
+}
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+.student-image {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.skill-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-align: center;
+}
+.badge-top { background-color: #10B981; color: white; }
+.badge-struggle { background-color: #F43F5E; color: white; }
+/* NEW: Intermediate badge class for dynamic rendering */
+.badge-intermediate { background-color: #E0E7FF; color: #4338CA; }
+
+
+/* --- CARD 5: Trainer To-Do/Tasks (Replaces Student's Video Card) --- */
+.tasks-card {
+    position: absolute;
+    top: 578px;
+    left: 422px; 
+    width: 375px; 
+    height: 374px; 
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+.tasks-card h3 {
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E2E8F0;
+}
+.task-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #F8FAFC;
+    border-left: 4px solid #F59E0B; /* Yellow for attention */
+}
+.task-details {
+    flex-grow: 1;
+}
+.task-details .text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+}
+.task-details .countdown {
+    font-size: 11px;
+    color: #64748B;
+}
+.task-priority-tag {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background-color: #FEF2F2;
+    color: #F43F5E;
+}
+.task-item.high { border-left-color: #F43F5E; }
+.task-item.medium { border-left-color: #F59E0B; }
+.task-item.low { border-left-color: #4338CA; }
+
+
+/* --- CARD 6: Right Schedule Card (Matching Student) --- */
+.right-schedule-card {
+    position: absolute;
+    top: 88px;
+    left: 995px;
+    width: 350px;
+    height: 874px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+.current-time-display {
+  text-align: right;
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 15px;
+}
+.right-schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.right-schedule-header h3 {
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0;
+}
+.right-schedule-header button {
+    background: none;
+    border: none;
+    color: #94A3B8;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.right-schedule-header button:hover {
+    color: #334155;
+}
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.calendar-controls button {
+    background-color: #4338CA;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.calendar-controls button:hover {
+    background-color: #3730a3;
+}
+.calendar-controls p {
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+}
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    font-size: 12px;
+    color: #64748B;
+    text-align: center;
+    margin-bottom: 8px;
+    user-select: none;
+}
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    font-size: 12px;
+    color: #334155;
+    text-align: center;
+    height: auto;
+    margin-bottom: 16px;
+}
+.calendar-days > div {
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.calendar-days > div:not(.inactive):hover {
+    background-color: #eef2ff;
+}
+.calendar-days .inactive {
+    color: #94A3B8;
+    cursor: default;
+}
+.calendar-days .active {
+    background-color: #4338CA;
+    color: white;
+    user-select: none;
+}
+.schedule-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    font-size: 12px;
+    color: #64748B;
+    border-top: 1px solid #CBD5E1;
+    padding-top: 16px;
+}
+.schedule-list h5 {
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+.schedule-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: #F8FAFC;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.schedule-item .date {
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1.2;
+}
+.schedule-item .desc {
+    flex-grow: 1;
+    white-space: normal;
+    line-height: 1.2;
+    color: #64748B;
+}
+/* Styling for different item types (Trainer Specific) */
+.schedule-item.class-item {
+  background-color: #EFF6FF; 
+  border-left: 4px solid #3B82F6; /* Blue border */
+}
+.schedule-item.meeting-item {
+  background-color: #FFFBEB; 
+  border-left: 4px solid #F59E0B; /* Yellow border */
+}
+.schedule-item.admin-item {
+  background-color: #FEF2F2; 
+  border-left: 4px solid #EF4444; /* Red border */
+}
+.schedule-item.study-item {
+  background-color: #ECFDF5; 
+  border-left: 4px solid #10B981; /* Green border */
+}
+
+.schedule-item .join-button {
+    background-color: #22C55E; /* Green join button */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+.schedule-item .join-button:hover {
+    background-color: #16a34a;
+}
+.no-schedule-message {
+  text-align: center;
+  padding: 15px;
+  color: #94A3B8;
+  font-size: 12px;
+  border: 1px dashed #E2E8F0;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* --- Modal Styles (Matching Student) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 450px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
-
-.action-button {
-  padding: 0.9rem;
-  background-color: var(--background-dark);
-  color: var(--primary-color);
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
+.modal-content .modal-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.modal-content .close-button {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0 5px;
+}
+.modal-content .form-group {
+  margin-bottom: 15px;
+}
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+.modal-content select,
+.modal-content textarea,
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.modal-content .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-content .btn-cancel {
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #64748B;
+  color: white;
+  border: none;
+}
+.modal-content .btn-submit {
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #F43F5E; /* Student Accent Color */
+  color: white;
+  border: none;
+}
+.modal-content .btn-submit:disabled {
+    background-color: #94A3B8;
+    cursor: not-allowed;
 }
 
-.action-button:hover {
-  background-color: var(--primary-color);
-  color: var(--background-dark);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-  transform: translateX(5px);
+
+/* --- Responsive Adjustments (Matching Student) --- */
+@media (max-width: 1200px) {
+  .container {
+    height: auto;
+    padding-bottom: 50px;
+  }
+  header {
+    padding: 0 15px;
+  }
+  .logo-search {
+    flex-grow: 1;
+  }
+  .search-wrapper {
+    max-width: none;
+  }
+  aside.sidebar {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-radius: 0;
+  }
+  nav.sidebar-nav {
+    flex-direction: row;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .sidebar-bottom {
+    display: none;
+  }
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 15px;
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin-left: 0;
+  }
+  /* Cards become relative and full width */
+  .trainer-info-card,
+  .stats-cards-container,
+  .quick-actions-card,
+  .performance-analysis-card,
+  .tasks-card,
+  .right-schedule-card {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    margin-bottom: 0;
+    border-radius: 8px;
+  }
+  .stats-cards-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .right-schedule-card {
+    margin-top: 20px;
+  }
 }
 
-/* --- Footer --- */
-.dashboard-footer {
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+@media (max-width: 768px) {
+  .header-right {
+    gap: 10px;
+  }
+  .btn-request {
+    padding: 6px 12px;
+    font-size: 12px;
+    gap: 5px;
+  }
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  nav.sidebar-nav a {
+    font-size: 10px;
+    gap: 4px;
+  }
+  nav.sidebar-nav a i {
+    font-size: 18px;
+  }
+  .stats-cards-container {
+    grid-template-columns: 1fr 1fr; /* Keep 2 columns if space allows */
+    gap: 10px;
+    height: auto;
+  }
+  .trainer-info-card {
+    min-height: 250px;
+  }
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-/* Mobile adjustments for filter bar */
-@media (max-width: 600px) {
-    .filter-bar {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    .filter-button {
-        padding: 0.8rem;
-    }
-    .query-item {
-        grid-template-columns: 1fr;
-    }
-    .query-action-button {
-        width: 100%;
-        margin-top: 0.5rem;
-    }
+@media (max-width: 480px) {
+  header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 15px;
+    gap: 10px;
+  }
+  .logo-search {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .search-wrapper {
+    width: 100%;
+    order: 3;
+    margin-top: 10px;
+  }
+  .header-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .trainer-info-card,
+  .quick-actions-card,
+  .performance-analysis-card,
+  .tasks-card,
+  .right-schedule-card {
+    padding: 15px;
+  }
+  .stats-cards-container {
+    grid-template-columns: 1fr; /* Stack on small mobile */
+  }
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
 }

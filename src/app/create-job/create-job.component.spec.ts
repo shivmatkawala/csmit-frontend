@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BlankFormComponent } from './blank-form.component';
+import { CreateJobComponent } from './create-job.component';
 
-describe('BlankFormComponent', () => {
-  let component: BlankFormComponent;
-  let fixture: ComponentFixture<BlankFormComponent>;
+describe('CreateJobComponent', () => {
+  let component: CreateJobComponent;
+  let fixture: ComponentFixture<CreateJobComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [BlankFormComponent]
+      declarations: [CreateJobComponent]
     });
-    fixture = TestBed.createComponent(BlankFormComponent);
+    fixture = TestBed.createComponent(CreateJobComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

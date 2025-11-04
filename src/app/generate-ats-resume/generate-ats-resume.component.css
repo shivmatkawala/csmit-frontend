@@ -305,8 +305,6 @@
   outline: none;
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5);
 }
-
-/* Primary Button (Download PDF) */
 .btn-primary {
   background-color: #4f46e5;
   color: #ffffff;

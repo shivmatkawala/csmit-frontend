@@ -1,0 +1,255 @@
+<div class="form-container">
+    
+    <!-- Job Card -->
+    <div class="form-card">
+
+        <!-- Back Button -->
+        <button (click)="goBack()" class="back-button" title="Go Back">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!-- Hamburger Button (Job List Panel) -->
+        <button (click)="togglePanel()" class="hamburger-button" title="View Job Listings">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
+
+        <!-- Header -->
+        <div class="header-section">
+            <h2>Post New Job Vacancy</h2>
+            <p>Enter detailed information about the job position.</p>
+        </div>
+
+        <!-- Dynamic Message Box -->
+        <div *ngIf="message" class="message-box" [ngClass]="{'success': !isError, 'error': isError}">
+            <p><strong>{{ isError ? 'Error!' : 'Success!' }}</strong> {{ message }}</p>
+        </div>
+
+        <!-- Job Creation Form -->
+        <form (ngSubmit)="createJob()">
+            
+            <!-- Job Title Field -->
+            <div class="form-group">
+                <label for="jobtitle">Job Title <span class="required">*</span></label>
+                <input 
+                    id="jobtitle" 
+                    type="text" 
+                    class="text-input"
+                    name="jobtitle" 
+                    [(ngModel)]="jobData.jobtitle" 
+                    required 
+                    placeholder="E.g., Senior Backend Developer"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="company">Company Name <span class="required">*</span></label>
+                <input 
+                    id="company" 
+                    type="text" 
+                    class="text-input"
+                    name="company" 
+                    [(ngModel)]="jobData.company" 
+                    required 
+                    placeholder="E.g., NextGen Tech"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input 
+                    id="location" 
+                    type="text" 
+                    class="text-input"
+                    name="location" 
+                    [(ngModel)]="jobData.location" 
+                    placeholder="E.g., Bangalore / Remote"
+                >
+            </div>
+
+            <!-- Job Type and Experience Row -->
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <!-- Job Type Selection -->
+                <div style="flex: 2;">
+                    <label for="job_type">Job Type</label>
+                    <div class="select-wrapper">
+                        <select 
+                            id="job_type" 
+                            class="text-input"
+                            name="job_type" 
+                            [(ngModel)]="jobData.job_type" 
+                            required
+                        >
+                            <option *ngFor="let type of jobTypes" [ngValue]="type">
+                                {{ type }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Required Experience -->
+                <div style="flex: 1;">
+                    <label for="reqexp">Req. Experience (Yrs)</label>
+                    <input 
+                        id="reqexp" 
+                        type="number" 
+                        class="text-input"
+                        name="reqexp" 
+                        [(ngModel)]="jobData.reqexp" 
+                        min="0"
+                    >
+                </div>
+            </div>
+
+            <!-- HR Contact Fields -->
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label for="hr_email">HR Email</label>
+                    <input 
+                        id="hr_email" 
+                        type="email" 
+                        class="text-input"
+                        name="hr_email" 
+                        [(ngModel)]="jobData.hr_email" 
+                        placeholder="hr@company.com"
+                    >
+                </div>
+                <div style="flex: 1;">
+                    <label for="hr_phone">HR Phone</label>
+                    <input 
+                        id="hr_phone" 
+                        type="tel" 
+                        class="text-input"
+                        name="hr_phone" 
+                        [(ngModel)]="jobData.hr_phone" 
+                        placeholder="+91-9876..."
+                    >
+                </div>
+            </div>
+
+            <!-- Passed Out Year Range -->
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label for="from_passed_out_year">From Passed Out Year</label>
+                    <input 
+                        id="from_passed_out_year" 
+                        type="number" 
+                        class="text-input"
+                        name="from_passed_out_year" 
+                        [(ngModel)]="jobData.from_passed_out_year" 
+                    >
+                </div>
+                <div style="flex: 1;">
+                    <label for="to_passed_out_year">To Passed Out Year</label>
+                    <input 
+                        id="to_passed_out_year" 
+                        type="number" 
+                        class="text-input"
+                        name="to_passed_out_year" 
+                        [(ngModel)]="jobData.to_passed_out_year" 
+                    >
+                </div>
+            </div>
+
+            <!-- Job Description Field -->
+            <div class="form-group">
+                <label for="job_description">Job Description <span class="required">*</span></label>
+                <textarea 
+                    id="job_description" 
+                    class="text-input"
+                    name="job_description" 
+                    [(ngModel)]="jobData.job_description" 
+                    required 
+                    rows="4"
+                    placeholder="Detail the roles and responsibilities..."
+                ></textarea>
+            </div>
+
+            <!-- Apply Before Date & Is Active Toggle -->
+            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                    <label for="apply_before_date">Apply Before Date</label>
+                    <input 
+                        id="apply_before_date" 
+                        type="date" 
+                        class="text-input"
+                        name="apply_before_date" 
+                        [(ngModel)]="jobData.apply_before_date" 
+                    >
+                </div>
+                <div style="flex-basis: 100px; padding-left: 20px;">
+                    <label for="is_active" style="white-space: nowrap;">Is Active?</label>
+                    <input 
+                        id="is_active" 
+                        type="checkbox" 
+                        name="is_active" 
+                        [(ngModel)]="jobData.is_active" 
+                        style="width: 20px; height: 20px; vertical-align: middle; margin-top: 5px;"
+                    >
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" class="submit-button">
+                    Post Job Vacancy
+                </button>
+            </div>
+        </form>
+
+        <!-- ==================================== -->
+        <!-- --- Job Listings Side Panel --- -->
+        <!-- ==================================== -->
+        <div class="user-panel" [ngClass]="{'open': isPanelOpen}">
+            <div class="panel-header">
+                <h3>Active Job Listings ({{ filteredJobs.length }})</h3>
+                <button (click)="togglePanel()" class="close-panel-button" title="Close">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Filter Controls (Placeholder for future filters) -->
+            <div class="filter-controls">
+                <button 
+                    class="filter-button active" 
+                    (click)="fetchJobs()"
+                >
+                    Refresh All Jobs
+                </button>
+            </div>
+
+            <!-- Job List -->
+            <div class="user-list-container">
+                <div *ngIf="isLoadingJobs" class="loading-indicator">
+                    Fetching active job vacancies...
+                </div>
+                
+                <div *ngIf="!isLoadingJobs && filteredJobs.length === 0" class="loading-indicator">
+                    No active job listings found.
+                </div>
+
+                <div *ngIf="!isLoadingJobs && filteredJobs.length > 0">
+                    <div *ngFor="let job of filteredJobs" class="user-item" style="display: block; border: 1px solid #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                        <div class="user-info" style="padding-right: 0; flex-basis: auto;">
+                            <div class="username" title="{{ job.jobtitle }} at {{ job.company }}">{{ job.jobtitle }}</div>
+                            <div class="role" style="font-style: normal; color: #333; margin-top: 2px;">
+                                <strong>{{ job.company }}</strong> | {{ job.location }} 
+                            </div>
+                            <div class="role">
+                                Type: {{ job.job_type }} | Exp: {{ job.reqexp }}+ Yrs | ID: {{ job.jobid }}
+                            </div>
+                            <div class="role" [style.color]="job.is_active ? 'var(--primary-green)' : 'var(--delete-red)'">
+                                Status: {{ job.is_active ? 'Active' : 'Inactive' }} 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ==================================== -->
+
+    </div>
+</div>

@@ -132,59 +132,8 @@
     font-weight: 500;
 }
 
-/* 5. Segmented Mode Control (Online/Offline Buttons) */
-.mode-segmented-control {
-    display: flex;
-    border: 2px solid #ecf0f1; /* Light border around the whole control */
-    border-radius: 8px;
-    overflow: hidden; /* To keep inner elements contained within the radius */
-    width: 100%;
-}
 
-.mode-option {
-    flex: 1; /* Each option takes equal space */
-    padding: 12px 10px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    background-color: #f4f7f9; /* Slightly darker background for inactive */
-    color: #7f8c8d; /* Muted color for inactive text */
-    transition: all 0.2s ease;
-    text-align: center;
-}
-
-/* Style for the active/selected button */
-.mode-option.active {
-    background-color: #3498db; /* Blue color for active selection */
-    color: #ffffff; /* White text on active */
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Hover effect on non-active buttons */
-.mode-option:not(.active):hover {
-    background-color: #e8ecef;
-}
-
-/* Ensure nice looking borders between segments */
-.mode-option:first-child {
-    border-right: 1px solid #ecf0f1;
-}
-
-.mode-option:last-child {
-    border-left: 1px solid #ecf0f1;
-}
-
-/* Active style overrides the default border color */
-.mode-option.active:first-child {
-    border-right-color: #3498db;
-}
-
-.mode-option.active:last-child {
-    border-left-color: #3498db;
-}
-
-/* 6. Submission Message */
+/* 6. Submission Message (Used for both Success and Error states) */
 .submission-success-message {
     background-color: #e6ffee; 
     padding: 15px; 
@@ -242,4 +191,46 @@
     color: #7f8c8d; 
     cursor: not-allowed; 
     box-shadow: none;
+}
+
+/* 8. Side Panel Styles (Copied from create-course for consistency) */
+
+.course-list-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh; /* Full viewport height */
+    background-color: #f4f7f9;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%); /* Start hidden off-screen */
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.course-list-panel.open {
+    transform: translateX(0%); /* Slide in when open */
+}
+
+/* Panel Overlay Styles */
+.course-list-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.course-list-overlay.open {
+    opacity: 1;
+    visibility: visible;
 }

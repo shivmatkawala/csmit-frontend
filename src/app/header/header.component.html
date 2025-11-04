@@ -5,21 +5,24 @@
 
   <div class="container header-container">
 
+    <!-- Left side: Animated Logo -->
     <div class="logo-container">
       <a href="#" class="logo-link logo-image-container" (click)="zoomLogo()">
         <img src="assets/logo.jpg" alt="Company Logo" class="circular-logo-img" [class.zoomed]="isLogoZoomed">
       </a>
     </div>
 
+    <!-- CENTER: Search Bar -->
     <div class="search-container">
-       <input type="text" placeholder="Search courses, categories..." class="search-input">
+       <input type="text" placeholder="Search courses, categories..." class="search-input"> 
        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
     </div>
 
-
+    <!-- Right Group: Nav Links + Login Button + Hamburger -->
     <div class="actions-container right-group">
+      <!-- Main Navigation Links (Desktop) -->
       <nav class="main-nav desktop-nav-links">
           <ul>
             <li><a href="#"><span>Courses</span></a></li>
@@ -28,13 +31,15 @@
             <li><a href="#"><span>Contact</span></a></li>
           </ul>
       </nav>
-      <a routerLink="/login" class="login-btn">
+      <!-- Login Button: Creative Design -->
+      <a routerLink="/login" class="login-btn desktop-login-btn">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.5a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.638z" />
         </svg>
         Log In
       </a>
 
+      <!-- Animated Hamburger Menu Icon (Mobile Only) -->
       <button class="hamburger-menu" (click)="toggleMenu()">
         <span class="line line-1"></span>
         <span class="line line-2"></span>
@@ -43,17 +48,18 @@
 
     </div>
 
-
   </div>
 
+  <!-- Mobile Menu with animations -->
   <nav class="mobile-nav" [class.open]="isMenuOpen">
       <div class="mobile-nav-inner">
-        <a href="#" style="--delay: 0.1s;">Courses</a>
-        <a href="#" style="--delay: 0.2s;">Careers</a>
-        <a href="#" style="--delay: 0.3s;">Blog</a>
-        <a href="#" style="--delay: 0.4s;">Contact</a>
-        <hr style="--delay: 0.5s;">
-        <div class="mobile-auth-buttons" style="--delay: 0.6s;">
+        <!-- Links for mobile menu -->
+        <a href="#" style="--delay: 0.15s;">Courses</a>
+        <a href="#" style="--delay: 0.25s;">Careers</a>
+        <a href="#" style="--delay: 0.35s;">Blog</a>
+        <a href="#" style="--delay: 0.45s;">Contact</a>
+        <hr style="--delay: 0.55s;">
+        <div class="mobile-auth-buttons" style="--delay: 0.65s;">
           <a routerLink="/login" class="login-btn mobile-login-btn-full" (click)="toggleMenu()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.5a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.638z" />
@@ -67,36 +73,31 @@
 
 </header>
 
-<!-- Floating Chat Button: Now opens the popup -->
-<button
-  class="floating-chat-btn"
-  title="Chatbot"
-  (click)="toggleChatbot()">
-  <svg class="chat-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <path fill="#ffffff" d="M 50 10 C 25 10 10 30 10 50 C 10 70 25 90 50 90 C 65 90 75 80 80 75 L 85 80 L 80 70 C 90 60 90 40 90 50 C 90 30 75 10 50 10 Z" stroke="#111827" stroke-width="3"/>
-
-    <rect x="35" y="35" width="30" height="25" rx="5" fill="#111827"/>
-
-    <circle cx="43" cy="45" r="3" fill="#3b82f6"/>
-    <circle cx="57" cy="45" r="3" fill="#3b82f6"/>
-
-    <circle class="active-dot" cx="50" cy="30" r="4" fill="#25D366"/>
-    <rect x="48" y="30" width="4" height="5" fill="#111827" />
-  </svg>
-</button>
-
-<!-- NEW: Chatbot Popup Overlay and Component -->
-<!-- Popup will be visible only when isChatbotOpen is true -->
-<div class="chatbot-popup-overlay" [class.open]="isChatbotOpen" (click)="toggleChatbot()">
-    <div class="chatbot-popup-content" (click)="$event.stopPropagation()">
-        <div class="chatbot-header">
-            <h3>Quick Chat Support</h3>
-            <button class="close-btn" (click)="toggleChatbot()">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-        </div>
-        <app-chatbot></app-chatbot>
+<!-- NEW: Chatbot Modal/Popup (Centered, Responsive) -->
+<div class="chatbot-modal-overlay" [class.open]="isChatbotOpen" (click)="closeChatbotIfOutside($event)">
+  <div class="chatbot-popup-container">
+    <!-- Close Button -->
+    <button class="chatbot-close-btn" (click)="toggleChatbot()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    
+    <!-- Chatbot Header/Title -->
+    <div class="chatbot-header">
+      <img src="assets/bot.jpg" alt="AI Assistant" class="bot-header-icon">
+      <div class="bot-info">
+        <h3>CSMIT AI Assistant</h3>
+        <p>Ask anything about courses and admissions.</p>
+      </div>
     </div>
+    
+    <!-- Chatbot Component itself -->
+    <app-chatbot></app-chatbot> 
+  </div>
 </div>
+
+<!-- Floating Bot Button -->
+<a href="javascript:void(0)" class="floating-bot-btn" title="Chat with our AI Assistant" (click)="toggleChatbot()">
+  <img src="assets/bot.jpg" alt="AI Chatbot Icon" class="bot-icon-img">
+</a>

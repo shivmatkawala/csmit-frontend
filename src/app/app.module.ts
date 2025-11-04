@@ -16,16 +16,16 @@ import { AdminPanelComponent } from './admin-panel/admin-panel.component';
 import { FooterComponent } from './footer/footer.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
-import { UploadJobComponent } from './upload-job/upload-job.component';
-import { CreateBatchComponent } from './create-batch/create-batch.component';
-import { CreateExamComponent } from './create-exam/create-exam.component';
-import { BlankFormComponent } from './create-exam/blank-form/blank-form.component';
-import { ContactInfoComponent } from './create-exam/contact-info/contact-info.component';
 import { AdminFormComponent } from './admin-panel/admin-form/admin-form.component';
 import { ProfileSettingComponent } from './student-dashboard/profile-setting/profile-setting.component';
 import { CreateCourseComponent } from './create-course/create-course.component'; // Keep the import
+import { AboutCsmitComponent } from './about-csmit/about-csmit.component';
 import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
-
+import { CreateUserComponent } from './create-user/create-user.component';
+import { AssignUserToBatchComponent } from './assign-user-to-batch/assign-user-to-batch.component';
+import { CreateJobComponent } from './create-job/create-job.component';
+import { CreateExamComponent } from './createexam/createexam.component';
+import { CreateBatchComponent } from './create-batch/create-batch.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -40,15 +40,16 @@ import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard
     FooterComponent,
     ChatbotComponent,
     StudentDashboardComponent,
-    TrainerDashboardComponent,
-    UploadJobComponent,
-    CreateBatchComponent,
-    CreateExamComponent,
-    BlankFormComponent,
-    ContactInfoComponent,
     ProfileSettingComponent,
     CreateCourseComponent,
-    // REMOVED: AdminFormComponent from declarations
+    AboutCsmitComponent,
+    TrainerDashboardComponent,
+    CreateUserComponent,
+    AssignUserToBatchComponent,
+    CreateJobComponent,
+    CreateExamComponent,
+    CreateBatchComponent
+    // REMOVED TrainerDashboardComponent from declarations as it is standalone
   ],
   imports: [
     BrowserModule,
@@ -56,7 +57,7 @@ import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard
     ReactiveFormsModule,
     HttpClientModule,
     FormsModule,
-    AdminFormComponent, 
+    AdminFormComponent,
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,8 +1,3 @@
-/* -------------------------------------- */
-/* Global Styles and Component Setup */
-/* -------------------------------------- */
-
-/* Applies to the host component, ensuring full-width layout */
 :host {
     display: block;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -142,21 +137,7 @@
 /* Color Themes (Card and Button) */
 /* -------------------------------------- */
 
-/* Blue Theme (Student) */
-.card-blue { border-left-color: #3498db; }
-.icon-blue { background-color: #ebf5fb; }
-.icon-blue svg { stroke: #3498db; }
-.btn-blue { background-color: #3498db; }
-.btn-blue:hover { background-color: #2980b9; }
-
-/* Green Theme (Trainer) */
-.card-green { border-left-color: #2ecc71; }
-.icon-green { background-color: #e8f8f5; }
-.icon-green svg { stroke: #2ecc71; }
-.btn-green { background-color: #2ecc71; }
-.btn-green:hover { background-color: #27ae60; }
-
-/* NEW Indigo Theme (Admin) */
+/* Indigo Theme (Admin/User) */
 .card-indigo { border-left-color: #673AB7; } /* Deep Purple */
 .icon-indigo { background-color: #f3e5f5; }
 .icon-indigo svg { stroke: #673AB7; }
@@ -177,12 +158,20 @@
 .btn-red { background-color: #e74c3c; }
 .btn-red:hover { background-color: #c0392b; }
 
-/* Violet Theme (Batch) */
+/* Violet Theme (Batch/Course) */
 .card-violet { border-left-color: #9b59b6; }
 .icon-violet { background-color: #f5eef8; }
 .icon-violet svg { stroke: #9b59b6; }
 .btn-violet { background-color: #9b59b6; }
 .btn-violet:hover { background-color: #8e44ad; }
+
+/* Teal Theme (Assign User/Batch Management) */
+.card-teal { border-left-color: #1abc9c; } /* Emerald/Teal */
+.icon-teal { background-color: #e8f8f8; }
+.icon-teal svg { stroke: #1abc9c; }
+.btn-teal { background-color: #1abc9c; }
+.btn-teal:hover { background-color: #16a085; }
+
 
 /* Placeholder Card Styling */
 .card-placeholder {

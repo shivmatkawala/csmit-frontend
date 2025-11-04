@@ -9,68 +9,26 @@
     <!-- Card Grid Layout -->
     <div class="card-grid">
 
-        <!-- Card 1: Create Student (Blue) -->
-        <!-- Navigation function pehle se hi laga hua hai -->
-        <div class="card card-blue" tabindex="0" (click)="navigateToCreateStudent()">
+        <!-- Card 1: Create User (Indigo/Deep Purple) -->
+        <div class="card card-indigo" tabindex="0" (click)="navigateToCreateUser()">
             <div class="card-content">
-                <!-- Icon Container - Using pure SVG for simplicity -->
-                <div class="card-icon icon-blue">
+                <!-- Icon Container: Shield for admin/security -->
+                <div class="card-icon icon-indigo">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m8-11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm10 5v-2a4 4 0 0 0-3-3.87M23 3l-3 3-3-3"/>
                     </svg>
                 </div>
 
-                <h2>Create Student</h2>
-                <p>Register new student accounts and profiles in the system.</p>
+                <h2>Create New User</h2>
+                <p>Register new users (Admin, Trainer, Student) and assign roles.</p>
             </div>
 
             <div class="card-action">
-                <button class="btn-blue">Go to Create Student</button>
-            </div>
-        </div>
-
-        <!-- Card 2: Create Trainer (Green) -->
-        <!-- Navigation function pehle se hi laga hua hai -->
-        <div class="card card-green" tabindex="0" (click)="navigateToTrainerForm()">
-            <div class="card-content">
-                <!-- Icon Container -->
-                <div class="card-icon icon-green">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8h6M22 5v6"/>
-                    </svg>
-                </div>
-
-                <h2>Create Trainer</h2>
-                <p>Add new faculty or professional trainer profiles and credentials.</p>
-            </div>
-
-            <div class="card-action">
-                <button class="btn-green">Go to Create Trainer</button>
+                <button class="btn-indigo">Go to Create User</button>
             </div>
         </div>
         
-        <!-- NEW CARD: Create Admin (Indigo/Deep Purple) -->
-        <div class="card card-indigo" tabindex="0" (click)="navigateToAdminForm()">
-            <div class="card-content">
-                <!-- Icon Container: Shield for admin/security -->
-                <div class="card-icon icon-indigo">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        <path d="M15 9l-3 3-2-2"/>
-                    </svg>
-                </div>
-
-                <h2>Create Admin</h2>
-                <p>Register new superuser or administrator accounts for system control.</p>
-            </div>
-
-            <div class="card-action">
-                <button class="btn-indigo">Go to Create Admin</button>
-            </div>
-        </div>
-
-        <!-- Card 3: Create Exam (Amber) -->
-        <!-- FIX: 'navigateToCreateExam()' function call add kiya gaya hai -->
+        <!-- Card 2: Create Exam (Amber) - Previous Card 5 -->
         <div class="card card-amber" tabindex="0" (click)="navigateToCreateExam()">
             <div class="card-content">
                 <!-- Icon Container -->
@@ -89,8 +47,7 @@
             </div>
         </div>
 
-        <!-- Card 4: Upload Jobs (Red) -->
-        <!-- FIX: 'navigateTouploadJobForm()' function call add kiya gaya hai -->
+        <!-- Card 3: Upload Jobs (Red) - Previous Card 6 -->
         <div class="card card-red" tabindex="0" (click)="navigateTouploadJobForm()">
             <div class="card-content">
                 <!-- Icon Container -->
@@ -109,8 +66,7 @@
             </div>
         </div>
 
-        <!-- Card 5: Update New Batch (Violet) -->
-        <!-- FIX: 'navigateTocreatebatchForm()' function call add kiya gaya hai -->
+        <!-- Card 4: Update New Batch (Violet) - Previous Card 7 -->
         <div class="card card-violet" tabindex="0" (click)="navigateTocreatebatchForm()">
             <div class="card-content">
                 <!-- Icon Container -->
@@ -129,7 +85,7 @@
             </div>
         </div>
         
-        <!-- NEW CARD: Create New Course (Violet-2 - same theme for related action) -->
+        <!-- Card 5: Create New Course (Violet-2 - same theme for related action) - Previous Card 8 -->
         <div class="card card-violet" tabindex="0" (click)="navigateToCreateCourseForm()">
             <div class="card-content">
                 <!-- Icon Container: Book icon for course/curriculum -->
@@ -148,6 +104,30 @@
                 <button class="btn-violet">Go to Create Course</button>
             </div>
         </div>
+
+        <!-- Card 6: Assign User to Batch (Teal) -->
+        <div class="card card-teal" tabindex="0" (click)="navigateToAssignUserToBatch()">
+            <div class="card-content">
+                <!-- Icon Container: Link/connect icon -->
+                <div class="card-icon icon-teal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 17H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/>
+                        <circle cx="9" cy="12" r="1"/>
+                        <circle cx="15" cy="12" r="1"/>
+                        <path d="M12 7V3"/>
+                        <path d="M12 21v-4"/>
+                    </svg>
+                </div>
+
+                <h2>Assign User to Batch</h2>
+                <p>Map users (Student/Trainer) to specific batches and roles.</p>
+            </div>
+
+            <div class="card-action">
+                <button class="btn-teal">Assign User to Batch</button>
+            </div>
+        </div>
+
 
         <!-- Placeholder Card (Grey) -->
         <div class="card card-placeholder" tabindex="0">

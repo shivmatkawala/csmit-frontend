@@ -1,20 +1,21 @@
+/* Google Fonts Import */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
+/* CSS Variables */
 :host {
-  --primary-color: #e03a3e;
+  --primary-color: #e03a3e; /* Strong Red Accent */
   --primary-hover: #b82f32;
   --dark-color: #111827;
-  --dark-hover: #374151;
   --text-primary: #111827;
   --text-secondary: #6b7280;
   --background-light: #ffffff;
   --border-color: #f3f4f6;
-  --header-height: 80px;
+  --header-height: 100px;
   --transition-fast: 0.2s ease;
   --transition-medium: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  --whatsapp-green: #25D366;
 }
 
+/* Base Header Styling */
 .site-header {
   font-family: 'Poppins', sans-serif;
   height: var(--header-height);
@@ -46,6 +47,7 @@
   height: 100%;
 }
 
+/* Logo Styling */
 .logo-link {
   display: flex;
   align-items: center;
@@ -54,8 +56,8 @@
 }
 
 .circular-logo-img {
-    height: 60px;
-    width: 60px;
+    height: 75px;
+    width: 75px;
     border-radius: 50%;
     object-fit: cover;
     display: block;
@@ -78,22 +80,23 @@
     z-index: 1001;
 }
 
+/* Search Bar (Center) */
 .search-container {
   position: relative;
-  display: block;
+  display: block; 
   flex-grow: 1;
-  max-width: 450px;
-  margin: 0 3rem;
+  max-width: 350px; 
+  margin: 0 3rem; 
 }
 .search-input {
   width: 100%;
-  height: 40px;
-  padding-left: 50px;
+  height: 40px; 
+  padding-left: 45px;
   padding-right: 15px;
-  border: 2px solid #e5e7eb;
-  border-radius: 30px;
+  border: 2px solid #e5e7eb; 
+  border-radius: 30px; 
   background-color: #f9fafb;
-  font-size: 0.95rem;
+  font-size: 0.95rem; 
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -105,10 +108,10 @@
 }
 .search-icon {
   position: absolute;
-  left: 18px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  height: 20px;
+  height: 20px; 
   width: 20px;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
@@ -117,7 +120,7 @@
   color: var(--primary-color);
 }
 
-
+/* Right Group: Nav Links + Login Button */
 .actions-container.right-group {
   display: flex;
   align-items: center;
@@ -125,18 +128,19 @@
   gap: 1.5rem;
 }
 
+/* Main Navigation (Desktop) */
 .main-nav.desktop-nav-links ul {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 1rem;
+  gap: 1rem; 
 }
 .main-nav a {
   text-decoration: none;
   color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 600; 
+  font-size: 0.9rem; 
   position: relative;
   padding: 4px 0;
   transition: color var(--transition-fast);
@@ -148,8 +152,8 @@
   content: '';
   position: absolute;
   width: 100%;
-  height: 3px;
-  bottom: -6px;
+  height: 3px; 
+  bottom: -6px; 
   left: 0;
   background-color: var(--primary-color);
   transform: scaleX(0);
@@ -162,23 +166,24 @@
   transform-origin: bottom left;
 }
 
+/* Creative Login Button Design */
 .login-btn {
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  padding: 0.6rem 1.5rem;
+  font-weight: 700; 
+  font-size: 0.9rem; 
+  padding: 0.6rem 1.5rem; 
   border-radius: 50px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.5rem; 
   background-color: var(--primary-color);
   color: white;
   border: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(224, 58, 62, 0.4);
+  box-shadow: 0 4px 15px rgba(224, 58, 62, 0.4); 
 }
 .login-btn svg {
-    width: 18px;
+    width: 18px; 
     height: 18px;
     stroke: white;
     transition: transform 0.3s ease;
@@ -187,14 +192,14 @@
 .login-btn:hover {
   background-color: var(--dark-color);
   color: white;
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.4);
+  transform: translateY(-3px) scale(1.01); 
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.4); 
 }
 .login-btn:hover svg {
-    transform: translateX(2px);
+    transform: translateX(2px); 
 }
 
-
+/* Mobile Login Button Adjustment */
 .mobile-login-btn-full {
     width: 100%;
     justify-content: center;
@@ -204,23 +209,22 @@
     stroke: white !important;
 }
 
-
+/* Animated Hamburger Menu (Mobile) */
 .hamburger-menu {
-  display: none;
+  display: none; 
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  width: 26px;
-  height: 20px;
+  width: 26px; 
+  height: 20px; 
   position: relative;
   z-index: 1010;
-  margin-left: 1rem;
 }
 .line {
   display: block;
   width: 100%;
-  height: 2px;
+  height: 2px; 
   background-color: var(--dark-color);
   position: absolute;
   left: 0;
@@ -232,37 +236,40 @@
 .line-3 { bottom: 0; }
 
 .site-header.menu-open .line-1 {
-  transform: translateY(9px) rotate(45deg);
+  transform: translateY(9px) rotate(45deg); 
 }
 .site-header.menu-open .line-2 {
   opacity: 0;
 }
 .site-header.menu-open .line-3 {
-  transform: translateY(-9px) rotate(-45deg);
+  transform: translateY(-9px) rotate(-45deg); 
 }
 
+/* Animated Mobile Navigation */
 .mobile-menu-overlay {
-  display: none;
+  display: none; 
   position: fixed;
-  top: var(--header-height);
+  top: var(--header-height); 
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.7); 
   opacity: 0;
   transition: opacity 0.4s ease;
   z-index: 998;
+  pointer-events: none; 
 }
 
 .mobile-menu-overlay.open {
-  display: block;
+  display: block; 
   opacity: 1;
+  pointer-events: auto;
 }
 
 .mobile-nav {
   display: none;
   position: fixed;
-  top: var(--header-height);
+  top: var(--header-height); 
   left: 0;
   right: 0;
   height: calc(100vh - var(--header-height));
@@ -274,6 +281,7 @@
   z-index: 999;
 }
 .mobile-nav.open {
+  display: block; 
   transform: translateX(0);
 }
 .mobile-nav-inner {
@@ -281,6 +289,7 @@
   display: flex;
   flex-direction: column;
 }
+
 .mobile-nav-inner a, .mobile-nav-inner .mobile-auth-buttons {
   opacity: 0;
   transform: translateY(20px);
@@ -296,16 +305,16 @@
 .mobile-nav a {
   text-decoration: none;
   color: var(--text-primary);
-  font-size: 1.3rem;
+  font-size: 1.3rem; 
   font-weight: 600;
-  padding: 1.2rem 0;
+  padding: 1.2rem 0; 
   border-bottom: 1px solid var(--border-color);
 }
 .mobile-nav a:last-of-type {
     border-bottom: none;
 }
 .mobile-nav hr {
-  display: none;
+  display: none; 
 }
 .mobile-auth-buttons {
   display: flex;
@@ -314,200 +323,251 @@
   margin-top: 2rem;
 }
 
-.floating-chat-btn {
-  /* Ab yeh button popup ko open/close karega */
+/* Floating Bot Icon Styles */
+.floating-bot-btn {
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
   width: 65px;
   height: 65px;
   border-radius: 50%;
+  overflow: hidden; 
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  background-color: var(--whatsapp-green);
-  box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: pulse-shadow-green 2.5s infinite;
-  border: none;
-  cursor: pointer;
+  z-index: 1500; 
+  background-color: var(--background-light); 
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  animation: floating-bounce 4s infinite ease-in-out; 
 }
 
-.floating-chat-btn:hover {
-  transform: scale(1.15) rotate(-3deg);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-  animation: none;
+/* Bot Image Styles */
+.bot-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%; 
+    transition: transform 0.3s ease-in-out;
 }
 
-@keyframes pulse-shadow-green {
-  0% {
-    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+/* Hover Animation */
+.floating-bot-btn:hover {
+  transform: translateY(-5px) scale(1.05); 
+  box-shadow: 0 10px 30px rgba(224, 58, 62, 0.6); 
+  background-color: var(--primary-color); 
+  animation: none; 
+}
+.floating-bot-btn:hover .bot-icon-img {
+    transform: scale(1.1) rotate(5deg); 
+}
+
+/* Keyframes for Continuous Floating/Bouncing Effect */
+@keyframes floating-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
   }
-  70% {
-    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  50% {
+    transform: translateY(-8px); 
+    box-shadow: 0 15px 25px rgba(224, 58, 62, 0.7); 
   }
 }
 
-.floating-chat-btn .chat-icon-svg {
-    width: 80%;
-    height: 80%;
-    overflow: visible;
-}
-
-@keyframes blink-active {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(0.8); }
-}
-
-.floating-chat-btn .active-dot {
-    animation: blink-active 1.5s infinite ease-in-out;
-}
-
-/* ------------------------------------------- */
-/* NEW: Chatbot Popup Styles */
-/* ------------------------------------------- */
-.chatbot-popup-overlay {
+/* --- CHATBOT MODAL STYLES (Center, Responsive) --- */
+.chatbot-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent backdrop */
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
     display: flex;
-    align-items: center; /* Center vertically */
-    justify-content: center; /* Center horizontally */
-    z-index: 2000; /* High z-index to cover everything */
-    visibility: hidden;
+    justify-content: center;
+    align-items: center;
     opacity: 0;
-    transition: opacity 0.3s ease, visibility 0.3s;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.chatbot-popup-overlay.open {
-    visibility: visible;
+.chatbot-modal-overlay.open {
     opacity: 1;
+    visibility: visible;
 }
 
-.chatbot-popup-content {
+.chatbot-popup-container {
     background: var(--background-light);
-    border-radius: 12px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 500px; /* Chatbot ki max width maintain */
-    max-height: 80vh;
-    overflow: hidden;
-    transform: translateY(-50px) scale(0.9);
-    transition: transform 0.3s ease;
+    border-radius: 16px; 
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 420px;
+    height: 85%;
+    max-height: 600px;
+    position: relative;
+    padding: 0;
     display: flex;
     flex-direction: column;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.chatbot-popup-overlay.open .chatbot-popup-content {
-    transform: translateY(0) scale(1);
+.chatbot-modal-overlay.open .chatbot-popup-container {
+    transform: scale(1) translateY(0);
 }
 
-.chatbot-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background-color: var(--primary-color);
-    color: white;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
-.chatbot-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-.chatbot-header .close-btn {
+.chatbot-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     background: none;
     border: none;
     cursor: pointer;
-    color: white;
-    padding: 5px;
+    z-index: 10;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+    padding: 8px;
+    border-radius: 50%;
 }
-.chatbot-header .close-btn svg {
+.chatbot-close-btn:hover {
+    color: var(--primary-color);
+    background-color: #f5f5f5;
+}
+.chatbot-close-btn svg {
     width: 24px;
     height: 24px;
-    transition: transform 0.2s ease;
-}
-.chatbot-header .close-btn:hover svg {
-    transform: rotate(90deg);
+    display: block;
 }
 
+/* Chatbot Header Styling */
+.chatbot-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 15px 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+.bot-header-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.bot-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+.bot-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+/* app-chatbot component styling to fill space */
 app-chatbot {
-    display: block; /* Ensure the component takes up space */
     flex-grow: 1;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* Media Queries Adjustment */
+/* --- RESPONSIVE DESIGN (MOBILE/TABLET) --- */
+
 @media (max-width: 1024px) {
+  /* General Header Padding for Tablet/Mobile */
   .site-header {
-    padding: 0 1rem;
+    padding: 0 1rem; 
   }
 
+  /* Layout adjustments */
+  .logo-container {
+      order: 1;
+      flex: 1;
+  }
   .search-container {
-    display: none;
+    max-width: 300px;
+    margin: 0 auto; 
+    order: 2; 
+    flex-grow: 0;
+    flex-shrink: 0;
   }
-
+  .actions-container.right-group {
+      order: 3;
+      flex: 1;
+      justify-content: flex-end;
+      gap: 0; 
+  }
+  
+  /* Navigation visibility */
   .main-nav.desktop-nav-links {
     display: none;
   }
-
+  .login-btn.desktop-login-btn {
+      display: none;
+  }
   .hamburger-menu {
     display: block;
-    margin-left: 0.75rem;
+    margin-left: 0; 
   }
-
-  .actions-container.right-group {
-    gap: 0.75rem;
-  }
-
+  
+  /* Mobile Menu Fixes */
   .mobile-menu-overlay {
-    height: calc(100vh - var(--header-height));
+    height: calc(100vh - var(--header-height)); 
     bottom: 0;
-    display: block;
   }
-
   .mobile-nav {
-    height: calc(100vh - var(--header-height));
+    top: var(--header-height); 
+    height: calc(100vh - var(--header-height)); 
     bottom: 0;
-    display: block;
   }
-
-  .floating-chat-btn {
+  
+  /* Floating Bot Icon adjusted for tablet */
+  .floating-bot-btn {
       width: 55px;
       height: 55px;
       right: 1rem;
       bottom: 1rem;
   }
 
-  /* Chatbot on small screens */
-  .chatbot-popup-content {
-      max-width: 90vw; /* Small screens pe thoda chhota rakho */
-      border-radius: 8px;
+  /* Chatbot Popup Mobile adjustments */
+  .chatbot-popup-container {
+      width: 95%;
+      height: 95%;
+      max-width: none;
+      max-height: none;
+      border-radius: 12px;
   }
 }
 
 @media (max-width: 640px) {
-  .login-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    gap: 0.3rem;
-  }
-  .login-btn svg {
-      width: 16px;
-      height: 16px;
+  /* Phone View adjustments */
+  .search-input {
+    height: 38px;
+    font-size: 0.85rem;
   }
 
+  .search-container {
+      margin: 0 auto; 
+      max-width: 180px; 
+  }
+    
   .circular-logo-img {
-    height: 50px;
-    width: 50px;
+    height: 60px;
+    width: 60px;
+  }
+  .mobile-login-btn-full {
+    font-size: 1rem;
+    padding: 0.8rem 0;
+  }
+  
+  /* Chatbot Popup Full Screen on Mobile */
+  .chatbot-popup-container {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
   }
 }

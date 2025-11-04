@@ -1,0 +1,195 @@
+<div class="form-container">
+    
+    <!-- Registration Card: Set to position: relative in CSS to anchor buttons/panel -->
+    <div class="form-card">
+
+        <!-- Back Button (Matching Login Form Design) -->
+        <button (click)="goBack()" class="back-button" title="Go Back">
+            <!-- Back Arrow Icon (SVG from login-form) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!-- Hamburger Button (Right Side) -->
+        <button (click)="togglePanel()" class="hamburger-button" title="Manage Users">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
+
+        <!-- Header -->
+        <div class="header-section">
+            <h2>Create New User Account</h2>
+            <p>Enter username, password, and assign a role.</p>
+        </div>
+
+        <!-- Dynamic Message Box -->
+        <div *ngIf="message" class="message-box" [ngClass]="{'success': !isError, 'error': isError}">
+            <p><strong>{{ isError ? 'Error!' : 'Success!' }}</strong> {{ message }}</p>
+        </div>
+
+        <!-- Registration Form -->
+        <form (ngSubmit)="createUser()">
+            
+            <!-- Username/Email Field -->
+            <div class="form-group">
+                <label for="username">Username (Email ID)</label>
+                <input 
+                    id="username" 
+                    type="email" 
+                    class="text-input"
+                    name="username" 
+                    [(ngModel)]="username" 
+                    required 
+                    placeholder="Enter email or username"
+                >
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    id="password" 
+                    type="password" 
+                    class="text-input"
+                    name="password" 
+                    [(ngModel)]="password" 
+                    required 
+                    placeholder="Enter password"
+                >
+            </div>
+
+            <!-- Role Selection Field -->
+            <div class="form-group">
+                <label for="roleid">Assign Role</label>
+                <div class="select-wrapper">
+                    <select 
+                        id="roleid" 
+                        class="text-input"
+                        name="roleid" 
+                        [(ngModel)]="roleid" 
+                        required
+                    >
+                        <option *ngFor="let role of roles" [ngValue]="role.id">
+                            {{ role.name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" class="submit-button">
+                    Create User
+                </button>
+            </div>
+        </form>
+
+        <!-- ==================================== -->
+        <!-- --- User Management Side Panel --- -->
+        <!-- ==================================== -->
+        <div class="user-panel" [ngClass]="{'open': isPanelOpen}">
+            <div class="panel-header">
+                <h3>Manage Users</h3>
+                <button (click)="togglePanel()" class="close-panel-button" title="Close">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <button 
+                    class="filter-button" 
+                    [ngClass]="{'active': currentFilter === null}"
+                    (click)="filterUsers(null)"
+                >
+                    All Users
+                </button>
+                <button 
+                    *ngFor="let role of roles"
+                    class="filter-button" 
+                    [ngClass]="{'active': currentFilter === role.id}"
+                    (click)="filterUsers(role.id)"
+                >
+                    {{ role.name }}
+                </button>
+            </div>
+
+            <!-- User List -->
+            <div class="user-list-container">
+                <div *ngIf="isLoadingUsers" class="loading-indicator">
+                    Fetching users...
+                </div>
+                
+                <div *ngIf="!isLoadingUsers && filteredUsers.length === 0" class="loading-indicator">
+                    No users found for this filter.
+                </div>
+
+                <div *ngIf="!isLoadingUsers && filteredUsers.length > 0">
+                    <div *ngFor="let user of filteredUsers" class="user-item">
+                        <div class="user-info">
+                            <div class="username" title="{{ user.username }}">{{ user.username }}</div>
+                            <!-- Updated: Use user.userid and ensure role is displayed correctly -->
+                            <div class="role">ID: {{ user.userid }} | Role: {{ getRoleName(user.roleid) }} | Active: {{ user.is_active ? 'Yes' : 'No' }}</div>
+                        </div>
+                        <div class="user-actions">
+                            <!-- Deactivate Button (Visible if active) -->
+                            <button 
+                                *ngIf="user.is_active"
+                                (click)="showConfirmation(user.userid, 'deactivate')" 
+                                class="action-button deactivate-button"
+                                title="Deactivate User"
+                            >
+                                Deactivate
+                            </button>
+                            <!-- Reactivate Button (Visible if inactive) -->
+                            <button 
+                                *ngIf="!user.is_active"
+                                (click)="showConfirmation(user.userid, 'reactivate')" 
+                                class="action-button reactivate-button"
+                                title="Reactivate User"
+                            >
+                                Reactivate
+                            </button>
+                            <button 
+                                (click)="showConfirmation(user.userid, 'delete')" 
+                                class="action-button delete-button"
+                                title="Delete Permanently"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ==================================== -->
+
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div *ngIf="isModalOpen" class="custom-modal-backdrop" (click)="closeModal()">
+        <div class="custom-modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h4>Confirm Action</h4>
+                <button (click)="closeModal()" class="close-modal-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>{{ modalData?.message }}</p>
+                <div class="modal-buttons">
+                    <button (click)="closeModal()" class="btn-cancel">Cancel</button>
+                    <button (click)="confirmAction()" 
+                        [ngClass]="{
+                            'btn-confirm-delete': modalData?.action === 'delete',
+                            'btn-confirm-deactivate': modalData?.action === 'deactivate',
+                            'btn-confirm-reactivate': modalData?.action === 'reactivate'
+                        }"
+                    >
+                        Confirm {{ modalData?.action | titlecase }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

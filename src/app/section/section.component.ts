@@ -10,6 +10,16 @@ export class SectionComponent implements OnInit {
   // State for managing the video player modal
   isModalOpen = false;
   selectedVideoUrl: SafeResourceUrl = '';
+  
+  // NEW STATE: State for managing the About CSMIT modal
+  isAboutModalOpen = false;
+
+  // Mock Trainer Data (will be passed to about-csmit component)
+  trainers = [
+    { name: 'Ravi Verma', specialization: 'Lead Data Scientist', experience: '12 Yrs', rating: '4.9', image: 'https://placehold.co/80x80/2980b9/ffffff?text=RV' },
+    { name: 'Sneha Patel', specialization: 'Full Stack Architect', experience: '10 Yrs', rating: '4.8', image: 'https://placehold.co/80x80/8e44ad/ffffff?text=SP' },
+    { name: 'Arjun Singh', specialization: 'Cyber Security Expert', experience: '15 Yrs', rating: '4.7', image: 'https://placehold.co/80x80/27ae60/ffffff?text=AS' }
+  ];
 
   // Original array of demo video data with updated, high-quality thumbnails
   demoVideos = [
@@ -89,6 +99,18 @@ export class SectionComponent implements OnInit {
     this.scrollerVideos2 = [...videos2, ...videos2]; 
   }
 
+  // NEW METHOD: Opens the About CSMIT modal and prevents body scrolling
+  openAboutModal() {
+    this.isAboutModalOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  // NEW METHOD: Closes the About CSMIT modal and restores body scrolling
+  closeAboutModal() {
+    this.isAboutModalOpen = false;
+    document.body.style.overflow = 'auto';
+  }
+
   /**
    * Opens the video modal and sets the URL for the selected video.
    * @param videoId The YouTube ID of the video to play.
@@ -98,6 +120,8 @@ export class SectionComponent implements OnInit {
     const unsafeUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
     this.selectedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(unsafeUrl);
     this.isModalOpen = true;
+    // Prevent body scrolling behind the video modal
+    document.body.style.overflow = 'hidden';
   }
 
   /**
@@ -106,5 +130,7 @@ export class SectionComponent implements OnInit {
   closeModal() {
     this.isModalOpen = false;
     this.selectedVideoUrl = '';
+    // Restore body scrolling
+    document.body.style.overflow = 'auto';
   }
 }

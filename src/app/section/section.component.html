@@ -15,7 +15,8 @@
         </p>
         <div class="hero-cta">
           <!-- Button style matching the inspiration -->
-          <a href="#" class="cta-button">About CSMIT</a>
+          <!-- UPDATED: Added click event to open the About CSMIT modal -->
+          <a href="javascript:void(0)" class="cta-button" (click)="openAboutModal()">About CSMIT</a>
         </div>
       </div>
 
@@ -115,3 +116,11 @@
     </div>
   </div>
 </main>
+
+<!-- NEW: About CSMIT Modal (Popup) Component -->
+<app-about-csmit 
+  *ngIf="isAboutModalOpen" 
+  [isVisible]="isAboutModalOpen" 
+  [trainers]="trainers"
+  (closeModal)="closeAboutModal()">
+</app-about-csmit>

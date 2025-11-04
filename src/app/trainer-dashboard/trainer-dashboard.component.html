@@ -1,153 +1,247 @@
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- Main container matching student layout -->
+<div class="container">
+<header>
+  <div class="logo-search">
+    <div class="logo">
+      <!-- Logo Image matching student style -->
+      <img src="assets/logo.jpg" alt="Institute Logo" class="institute-logo" title="Institute Logo">
+    </div>
+    <div class="search-wrapper">
+      <!-- Search input now uses config variable -->
+      <input type="search" [placeholder]="config.SEARCH_PLACEHOLDER" />
+      <i class="fas fa-search"></i>
+    </div>
+  </div>
+  <div class="header-right">
+    <!-- Action Button (Text and Icon from config) -->
+    <button class="btn-request">
+      <i [class]="config.ANNOUNCEMENT_BUTTON.icon"></i> {{ config.ANNOUNCEMENT_BUTTON.label }}
+    </button>
 
-    <!-- Header and Greeting - Tech Theme Accent (Enhanced) -->
-    <header class="header-card">
-      <div class="header-content">
-        <h1 class="greeting-text">
-          Welcome, {{ trainerName }}! 🚀
-        </h1>
-        <img [src]="profileImageUrl" alt="Profile" class="profile-image"/>
-      </div>
-      <p class="welcome-message">Manage your courses, code reviews, and student engagement. Let's make today productive!</p>
-    </header>
+    <!-- Trainer Avatar matching student style -->
+    <div class="user-avatar" title="{{ trainerName }}">
+      <img [src]="trainerDetails.profileUrl" alt="Trainer Avatar" class="user-avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+    </div>
+  </div>
+</header>
 
-    <div class="content-grid">
+<!-- Sidebar Navigation (Left - Matching Student Layout) -->
+<aside class="sidebar">
+  <div>
+    <nav class="sidebar-nav">
+      <!-- Nav links for Trainer (Dynamically rendered from config.SIDEBAR_LINKS) -->
+      <a *ngFor="let link of config.SIDEBAR_LINKS"
+         [class.active]="activeTab() === link.id" 
+         (click)="activeTab.set(link.id)" 
+         [title]="link.label">
+        <i [class]="link.icon"></i>{{ link.label }}
+      </a>
+    </nav>
+  </div>
+  <div class="sidebar-bottom">
+    <!-- Placeholder for Dark Mode Toggle (Trainer's original implementation) -->
+    <div class="toggle-switch" [class.active]="darkModeActive()" (click)="darkModeActive.set(!darkModeActive())" title="Toggle Dark Mode">
+      <span></span>
+    </div>
+    <!-- Settings icon (Dummy Action) -->
+    <a title="Profile Settings"><i class="fas fa-cog"></i></a>
+  </div>
+</aside>
 
-      <!-- Main Content Area -->
-      <div class="main-content-area">
+<!-- Right Schedule Card (Calendar and Schedule - Matching Student Layout) -->
+<section class="right-schedule-card">
+  <div class="current-time-display">
+    <p class="current-time-text">Current Time: {{ currentTime() }}</p>
+  </div>
+  <div class="right-schedule-header">
+    <h3>My Professional Schedule</h3>
+    <button aria-label="More options"><i class="fas fa-ellipsis-h"></i></button>
+  </div>
 
-        <!-- 1. Key Metrics - Tech Focused (Enhanced Card Look) -->
-        <section class="section-card">
-          <h2 class="section-title">Key Performance Indicators</h2>
-          <div class="metrics-grid">
-            <div *ngFor="let metric of metrics" class="metric-item">
-              <div class="metric-icon">{{ metric.icon }}</div>
-              <p class="metric-label">{{ metric.label }}</p>
-              <p class="metric-value">{{ metric.value }}</p>
-            </div>
-          </div>
-        </section>
+  <!-- Calendar Controls (Monthly View) -->
+  <div class="calendar-controls">
+    <button aria-label="Previous Month" (click)="navigateCalendar(-1)">&lt;</button>
+    <p>{{ selectedMonthYear() }}</p>
+    <button aria-label="Next Month" (click)="navigateCalendar(1)">&gt;</button>
+  </div>
 
-        <!-- 2. My Courses - Enhanced Progress Display -->
-        <section class="section-card">
-          <h2 class="section-title">Active Courses & Progress</h2>
-          <div class="courses-list">
-            <div *ngFor="let course of teachingCourses" class="course-item">
-              <div class="course-info">
-                <span class="course-code-badge">{{ course.id }}</span>
-                <h3 class="course-title">{{ course.title }}</h3>
-                <p class="students-count" style="font-size: 0.9rem; color: var(--text-secondary);">
-                  <span style="color: var(--secondary-color);">{{ course.totalStudents }}</span> Active Students
-                </p>
-              </div>
-              <div class="course-stats">
-                <div class="status-badge" [ngClass]="getStatusClass(course.status)">
-                  {{ course.status }}
-                </div>
-                <!-- Progress Bar -->
-                <div class="completion-bar-container">
-                  <div class="completion-bar"
-                    [ngClass]="getCompletionClass(course.completion)"
-                    [style.width.%]="course.completion">
-                  </div>
-                </div>
-                <p class="completion-text">
-                  Progress: {{ course.completion }}%
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+  <!-- Calendar Grid -->
+  <div class="calendar-weekdays">
+    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+  <div class="calendar-days">
+    <!-- Day cell -->
+    <div *ngFor="let day of calendarDays()"
+      [class.inactive]="day.disabled"
+      [class.active]="day.fullDate && day.fullDate.toDateString() === today().toDateString()"
+      [class.selected]="day.selected"
+      [class.has-event]="day.hasEvent"
+      (click)="!day.disabled && onDateSelect(day)"
+      [title]="day.fullDate ? (day.fullDate | date:'fullDate') : ''">
+      {{ day.date }}
+    </div>
+  </div>
 
-        <!-- 3. Student Queries/Q&A - Real-Time Engagement -->
-        <section class="section-card">
-          <h2 class="section-title">Student Q&A Corner (Real-Time)</h2>
-
-          <div class="filter-bar">
-            <!-- Filter Buttons -->
-            <button class="filter-button"
-                    [ngClass]="{'active': queryFilter === 'All'}"
-                    (click)="queryFilter = 'All'">
-              All Queries ({{ allRecentStudentQueries.length }})
-            </button>
-            <button class="filter-button"
-                    [ngClass]="{'active': queryFilter === 'Unresolved'}"
-                    (click)="queryFilter = 'Unresolved'">
-              Unresolved ({{ unresolvedQueryCount }})
-            </button>
-            <button class="filter-button"
-                    [ngClass]="{'active': queryFilter === 'High Priority'}"
-                    (click)="queryFilter = 'High Priority'">
-              Urgent ({{ highPriorityQueryCount }})
-            </button>
-          </div>
-
-          <div class="queries-list">
-            <ng-container *ngIf="filteredQueries.length > 0; else noQueries">
-              <div *ngFor="let query of filteredQueries"
-                   class="query-item"
-                   [ngClass]="{'priority-high': query.priority === 'High' && !query.resolved, 'resolved': query.resolved}">
-
-                <div class="query-details">
-                  <p class="query-title">{{ query.title }}</p>
-                  <p class="query-meta">
-                    <span style="color: var(--secondary-color);">{{ query.studentName }}</span> |
-                    {{ query.courseId }} |
-                    Priority: <strong [style.color]="query.priority === 'High' ? '#ef4444' : (query.priority === 'Medium' ? '#f59e0b' : 'var(--secondary-color)')">{{ query.priority }}</strong>
-                  </p>
-                </div>
-
-                <button class="query-action-button" (click)="toggleQueryResolved(query)">
-                  {{ query.resolved ? 'Mark Unresolved' : 'Resolve Query' }}
-                </button>
-              </div>
-            </ng-container>
-
-            <ng-template #noQueries>
-              <p class="query-data-message">🎉 No pending queries! Everything is resolved.</p>
-            </ng-template>
-          </div>
-        </section>
-
-      </div>
-
-      <!-- Sidebar Area -->
-      <div class="sidebar-area">
-
-        <!-- 4. Pending Tasks/Grading -->
-        <section class="sidebar-card action-card">
-          <h2 class="sidebar-title">
-            <span class="sidebar-icon">🚨</span> High Priority Reviews
-          </h2>
-          <div class="tasks-list">
-            <div *ngFor="let task of pendingTasks" class="task-item" [ngClass]="getTaskPriorityClass(task.daysDue)">
-              <div class="task-details">
-                <p class="task-name">{{ task.name }}</p>
-                <span class="task-course">Course: {{ task.course }}</span>
-              </div>
-              <span class="task-due-date">Due in {{ task.daysDue }} days</span>
-            </div>
-          </div>
-          <button class="full-width-button">
-            Go to Review Center
-          </button>
-        </section>
-
-        <!-- 5. Quick Actions -->
-        <section class="sidebar-card action-card">
-          <h2 class="sidebar-title">
-            <span class="sidebar-icon">⚡</span> Quick Actions
-          </h2>
-          <div class="actions-grid">
-            <button class="action-button">Create New Code Challenge <span style="color: var(--secondary-color);">→</span></button>
-            <button class="action-button">Host Live Q&A Session <span style="color: var(--secondary-color);">→</span></button>
-            <button class="action-button">Update Course Curriculum <span style="color: var(--secondary-color);">→</span></button>
-          </div>
-        </section>
-
+  <!-- Schedule List -->
+  <div class="schedule-list">
+    <h5>Events for {{ selectedScheduleDate() | date:'dd MMM yyyy' }}</h5>
+    <div *ngIf="scheduleDetails().length === 0" class="no-schedule-message">
+        No specific events for the selected date.
+    </div>
+    <div *ngFor="let item of scheduleDetails()" class="schedule-section">
+      <div class="schedule-item" [ngClass]="getScheduleTypeClass(item.type)">
+        <div class="date">
+          {{ item.dayOfWeekShort }} <br> {{ item.dayOfMonth }}
+        </div>
+        <p class="desc">{{ item.desc }}</p>
+        <button *ngIf="item.joinButton" class="join-button">Join Now</button>
       </div>
     </div>
-
+    
+    <!-- Apply Leave Option -->
+    <div *ngIf="selectedScheduleDate()" class="apply-leave-area-footer">
+      <button (click)="openLeaveForm()" class="request-leave-button">
+        Apply Leave for Selected Date
+      </button>
+    </div>
   </div>
+</section>
+
+<!-- Main Content Area (Left and Center Columns combined) -->
+<main class="main-content">
+  <!-- 1. Trainer/Batch Info Card (Position 1: Replaces Student's Good Morning Card) -->
+  <section class="trainer-info-card">
+    <img [src]="trainerDetails.profileUrl" 
+         alt="{{ trainerDetails.name }}" 
+         class="profile-img" 
+         title="{{ trainerDetails.name }}">
+    <h2>{{ trainerDetails.name }}</h2>
+    <p class="role">{{ trainerDetails.role }}</p>
+    
+    <div class="batch-details">
+      <p style="color: #F43F5E;">{{ myBatches[0].name }}</p>
+      <span>{{ myBatches[0].strength }} Students | Next Class in {{ myBatches[0].countdown }}</span>
+    </div>
+
+    <div class="time-row">
+      <i class="fas fa-clock"></i>
+      <span>{{ currentTime() | date:'hh:mm:ss a' }}</span>
+    </div>
+  </section>
+
+  <!-- 2. 4 Stats Grid (Position 2: Replaces Student's Metrics Container) -->
+  <section class="stats-cards-container">
+    
+    <!-- Use *ngFor for compactness and easier update -->
+    <div *ngFor="let stat of compactStats; let i = index" class="stat-card" [ngClass]="stat.colorClass">
+      <p class="title">{{ stat.title }}</p>
+      <!-- Use ternary operator to conditionally display value based on array index -->
+      <p [ngClass]="{'value': i !== 2, 'value-small': i === 2}">{{ stat.value }}</p>
+      <div class="footer-info">
+        <span style="font-size: 11px;">{{ stat.subText }}</span>
+        <!-- Conditional elements based on card index/data -->
+        <button *ngIf="i === 1" class="quick-review-button">Review</button>
+        <i *ngIf="i === 0" class="fas fa-chart-line" style="color: #4338CA;"></i>
+        <i *ngIf="i === 2" class="fas fa-users" style="color: #9F7AEA;"></i>
+        <i *ngIf="i === 3" class="fas fa-bolt" style="color: #10B981;"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Quick Actions (Position 3: Rendered from config.QUICK_ACTIONS) -->
+  <section class="quick-actions-card">
+    <h3>Quick Actions</h3>
+    <div class="actions-grid">
+      <button *ngFor="let action of config.QUICK_ACTIONS" class="action-button">
+        <i [class]="action.icon"></i>
+        {{ action.label }}
+      </button>
+    </div>
+  </section>
+
+  <!-- 4. Performance Analysis (Position 4: Rendered from config.TOP_STUDENTS) -->
+  <section class="performance-analysis-card">
+    <h3>Top 5 Student Performance</h3>
+    <div class="performance-list">
+      
+      <!-- Performance Items rendered using *ngFor -->
+      <div *ngFor="let student of config.TOP_STUDENTS" class="performance-item">
+        <div class="student-info">
+          <!-- Image details from config -->
+          <img [src]="student.imageUrl" alt="Student {{ student.initials }}" class="student-image">
+          <span>{{ student.name }}</span>
+        </div>
+        <!-- Badge class and text from config -->
+        <span class="skill-badge" [ngClass]="getBadgeClass(student.status)">{{ student.status }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Trainer To-Do/Tasks (Position 5: Uses existing toDoTasks) -->
+  <section class="tasks-card">
+    <h3>Trainer To-Do List</h3>
+    <div class="task-list">
+      <div *ngFor="let task of toDoTasks" 
+           class="task-item" 
+           [ngClass]="{'high': task.priority === 'High', 'medium': task.priority === 'Medium', 'low': task.priority === 'Low'}">
+        <div class="task-details">
+          <p class="text">{{ task.text }}</p>
+          <span class="countdown">{{ task.countdown }}</span>
+        </div>
+        <span class="task-priority-tag">{{ task.priority }} Priority</span>
+      </div>
+    </div>
+  </section>
+  
+</main>
+
+<!-- Leave Application Modal/Popup (Renamed to generic modal for reusability) -->
+<div *ngIf="isLeaveFormOpen()" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Apply for Leave</h3>
+      <button class="close-button" (click)="closeLeaveForm()">&times;</button>
+    </div>
+    <form (ngSubmit)="submitLeave()" class="form-group">
+
+        <label for="startDate">Start Date:</label>
+        <input 
+          #startDateInput
+          id="startDate" 
+          type="date" 
+          [value]="leaveStartDate()" 
+          (input)="leaveStartDate.set(startDateInput.value)" 
+          required
+        >
+
+        <label for="endDate">End Date:</label>
+        <input 
+          #endDateInput
+          id="endDate" 
+          type="date" 
+          [value]="leaveEndDate()" 
+          (input)="leaveEndDate.set(endDateInput.value)" 
+          required
+        >
+
+        <label for="reason">Reason:</label>
+        <textarea 
+          #reasonTextarea
+          id="reason" 
+          rows="4" 
+          [value]="leaveReason()"
+          (input)="leaveReason.set(reasonTextarea.value)" 
+          placeholder="Enter reason for leave..." 
+          required
+        ></textarea>
+
+        <div class="modal-footer">
+          <button type="button" (click)="closeLeaveForm()" class="btn-cancel">Cancel</button>
+          <button type="submit" class="btn-submit" [disabled]="!leaveStartDate() || !leaveEndDate() || !leaveReason()">Submit Application</button>
+        </div>
+      </form>
+  </div>
+</div>
+
 </div>

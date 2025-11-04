@@ -242,3 +242,45 @@
     cursor: not-allowed; 
     box-shadow: none;
 }
+
+/* 8. Course List Side Panel Styles */
+
+.course-list-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh; /* Full viewport height */
+    background-color: #f4f7f9;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%); /* Start hidden off-screen */
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.course-list-panel.open {
+    transform: translateX(0%); /* Slide in when open */
+}
+
+/* Panel Overlay Styles */
+.course-list-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.course-list-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}

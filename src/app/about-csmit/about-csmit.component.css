@@ -1,0 +1,368 @@
+/* Google Font Import (Assuming Poppins is already available, but ensuring it) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap');
+
+/* Inherit Global Variables (Red/Black from Header, Indigo/Pink from Navbar) */
+:host {
+    --primary-color: #6366f1; /* Indigo */
+    --secondary-color: #ec4899; /* Pink */
+    --text-dark: #1f2937; 
+    --text-light: #6b7280;
+    --background-light: #fffffb; /* Slight off-white/cream for paper effect */
+    --background-panel: #f8f9fc;
+    --gradient: linear-gradient(90deg, #6366f1 0%, #a855f7 100%); 
+    --shadow-heavy: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+    --header-height: 80px; 
+    font-family: 'Poppins', sans-serif;
+}
+
+/* --- OVERLAY AND MODAL STRUCTURE --- */
+
+.about-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Dark, blurry background for full attention */
+    background-color: rgba(17, 24, 39, 0.95); 
+    backdrop-filter: blur(8px); /* Reduced blur for performance */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* CENTERED ALIGNMENT (Important for the request) */
+    z-index: 3000; /* Highest Z-index */
+    opacity: 0;
+    visibility: hidden; /* New: Use visibility for better transition control */
+    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+    overflow-y: auto; /* Allow scrolling if the content is too tall */
+}
+
+.about-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- LETTER-LIKE DESIGN CHANGES --- */
+.about-modal-content {
+    /* Paper color */
+    background: var(--background-light); 
+    color: var(--text-dark); 
+    /* Max width set for A4-like look */
+    max-width: 800px; 
+    width: 90%;
+    /* margin-top removed, centered by flexbox now */
+    margin: 40px auto; /* Add margin top/bottom for scrolling space */
+    border-radius: 0.75rem; /* Consistent roundness */
+    position: relative;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); /* Stronger shadow for floating effect */
+    overflow-y: hidden; /* Scrollable content is inside .about-content-inner */
+    max-height: 90vh; /* Responsive max height */
+    
+    /* Animation */
+    transform: scale(0.8) translateY(20px);
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.5s ease-out;
+}
+
+.about-modal-overlay.open .about-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.about-content-inner {
+    padding: 4rem 5rem; 
+    display: flex;
+    flex-direction: column;
+    gap: 4rem; 
+    overflow-y: auto; /* Actual scrolling happens here */
+    max-height: calc(90vh - 80px); /* Adjust max-height for inner scrolling (approx header + footer space) */
+}
+
+/* Close Button Styling - Adjusted to be inside the content box's flow */
+.modal-close-btn {
+    position: absolute; /* Relative to .about-modal-content */
+    top: 15px;
+    right: 15px; 
+    z-index: 3002;
+    background: var(--background-panel);
+    border: 1px solid var(--text-light);
+    border-radius: 50%;
+    width: 35px; /* Reduced size */
+    height: 35px;
+    cursor: pointer;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+}
+.modal-close-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    margin: auto;
+}
+.modal-close-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* --- LETTERHEAD & FOOTER LINES --- */
+.letter-header-line, .letter-footer-line {
+    height: 3px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    width: 100%;
+    margin-bottom: 2.5rem;
+    border-radius: 999px;
+}
+.letter-footer-line {
+    margin-top: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+.letter-signature {
+    text-align: right;
+    font-style: italic;
+    color: var(--text-light);
+    font-size: 1.1rem;
+    margin-top: 0;
+}
+
+
+/* --- SECTION STYLING (No functional changes, just cleanup) --- */
+
+/* 1. INTRO & VISION SECTION */
+.section-intro {
+    text-align: center;
+}
+.pre-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+.about-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+.title-line-1 {
+    display: block;
+    color: var(--text-dark);
+}
+.title-line-2 {
+    display: block;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.about-description {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1.15rem;
+    color: var(--text-dark);
+    line-height: 1.7;
+    text-align: justify;
+}
+
+/* Key Stats Grid */
+.key-stats-grid {
+    display: flex;
+    justify-content: space-around; 
+    gap: 3rem;
+    margin-top: 3rem;
+}
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+}
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--primary-color);
+    line-height: 1;
+}
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-top: 0.5rem;
+}
+
+/* 2. MISSION SECTION */
+.section-mission {
+    text-align: left;
+    padding-top: 2rem;
+}
+.section-sub-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+.mission-points-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+.mission-card {
+    background-color: var(--background-panel);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    border-left: 5px solid var(--primary-color);
+    transition: all 0.2s ease;
+}
+.mission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+.mission-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.mission-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+.mission-card p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+}
+
+/* 3. TRAINER DETAILS SECTION */
+.section-trainers {
+    text-align: center;
+    padding-top: 2rem;
+}
+.trainer-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+.trainers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+.trainer-card {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--background-panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+.trainer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+    border-color: var(--secondary-color);
+}
+.trainer-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+    border: 3px solid var(--secondary-color);
+    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.1);
+}
+.trainer-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+}
+.trainer-specialization {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+.trainer-details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+.rating {
+    color: var(--secondary-color);
+}
+
+
+/* --- RESPONSIVE ADJUSTMENTS --- */
+@media (max-width: 900px) {
+    .about-modal-content {
+        /* Adjusted margin for tablet view */
+        margin: 20px auto;
+        width: 95%;
+        border-radius: 0.5rem;
+        max-height: 95vh;
+    }
+    .about-content-inner {
+        padding: 2rem;
+        gap: 3rem;
+        max-height: calc(95vh - 60px);
+    }
+    .about-title {
+        font-size: 2.2rem;
+    }
+    .about-description {
+        font-size: 0.95rem;
+    }
+    .key-stats-grid {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .stat-value {
+        font-size: 2rem;
+    }
+    .mission-points-grid {
+        grid-template-columns: 1fr;
+    }
+    .trainer-photo {
+        width: 70px;
+        height: 70px;
+    }
+    .modal-close-btn {
+        top: 10px;
+        right: 10px;
+    }
+}
+
+@media (max-width: 500px) {
+    .about-modal-content {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    .about-content-inner {
+        padding: 1.5rem;
+        gap: 2rem;
+        max-height: 100vh;
+    }
+    .about-title {
+        font-size: 1.6rem;
+    }
+    .section-sub-title {
+        font-size: 1.4rem;
+    }
+    .mission-card {
+        padding: 1.2rem;
+    }
+    .trainers-grid {
+        grid-template-columns: 1fr;
+    }
+    .letter-header-line, .letter-footer-line {
+        margin-bottom: 1.5rem;
+    }
+}

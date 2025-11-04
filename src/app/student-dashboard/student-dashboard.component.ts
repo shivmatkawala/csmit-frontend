@@ -616,9 +616,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   downloadResume(): void {
     // Note: Since Angular Router is not available in the single-file environment, 
     // we'll use a direct window redirection as a placeholder.
-    this.showMessage('Redirecting to ATS Resume Generator...', 'success');
+    // FIX: अब यह रिज्यूमे फॉर्म (create-student) पेज पर रीडायरेक्ट होगा, जैसा कि अनुरोध किया गया है।
+    this.showMessage('Redirecting to Resume Creation Form (ATS Builder)...', 'success');
     // Using window.location.href to simulate redirection to the specified route
-    window.location.href = 'generate-ats-resume'; 
+    window.location.href = 'create-student'; 
   }
 
 

@@ -1,0 +1,90 @@
+<!-- About CSMIT Full-Page Panel/Modal (Uses a full-screen, center-aligned scrollable design) -->
+<div class="about-modal-overlay" [class.open]="isVisible" (click)="onClose()">
+  <div class="about-modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Close Button -->
+    <button class="modal-close-btn" (click)="onClose()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+
+    <!-- CONTENT START -->
+    <div class="about-content-inner">
+
+        <!-- 1. INTRO & VISION SECTION (Large Title with Gradient) -->
+        <section class="section-intro">
+            <!-- Letterhead look: Use a strong line/border effect -->
+            <div class="letter-header-line"></div>
+            
+            <p class="pre-title">OUR LEGACY, YOUR FUTURE</p>
+            <h1 class="about-title">
+                <span class="title-line-1">Redefining Tech Education</span>
+                <span class="title-line-2">for the Digital Age.</span>
+            </h1>
+            <p class="about-description">
+                CSMIT (Chatrapati Shivaji Maharaj Information Technology) is more than an institute; it's a launchpad for world-class careers. We combine intensive, hands-on training with cutting-edge professional development to transform aspiring learners into industry-ready leaders.
+            </p>
+            <div class="key-stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value">10+</span>
+                    <span class="stat-label">Years of Excellence</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">5000+</span>
+                    <span class="stat-label">Trained Professionals</span>
+                </div>
+                <!-- Placement Rate Stat ko hata diya gaya hai, user ki request par -->
+                <div class="stat-card">
+                    <span class="stat-value">30+</span>
+                    <span class="stat-label">Global Certifications</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. FOUNDATION/MISSION SECTION -->
+        <section class="section-mission">
+            <h2 class="section-sub-title">Our Philosophy: Learn, Build, Succeed</h2>
+            <div class="mission-points-grid">
+                <div class="mission-card">
+                    <div class="mission-icon">💡</div>
+                    <h3>Industry Aligned Syllabus</h3>
+                    <p>We update our curriculum every six months based on inputs from FAANG engineers, ensuring you learn only the most relevant, in-demand technologies.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="mission-icon">🤝</div>
+                    <h3>Global Collaborations</h3>
+                    <p>CSMIT actively partners with international tech organizations to provide real-world training environments and internship opportunities for our students.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="mission-icon">⚙️</div>
+                    <h3>Hands-on Project Focus</h3>
+                    <p>Every course culminates in large-scale capstone projects, giving you a portfolio that proves your capabilities to potential employers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. TRAINER DETAILS SECTION -->
+        <section class="section-trainers">
+            <h2 class="section-sub-title">Meet Our Mentors</h2>
+            <p class="trainer-subtitle">Learn directly from senior professionals who have built systems at top MNCs.</p>
+            <div class="trainers-grid">
+                <div class="trainer-card" *ngFor="let trainer of trainers">
+                    <img [src]="trainer.image" [alt]="trainer.name" class="trainer-photo">
+                    <h3 class="trainer-name">{{ trainer.name }}</h3>
+                    <p class="trainer-specialization">{{ trainer.specialization }}</p>
+                    <div class="trainer-details">
+                        <span class="experience">Exp: {{ trainer.experience }}</span>
+                        <span class="rating">⭐ {{ trainer.rating }}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="letter-footer-line"></div>
+        <p class="letter-signature">
+            Committed to Excellence.
+        </p>
+
+    </div>
+    <!-- CONTENT END -->
+  </div>
+</div>

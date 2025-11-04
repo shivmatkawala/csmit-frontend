@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ApiService, StudentInfo, LoginResponse } from '../services/api.service'; 
+// FIX: ApiService से interfaces को सीधे ResumeService से उपयोग करें 
+import { ResumeService, StudentInfo } from '../services/create-resume.service'; 
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-generate-ats-resume',
@@ -19,27 +21,63 @@ export class GenerateAtsResumeComponent implements OnInit{
   // Signal to control the visibility of the action buttons (print, download).
   isButtonContainerVisible = signal(true); 
 
+  // FIX: ApiService की जगह ResumeService का उपयोग करें
   constructor(
-    private apiService: ApiService,
+    private resumeService: ResumeService,
     private router: Router 
   ) {}
 
   ngOnInit(): void {
-    const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
-    
-    if (loginData && loginData.info) {
-      // Use the 'info' object which contains all resume-related data.
-      this.resumeData = loginData.info; 
-      
-      // Divide skills into two columns for presentation.
-      this.divideSkillsIntoColumns(this.resumeData.skills); 
-
-      console.log('Resume Data Loaded:', this.resumeData);
-    } else {
-      console.log('No login data found, redirecting to dashboard');
-      // In a production app, you would navigate: this.router.navigate(['/dashboard']);
-    }
+    this.fetchResumeData();
   }
+  
+  /**
+   * Fetches the student's resume data using the GET API.
+   * FIX: Hardcoding 'USR006' as per your requirement, but ideally this comes from session/auth.
+   */
+  private fetchResumeData(): void {
+      
+    // FIX: Get the user ID from the session, default to 'USR006' as requested
+    const userId = typeof window !== 'undefined' && window.sessionStorage.getItem('CURRENT_USER_ID') || 'USR006';
+    
+    // ResumeService का उपयोग करके GET API कॉल करें
+    this.resumeService.getResumeData(userId).subscribe({
+      next: (data: StudentInfo) => {
+        this.resumeData = data; 
+        this.divideSkillsIntoColumns(this.resumeData.skills); 
+        console.log('Resume Data Fetched Successfully:', this.resumeData);
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error('Failed to fetch resume data from API:', error);
+        // Fallback: If API fails, try to load data stored during form submission
+        this.loadFallbackData();
+      }
+    });
+  }
+
+  /**
+   * Loads the fallback data saved during the create-student submission process.
+   */
+  private loadFallbackData(): void {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+          const storedData = window.sessionStorage.getItem('STUDENT_DATA');
+          if (storedData) {
+              const loginData = JSON.parse(storedData);
+              if (loginData && loginData.info) {
+                  this.resumeData = loginData.info;
+                  if (this.resumeData) {
+                      this.divideSkillsIntoColumns(this.resumeData.skills);
+                  }
+                  console.log('Resume Data Loaded from Fallback Storage:', this.resumeData);
+                  return;
+              }
+          }
+      }
+      // If no data is found anywhere
+      console.log('No resume data found, redirecting to creation page.');
+      // In a production app, you would navigate: this.router.navigate(['/create-student']);
+  }
+
 
   /**
    * Helper function to divide the skills array roughly in half for two-column display.
@@ -67,23 +105,15 @@ export class GenerateAtsResumeComponent implements OnInit{
     return '';
   }
 
-  /**
-   * Toggles the visibility of the action buttons container.
-   */
+  
   toggleButtonContainer(): void {
       this.isButtonContainerVisible.update(visible => !visible);
   }
 
-  /**
-   * Triggers the default browser print function.
-   */
+  
   printResume(): void {
     window.print();
   }
-
-  /**
-   * Dynamically loads html2pdf and initiates the PDF generation.
-   */
   downloadResume(): void {
     // #resume-content is the outer container. We target it.
     const resumeElement = document.getElementById('resume-content'); 
@@ -107,7 +137,7 @@ export class GenerateAtsResumeComponent implements OnInit{
      const html2pdf = (window as any).html2pdf;
      if (!html2pdf) return;
      
-     // Store original body styles
+     
      const originalBodyMargin = document.body.style.margin;
      const originalBodyOverflow = document.body.style.overflow;
 
@@ -117,7 +147,6 @@ export class GenerateAtsResumeComponent implements OnInit{
 
     // Configuration for html2pdf
     const opt: any = { 
-        // FIX: Setting margin to 0 for full bleed control via CSS 
         margin: 0, 
         filename: `${this.resumeData?.full_name?.replace(' ', '_') || 'Student'}_ATS_Resume.pdf`,
         image: { type: 'jpeg' as 'jpeg', quality: 0.98 },
@@ -127,10 +156,6 @@ export class GenerateAtsResumeComponent implements OnInit{
           dpi: 300, 
           letterRendering: true,
           useCORS: true,
-          // FIX: फिक्स्ड windowHeight/Width/scrollY/scrollX को हटा दिया गया है
-          // ताकि html2pdf मल्टी-पेज कंटेंट को बिना काटे कैप्चर कर सके।
-          // अब यह कंटेंट की वास्तविक ऊँचाई के अनुसार चलेगा।
-          // ignoreElements with print-hidden class during canvas capture
           ignoreElements: (element: HTMLElement) => element.classList.contains('print-hidden')
         }, 
         jsPDF: { 
@@ -141,14 +166,12 @@ export class GenerateAtsResumeComponent implements OnInit{
           orientation: 'portrait' 
         },
         pagebreak: { 
-          // FIX: 'avoid-all' को 'css' में बदल दिया गया है ताकि CSS में परिभाषित 
-          // 'page-break-inside: avoid' का पालन हो और कंटेंट न कटे।
+         
           mode: 'css' 
         }
     };
     
-    // Generate PDF and then restore original body styles
-    // We target the outer #resume-content element
+    
     html2pdf().from(resumeElement).set(opt).save().then(() => {
         // Restore original body styles after PDF generation is complete
         document.body.style.margin = originalBodyMargin;

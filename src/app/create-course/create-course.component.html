@@ -1,22 +1,56 @@
 <!-- Main Container -->
 <div class="main-container">
-  <div class="form-card">
+  <div class="form-card" style="max-width: 550px; position: relative; overflow: hidden;">
 
-    <!-- Header -->
-    <div class="form-header">
+    <!-- Header (with Hamburger Menu Button) -->
+    <div class="form-header" style="display: flex; justify-content: space-between; align-items: center;">
       <h1 class="form-header-title">
-        Create New Course
+        {{ isEditMode ? 'Update Course' : 'Create New Course' }}
       </h1>
-      <p class="form-header-subtitle">
-        Define a new curriculum structure, assign a trainer, and set its details.
-      </p>
+      <!-- Hamburger Menu Icon (SVG) -->
+      <button 
+        type="button" 
+        (click)="toggleCourseListPanel()"
+        class="submit-button" 
+        style="padding: 10px; background-color: #3498db; width: 44px; height: 44px; flex-shrink: 0;"
+        [title]="showCourseListPanel ? 'Hide Course List' : 'Show Course List'"
+      >
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24" 
+          fill="white" 
+          width="24px" 
+          height="24px"
+          style="display: block; margin: 0 auto;"
+        >
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <!-- Menu Icon Path -->
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+      </button>
+    </div>
+    
+    <p class="form-header-subtitle">
+      {{ isEditMode ? 'Edit the fields below and save your changes.' : 'Enter the course name, content URL, and list of subjects.' }}
+    </p>
+
+    <!-- Form Submission Status/Messages -->
+    <div *ngIf="errorMessage" class="submission-success-message" style="background-color: #fcebeb; border-color: #e74c3c; color: #c0392b; margin-bottom: 20px;">
+        <p class="message-title">Error!</p>
+        <p class="message-content">{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="successMessage" class="submission-success-message" style="margin-bottom: 20px;">
+        <p class="message-title">Success!</p>
+        <p class="message-content">{{ successMessage }}</p>
     </div>
 
     <!-- Form Area - Template Driven Form (TDF) -->
+    <!-- Bind the form with #courseForm reference -->
     <form #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)" class="batch-form">
 
-      <!-- Section 1: Course Details (2 Columns on Desktop) -->
-      <div class="form-section-group">
+      <!-- Section 1: Course Details (Single Column) -->
+      <div class="form-section-group single-col">
         
         <!-- Course Name -->
         <div class="form-group">
@@ -30,7 +64,7 @@
             [(ngModel)]="courseData.courseName"
             #courseName="ngModel"
             class="input-field"
-            placeholder="e.g. Full Stack Web Development"
+            placeholder="Example: Robotics with ROS"
           />
           <div *ngIf="courseName.invalid && (courseName.dirty || courseName.touched)" class="error-message">
             <div *ngIf="courseName.errors?.['required']">Course Name is required.</div>
@@ -38,199 +72,63 @@
           </div>
         </div>
 
-        <!-- Course Code (New Field) -->
+        <!-- Content URL -->
         <div class="form-group">
-          <label for="courseCode" class="input-label">Course Code (Short Form)</label>
+          <label for="contentUrl" class="input-label">Content URL</label>
           <input
-            id="courseCode"
-            name="courseCode"
-            type="text"
+            id="contentUrl"
+            name="contentUrl"
+            type="url"
             required
-            minlength="2"
-            maxlength="10"
-            [(ngModel)]="courseData.courseCode"
-            #courseCode="ngModel"
+            pattern="https?://.+"
+            [(ngModel)]="courseData.contentUrl"
+            #contentUrl="ngModel"
             class="input-field"
-            placeholder="e.g. FSWD, DSML"
+            placeholder="Example: https://example.com/course-materials"
           />
-          <div *ngIf="courseCode.invalid && (courseCode.dirty || courseCode.touched)" class="error-message">
-            <div *ngIf="courseCode.errors?.['required']">Course Code is required.</div>
-            <div *ngIf="courseCode.errors?.['minlength']">Code must be 2-10 characters long.</div>
+          <div *ngIf="contentUrl.invalid && (contentUrl.dirty || contentUrl.touched)" class="error-message">
+            <div *ngIf="contentUrl.errors?.['required']">Content URL is required.</div>
+            <div *ngIf="contentUrl.errors?.['pattern']">Please enter a valid URL.</div>
           </div>
         </div>
-      </div>
 
-      <!-- Section 2: Trainer, Duration, and Timing (3 Columns on Desktop) -->
-      <div class="form-section-group three-cols">
-        
-        <!-- Trainer Selection (New Field) -->
+        <!-- Subjects (Comma-separated input) -->
         <div class="form-group">
-          <label for="selectedTrainerId" class="input-label">Select Trainer</label>
-          <select
-            id="selectedTrainerId"
-            name="selectedTrainerId"
+          <label for="subjectsInput" class="input-label">Subjects (Comma-separated)</label>
+          <textarea
+            id="subjectsInput"
+            name="subjectsInput"
+            rows="3"
             required
-            [(ngModel)]="courseData.selectedTrainerId"
-            #selectedTrainerId="ngModel"
-            class="input-field select-field"
-            [disabled]="trainers.length === 0"
-          >
-            <option value="" disabled>-- Select a Trainer --</option>
-            <option *ngFor="let trainer of trainers" [value]="trainer.id">
-              {{ getTrainerFullName(trainer) }} ({{ trainer.id }})
-            </option>
-          </select>
-          <!-- Error message if fetching trainers failed -->
-          <div *ngIf="errorMessage && trainers.length === 0" class="error-message">
-            {{ errorMessage }}
-          </div>
-          <div *ngIf="selectedTrainerId.invalid && (selectedTrainerId.dirty || selectedTrainerId.touched)" class="error-message">
-            Trainer selection is required.
+            [(ngModel)]="courseData.subjectsInput"
+            #subjectsInput="ngModel"
+            class="input-field textarea-field"
+            placeholder="Example: Golang, Python, ROS, AI/ML"
+          ></textarea>
+          <p class="form-header-subtitle" style="margin-top: 5px; font-size: 0.8rem;">
+            Please separate each subject with a comma (,).
+          </p>
+          <div *ngIf="subjectsInput.invalid && (subjectsInput.dirty || subjectsInput.touched)" class="error-message">
+            Subject list is required.
           </div>
         </div>
 
-        <!-- Duration in Months -->
-        <div class="form-group">
-          <label for="durationMonths" class="input-label">Duration (Months)</label>
-          <input
-            id="durationMonths"
-            name="durationMonths"
-            type="number"
-            required
-            min="1"
-            max="24"
-            [(ngModel)]="courseData.durationMonths"
-            #durationMonths="ngModel"
-            class="input-field"
-            placeholder="e.g. 6"
-          />
-          <div *ngIf="durationMonths.invalid && (durationMonths.dirty || durationMonths.touched)" class="error-message">
-            <div *ngIf="durationMonths.errors?.['required']">Duration is required.</div>
-            <div *ngIf="durationMonths.errors?.['min']">Min duration is 1 month.</div>
-            <div *ngIf="durationMonths.errors?.['max']">Max duration is 24 months.</div>
-          </div>
-        </div>
-
-        <!-- Course Timing (BatchTiming ki jagah) -->
-        <div class="form-group">
-          <label for="courseTiming" class="input-label">Daily Timing</label>
-          <input
-            id="courseTiming"
-            name="courseTiming"
-            type="text"
-            required
-            minlength="5"
-            [(ngModel)]="courseData.courseTiming"
-            #courseTiming="ngModel"
-            class="input-field"
-            placeholder="e.g. 2 Hours/Day"
-          />
-          <div *ngIf="courseTiming.invalid && (courseTiming.dirty || courseTiming.touched)" class="error-message">
-            <div *ngIf="courseTiming.errors?.['required']">Timing is required.</div>
-            <div *ngIf="courseTiming.errors?.['minlength']">Timing must be at least 5 characters long.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 3: Pricing and Mode (2 Columns on Desktop) -->
-      <div class="form-section-group">
-
-        <!-- Price -->
-        <div class="form-group">
-          <label for="price" class="input-label">Price (₹)</label>
-          <input
-            id="price"
-            name="price"
-            type="number"
-            required
-            min="0"
-            [(ngModel)]="courseData.price"
-            #price="ngModel"
-            class="input-field"
-            placeholder="e.g. 35000"
-          />
-          <div *ngIf="price.invalid && (price.dirty || price.touched)" class="error-message">
-            Price is required.
-          </div>
-        </div>
-
-        <!-- Mode Selection: Online/Offline Buttons (Segmented Control) -->
-        <div class="form-group">
-          <label class="input-label">Course Mode</label>
-          <div class="mode-segmented-control">
-            <!-- Offline Button (isOnline: false) -->
-            <button
-              type="button"
-              class="mode-option"
-              [class.active]="!courseData.isOnline"
-              (click)="courseData.isOnline = false"
-            >
-              Offline (In-person)
-            </button>
-            
-            <!-- Online Button (isOnline: true) -->
-            <button
-              type="button"
-              class="mode-option"
-              [class.active]="courseData.isOnline"
-              (click)="courseData.isOnline = true"
-            >
-              Online (Remote)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 4: Capacity and Description (Single Column for Description) -->
-      <div class="form-section-group single-col">
-        
-        <!-- Capacity -->
-        <div class="form-group" style="width: 50%;">
-          <label for="capacity" class="input-label">Max Capacity (Seats)</label>
-          <input
-            id="capacity"
-            name="capacity"
-            type="number"
-            required
-            min="10"
-            [(ngModel)]="courseData.capacity"
-            #capacity="ngModel"
-            class="input-field"
-            placeholder="e.g. 40"
-          />
-          <div *ngIf="capacity.invalid && (capacity.dirty || capacity.touched)" class="error-message">
-            <div *ngIf="capacity.errors?.['required']">Capacity is required.</div>
-            <div *ngIf="capacity.errors?.['min']">Capacity must be at least 10.</div>
-          </div>
-        </div>
-        
-        <!-- Description -->
-        <label for="description" class="input-label" style="margin-top: 20px;">Detailed Course Description / Curriculum Summary</label>
-        <textarea
-          id="description"
-          name="description"
-          rows="5"
-          required
-          minlength="50"
-          [(ngModel)]="courseData.description"
-          #description="ngModel"
-          class="input-field textarea-field"
-          placeholder="Write a comprehensive description covering key topics, outcomes, and prerequisites."
-        ></textarea>
-        <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-message">
-          <div *ngIf="description.errors?.['required']">Description is required.</div>
-          <div *ngIf="description.errors?.['minlength']">Description must be at least 50 characters long.</div>
-        </div>
-      </div>
-
-      <!-- Form Submission Status -->
-      <div *ngIf="formSubmitted" class="submission-success-message">
-        <p class="message-title">Submission Successful!</p>
-        <p class="message-content">New course data has been logged to the console (API call simulated).</p>
       </div>
 
       <!-- Submit Button -->
       <div class="submit-button-container">
+        <!-- Reset/Cancel Button (Visible in Edit Mode) -->
+        <button
+          *ngIf="isEditMode"
+          type="button"
+          (click)="resetFormState(courseForm)"
+          class="submit-button"
+          style="background-color: #95a5a6; color: white; margin-right: 15px;"
+        >
+          Cancel / Create New
+        </button>
+
+        <!-- Main Action Button -->
         <button
           type="submit"
           [disabled]="courseForm.invalid || isSubmitting"
@@ -238,10 +136,91 @@
           [class.enabled]="courseForm.valid && !isSubmitting"
           [class.disabled]="courseForm.invalid || isSubmitting"
         >
-          {{ isSubmitting ? 'Creating Course...' : 'Create Course' }}
+          {{ isSubmitting ? (isEditMode ? 'Updating Course...' : 'Creating Course...') : (isEditMode ? 'Update Course' : 'Create Course') }}
         </button>
       </div>
     </form>
 
   </div>
 </div>
+
+
+<!-- Side Panel for Course List (Simple Modal/Off-Canvas Style) -->
+<div 
+  class="course-list-panel" 
+  [class.open]="showCourseListPanel"
+>
+  <!-- Close Button -->
+  <button 
+    type="button" 
+    (click)="toggleCourseListPanel()" 
+    style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #34495e;"
+  >
+    &times;
+  </button>
+  
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #34495e; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">
+    All Available Courses
+  </h2>
+
+  <!-- List Loading/Error State -->
+  <div *ngIf="listErrorMessage" class="error-message" style="color: #e74c3c; padding: 10px; border: 1px dashed #e74c3c; border-radius: 8px;">
+    {{ listErrorMessage }}
+  </div>
+  
+  <div *ngIf="courses.length === 0 && !listErrorMessage" style="text-align: center; color: #7f8c8d; padding: 20px;">
+    Courses are loading...
+  </div>
+
+  <!-- Course List -->
+  <div *ngIf="courses.length > 0" class="course-list">
+    <div 
+      *ngFor="let course of courses" 
+      style="
+        background-color: white; 
+        border: 1px solid #ecf0f1; 
+        border-radius: 8px; 
+        padding: 15px; 
+        margin-bottom: 15px; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      "
+    >
+      <div style="font-weight: 700; color: #3498db; font-size: 1.1rem; margin-bottom: 5px;">
+        {{ course.courseName }} 
+        <span style="float: right; font-size: 0.9rem; color: #7f8c8d;">ID: {{ course.courseId }}</span>
+      </div>
+      <p style="font-size: 0.9rem; color: #7f8c8d; margin: 0 0 10px 0;">
+        <!-- FIX: Using helper function to safely format subjects for display. This fixes compilation errors. -->
+        Subjects: {{ getSubjectsDisplay(course) }}
+      </p>
+      
+      <!-- Actions -->
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button 
+          type="button" 
+          (click)="loadCourseForEdit(course)"
+          class="submit-button" 
+          style="flex: 1; padding: 8px; background-color: #f39c12; color: white; font-size: 0.9rem;"
+        >
+          Update
+        </button>
+        <button 
+          type="button" 
+          (click)="confirmDelete(course.courseId)"
+          class="submit-button" 
+          style="flex: 1; padding: 8px; background-color: #e74c3c; color: white; font-size: 0.9rem;"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Panel Overlay for better UX -->
+<div 
+  class="course-list-overlay" 
+  [class.open]="showCourseListPanel"
+  (click)="toggleCourseListPanel()"
+></div>

@@ -22,6 +22,15 @@
     <!-- STEP 1: PERSONAL DETAILS -->
     <section class="form-section fade-in" *ngIf="currentStep() === 1">
       <h2>Personal Details</h2>
+      
+      <!-- Display User ID if found in session -->
+      <p *ngIf="currentUserId()" style="text-align: right; color: #1a73e8; font-weight: 600; margin-bottom: 20px;">
+        Session User ID: {{ currentUserId() }}
+      </p>
+      <p *ngIf="!currentUserId()" class="error-message" style="text-align: center; margin-bottom: 20px;">
+        Warning: User ID not found in session. Please log in first. Submission might fail.
+      </p>
+
       <div class="grid-2-cols">
         <label class="input-group">
           Full Name<span class="mandatory">*</span>
@@ -29,32 +38,40 @@
           <div *ngIf="isInvalid('fullName')" class="error-message">Full Name is required.</div>
         </label>
 
+        <!-- FIX: ADDED DOB FIELD -->
         <label class="input-group">
-          Email<span class="mandatory">*</span>
-          <input type="email" formControlName="email" placeholder="you@example.com" />
-          <div *ngIf="isInvalid('email')" class="error-message">A valid email is required.</div>
+          Date of Birth<span class="mandatory">*</span>
+          <input type="date" formControlName="dob" placeholder="YYYY-MM-DD" />
+          <div *ngIf="isInvalid('dob')" class="error-message">Date of Birth (YYYY-MM-DD) is required.</div>
         </label>
       </div>
 
       <div class="grid-2-cols">
         <label class="input-group">
+          Email<span class="mandatory">*</span>
+          <input type="email" formControlName="email" placeholder="you@example.com" />
+          <div *ngIf="isInvalid('email')" class="error-message">A valid email is required.</div>
+        </label>
+
+        <label class="input-group">
           Phone Number<span class="mandatory">*</span>
           <input type="tel" formControlName="phone" placeholder="+91 9876543210" />
           <div *ngIf="isInvalid('phone')" class="error-message">A valid phone number is required.</div>
         </label>
-        
+      </div>
+
+      <div class="grid-2-cols">
         <label class="input-group">
           LinkedIn URL<span class="mandatory">*</span>
           <input type="url" formControlName="linkedin" placeholder="https://linkedin.com/in/username" />
           <div *ngIf="isInvalid('linkedin')" class="error-message">LinkedIn profile URL is required.</div>
         </label>
+        
+        <label class="input-group">
+          Portfolio/GitHub URL
+          <input type="url" formControlName="portfolio" placeholder="https://github.com/username/portfolio" />
+        </label>
       </div>
-      
-      <!-- FIX: ADDED PORTFOLIO/GITHUB FIELD (Required in your JSON payload) -->
-      <label class="input-group full-width">
-        Portfolio/GitHub URL
-        <input type="url" formControlName="portfolio" placeholder="https://github.com/username/portfolio" />
-      </label>
 
       <label class="input-group full-width">
         Address (City, State, Country)<span class="mandatory">*</span>
@@ -224,6 +241,7 @@
                  [formControl]="skillSearchControl"
                  placeholder="E.g., Angular, Python, Communication" />
         </label>
+        <!-- Updated: Filtered suggestions will now be the full list of skill names fetched from the backend, including tech stacks -->
         <div class="skill-suggestions-dropdown" *ngIf="filteredSuggestions().length > 0">
           <button *ngFor="let suggestion of filteredSuggestions()" 
                   type="button" 
@@ -237,6 +255,7 @@
 
       <!-- FIX: Added formArrayName="skills" wrapper to the container -->
       <div class="skill-card-container" formArrayName="skills">
+        <!-- Updated: Display all proficiency levels dynamically -->
         <div class="skill-card" [formGroupName]="i" *ngFor="let skillControl of skillsControls.controls; let i = index">
           <div class="grid-2-cols">
             <label class="input-group">
@@ -249,10 +268,8 @@
               Proficiency Level<span class="mandatory">*</span>
               <select formControlName="level">
                 <option value="" disabled>Select Level</option>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
-                <option value="Expert">Expert</option>
+                <!-- FIX: Use the fetched proficiencyList data -->
+                <option *ngFor="let level of proficiencyList()" [value]="level.levelName">{{ level.levelName }}</option>
               </select>
               <!-- Validation Added -->
               <div *ngIf="skillControl.get('level')?.invalid && (skillControl.get('level')?.touched || isSubmitted())" class="error-message">Proficiency Level is required.</div>
@@ -276,29 +293,29 @@
 
       <!-- FIX: Added formArrayName="projects" wrapper -->
       <div formArrayName="projects">
-        <div class="item-card" [formGroupName]="i" *ngFor="let projectControl of projectsControls.controls; let i = index">
+        <div class="item-card project-item" [formGroupName]="i" *ngFor="let projectControl of projectsControls.controls; let i = index">
           <h3>Project {{ i + 1 }}</h3>
           <label class="input-group full-width">
             Project Title<span class="mandatory">*</span>
-            <input formControlName="title" placeholder="ATS-Optimized Resume Builder" />
+            <input formControlName="title" placeholder="LMS Platform" />
             <!-- Validation Added -->
             <div *ngIf="projectControl.get('title')?.invalid && (projectControl.get('title')?.touched || isSubmitted())" class="error-message">Project Title is required.</div>
           </label>
 
           <!-- FIX: ADDED TECHUSED INPUT FIELD -->
-          <label class="input-group full-width">Technology Used (e.g., Angular, Django)
+          <label class="input-group full-width">Technology Used (Comma Separated, e.g., Angular, Django)
             <input formControlName="techUsed" placeholder="E.g., Angular, Django" /> 
           </label>
           
-          <label class="input-group full-width">Project URL
-            <input formControlName="url" placeholder="https://github.com/user/project" />
+          <label class="input-group full-width">Project URL (Github Link)
+            <input formControlName="url" placeholder="https://github.com/shivkumar/lms" />
           </label>
           
-          <label class="input-group full-width">Description
-            <textarea formControlName="description" rows="3" placeholder="Key role, what you built, and main achievement"></textarea>
+          <label class="input-group full-width">Description / Achievements
+            <textarea formControlName="description" rows="3" placeholder="Designed normalized schema, reduced load time by 30%"></textarea>
           </label>
           
-          <!-- Optional Fields (Duration/Role - keeping them for better UX, even if not in API payload) -->
+          <!-- Optional Fields (Duration/Role - keeping them for better UX, even if not directly in API payload) -->
           <div class="grid-2-cols">
             <label class="input-group">Duration</label>
             <label class="input-group">Role</label>

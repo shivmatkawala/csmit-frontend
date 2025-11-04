@@ -1,136 +1,253 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { Trainer, TrainerApiService } from '../services/trainer.service';
+import { CreateCourseService, Course, Subject } from '../services/create-course.service'; // FIX: Added Subject import
+import { HttpErrorResponse } from '@angular/common/http';
+import { forkJoin, Observable } from 'rxjs';
 
-/**
- * Interface for the Course Data structure
- */
-interface Course {
-  courseName: string; // BatchName ki jagah CourseName
-  courseCode: string;
-  durationMonths: number | null; // Naya field
-  selectedTrainerId: string; // Trainer ID store karne ke liye
-  courseTiming: string; 
-  capacity: number | null; // Max students
-  price: number | null;
-  isOnline: boolean;
-  description: string;
-}
+// We will use the 'Course' interface from the service file now.
 
 @Component({
   selector: 'app-create-course',
-  // Linking to separate template and style files
   templateUrl: './create-course.component.html',
   styleUrls: ['./create-course.component.css']
 })
 export class CreateCourseComponent implements OnInit {
 
-  // State flags
+  // State flags for form submission
   isSubmitting: boolean = false;
   formSubmitted: boolean = false;
   errorMessage: string | null = null;
+  successMessage: string | null = null;
   
-  // Trainer data
-  trainers: Trainer[] = [];
+  // CRUD State
+  isEditMode: boolean = false; // To switch between Create and Update mode
+  currentCourseId: number | undefined; // Stores the ID of the course being edited
   
-  // Data model initialized with default values
-  courseData: Course = {
-    courseName: '',
-    courseCode: '',
-    durationMonths: 6,
-    selectedTrainerId: '', // Default empty
-    courseTiming: '2 Hours/Day',
-    capacity: 40,
-    price: 35000,
-    isOnline: false,
-    description: ''
+  // List State
+  courses: Course[] = []; // Fetched course list
+  showCourseListPanel: boolean = false; // State for the side panel visibility
+  listErrorMessage: string | null = null;
+  
+  // Data model for the form
+  // subjectsInput: to handle subjects as a comma-separated string
+  courseData: { 
+    courseName: string, 
+    contentUrl: string, 
+    subjectsInput: string 
+  } = {
+    // FIX: Initializing with the user's provided data, ensuring subjects are represented as a comma-separated string for the form
+    courseName: 'Robbotics eith ROS',
+    contentUrl: 'https://example.com/robotis-ros-course-materials',
+    subjectsInput: 'Golang, Python, Robotics Operating System'
   };
 
-  constructor(private trainerApiService: TrainerApiService) { } // Inject Trainer Service
+  constructor(private createCourseService: CreateCourseService) { } 
 
   ngOnInit(): void {
-    this.fetchTrainers();
+
   }
   
   /**
-   * Fetch all trainers from the API to populate the dropdown.
+   * FIX: Helper method to safely format the subjects array for display in the template.
+   * This resolves the Parser Error and TS type error related to complex template logic (map).
+   * @param course The course object.
+   * @returns A comma-separated string of subject names, or 'N/A'.
    */
-  fetchTrainers(): void {
-    // Calling the API service to get the list of trainers
-    this.trainerApiService.getTrainers().subscribe({
-      next: (data) => {
-        this.trainers = data;
-        // Optionally set a default trainer if available
-        if (this.trainers.length > 0) {
-          this.courseData.selectedTrainerId = this.trainers[0].id;
+  getSubjectsDisplay(course: Course): string {
+    if (!course.subjects || course.subjects.length === 0) {
+        return 'N/A';
+    }
+    // We explicitly cast the array elements to Subject for type safety in map()
+    return (course.subjects as Subject[])
+           .map(s => s.subjectname)
+           .join(', ');
+  }
+
+  /**
+   * Toggles the visibility of the course list side panel.
+   * Fetch the list when the panel opens.
+   */
+  toggleCourseListPanel(): void {
+    this.showCourseListPanel = !this.showCourseListPanel;
+    if (this.showCourseListPanel) {
+      this.fetchCourseList();
+    }
+  }
+
+  /**
+   * Fetches the list of courses from the backend API.
+   */
+  fetchCourseList(): void {
+    this.listErrorMessage = null;
+    this.createCourseService.listCourses().subscribe({
+        next: (data) => {
+            // FIX: Map the incoming data to ensure 'courseId' is present and correct (camelCase).
+            // This addresses the issue where the API might return 'courseid' (lowercase).
+            this.courses = data.map((course: any) => ({
+                ...course,
+                courseId: course.courseId || course.courseid // Use existing courseId or map from courseid
+            })) as Course[];
+
+            // Check if courseId is present in the first item just for a sanity check
+            if (this.courses.length > 0 && !this.courses[0].courseId) {
+                console.warn("API returned course list but courseId is missing on the first item even after mapping. Check API response structure.");
+            }
+            if (this.courses.length === 0) {
+              this.listErrorMessage = 'No courses found. Please create a new course.';
+            }
+        },
+        error: (error: HttpErrorResponse) => {
+            console.error('Error fetching course list:', error);
+            this.listErrorMessage = 'Error loading course list: Could not contact the server.';
         }
-      },
-      error: (error) => {
-        console.error('Error fetching trainers:', error);
-        this.errorMessage = 'Failed to load trainers. Using mock data for selection.';
-        // Fallback or mock data for demonstration if API fails (Optional)
-        this.trainers = [
-            { id: 'TRAINER-001', firstName: 'Mock', lastName: 'A', email: '', phone: '', courses: [], experienceYears: 5, imageUrl: '' },
-            { id: 'TRAINER-002', firstName: 'Mock', lastName: 'B', email: '', phone: '', courses: [], experienceYears: 8, imageUrl: '' }
-        ];
-        if (this.trainers.length > 0) {
-          this.courseData.selectedTrainerId = this.trainers[0].id;
-        }
-      }
     });
   }
 
-
   /**
-   * Handles the form submission for the Template-Driven Form.
-   * @param form The NgForm instance provided by Angular.
+   * Resets the form and state to default 'Create' mode.
+   */
+  resetFormState(form: NgForm): void {
+      form.resetForm({
+        courseName: '',
+        contentUrl: 'https://',
+        subjectsInput: ''
+      });
+      this.isEditMode = false;
+      this.currentCourseId = undefined;
+      this.formSubmitted = false;
+      this.errorMessage = null;
+      this.successMessage = null;
+  }
+  
+  /**
+   * Pre-fills the form with the selected course data for editing.
+   * @param course The course object to load into the form.
+   */
+  loadCourseForEdit(course: Course): void {
+    // FIX: Check for both undefined and null (or 0, if 0 is invalid)
+    if (!course.courseId) {
+        console.error('Cannot edit a course without a valid ID.', course);
+        this.errorMessage = 'Course ID is not available for update.';
+        return;
+    }
+
+    this.isEditMode = true;
+    this.currentCourseId = course.courseId;
+    
+    // Fill the form data with the selected course
+    this.courseData = {
+        courseName: course.courseName,
+        contentUrl: course.contentUrl,
+        // Convert the subjects array of OBJECTS to a comma-separated STRING of names
+        subjectsInput: course.subjects && course.subjects.length > 0
+                       ? course.subjects.map((sub: Subject) => sub.subjectname).join(', ') 
+                       : '' 
+    };
+
+    this.showCourseListPanel = false; // Close the panel
+    this.errorMessage = null;
+    this.successMessage = `Course ID ${course.courseId} loaded for 'Update'.`;
+  }
+  
+  /**
+   * Handles the form submission (either CREATE or UPDATE).
+   * @param form The NgForm instance.
    */
   onSubmit(form: NgForm): void {
-    this.errorMessage = null; // Clear previous errors
+    this.errorMessage = null; 
+    this.successMessage = null;
     if (form.invalid) {
       this.errorMessage = 'Form is invalid. Please fill in all required fields correctly.';
-      console.error(this.errorMessage);
-      this.formSubmitted = false;
       return;
     }
 
     this.isSubmitting = true;
-    this.formSubmitted = false;
     
-    // Find the selected trainer's name to display in console
-    const selectedTrainer = this.trainers.find(t => t.id === this.courseData.selectedTrainerId);
+    // Convert subjectsInput string to a simple array of strings (names)
+    const subjectsArray: string[] = this.courseData.subjectsInput
+                            .split(',')
+                            .map(s => s.trim())
+                            .filter(s => s.length > 0);
 
-    // Simulate API call delay for 1.5 seconds
-    setTimeout(() => {
-      // In a real application, you would send this.courseData to your backend service
-      console.log('--- Course Data Successfully Submitted ---');
-      console.log('Course Object:', this.courseData);
-      console.log('Selected Trainer:', selectedTrainer ? `${selectedTrainer.firstName} ${selectedTrainer.lastName} (${selectedTrainer.id})` : 'N/A');
-      
-      this.isSubmitting = false;
-      this.formSubmitted = true;
+    // Construct the API payload object (The backend expects a payload with subjects as string[])
+    let payload: { 
+        courseId?: number, 
+        courseName: string, 
+        contentUrl: string, 
+        subjects: string[] 
+    } = {
+        courseName: this.courseData.courseName,
+        contentUrl: this.courseData.contentUrl,
+        subjects: subjectsArray // This is now string[]
+    };
+    
+    let apiCall: Observable<any>;
+    let action: string;
 
-      // Optional: Reset form fields after successful submission
-      // form.resetForm({
-      //   courseTiming: '2 Hours/Day',
-      //   isOnline: false,
-      //   capacity: 40,
-      //   price: 35000,
-      //   durationMonths: 6,
-      //   selectedTrainerId: this.trainers.length > 0 ? this.trainers[0].id : '',
-      // });
-
-    }, 1500); 
+    if (this.isEditMode && this.currentCourseId) {
+        // UPDATE operation
+        payload.courseId = this.currentCourseId;
+        apiCall = this.createCourseService.updateCourse(payload as any); // Type is inferred as correct here now
+        action = 'update';
+    } else {
+        // CREATE operation
+        apiCall = this.createCourseService.createCourse(payload);
+        action = 'creation';
+    }
+    
+    apiCall.subscribe({
+        next: (response) => {
+            console.log('API Response:', response);
+            this.isSubmitting = false;
+            this.successMessage = `Course successfully ${action}d!`;
+            this.errorMessage = null;
+            this.formSubmitted = true;
+            this.resetFormState(form); // Reset form
+            this.fetchCourseList(); // Update list
+        },
+        error: (error: HttpErrorResponse) => {
+            console.error('API Error:', error);
+            this.isSubmitting = false;
+            this.errorMessage = `Error during course ${action}: Could not contact the server.`;
+            this.successMessage = null;
+        }
+    });
   }
   
   /**
-   * Helper function to combine first name and last name
-   * @param trainer The Trainer object
-   * @returns Full name string
+   * Handles the course deletion process.
+   * @param courseId The ID of the course to delete.
    */
-  getTrainerFullName(trainer: Trainer): string {
-    return `${trainer.firstName} ${trainer.lastName}`;
+  confirmDelete(courseId: number | undefined): void {
+    // FIX: Check for both undefined and null
+    if (!courseId) {
+      this.errorMessage = 'Course ID is not available for deletion.';
+      return;
+    }
+    
+    // Using prompt instead of confirm() as per best practices in iframe environment
+    const isConfirmed = prompt(`Are you sure you want to delete Course ID ${courseId}? Type 'DELETE' to confirm.`);
+    if (isConfirmed !== 'DELETE') {
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.createCourseService.deleteCourse(courseId).subscribe({
+        next: (response) => {
+            console.log('Delete API Response:', response);
+            this.isSubmitting = false;
+            this.successMessage = `Course ID ${courseId} successfully deleted.`;
+            this.fetchCourseList(); // Update list
+            if (this.currentCourseId === courseId) {
+              // If the currently edited course was deleted, reset the form
+              this.resetFormState({} as NgForm); 
+            }
+        },
+        error: (error: HttpErrorResponse) => {
+            console.error('Delete API Error:', error);
+            this.isSubmitting = false;
+            this.errorMessage = `Error deleting Course ID ${courseId}.`;
+        }
+    });
   }
 }

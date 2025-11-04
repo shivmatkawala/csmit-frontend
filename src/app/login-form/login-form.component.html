@@ -19,6 +19,13 @@
             <!-- Main Heading (CSMTTI) -->
             <h1 class="main-heading">CSMTTI</h1>
         </div>
+        
+        <!-- Error Message Display Area -->
+        <!-- Error message tab dikhega jab errorMessage string empty nahi hogi -->
+        <div *ngIf="errorMessage" class="error-message-box">
+            {{ errorMessage }}
+        </div>
+        <!-- END: Error Message Display Area -->
 
         <!-- Login Form -->
         <form (ngSubmit)="login()">
@@ -34,23 +41,7 @@
                 <input type="password" id="password" class="text-input" placeholder="Enter your password" [(ngModel)]="password" name="password" required>
             </div>
 
-            <!-- role Input Group (Behtar Design) -->
-            <div class="form-group custom-select-group">
-                <label for="role">Select Role</label>
-                <div class="custom-select-wrapper">
-                    <!-- The actual select element -->
-                    <select id="role" class="text-input custom-select" [(ngModel)]="role" name="role" required>
-                        <option value="" disabled selected>Select your role</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Trainer">Trainer</option>
-                        <option value="Student">Student</option>
-                    </select>
-                    <!-- Custom Arrow Icon for the select input -->
-                    <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </div>
+            <!-- FIX: 'Select Role' ड्रॉपडाउन हटा दिया गया है। -->
 
             <!-- Login Button -->
             <button type="submit" class="login-button">
