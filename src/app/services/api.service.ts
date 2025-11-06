@@ -3,8 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-// NEW INTERFACE: /api/users/all/ endpoint से आने वाले User data के लिए (Previous logic se)
-// Ab iska upyog sirf client-side structure ke liye hoga.
+// NEW INTERFACE: /api/users/all/ endpoint से आने वाले User data के लिए
 export interface User {
   id: number;
   email: string; 
@@ -14,14 +13,10 @@ export interface User {
   last_name: string;
 }
 
-// Login response structure ke liye interfaces (Existing)
-// Is response mein server ko role_id ya role ka naam bhejna chahiye.
+// Student Info Structure (Detailed profile data)
 export interface StudentInfo {
-  csmit_id: string;
-  education: any[];
-  experience: any[];
-  skills: any[];
-  projects: any[];
+  // FIX: छात्र ID को userId के रूप में
+  userId: string; 
   full_name: string;
   email: string;
   phone: string;
@@ -29,16 +24,44 @@ export interface StudentInfo {
   linkedin: string;
   portfolio: string;
   experience_type: string;
+  education: any[];
+  experience: any[];
+  skills: any[];
+  projects: any[];
+  // FIX: यदि बैच ID सीधे StudentInfo ऑब्जेक्ट के भीतर है
+  batch_id?: number; 
+  course_id?: number; // FIX: Course ID जोड़ा गया
 }
 
+// Login Response Structure (UPDATED)
 export interface LoginResponse {
   message: string;
-  role: string; // FIX: Server dwara bheja gaya role ka naam (e.g., 'Admin'). Ab yehi use hoga.
-  // role_id: number; // FIX: role_id हटा दिया गया है क्योंकि सर्वर इसे नहीं भेज रहा है।
-  csmit_id: string;
+  role: string; // Server द्वारा भेजा गया role का नाम (e.g., 'Student')
+  userId: string; // FIX: छात्र का मुख्य ID (User ID)
   username: string;
   info: StudentInfo;
+  // FIX: यदि batch_id टॉप लेवल पर नहीं आता है, तो भी हम इसे यहाँ रखते हैं
+  batch_id?: number;
+  course_id?: number; 
 }
+
+// NEW INTERFACE: Student ID का उपयोग करके Profile Details fetch करने के लिए (UPDATED)
+export interface StudentProfileDetails {
+  userId: string; // FIX: Use userId
+  batch_id?: number; // वह ID जो हमें चाहिए
+  course_id?: number; // Course ID भी यहाँ से fetch कर सकते हैं
+  // अन्य आवश्यक डेटा
+}
+
+// 👇️ NEW INTERFACE: StudentBatches API से आने वाले डेटा के लिए
+export interface StudentBatchDetails {
+    studentbatchid: number;
+    batchid: number;
+    userid: string;
+    batch_name: string;
+    course_id: number; // Serializer से जोड़ा गया
+}
+
 
 // Existing Student interface (used for POST/PUT operations)
 export interface Student {
@@ -60,11 +83,8 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  /** LOGIN - Server ko username aur password bhejkar authentication karein */
-  // FIX: Ab yeh method sirf username aur password accept karta hai.
+  /** LOGIN - Server को username और password bhejkar authentication karein */
   login(username: string, password: string): Observable<LoginResponse> {
-    // FIX: URL को 'users/login/' endpoint के साथ पूरा किया गया है।
-    // FIX: Data payload mein ab sirf 'username' aur 'password' bhejenge.
     return this.http.post<LoginResponse>(`${this.baseUrl}users/login/`, { username, password })
       .pipe(
         tap(res => {
@@ -79,15 +99,9 @@ export class ApiService {
       );
   }
   
-  // NOTE: Ab hum is method ka upyog nahi kar rahe hain.
-  getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}users/all/`)
-      .pipe(catchError(this.handleError));
-  }
-
 
   /** GET Stored Login Data */
-  getStoredStudentData(): LoginResponse | null { // Is function ka upyog student-dashboard.component.ts mein hoga
+  getStoredStudentData(): LoginResponse | null { // Is function का upyog student-dashboard.component.ts mein hoga
     try {
       const data = sessionStorage.getItem(this.STORAGE_KEY);
       if (data) {
@@ -104,58 +118,36 @@ export class ApiService {
       sessionStorage.removeItem(this.STORAGE_KEY);
   }
 
+  /**
+   * NEW: Student ID का उपयोग करके StudentBatchDetails fetch करें (BATCH & COURSE ID के लिए)।
+   * @param userId - छात्र का userId।
+   * @returns StudentBatchDetails[]
+   */
+  fetchStudentBatches(userId: string): Observable<StudentBatchDetails[]> {
+      // Django URL: /exams/student-batches/<str:user_id>/
+      const apiUrl = `${this.baseUrl}exams/student-batches/${userId}/`;
+      console.log(`Fetching student batches (batch/course ID) for ID: ${userId} from ${apiUrl}`);
+      // API एक array of StudentBatchDetails लौटाता है
+      return this.http.get<StudentBatchDetails[]>(apiUrl) 
+          .pipe(catchError(this.handleError));
+  }
+
+
   /** CREATE (POST) Resume/Student (Form Submission) */
   submitResume(resumeData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    // FIX: URL को 'students/' endpoint के साथ पूरा किया गया है。
+    // FIX: URL को 'students/' endpoint के साथ पूरा किया गया है।
     return this.http.post(`${this.baseUrl}students/`, resumeData, { headers }) 
       .pipe(catchError(this.handleError));
   }
 
   /** Create new student (Original Method) */
   createStudent(student: Student): Observable<any> {
-    // FIX: URL को 'students/' endpoint के साथ पूरा किया गया है。
     return this.http.post(`${this.baseUrl}students/`, student);
   }
 
 
-  /** READ (GET) all resumes */
-  getAllResumes(): Observable<any[]> {
-    // FIX: URL को 'resumes/' endpoint के साथ पूरा किया गया है。
-    return this.http.get<any[]>(`${this.baseUrl}resumes/`)
-      .pipe(catchError(this.handleError));
-  }
-
-  /** READ (GET) single resume */
-  getResumeById(id: number): Observable<any> {
-    // FIX: URL को 'resumes/{id}/' endpoint के साथ पूरा किया गया है。
-    return this.http.get<any>(`${this.baseUrl}resumes/${id}/`)
-      .pipe(catchError(this.handleError));
-  }
-
-  // Get all students 
-  getStudents(): Observable<any> {
-    // FIX: URL को 'students/' endpoint के साथ पूरा किया गया है。
-    return this.http.get(`${this.baseUrl}students/`);
-  }
-
-  // Get single student by ID
-  getStudent(id: number): Observable<any> {
-    // FIX: URL को 'students/{id}/' endpoint के साथ पूरा किया गया है。
-    return this.http.get(`${this.baseUrl}students/${id}/`);
-  }
-
-  // Update a student
-  updateStudent(id: number, data: Student): Observable<any> {
-    return this.http.put(`${this.baseUrl}students/${id}/`, data);
-  }
-
-  // Delete a student
-  deleteStudent(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}students/${id}/`);
-  }
-
-  // Get resume data for a student
+  /** READ (GET) single resume or student profile by ID */
   getResumeData(studentId: string | number): Observable<any> {
     // URL FIXED to match Django Router: /api/students/{id}/
     return this.http.get<any>(`${this.baseUrl}students/${studentId}/`);
@@ -168,16 +160,13 @@ export class ApiService {
       errorMessage = `Client Error: ${error.error.message}`;
     } else {
       // Check if error.error is a string or an object with a message property
-      // Server se aaya hua specific error message ya 'Error' object ko use karein
       errorMessage = error.error?.message || error.error?.error || error.error || error.message; 
       
-      // Agar error string hai aur server ki taraf se hai, toh usse seedha use karein
       if (typeof error.error === 'string' && error.error.length > 0) {
         errorMessage = error.error;
       }
     }
     console.error('API Error:', errorMessage);
-    // throwError() ko function ke taur par call karein.
     return throwError(() => new Error(errorMessage)); 
   }
 

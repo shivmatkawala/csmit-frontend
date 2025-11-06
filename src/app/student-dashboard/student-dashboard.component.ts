@@ -1,10 +1,14 @@
 // student-dashboard.component.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { interval, Subscription, timer } from 'rxjs';
+import { interval, Subscription, timer, Observable, of } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ApiService, LoginResponse } from '../services/api.service';
-// --- Interfaces for Student Data (Dummy Data Structure) ---
+// FIX: LoginResponse, StudentInfo, और StudentBatchDetails के अपडेटेड इंटरफ़ेस को इस्तेमाल करें
+import { ApiService, LoginResponse, StudentInfo, StudentProfileDetails, StudentBatchDetails } from '../services/api.service'; 
+import { examAPi } from '../services/createexam.service'; // Exam Service ko import kiya
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs'; // For multiple async calls
+
 interface Course {
   title: string;
   progress: number;
@@ -36,13 +40,44 @@ interface ScheduleItem {
 // ProfileSettingComponent को डेटा पास करने के लिए एक नया Interface
 export interface StudentProfileData {
   full_name: string;
-  email: string; // Dummy email added
-  student_id: string; // Dummy student_id added
+  email: string; 
+  student_id: string; // FIX: Now stores userId (was csmit_id)
   profileImageUrl: string;
   profileInitial: string;
   profileImagePlaceholder: boolean; // <-- FIX: Added missing property
   courses: Course[];
   featureCards: FeatureCard[];
+  // New property to hold student's batch ID for exam filtering
+  batchId?: number; 
+  courseId?: number; // FIX: Course ID जोड़ा गया
+}
+
+// --- NEW INTERFACES for EXAM Feature (API Response Structure) ---
+interface Subject {
+  subjectid: number;
+  subjectname: string;
+}
+
+interface Batch {
+  batchId: number;
+  batchName: string;
+}
+
+// FIX: Exam API response structure के अनुरूप Interface
+interface AvailableExam {
+  examId: number; // For fetching questions
+  examName: string;
+  start_datetime: string; // NEW
+  end_datetime: string;   // NEW
+  is_active: boolean;     // NEW
+  courseid: number; 
+  batchid: number;
+  subjectid: number;
+  // Note: Assuming 'batch' and 'subject' come as nested objects in the exam-list API response
+  batch: { batchId: number, batchName: string }; // Nested Batch object structure ko simplify kiya
+  subject: { subjectid: number, subjectname: string }; // Nested Subject object structure ko simplify kiya
+  durationMinutes: number; 
+  totalQuestions: number; 
 }
 
 
@@ -65,12 +100,14 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   studentProfileData: StudentProfileData = {
     full_name: 'Loading...',
     email: 'loading@example.com',
-    student_id: 'STU-0000',
+    student_id: 'STU-0000', // FIX: Default to dummy ID
     profileImageUrl: '',
     profileInitial: '',
     profileImagePlaceholder: true, // Default value
     courses: [],
-    featureCards: []
+    featureCards: [],
+    batchId: undefined, // Default value
+    courseId: undefined, // Default value
   };
 
   // --- User & Clock Data (Real-time updates ke liye) ---
@@ -88,55 +125,63 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   private timeSubscription?: Subscription;
 
   // --- Study Time Tracking (Clock In/Out) ---
-  // Replicating the HR dashboard's clocking mechanism for tracking study time
-  studyTimeTimer: string = '00:00:00'; // Current session timer (HH:MM:SS)
-  totalStudyHours: string = '00:00'; // Total hours studied today
-  targetRemainingHours: string = '04:00'; // Remaining hours to meet 5-hour target
-  isStudying: boolean = false; // True if currently clocked in (studying)
-  studyLog: { in: Date, out?: Date, durationSeconds?: number }[] = []; // Local log of study sessions
+  studyTimeTimer: string = '00:00:00'; 
+  totalStudyHours: string = '00:00'; 
+  targetRemainingHours: string = '04:00'; 
+  isStudying: boolean = false; 
+  studyLog: { in: Date, out?: Date, durationSeconds?: number }[] = []; 
 
   // SVG progress bar properties
   private readonly CIRCLE_RADIUS: number = 54;
   private readonly CIRCUMFERENCE: number = 2 * Math.PI * this.CIRCLE_RADIUS;
-  readonly MAX_TARGET_HOURS: number = 5; // Target study hours for the day (e.g., 5 hours)
+  readonly MAX_TARGET_HOURS: number = 5; 
   readonly MAX_TARGET_MINUTES: number = this.MAX_TARGET_HOURS * 60;
 
-  // --- Feature Cards, Courses, Assignments (Dummy Data) ---
-  featureCards: FeatureCard[] = []; // Naye feature cards
-  courses: Course[] = []; // Courses for progress card
-  nextDeadlines: ScheduleItem[] = []; // Next Deadlines and Classes
+  // --- Feature Cards, Courses, Assignments ---
+  featureCards: FeatureCard[] = []; 
+  courses: Course[] = []; 
+  nextDeadlines: ScheduleItem[] = []; 
 
   // --- Calendar and Schedule ---
   selectedMonthYear: string = '';
-  displayedMonthStart: Date = new Date(); // Stores the start date of the currently displayed month
+  displayedMonthStart: Date = new Date(); 
   calendarDays: { date: number | string; disabled: boolean; selected: boolean; fullDate: Date | null }[] = [];
-  fullScheduleDetails: ScheduleItem[] = []; // All data for the displayed month
-  scheduleDetails: ScheduleItem[] = []; // Filtered list for display
+  fullScheduleDetails: ScheduleItem[] = []; 
+  scheduleDetails: ScheduleItem[] = []; 
   selectedScheduleDate: Date | null = null;
 
   // --- Form & Message Properties ---
-  showAssignmentModal: boolean = false; // For assignment submission/details
+  showAssignmentModal: boolean = false; 
   assignmentTitleControl = new FormControl('', Validators.required);
   assignmentDetailsControl = new FormControl('');
   message: string = '';
   messageType: 'success' | 'error' | 'warning' | '' = '';
+  
+  // --- NEW EXAM PROPERTIES ---
+  showExamModal: boolean = false;
+  activeExams: AvailableExam[] = [];
+  isLoadingExams: boolean = true;
+  selectedExamId: number | null = null;
+  
+  // FIX 1: Add the missing property required by the template
+  examToAttend: AvailableExam | null = null; 
 
-  // ApiService ko constructor me inject kiya
-  constructor(private cdr: ChangeDetectorRef, private sanitizer: DomSanitizer, private apiService: ApiService) {}
+  constructor(private cdr: ChangeDetectorRef, private apiService: ApiService, private examService: examAPi) {}
+
+  get selectedExam(): AvailableExam | undefined {
+      if (this.selectedExamId === null) {
+          return undefined;
+      }
+      return this.activeExams.find(e => e.examId === this.selectedExamId);
+  }
 
   // =========================================================================
   // LIFECYCLE HOOKS
   // =========================================================================
 
   ngOnInit(): void {
-    // 1. Initialize dummy data first
-    this.initializeDummyData();
-    
-    // 2. Fetch Student Data (Backend storage se)
-    this.fetchStudentDataFromStorage();
-
-
-    // 3. Start real-time clock
+    this.initializeDataStructures();
+    this.fetchStudentDataFromStorage(); // यह अब Batch ID और Course ID को फ़ेच करेगा
     this.updateClock();
     this.timeSubscription = interval(1000).subscribe(() => {
       this.updateClock();
@@ -145,12 +190,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    // 4. Initialize Calendar
     const now = new Date();
-    this.displayedMonthStart = new Date(now.getFullYear(), now.getMonth(), 1); // Start of the current month
+    this.displayedMonthStart = new Date(now.getFullYear(), now.getMonth(), 1); 
     this.populateCalendar(this.displayedMonthStart);
     this.selectedScheduleDate = this.todayDate;
-    this.initializeScheduleData();
     this.updateDisplayedScheduleDetails();
   }
 
@@ -158,71 +201,126 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.timeSubscription?.unsubscribe();
   }
 
-  // =========================================================================
-  // REAL-TIME DATA FETCHING (Backend Storage se)
-  // =========================================================================
+  private initializeDataStructures(): void {
+    this.featureCards = []; 
+    this.courses = []; 
+    this.nextDeadlines = []; 
+    this.fullScheduleDetails = [];
+    this.studyLog = [];
+  }
 
   private fetchStudentDataFromStorage(): void {
     const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
     
-    if (loginData && loginData.info) {
-      const studentInfo = loginData.info;
-      
-      this.studentName = studentInfo.full_name || 'Student'; // Full name use kiya
-      
-      // Filhaal, image nahi aa rahi hai, toh humesha placeholder use karein
-      this.profileImageUrl = ''; 
-      this.profileImagePlaceholder = true;
+    this.loadingDashboardData = true; 
+    this.cdr.detectChanges(); 
 
-      const initial = this.getProfileInitial(this.studentName);
-
-      // StudentProfileData object ko update karein
+    // FIX: Check for userId
+    if (loginData && loginData.userId) {
+      const studentId = loginData.userId;
+      
+      // FIX: Nullish coalescing operator (?) का उपयोग करके 'info' और 'full_name' को सुरक्षित रूप से एक्सेस करें
+      // अगर info या full_name अनुपलब्ध है, तो fallback के रूप में 'username' का उपयोग करें।
+      const fullName = loginData.info?.full_name || loginData.username || 'Student'; 
+      const email = loginData.info?.email || loginData.username || 'johndoe@university.edu';
+      
+      const initial = this.getProfileInitial(fullName);
+      
+      this.studentName = fullName; 
+      this.profileInitial = initial; 
+      this.profileImagePlaceholder = true; 
+      
+      // 1. Update basic profile data immediately
       this.studentProfileData = {
-          full_name: this.studentName,
-          email: studentInfo.email || 'johndoe@university.edu', // Dummy/Default email
-           student_id: 'STU-0000',
-          profileImageUrl: this.profileImageUrl,
-          profileInitial: initial,
-          profileImagePlaceholder: this.profileImagePlaceholder, // <-- FIX: Assign value
-          courses: this.courses, // Dummy data use kar rahe hain
-          featureCards: this.featureCards // Dummy data use kar rahe hain
+          ...this.studentProfileData,
+          full_name: fullName,
+          email: email, 
+          student_id: studentId, // student_id now holds the userId
       };
+      
+      console.log('--- Student Data Found. Fetching Batch Details using ID:', studentId, '---');
+      
+      // 2. Fetch Batch/Course details using the new fetchStudentBatches API
+      this.apiService.fetchStudentBatches(studentId).pipe(
+          tap((batchDetails: StudentBatchDetails[]) => {
+              
+              if (batchDetails && batchDetails.length > 0) {
+                  // छात्र कई बैच में हो सकता है; हम पहले बैच का उपयोग कर रहे हैं।
+                  const firstBatch = batchDetails[0];
+                  const studentBatchId = firstBatch.batchid; 
+                  const studentCourseId = firstBatch.course_id; 
 
-      if (this.profileImagePlaceholder) {
-        // Image URL nahi hai, toh initials dikhao
-        this.profileInitial = initial;
-      }
-      
-      this.loadingDashboardData = false;
-      this.cdr.detectChanges(); // UI ko force update karein
-      
-      console.log('Student data loaded successfully from API service storage.');
+                  // 3. Update Batch/Course data
+                  this.studentProfileData = {
+                      ...this.studentProfileData,
+                      batchId: studentBatchId, 
+                      courseId: studentCourseId
+                  };
+                  
+                  // 4. Update UI and fetch exams
+                  console.log('--- Batches Loaded. Filtering Exams with BATCH ID:', studentBatchId, 'and COURSE ID:', studentCourseId, '---');
+                  this.fetchActiveExamsForStudent(studentBatchId, studentCourseId);
+                  
+              } else {
+                  // यदि कोई बैच असाइन नहीं है
+                  const defaultId = 1;
+                  this.studentProfileData = {
+                      ...this.studentProfileData,
+                      batchId: defaultId, 
+                      courseId: defaultId
+                  };
+                  console.warn('Student has no assigned batches. Using default IDs 1 for exam filtering.');
+                  this.showMessage('No batches assigned. Using default IDs for exams.', 'warning');
+                  this.fetchActiveExamsForStudent(defaultId, defaultId); 
+              }
+              
+              this.loadingDashboardData = false;
+              this.cdr.detectChanges(); 
+              
+          }),
+          catchError((error) => {
+              // API फ़ेल होने पर या ID न मिलने पर डिफ़ॉल्ट ID का उपयोग करें
+              console.error('Error fetching student batches (batch/course ID):', error);
+              const defaultId = 1; 
+              this.studentProfileData = {
+                  ...this.studentProfileData,
+                  batchId: defaultId,
+                  courseId: defaultId
+              };
+              this.loadingDashboardData = false;
+              this.showMessage('Error fetching Batch/Course ID. Using default IDs 1 for exams.', 'error');
+              this.cdr.detectChanges();
+              this.fetchActiveExamsForStudent(defaultId, defaultId);
+              return of(null); // Return observable null to complete the stream
+          })
+      ).subscribe();
 
     } else {
-      // Data available nahi hai
+      // Login Data (userId) उपलब्ध नहीं है, default/guest data सेट करें
       this.studentName = 'Guest User';
+      const defaultId = 1; 
       this.profileInitial = this.getProfileInitial(this.studentName);
       this.profileImagePlaceholder = true;
       this.loadingDashboardData = false;
-      this.showMessage('Login data not found. Showing default content.', 'warning');
+      this.showMessage('Login data (userId) not found. Showing default content.', 'warning');
       
-      // Default data set karein
       this.studentProfileData = {
+          ...this.studentProfileData,
           full_name: this.studentName,
           email: 'guest@university.edu',
           student_id: 'STU-0000',
-          profileImageUrl: '',
           profileInitial: this.profileInitial,
-          profileImagePlaceholder: true, // <-- FIX: Assign default value
-          courses: this.courses,
-          featureCards: this.featureCards
+          batchId: defaultId,
+          courseId: defaultId
       };
+      this.cdr.detectChanges(); 
+      this.fetchActiveExamsForStudent(defaultId, defaultId); 
     }
   }
 
   // Profile initial calculate karne ka logic
   getProfileInitial(fullName: string): string {
-    if (!fullName) return 'U'; // Default for unknown
+    if (!fullName) return 'U'; 
     const parts = fullName.split(/\s+/).filter(p => p.length > 0);
     if (parts.length === 1) {
       return parts[0][0].toUpperCase();
@@ -233,114 +331,143 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
     return fullName[0].toUpperCase();
   }
-
-
+  
   // =========================================================================
-  // DATA INITIALIZATION (Dummy)
+  // NEW/UPDATED: EXAM LOGIC (Batch ID and Course ID filtering)
   // =========================================================================
+  
+  // Fetch available exams based on the student's batch ID and course ID
+  fetchActiveExamsForStudent(batchId: number, courseId: number): void {
+      this.isLoadingExams = true;
+      this.activeExams = []; 
+      this.cdr.detectChanges();
+      
+      console.log(`Fetching student-specific exams using API for Batch ID: ${batchId} and Course ID: ${courseId}`);
 
-  private initializeDummyData(): void {
-    // 1. Student Feature Cards (Real-time utility for tech students)
-    this.featureCards = [
-      {
-        label: 'Recording Classes', // वीडियो रिकॉर्डिंग
-        icon: 'fas fa-video', // वीडियो/क्लास रिकॉर्डिंग आइकन
-        value: { watched: 4, total: 10 }, // 10 में से 4 क्लासेज देखीं
-        info: '4/10 recordings watched. Keep up the pace!', // फुटर टेक्स्ट
-        color: '#4338CA', // Blue
-        route: '/recordings' // Recordings पेज पर जाने का रूट
-      },
-      {
-        label: 'Skill Score',
-        icon: 'fas fa-bolt', // Skill/Speed icon
-        value: { score: 78, level: 'Advanced' },
-        info: 'Targeting 90+ in Core Java competency test.',
-        color: '#10B981', // Green
-        route: '/skills'
-      },
-      {
-        label: 'Daily Coding Streak',
-        icon: 'fas fa-fire', // Fire/Streak icon
-        value: { streak: 12, target: 30 },
-        info: 'You have solved 12 problems in a row!',
-        color: '#F43F5E', // Red/Rose
-        route: '/dsa'
-      },
-      {
-        label: 'Current Focus',
-        icon: 'fas fa-laptop-code', // Coding focus icon
-        value: { course: 'React Framework', progress: 65 },
-        info: '65% complete. Next lesson: Hooks deep dive.',
-        color: '#F59E0B', // Yellow/Orange
-        route: '/courses/IT402'
-      },
-    ];
-
-    // 2. Student Courses (kept for 'Top Courses Progress' section)
-    this.courses = [
-      { title: 'Advanced Algorithms', progress: 75, instructor: 'Dr. A. Sharma', category: 'CS', code: 'CS501', colorClass: '#3b82f6' },
-      { title: 'Data Structures', progress: 92, instructor: 'Prof. J. Singh', category: 'CS', code: 'CS301', colorClass: '#10b981' },
-      { title: 'Web Development (React)', progress: 40, instructor: 'Ms. P. Verma', category: 'IT', code: 'IT402', colorClass: '#f43f5e' },
-      { title: 'Database Management', progress: 85, instructor: 'Mr. K. Khan', category: 'IT', code: 'IT303', colorClass: '#f59e0b' },
-    ];
-
-    // 3. Next Deadlines (similar to HR's Next Holidays)
-    const today = new Date();
-    this.nextDeadlines = [
-      // Ensure date is a string to match the ScheduleItem interface
-      { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3).toISOString().slice(0, 10), desc: 'CS501 Assignment 3 Due', type: 'deadline' },
-      { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5).toISOString().slice(0, 10), desc: 'IT402 Project Review', type: 'session' },
-      { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 10).toISOString().slice(0, 10), desc: 'Final Exam Start Date', type: 'class' },
-    ];
+      // FIX: Changed from this.examService.listExams() to the new filtered API
+      this.examService.fetchStudentExams(courseId, batchId).pipe(
+          map((response: any[]) => {
+              // 1. API Response को map करें (फिल्टरिंग अब Django में हो रही है)
+              return response
+                  .map(exam => ({
+                      examId: exam.examid,
+                      examName: exam.examname,
+                      start_datetime: exam.start_datetime, 
+                      end_datetime: exam.end_datetime,     
+                      is_active: exam.is_active,           
+                      courseid: exam.courseid,
+                      batchid: exam.batchid, 
+                      subjectid: exam.subjectid,
+                      // Batch और Subject data को सुरक्षित रूप से मैप करें, या fallback mock data का उपयोग करें
+                      batch: { 
+                          batchId: exam.batchid, 
+                          batchName: exam.batch?.batchName || `Batch ${exam.batchid}` 
+                      },
+                      subject: { 
+                          subjectid: exam.subjectid, 
+                          subjectname: exam.subject?.subjectname || `Subject ID ${exam.subjectid}` 
+                      },
+                      durationMinutes: exam.durationMinutes || 60, // Default duration if not provided
+                      totalQuestions: exam.totalQuestions || 20 // Default questions if not provided
+                  }))
+                  .filter((exam: AvailableExam) => {
+                      // 2. Client-side filter को केवल isActive के लिए रखें (यदि Django इसे पहले से नहीं करता है)
+                      // यदि Django व्यू (StudentExamListView) केवल Active exams भेजता है, तो यह filter अनावश्यक है।
+                      // सुरक्षा के लिए इसे अभी रखा गया है।
+                      return exam.is_active === true;
+                  });
+          }),
+          catchError((error) => {
+              console.error(`Student Exam list fetch failed for Batch ID ${batchId} / Course ID ${courseId}. API error details:`, error);
+              this.showMessage('Error fetching live exams. Check API server and Django student-exams URL.', 'error');
+              
+              return of([]); 
+          })
+      ).subscribe(
+          (exams: AvailableExam[]) => {
+              this.activeExams = exams;
+              this.isLoadingExams = false;
+              if (exams.length === 0) {
+                  this.showMessage(`No active exams found for your Batch (${batchId}) and Course (${courseId}).`, 'warning');
+              } else {
+                  this.showMessage(`${exams.length} active exam(s) found for your batch/course.`, 'success');
+              }
+              this.cdr.detectChanges(); 
+          }
+      );
   }
 
-  // Initializing comprehensive schedule data for the current month
-  private initializeScheduleData(): void {
-    this.fullScheduleDetails = [];
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-
-    // Add dummy classes/sessions/deadlines for the current month
-    for (let i = 1; i <= 28; i++) {
-        const d = new Date(currentYear, currentMonth, i);
-        const dateISO = d.toISOString().slice(0, 10);
-        const dayOfWeekShort = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
-        const dayOfMonth = d.getDate().toString();
-
-        if (i % 7 === 1) { // Monday Class
-            this.fullScheduleDetails.push({ date: dateISO, desc: 'CS501 Lecture: 10:00 AM', type: 'class', dayOfWeekShort, dayOfMonth, joinButton: true });
-        }
-        if (i % 7 === 3) { // Wednesday Deadline
-            this.fullScheduleDetails.push({ date: dateISO, desc: 'IT402 Homework Submission', type: 'deadline', dayOfWeekShort, dayOfMonth });
-        }
-        if (i % 7 === 5) { // Friday Study Session
-            this.fullScheduleDetails.push({ date: dateISO, desc: 'Group Study Session: 3:00 PM', type: 'session', dayOfWeekShort, dayOfMonth, joinButton: true });
-        }
-        if (i === 15) { // Mid-month Test
-            this.fullScheduleDetails.push({ date: dateISO, desc: 'CS301 Mid-Term Test', type: 'class', dayOfWeekShort, dayOfMonth });
-        }
+  // Open the Exam Selection Modal
+  openExamModal(): void {
+    if (this.loadingDashboardData) {
+        this.showMessage('Please wait, dashboard data is still loading...', 'warning');
+        return;
     }
-    // Add dummy study logs for today to simulate real-time tracking
-    const todayISO = now.toISOString().slice(0, 10);
-    this.studyLog = [
-        { in: new Date(todayISO + 'T09:00:00'), durationSeconds: 3600 }, // 1 hour session (completed)
-    ];
-    this.recalculateTotalStudyHours();
-
-    // If a session has no logout (simulating clock in)
-    const lastSession = this.studyLog[this.studyLog.length - 1];
-    if (lastSession && lastSession.durationSeconds) { // If last session was completed, start a new one
-        this.isStudying = false; // Reset status
+    
+    this.showExamModal = true;
+    this.selectedExamId = null; 
+    
+    const currentBatchId = this.studentProfileData.batchId;
+    const currentCourseId = this.studentProfileData.courseId;
+    
+    if (currentBatchId && currentCourseId) {
+        // Re-fetch exams using the real-time batch ID and course ID
+        this.fetchActiveExamsForStudent(currentBatchId, currentCourseId);
+    } else {
+        const fallbackId = 1;
+        this.showMessage(`Batch/Course ID is missing. Using default IDs ${fallbackId} for filtering.`, 'warning');
+        this.fetchActiveExamsForStudent(fallbackId, fallbackId); 
     }
+    this.cdr.detectChanges(); 
+  }
 
-    // Sort schedule details
-    this.fullScheduleDetails.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Close the Exam Selection Modal
+  closeExamModal(): void {
+    this.showExamModal = false;
+  }
+  
+  // Start the selected exam
+  // FIX 2: Update startExam to set examToAttend and navigate to the exam page
+  startExam(): void {
+    if (!this.selectedExamId || !this.selectedExam) {
+        this.showMessage('Please select an exam to start.', 'warning');
+        return;
+    }
+    
+    const examDetails = this.selectedExam;
+
+    this.showMessage(`Starting Exam: ${examDetails.examName}`, 'success');
+    
+    // 1. Set the exam object to be passed to the child component
+    this.examToAttend = examDetails;
+
+    // 2. Change page to 'attend-exam' and close the modal
+    this.closeExamModal();
+    this.activePage = 'attend-exam'; 
+    
+    this.cdr.detectChanges(); 
+    
+    // NOTE: We don't need to fetch questions here; AttendExamComponent 
+    // will handle that in its own ngOnInit, using the inputs we pass it.
+  }
+
+  // FIX 3: Add the missing method required by the template
+  /**
+   * Handles the event when the AttendExamComponent finishes (submitted or expired).
+   * It changes the view back to the dashboard and shows a message.
+   */
+  onExamFinished(event: { status: 'submitted' | 'expired', message: string }): void {
+      console.log('Exam Finished Event:', event);
+      this.showMessage(event.message, event.status === 'submitted' ? 'success' : 'warning');
+      // Reset state and go back to dashboard
+      this.examToAttend = null; 
+      this.activePage = 'dashboard';
+      this.cdr.detectChanges();
   }
 
 
   // =========================================================================
-  // CLOCK AND GREETING LOGIC (Same as HR Dashboard)
+  // CLOCK AND GREETING LOGIC 
   // =========================================================================
 
   private updateClock(): void {
@@ -367,28 +494,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================================
-  // TIME TRACKING LOGIC (Adapted from HR Dashboard)
+  // TIME TRACKING LOGIC 
   // =========================================================================
 
-  // Parses duration string (HH:MM or HH:MM:SS) into total seconds.
   private parseDurationToSeconds(duration: string): number {
     const parts = duration.split(':').map(Number);
-    if (parts.length === 2) { // HH:MM
+    if (parts.length === 2) { 
       return parts[0] * 3600 + parts[1] * 60;
-    } else if (parts.length === 3) { // HH:MM:SS
+    } else if (parts.length === 3) { 
       return parts[0] * 3600 + parts[1] * 60 + parts[2];
     }
     return 0;
   }
 
-  // Formats total seconds into "HH:MM"
   private formatSecondsToHHMM(totalSeconds: number): string {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     return `${this.formatTime(hours)}:${this.formatTime(minutes)}`;
   }
 
-  // Formats total seconds into "HH:MM:SS"
   private formatSecondsToHHMMSS(totalSeconds: number): string {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -396,19 +520,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return `${this.formatTime(hours)}:${this.formatTime(minutes)}:${this.formatTime(seconds)}`;
   }
 
-  // Formats number to two digits
   private formatTime(num: number): string {
     return num < 10 ? '0' + num : num.toString();
   }
 
-  // Recalculates total study hours from the log.
   private recalculateTotalStudyHours(): void {
     let totalSeconds = 0;
     this.studyLog.forEach(session => {
         if (session.durationSeconds) {
             totalSeconds += session.durationSeconds;
         } else if (session.in && !session.out) {
-            // Include duration of active session (if any)
             totalSeconds += (new Date().getTime() - session.in.getTime()) / 1000;
         }
     });
@@ -419,42 +540,35 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.targetRemainingHours = this.formatSecondsToHHMM(pendingSeconds);
   }
 
-  // Calculates and updates the current session timer and remaining target hours.
   private calculateTimeTracking(): void {
     const now = new Date();
     let totalSecondsTrackedToday = 0;
     let currentSessionDurationSeconds = 0;
 
-    // 1. Calculate duration of all COMPLETED sessions
     this.studyLog.forEach(session => {
         if (session.durationSeconds) {
             totalSecondsTrackedToday += session.durationSeconds;
         }
     });
 
-    // 2. Find and calculate ACTIVE session duration (if studying)
     if (this.isStudying && this.studyLog.length > 0) {
       const lastSession = this.studyLog[this.studyLog.length - 1];
       if (lastSession && lastSession.in && !lastSession.out) {
         currentSessionDurationSeconds = (now.getTime() - new Date(lastSession.in).getTime()) / 1000;
         totalSecondsTrackedToday += currentSessionDurationSeconds;
 
-        // Update timeTrackingTimer for the active session (HH:MM:SS)
         this.studyTimeTimer = this.formatSecondsToHHMMSS(currentSessionDurationSeconds);
       }
     } else {
-        // If not actively studying, show total study time from log
         this.studyTimeTimer = this.formatSecondsToHHMMSS(this.parseDurationToSeconds(this.totalStudyHours));
     }
   }
 
-
-  // Handles the "Start Study Session" action (Clock In equivalent)
   startStudySession(): void {
     if (!this.isStudying) {
       this.isStudying = true;
       const newSession: any = { in: new Date() };
-      this.studyLog.push(newSession); // Add a new, open session to the log
+      this.studyLog.push(newSession); 
       this.showMessage('Study Session Started. Focus!', 'success');
       this.cdr.detectChanges();
     } else {
@@ -462,7 +576,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Handles the "End Study Session" action (Clock Out equivalent)
   endStudySession(): void {
     if (this.isStudying && this.studyLog.length > 0) {
       const lastSession = this.studyLog[this.studyLog.length - 1];
@@ -470,7 +583,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         lastSession.out = new Date();
         lastSession.durationSeconds = (lastSession.out.getTime() - lastSession.in.getTime()) / 1000;
         this.isStudying = false;
-        this.recalculateTotalStudyHours(); // Update total hours after session completion
+        this.recalculateTotalStudyHours(); 
         this.showMessage(`Study Session Ended. Total today: ${this.totalStudyHours}`, 'success');
         this.cdr.detectChanges();
         return;
@@ -493,10 +606,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================================
-  // CALENDAR POPULATION AND NAVIGATION (Monthly View - Simplified)
+  // CALENDAR POPULATION AND NAVIGATION 
   // =========================================================================
 
-  // Populates the calendar array for the given month
   populateCalendar(startDate: Date): void {
     this.calendarDays = [];
     const year = startDate.getFullYear();
@@ -505,10 +617,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
-    const startDayOfWeek = firstDayOfMonth.getDay(); // 0 (Sun) to 6 (Sat)
+    const startDayOfWeek = firstDayOfMonth.getDay(); 
     const daysInMonth = lastDayOfMonth.getDate();
 
-    // 1. Add placeholder days for the start of the week
     for (let i = 0; i < startDayOfWeek; i++) {
       this.calendarDays.push({ date: '', disabled: true, selected: false, fullDate: null });
     }
@@ -516,7 +627,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 2. Add actual days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       const currentDay = new Date(year, month, i);
       const isToday = currentDay.toDateString() === today.toDateString();
@@ -528,21 +638,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         fullDate: currentDay
       });
     }
-    // No need to add end placeholders for a simplified monthly view
   }
 
-  // Navigates the calendar view to the previous or next month.
   navigateCalendar(direction: number): void {
     const newMonthStart = new Date(this.displayedMonthStart);
     newMonthStart.setMonth(newMonthStart.getMonth() + direction);
     this.displayedMonthStart = newMonthStart;
     this.populateCalendar(this.displayedMonthStart);
-    this.selectedScheduleDate = null; // Reset selection
+    this.selectedScheduleDate = null; 
     this.clearMessage();
-    this.updateDisplayedScheduleDetails(); // Re-filter schedule (dummy data uses today's month, so this will only show if month matches)
+    this.updateDisplayedScheduleDetails();
   }
 
-  // Handles the selection of a date on the calendar.
   onDateSelect(fullDate: Date | null): void {
     if (fullDate) {
       this.selectedScheduleDate = fullDate;
@@ -551,13 +658,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Filters the full schedule data based on the selected date.
   private updateDisplayedScheduleDetails(): void {
     if (this.selectedScheduleDate) {
       const targetDateISO = this.selectedScheduleDate.toISOString().slice(0, 10);
       this.scheduleDetails = this.fullScheduleDetails.filter(item => item.date === targetDateISO);
     } else {
-      // Agar koi date select nahi hai, toh currently displayed month ka sab data dikhao
       this.scheduleDetails = this.fullScheduleDetails.filter(item => {
         const itemDate = new Date(item.date);
         return itemDate.getFullYear() === this.displayedMonthStart.getFullYear() &&
@@ -565,7 +670,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     }
 
-    // If no schedule details, add a 'No Class' item for the selected date.
     if (this.selectedScheduleDate && this.scheduleDetails.length === 0) {
         const dateISO = this.selectedScheduleDate.toISOString().slice(0, 10);
         const d = new Date(dateISO);
@@ -582,21 +686,19 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // Determines the color class for the course progress bar.
   getProgressColor(progress: number): string {
-    if (progress >= 80) return '#10b981'; // Green
-    if (progress >= 50) return '#f59e0b'; // Yellow
-    return '#ef4444'; // Red
+    if (progress >= 80) return '#10b981'; 
+    if (progress >= 50) return '#f59e0b'; 
+    return '#ef4444'; 
   }
 
   // =========================================================================
   // NAVIGATION (for Download Resume button and Sidebar)
   // =========================================================================
   
-  // New method to change the active page
   setActivePage(page: string): void {
-    // Check if the page is valid before setting
-    const validPages = ['dashboard', 'courses', 'assignments', 'career', 'profile-setting'];
+    // FIX: 'attend-exam' को validPages में शामिल करें ताकि onExamFinished के बाद वापस आ सके
+    const validPages = ['dashboard', 'courses', 'assignments', 'career', 'profile-setting', 'attend-exam'];
     if (validPages.includes(page)) {
       this.activePage = page;
       this.clearMessage();
@@ -605,20 +707,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // New method to handle feature card click/redirection
   openFeature(route: string): void {
-    // Note: In a real app, this would use Angular Router.
     this.showMessage(`Navigating to feature: ${route}`, 'success');
-    // window.location.href = route;
   }
   
-  // New method to handle resume download redirection
   downloadResume(): void {
-    // Note: Since Angular Router is not available in the single-file environment, 
-    // we'll use a direct window redirection as a placeholder.
-    // FIX: अब यह रिज्यूमे फॉर्म (create-student) पेज पर रीडायरेक्ट होगा, जैसा कि अनुरोध किया गया है।
     this.showMessage('Redirecting to Resume Creation Form (ATS Builder)...', 'success');
-    // Using window.location.href to simulate redirection to the specified route
     window.location.href = 'create-student'; 
   }
 
@@ -627,7 +721,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // MODAL/MESSAGE LOGIC
   // =========================================================================
 
-  // Original open/close modal functions, kept for the quick-submit button
   openAssignmentModal(): void {
     this.showAssignmentModal = true;
     this.assignmentTitleControl.setValue('');

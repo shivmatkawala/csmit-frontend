@@ -31,12 +31,10 @@ export class LoginFormComponent {
              return; 
         }
         
-        // User ID store karein (Server response mein agar 'csmit_id' ya koi anya ID ho)
-        if (res.csmit_id && typeof window !== 'undefined' && window.sessionStorage) {
-             window.sessionStorage.setItem('CURRENT_USER_ID', res.csmit_id); 
-             console.log('User ID stored as CURRENT_USER_ID:', res.csmit_id);
-        }
-
+        // ApiService ne login data (jismein userId shamil hai) ko pehle hi store kar diya hai.
+        // Yahan redundant storage hataya gaya hai.
+        console.log('Login successful. ApiService stored user data for role:', authenticatedRole);
+        
         // Navigation logic based STRICTLY on the authenticated role string from the server
         if (authenticatedRole === 'ADMIN') { 
           this.router.navigate(['/admin-panel']);

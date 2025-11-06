@@ -26,6 +26,7 @@ import { AssignUserToBatchComponent } from './assign-user-to-batch/assign-user-t
 import { CreateJobComponent } from './create-job/create-job.component';
 import { CreateExamComponent } from './createexam/createexam.component';
 import { CreateBatchComponent } from './create-batch/create-batch.component';
+import { AttendExamComponent } from './attend-exam/attend-exam.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,8 +49,8 @@ import { CreateBatchComponent } from './create-batch/create-batch.component';
     AssignUserToBatchComponent,
     CreateJobComponent,
     CreateExamComponent,
-    CreateBatchComponent
-    // REMOVED TrainerDashboardComponent from declarations as it is standalone
+    CreateBatchComponent,
+    AttendExamComponent
   ],
   imports: [
     BrowserModule,

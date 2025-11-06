@@ -16,6 +16,7 @@ import { CreateUserComponent } from './create-user/create-user.component';
 import { AssignUserToBatchComponent } from './assign-user-to-batch/assign-user-to-batch.component';
 import { CreateJobComponent } from './create-job/create-job.component';
 import { CreateExamComponent } from './createexam/createexam.component';
+import { AttendExamComponent } from './attend-exam/attend-exam.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -33,7 +34,8 @@ const routes: Routes = [
   {path:'create-user',component:CreateUserComponent},
   {path:'assign-user-to-batch',component:AssignUserToBatchComponent},
   {path:'upload-job',component:CreateJobComponent},
-  {path:'create-exam',component:CreateExamComponent}
+  {path:'create-exam',component:CreateExamComponent},
+  {path:'attend-exam',component:AttendExamComponent}
 ];
 
 @NgModule({

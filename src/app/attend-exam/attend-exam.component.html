@@ -1,0 +1,141 @@
+<div class="exam-wrapper" *ngIf="examId">
+  
+  <!-- Exam Header & Timer -->
+  <header class="exam-header">
+    <div class="exam-title-section">
+      <h1>{{ examName }}</h1>
+      <p class="exam-info">Exam ID: {{ examId }} | Total Questions: {{ questions.length }}</p>
+    </div>
+    <div class="timer-section" [class.low-time]="timeLeftSeconds < 300">
+      <i class="fas fa-clock"></i>
+      <span class="timer-text">{{ formattedTimeLeft }}</span>
+      <p class="timer-label">Time Remaining</p>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <div class="exam-content">
+    
+    <!-- Left Panel: Question Paper & Controls -->
+    <div class="question-panel">
+      
+      <!-- Loading/Error State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading exam questions...</p>
+      </div>
+      
+      <div *ngIf="error && !isLoading" class="error-state">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>{{ error }}</p>
+        <button class="btn-primary" (click)="examFinished.emit({status: 'submitted', message: 'Exam cancelled due to error.'})">Exit Exam</button>
+      </div>
+
+      <!-- Current Question View -->
+      <ng-container *ngIf="questions.length > 0 && !isLoading && !error">
+        <div class="current-question">
+          <div class="question-header">
+            <h3>Question {{ currentQuestionIndex + 1 }}</h3>
+            <span class="points">Points: {{ questions[currentQuestionIndex].points }}</span>
+          </div>
+          
+          <!-- Question Text (FIX: property name changed to questiontext) -->
+          <div class="question-text">
+            {{ questions[currentQuestionIndex].questiontext }}
+          </div>
+          
+          <!-- Answer Area based on Question Type (FIX: property name changed to questiontypeid) -->
+          <div class="answer-area">
+            <ng-container [ngSwitch]="questions[currentQuestionIndex].questiontypeid">
+              
+              <!-- 1: MCQ -->
+              <ng-container *ngSwitchCase="1">
+                <div class="mcq-options">
+                  <div *ngFor="let option of questions[currentQuestionIndex].options" class="option-item">
+                    <input 
+                      type="radio" 
+                      id="option_{{option.optionid}}" 
+                      name="mcq_question_{{questions[currentQuestionIndex].questionid}}"
+                      [value]="option.optionid"
+                      [checked]="questions[currentQuestionIndex].studentAnswer === option.optionid"
+                      (change)="onMcqSelect(option.optionid)">
+                    <label for="option_{{option.optionid}}">{{ option.option_text }}</label>
+                  </div>
+                </div>
+              </ng-container>
+
+              <!-- 2: Descriptive -->
+              <ng-container *ngSwitchCase="2">
+                <textarea 
+                  placeholder="Type your detailed answer here..."
+                  rows="6"
+                  [ngModel]="questions[currentQuestionIndex].studentAnswer"
+                  (ngModelChange)="onTextChange($event)">
+                </textarea>
+                <p class="help-text">Please provide a descriptive answer (max 500 words).</p>
+              </ng-container>
+
+              <!-- 3: Coding -->
+              <ng-container *ngSwitchCase="3">
+                <textarea 
+                  placeholder="Write your code solution here..."
+                  rows="10"
+                  [ngModel]="questions[currentQuestionIndex].studentAnswer"
+                  (ngModelChange)="onTextChange($event)">
+                </textarea>
+                <p class="help-text">Paste your final, runnable code here.</p>
+              </ng-container>
+
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Question Navigation Buttons (FIX: property name changed to questionid) -->
+        <div class="question-nav-buttons">
+          <button class="btn-secondary" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0">← Previous</button>
+          <button class="btn-mark" (click)="markForReview()" [class.active]="questions[currentQuestionIndex].status === 'marked'">
+            <i class="fas fa-flag"></i> {{ questions[currentQuestionIndex].status === 'marked' ? 'Unmark' : 'Mark for Review' }}
+          </button>
+          <button class="btn-primary" (click)="nextQuestion()" [disabled]="isLastQuestion">
+            {{ isLastQuestion ? 'Review Exam' : 'Save & Next →' }}
+          </button>
+          <button *ngIf="isLastQuestion" class="btn-submit-final" (click)="submitExam()">Submit Exam</button>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <!-- Right Panel: Status & Question Palette -->
+    <div class="status-panel">
+      <div class="exam-status-summary">
+        <h4>Status Summary</h4>
+        <div class="status-counts">
+          <div class="count answered">Answered: {{ answeredCount }}</div>
+          <div class="count marked">Marked: {{ markedCount }}</div>
+          <div class="count unanswered">Unanswered: {{ unansweredCount }}</div>
+        </div>
+      </div>
+      
+      <div class="question-palette">
+        <h4>Question Palette ({{ questions.length }} Qs)</h4>
+        <div class="palette-grid">
+          <button *ngFor="let q of questions; let i = index" 
+                  [class.answered]="q.status === 'answered'"
+                  [class.marked]="q.status === 'marked'"
+                  [class.unanswered]="q.status === 'unanswered'"
+                  [class.current]="i === currentQuestionIndex"
+                  (click)="goToQuestion(i)">
+            {{ i + 1 }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!examId" class="error-state full-page-error">
+  <i class="fas fa-exclamation-circle"></i>
+  <h1>Exam Not Found</h1>
+  <p>Please select a valid exam from the dashboard.</p>
+</div>
