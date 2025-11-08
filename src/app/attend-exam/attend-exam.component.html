@@ -1,7 +1,6 @@
 <div class="exam-wrapper" *ngIf="examId">
   
-  <!-- Exam Header & Timer -->
-  <header class="exam-header">
+  <header class="exam-header" *ngIf="!showResult">
     <div class="exam-title-section">
       <h1>{{ examName }}</h1>
       <p class="exam-info">Exam ID: {{ examId }} | Total Questions: {{ questions.length }}</p>
@@ -13,42 +12,66 @@
     </div>
   </header>
 
-  <!-- Main Content Area -->
-  <div class="exam-content">
+  <ng-container *ngIf="showResult && finalResult">
+      <div class="full-page-result">
+          <i class="fas fa-award result-icon" [class.success]="finalResult.total_score > 0" [class.fail]="finalResult.total_score === 0"></i>
+          <h1>Exam Completed Successfully!</h1>
+          
+          <div class="result-details">
+              <p class="score-label">Total Score Obtained</p>
+              <p class="score-value">{{ finalResult.total_score | number:'1.2-2' }} 
+                 <span class="max-score" *ngIf="finalResult.max_score">/ {{ finalResult.max_score }}</span>
+              </p>
+              <p class="status-message">{{ finalResult.status_message }}</p>
+          </div>
+          
+          <p class="exam-summary">
+              Thank you for completing **{{ examName }}**. 
+              Your attempt ID is **{{ finalResult.attemptid }}**.
+          </p>
+          
+          <button class="btn-primary exit-btn" (click)="exitResultView()">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </button>
+          <p class="note">Detailed analysis will be available on your profile.</p>
+      </div>
+  </ng-container>
+
+  <div class="exam-content" *ngIf="!showResult">
     
-    <!-- Left Panel: Question Paper & Controls -->
     <div class="question-panel">
       
-      <!-- Loading/Error State -->
       <div *ngIf="isLoading" class="loading-state">
         <i class="fas fa-spinner fa-spin"></i>
         <p>Loading exam questions...</p>
       </div>
       
-      <div *ngIf="error && !isLoading" class="error-state">
+      <div *ngIf="isSubmitting" class="loading-state" style="background-color: #f0f7ff; border: 1px solid #3498db; padding: 50px;">
+        <i class="fas fa-upload fa-spin" style="color: #3498db;"></i>
+        <p style="color: #3498db; font-weight: 600;">Submitting Exam... Do NOT close this window!</p>
+        <p style="font-size: 0.9rem;">(Step 1/6: Creating Attempt, Step 2/6: Submitting Answers, Step 3/6: Evaluating MCQs, Step 4/6: Evaluating AI, Step 5/6: Calculating Results, Step 6/6: Fetching Results)</p>
+      </div>
+
+      <div *ngIf="error && !isLoading && !isSubmitting" class="error-state">
         <i class="fas fa-exclamation-triangle"></i>
         <p>{{ error }}</p>
         <button class="btn-primary" (click)="examFinished.emit({status: 'submitted', message: 'Exam cancelled due to error.'})">Exit Exam</button>
       </div>
 
-      <!-- Current Question View -->
-      <ng-container *ngIf="questions.length > 0 && !isLoading && !error">
+      <ng-container *ngIf="questions.length > 0 && !isLoading && !error && !isSubmitting">
         <div class="current-question">
           <div class="question-header">
             <h3>Question {{ currentQuestionIndex + 1 }}</h3>
             <span class="points">Points: {{ questions[currentQuestionIndex].points }}</span>
           </div>
           
-          <!-- Question Text (FIX: property name changed to questiontext) -->
           <div class="question-text">
             {{ questions[currentQuestionIndex].questiontext }}
           </div>
           
-          <!-- Answer Area based on Question Type (FIX: property name changed to questiontypeid) -->
           <div class="answer-area">
             <ng-container [ngSwitch]="questions[currentQuestionIndex].questiontypeid">
               
-              <!-- 1: MCQ -->
               <ng-container *ngSwitchCase="1">
                 <div class="mcq-options">
                   <div *ngFor="let option of questions[currentQuestionIndex].options" class="option-item">
@@ -64,7 +87,6 @@
                 </div>
               </ng-container>
 
-              <!-- 2: Descriptive -->
               <ng-container *ngSwitchCase="2">
                 <textarea 
                   placeholder="Type your detailed answer here..."
@@ -75,7 +97,6 @@
                 <p class="help-text">Please provide a descriptive answer (max 500 words).</p>
               </ng-container>
 
-              <!-- 3: Coding -->
               <ng-container *ngSwitchCase="3">
                 <textarea 
                   placeholder="Write your code solution here..."
@@ -90,7 +111,6 @@
           </div>
         </div>
 
-        <!-- Question Navigation Buttons (FIX: property name changed to questionid) -->
         <div class="question-nav-buttons">
           <button class="btn-secondary" (click)="previousQuestion()" [disabled]="currentQuestionIndex === 0">← Previous</button>
           <button class="btn-mark" (click)="markForReview()" [class.active]="questions[currentQuestionIndex].status === 'marked'">
@@ -105,7 +125,6 @@
       </ng-container>
     </div>
 
-    <!-- Right Panel: Status & Question Palette -->
     <div class="status-panel">
       <div class="exam-status-summary">
         <h4>Status Summary</h4>

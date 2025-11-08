@@ -1,29 +1,31 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { examAPi } from '../services/createexam.service';
-import { Subscription, interval, timer } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { ApiService, LoginResponse } from '../services/api.service';
+import { Subscription, interval, timer, forkJoin, of, Observable } from 'rxjs';
+import { catchError, map, concatMap, tap } from 'rxjs/operators';
 
-// --- Interfaces for Question Structure from API ---
 interface QuestionOption {
-  // FIX: API response field name: optionid
   optionid: number; 
   option_text: string;
 }
 
 interface ExamQuestion {
-  // FIX: API response field name: questionid
   questionid: number; 
-  // FIX: API response field name: questiontext
   questiontext: string; 
   points: number;
-  // FIX: API response field name: questiontypeid
-  questiontypeid: number; // 1: MCQ, 2: Descriptive, 3: Coding
-  options: QuestionOption[]; // Only for MCQ
-  // Client-side tracking fields
-  studentAnswer: string | number | null; // Holds selected optionid (MCQ) or text (Descriptive/Coding)
+  questiontypeid: number; 
+  options: QuestionOption[];
+  studentAnswer: string | number | null; 
   status: 'unanswered' | 'answered' | 'marked';
 }
+
+interface AttemptResult {
+  attemptid: number;
+  total_score: number;
+  max_score: number;
+  status_message: string;
+}
+
 
 @Component({
   selector: 'app-attend-exam',
@@ -32,25 +34,27 @@ interface ExamQuestion {
 })
 export class AttendExamComponent implements OnInit, OnDestroy {
   @Input() examId: number | null = null;
-  @Input() durationMinutes: number = 60; // Dashboard से प्राप्त
+  @Input() durationMinutes: number = 60;
   @Input() examName: string = 'Online Assessment';
 
   @Output() examFinished = new EventEmitter<{ status: 'submitted' | 'expired', message: string }>();
   
-  // State
   isLoading: boolean = true;
   error: string | null = null;
-  
-  // Exam Data
+  isSubmitting: boolean = false;
+
   questions: ExamQuestion[] = [];
   currentQuestionIndex: number = 0;
   
-  // Timer & Control
   timeLeftSeconds: number = 0;
   timerSubscription: Subscription | undefined;
   formattedTimeLeft: string = '00:00:00';
+  
+  showResult: boolean = false;
+  finalResult: AttemptResult | null = null;
+  attemptId: number | null = null; 
 
-  constructor(private examService: examAPi) {}
+  constructor(private examService: examAPi, private apiService: ApiService) {}
 
   ngOnInit(): void {
     if (this.examId) {
@@ -73,26 +77,22 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     
     this.examService.fetchExamQuestions(examId).pipe(
       map((res: any[]) => {
-        // प्रश्न डेटा को ExamQuestion इंटरफ़ेस के अनुसार मैप करें
         return res.map(q => ({
-          // FIX: API response field name का उपयोग करें
           questionid: q.questionid,
           questiontext: q.questiontext,
           points: q.points,
           questiontypeid: q.questiontypeid,
-          // FIX: options के अंदर option_id की जगह optionid का उपयोग करें
           options: (q.options || []).map((opt: any) => ({
              optionid: opt.optionid, 
-             option_text: opt.optiontext // API response field name
+             option_text: opt.optiontext
           })),
-          studentAnswer: q.questiontypeid === 1 ? null : '', // MCQ के लिए null, बाकी के लिए खाली स्ट्रिंग
+          studentAnswer: q.questiontypeid === 1 ? null : '',
           status: 'unanswered'
         } as ExamQuestion));
       }),
       catchError(err => {
         this.error = 'Failed to load exam questions. Check console for API details.';
         this.isLoading = false;
-        console.error('Error fetching questions:', err);
         return of([]);
       })
     ).subscribe((questions: ExamQuestion[]) => {
@@ -104,9 +104,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     });
   }
   
-  /**
-   * टाइमर लॉजिक शुरू करना
-   */
   startTimer(): void {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
@@ -123,9 +120,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * समय को HH:MM:SS फॉर्मेट करना
-   */
   formatTime(totalSeconds: number): string {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -135,9 +129,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   }
   
-  /**
-   * प्रश्न नेविगेशन
-   */
   goToQuestion(index: number): void {
     if (index >= 0 && index < this.questions.length) {
       this.currentQuestionIndex = index;
@@ -156,95 +147,162 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     }
   }
   
-  /**
-   * छात्र के उत्तर को संभालना और स्थिति अपडेट करना
-   * @param answer - MCQ के लिए optionid, या Descriptive/Coding के लिए उत्तर टेक्स्ट
-   */
   handleAnswer(answer: string | number | null): void {
     const currentQuestion = this.questions[this.currentQuestionIndex];
     currentQuestion.studentAnswer = answer;
     
-    // Status update logic
-    if (currentQuestion.status === 'marked') return; // Marked questions should remain marked
+    if (currentQuestion.status === 'marked') return;
     
     if (currentQuestion.questiontypeid === 1) {
-        // MCQ: उत्तर null (unanswered) या optionid (answered)
         currentQuestion.status = answer !== null && answer !== undefined ? 'answered' : 'unanswered';
     } else {
-        // Descriptive/Coding: उत्तर खाली स्ट्रिंग या टेक्स्ट
         currentQuestion.status = answer && String(answer).trim().length > 0 ? 'answered' : 'unanswered';
     }
   }
   
-  // MCQ रेडियो बटन चेंज इवेंट को संभालना
   onMcqSelect(optionId: number): void {
     this.handleAnswer(optionId);
   }
   
-  // Descriptive/Coding इनपुट चेंज इवेंट को संभालना
   onTextChange(text: string): void {
       this.handleAnswer(text);
   }
 
-
-  
   markForReview(): void {
     const currentQuestion = this.questions[this.currentQuestionIndex];
     if (currentQuestion.status === 'marked') {
-        // Unmark
         currentQuestion.status = currentQuestion.studentAnswer !== null && currentQuestion.studentAnswer !== undefined && (currentQuestion.questiontypeid === 1 || String(currentQuestion.studentAnswer).trim().length > 0) ? 'answered' : 'unanswered';
     } else {
-        // Mark
         currentQuestion.status = 'marked';
     }
   }
   
-  
   submitExam(): void {
-    // FIX: Confirm box को custom modal से बदलें (यहाँ console log का उपयोग किया गया है)
-    console.log('--- Custom Confirmation Modal Needed ---');
-    
-    const confirmation = true; // Simulating confirmation
-    
-    if (confirmation) {
-      this.autoSubmitExam('submitted');
-    }
+    this.autoSubmitExam('submitted');
   }
 
-  /**
-   * अंतिम पेलोड तैयार करना और डैशबोर्ड को इवेंट एमिट करना
-   */
   autoSubmitExam(status: 'submitted' | 'expired'): void {
+    if (this.isSubmitting) return; 
+
     this.timerSubscription?.unsubscribe();
-    
-    const studentId = 'USER_ID_PLACEHOLDER'; 
+    this.isSubmitting = true;
 
+    const loginData: LoginResponse | null = this.apiService.getStoredStudentData();
+    const studentId: string = loginData?.userId || 'GUEST_USER'; 
     
-    const answersPayload = this.questions.map(q => ({
-      questionid: q.questionid,
-      // MCQ (1): studentAnswer में optionid होगा
-      mcq_answer_option_id: q.questiontypeid === 1 ? q.studentAnswer : null, 
-      // Descriptive/Coding (2, 3): studentAnswer में टेक्स्ट होगा
-      text_answer: q.questiontypeid !== 1 ? q.studentAnswer : null,
-    }));
-
-    const finalPayload = {
-      exam_id: this.examId,
-      user_id: studentId,
-      answers: answersPayload
+    const attemptPayload = {
+      examid: this.examId!,
+      userid: studentId,
+      attemptdate: new Date().toISOString(),
+      total_score: 0.00,
+      ai_evaluated: false,
+      updated_at: new Date().toISOString()
     };
     
-    console.log('--- FINAL SUBMISSION PAYLOAD ---', finalPayload);
-    
-    this.examFinished.emit({
-        status: status,
-        message: status === 'submitted' 
-            ? 'Exam submitted successfully! Results will be available soon.' 
-            : 'Time expired. Exam automatically submitted.'
+    this.error = 'Submitting Exam... Please wait.';
+
+    this.examService.createAttempt(attemptPayload).pipe(
+      tap(attemptRes => {
+        this.attemptId = attemptRes.attemptid; 
+      }),
+      concatMap(attemptRes => {
+        const attemptId = attemptRes.attemptid;
+        
+        const answerRequests: Observable<any>[] = this.questions.map(q => {
+          const isMCQ = q.questiontypeid === 1;
+          
+          const hasAnswer = q.studentAnswer !== null && q.studentAnswer !== undefined && 
+                           (typeof q.studentAnswer !== 'string' || String(q.studentAnswer).trim().length > 0);
+          
+          if (hasAnswer) {
+              const answerPayload = {
+                attemptid: attemptId,
+                questionid: q.questionid,
+                selectedoptionid: isMCQ ? q.studentAnswer : null,
+                descriptive_answer: !isMCQ && q.questiontypeid === 2 ? q.studentAnswer : null,
+                code_answer: !isMCQ && q.questiontypeid === 3 ? q.studentAnswer : null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                is_correct: false, 
+                points_earned: 0.00
+              };
+              
+              return this.examService.submitAnswer(answerPayload).pipe(
+                catchError(err => {
+                  return of({ success: false, questionid: q.questionid, error: err });
+                })
+              );
+          } else {
+              return of({ success: true, questionid: q.questionid, message: 'No answer provided' });
+          }
+        });
+        
+        return forkJoin(answerRequests).pipe(
+          map(() => attemptId)
+        );
+      }),
+      
+      concatMap(attemptId => {
+        return this.examService.evaluateMCQ(attemptId).pipe(
+          map(() => attemptId)
+        );
+      }),
+      
+      concatMap(attemptId => {
+        return this.examService.evaluateAI(attemptId).pipe(
+          map(() => attemptId)
+        );
+      }),
+      
+      concatMap(attemptId => {
+        return this.examService.calculateResults(attemptId).pipe(
+          map(() => attemptId)
+        );
+      }),
+      
+      concatMap(attemptId => {
+        return this.examService.fetchAttemptResult(attemptId).pipe(
+             catchError(err => {
+                return of({ 
+                    attemptid: attemptId, 
+                    total_score: 0,
+                    max_score: 0,
+                    status_message: 'Evaluation complete, but result fetch failed. Check dashboard later.'
+                } as AttemptResult);
+             })
+        );
+      }),
+
+      catchError(err => {
+        this.isSubmitting = false;
+        this.error = `Submission failed. The exam was not recorded completely. Details: ${err.message || 'API Error'}`;
+        this.examFinished.emit({
+          status: 'submitted',
+          message: this.error 
+        });
+        return of(null);
+      })
+      
+    ).subscribe({
+      next: (result: AttemptResult | null) => {
+        if (result !== null) {
+          this.isSubmitting = false;
+          this.error = null; 
+          
+          this.finalResult = result;
+          this.showResult = true;
+        }
+      }
     });
   }
 
-  // Question summary status counts
+  exitResultView(): void {
+    this.examFinished.emit({
+        status: 'submitted',
+        message: 'Exam results viewed. Check your profile for detailed history.'
+    });
+  }
+
   get answeredCount(): number {
     return this.questions.filter(q => q.status === 'answered').length;
   }
