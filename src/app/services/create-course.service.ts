@@ -10,10 +10,7 @@ export interface Subject {
   subjectname: string;
 }
 
-/**
- * Interface for the core Course data structure.
- * This is the shape when FETCHING/LISTING.
- */
+
 export interface Course {
   courseId?: number; // Keep as optional for safety, but check for it in component
   courseName: string;

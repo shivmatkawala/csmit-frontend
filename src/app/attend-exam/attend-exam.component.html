@@ -12,17 +12,23 @@
     </div>
   </header>
 
-  <ng-container *ngIf="showResult && finalResult">
+  <!-- OLD: Result Summary Screen -->
+  <ng-container *ngIf="showResult && finalResult && !showDetailedFeedback">
       <div class="full-page-result">
           <i class="fas fa-award result-icon" [class.success]="finalResult.total_score > 0" [class.fail]="finalResult.total_score === 0"></i>
           <h1>Exam Completed Successfully!</h1>
           
           <div class="result-details">
               <p class="score-label">Total Score Obtained</p>
-              <p class="score-value">{{ finalResult.total_score | number:'1.2-2' }} 
+              <p class="score-value">
+                 <!-- FIX: total_score को सुरक्षित रूप से प्रदर्शित करने के लिए Nullish Coalescing (?:) जैसा लॉजिक जोड़ा गया है -->
+                 {{ (finalResult.total_score !== null && finalResult.total_score !== undefined ? finalResult.total_score : 0) | number:'1.2-2' }} 
                  <span class="max-score" *ngIf="finalResult.max_score">/ {{ finalResult.max_score }}</span>
               </p>
-              <p class="status-message">{{ finalResult.status_message }}</p>
+              <!-- FIX: status_message को dynamic रूप से सेट किया गया है -->
+              <p class="status-message" [style.color]="finalResult.total_score > 0 ? '#2ecc71' : '#e74c4c'">
+                 {{ finalResult.status_message || (finalResult.total_score > 0 ? 'Congratulations, you scored above zero!' : 'Needs improvement.') }}
+              </p>
           </div>
           
           <p class="exam-summary">
@@ -33,8 +39,68 @@
           <button class="btn-primary exit-btn" (click)="exitResultView()">
               <i class="fas fa-arrow-left"></i> Back to Dashboard
           </button>
+          
+          <!-- NEW: Detailed Feedback Button -->
+          <button 
+              *ngIf="detailedAnswers.length > 0" 
+              class="btn-secondary exit-btn mt-3" 
+              (click)="toggleDetailedFeedback()"
+              style="margin-top: 15px; background-color: #3498db;">
+              <i class="fas fa-clipboard-list"></i> View AI Feedback & Details
+          </button>
+
           <p class="note">Detailed analysis will be available on your profile.</p>
       </div>
+  </ng-container>
+
+  <!-- NEW: Detailed Feedback Screen -->
+  <ng-container *ngIf="showResult && showDetailedFeedback && finalResult">
+    <div class="full-page-result detailed-feedback-container">
+        <div class="header-bar">
+             <button class="btn-secondary exit-btn" (click)="toggleDetailedFeedback()">
+                <i class="fas fa-arrow-left"></i> Back to Summary
+            </button>
+            <h1>Detailed AI Feedback for {{ examName }}</h1>
+           
+        </div>
+        
+        <div class="feedback-list">
+            <div *ngIf="detailedAnswers.length === 0" class="no-feedback">
+                <i class="fas fa-info-circle"></i>
+                <p>No Descriptive or Coding questions were submitted for AI evaluation.</p>
+            </div>
+            
+            <div *ngFor="let answer of detailedAnswers; let i = index" class="feedback-item">
+                <div class="question-header">
+                    <!-- question_type_id: 2 for Descriptive, 3 for Coding -->
+                    <h3>Question {{ i + 1 }} (Type: {{ answer.question_type_id === 2 ? 'Descriptive' : 'Coding' }})</h3>
+                    <span class="score-pill">Score: {{ answer.points_earned | number:'1.2-2' }} / {{ answer.max_points }}</span>
+                </div>
+                
+                <div class="question-text-box">
+                    <strong>Question:</strong> {{ answer.question_text }}
+                </div>
+                
+                <div class="answer-box">
+                    <strong>Your Answer:</strong>
+                    <pre>{{ answer.student_answer }}</pre>
+                </div>
+                
+                <div class="ai-feedback-box">
+                    <div class="feedback-header">
+                        <i class="fas fa-robot"></i> 
+                        <strong>AI Feedback</strong>
+                        <span class="ai-score-status">AI Score: {{ answer.ai_score | number:'1.2-2' }}</span>
+                    </div>
+                    <p>{{ answer.ai_feedback }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn-primary exit-btn mt-5" (click)="exitResultView()">
+            <i class="fas fa-sign-out-alt"></i> Complete & Exit
+        </button>
+    </div>
   </ng-container>
 
   <div class="exam-content" *ngIf="!showResult">
@@ -49,7 +115,10 @@
       <div *ngIf="isSubmitting" class="loading-state" style="background-color: #f0f7ff; border: 1px solid #3498db; padding: 50px;">
         <i class="fas fa-upload fa-spin" style="color: #3498db;"></i>
         <p style="color: #3498db; font-weight: 600;">Submitting Exam... Do NOT close this window!</p>
-        <p style="font-size: 0.9rem;">(Step 1/6: Creating Attempt, Step 2/6: Submitting Answers, Step 3/6: Evaluating MCQs, Step 4/6: Evaluating AI, Step 5/6: Calculating Results, Step 6/6: Fetching Results)</p>
+        <!-- सबमिशन स्टेप्स को नए 3-स्टेप फ्लो के अनुसार अपडेट किया गया -->
+        <p style="font-size: 0.9rem;">(Step 1/3: Creating Attempt & Submitting Answers, Step 2/3: Full Evaluation on Server, Step 3/3: Fetching Final Results)</p>
+        <!-- FIX: error message को Submitting state में भी दिखाएं -->
+        <p *ngIf="error" style="font-size: 0.8rem; color: #e74c4c; margin-top: 10px;">{{ error }}</p>
       </div>
 
       <div *ngIf="error && !isLoading && !isSubmitting" class="error-state">
@@ -80,8 +149,10 @@
                       id="option_{{option.optionid}}" 
                       name="mcq_question_{{questions[currentQuestionIndex].questionid}}"
                       [value]="option.optionid"
+                     
                       [checked]="questions[currentQuestionIndex].studentAnswer === option.optionid"
-                      (change)="onMcqSelect(option.optionid)">
+                     (change)="onMcqSelect(option.optionid)"
+                    />
                     <label for="option_{{option.optionid}}">{{ option.option_text }}</label>
                   </div>
                 </div>

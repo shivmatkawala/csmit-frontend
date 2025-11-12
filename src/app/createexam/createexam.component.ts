@@ -35,7 +35,9 @@ interface Question {
   questionText: string;
   questionType: string;
   options: string[];
-  correctOption?: string;
+  // FIX: correctOption अब string के बजाय number (option index) को स्टोर करेगा 
+  // ताकि हम इसे API को भेज सकें।
+  correctOption?: number; 
   points: number;
 }
 
@@ -73,7 +75,8 @@ export class CreateExamComponent implements OnInit {
   // Step 2 State
   questionTypes = ['mcq', 'discriptive', 'coding'];
   questions: Question[] = [
-    { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: '', points: 1 }
+    // FIX: correctOption को number (index) पर सेट किया गया है
+    { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: 0, points: 1 } 
   ];
 
   // UI State
@@ -202,7 +205,8 @@ export class CreateExamComponent implements OnInit {
       questionText: '',
       questionType: 'mcq',
       options: ['', '', '', ''],
-      correctOption: '',
+      // FIX: correctOption को index 0 पर सेट किया गया है
+      correctOption: 0, 
       points: 1
     });
   }
@@ -228,12 +232,15 @@ export class CreateExamComponent implements OnInit {
         question_typeId: typeMap[q.questionType]
       };
 
-      if (q.questionType === 'mcq') {
+      if (q.questionType === 'mcq' && q.correctOption !== undefined) {
+        // MCQ के लिए: options array को map करें
         return {
           ...base,
-          options: q.options.filter(opt => opt).map(opt => ({ // Filter out empty options
+          // options को map करें, और सही विकल्प के लिए is_correct: true सेट करें
+          options: q.options.filter(opt => opt).map((opt, index) => ({ 
             option_text: opt,
-            is_correct: opt === q.correctOption
+            // FIX: q.correctOption (index) की तुलना index से करें
+            is_correct: index === q.correctOption 
           }))
         };
       }
@@ -282,7 +289,8 @@ export class CreateExamComponent implements OnInit {
     // form.resetForm(); 
     
     this.questions = [
-      { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: '', points: 1 }
+      // FIX: correctOption को index 0 पर सेट किया गया है
+      { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: 0, points: 1 }
     ];
     // Reset examMetadata with default values
     this.examMetadata = {

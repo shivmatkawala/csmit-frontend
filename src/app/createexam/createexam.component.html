@@ -178,9 +178,10 @@
               [(ngModel)]="q.correctOption"
               required
             >
-              <option value="">Select Correct Option</option>
-              <option *ngFor="let opt of q.options; let j = index; trackBy: trackByIndex" [value]="opt">
-                Option {{ j + 1 }}
+              <option [ngValue]="null" disabled>Select Correct Option</option>
+              <!-- FIX: value को option text के बजाय index (number) पर सेट करें -->
+              <option *ngFor="let opt of q.options; let j = index; trackBy: trackByIndex" [ngValue]="j">
+                Option {{ j + 1 }} ({{ opt }})
               </option>
             </select>
           </div>

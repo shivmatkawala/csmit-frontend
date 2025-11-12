@@ -1,7 +1,7 @@
 // student-dashboard.component.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { interval, Subscription, timer, Observable, of } from 'rxjs';
+import { interval, Subscription, timer, Observable, of, throwError } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 // FIX: LoginResponse, StudentInfo, और StudentBatchDetails के अपडेटेड इंटरफ़ेस को इस्तेमाल करें
 import { ApiService, LoginResponse, StudentInfo, StudentProfileDetails, StudentBatchDetails } from '../services/api.service'; 
@@ -18,15 +18,22 @@ interface Course {
   colorClass: string;
 }
 
-// Interface for new Feature Cards
+// FIX: FeatureCard interface को दोनों कंपोनेंट्स (Dashboard और Profile Setting) में इस्तेमाल होने वाली सभी प्रॉपर्टीज़ के साथ मर्ज किया गया है।
 interface FeatureCard {
-  label: string;
+  // Common/Old properties (Profile Setting Component use karta hai)
+  label: string; 
+  value: string;
   icon: string;
-  value: any; // Can be string, number, or object
-  info: string;
-  color: string; // Used for icon/text color
+  color: string; // CSS color code
+
+  // New properties (Quick Access Cards use karte hain)
+  title: string; // Used in HTML for card header
+  subText: string; // Used in HTML for card footer
+  colorClass: string; // Used in HTML for [ngClass]
   route: string;
+  info?: string; // Optional field for compatibility
 }
+
 
 interface ScheduleItem {
   date: string; // ISO date string: YYYY-MM-DD
@@ -46,7 +53,7 @@ export interface StudentProfileData {
   profileInitial: string;
   profileImagePlaceholder: boolean; // <-- FIX: Added missing property
   courses: Course[];
-  featureCards: FeatureCard[];
+  featureCards: FeatureCard[]; // FIX: अब यह FeatureCard[] (पुराने style वाला) है
   // New property to hold student's batch ID for exam filtering
   batchId?: number; 
   courseId?: number; // FIX: Course ID जोड़ा गया
@@ -80,6 +87,18 @@ interface AvailableExam {
   totalQuestions: number; 
 }
 
+// --- NEW INTERFACE for dropdowns (Course and Batch) ---
+interface FilterCourse {
+    course_id: number;
+    course_name: string;
+}
+
+interface FilterBatch {
+    batchid: number;
+    batch_name: string;
+    course_id: number; // Batches ko Course se link karne ke liye
+}
+
 
 @Component({
   selector: 'app-student-dashboard',
@@ -105,7 +124,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     profileInitial: '',
     profileImagePlaceholder: true, // Default value
     courses: [],
-    featureCards: [],
+    featureCards: [], // FIX: Initialize empty for now
     batchId: undefined, // Default value
     courseId: undefined, // Default value
   };
@@ -138,9 +157,64 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   readonly MAX_TARGET_MINUTES: number = this.MAX_TARGET_HOURS * 60;
 
   // --- Feature Cards, Courses, Assignments ---
-  featureCards: FeatureCard[] = []; 
-  courses: Course[] = []; 
-  nextDeadlines: ScheduleItem[] = []; 
+  // FIX: quickAccessCards डेटा को नए और पुराने दोनों HTML प्रॉपर्टीज़ के लिए अपडेट किया गया है
+  quickAccessCards: FeatureCard[] = [
+    { 
+      label: 'Batches Status', // for Profile Setting compatibility
+      title: 'My Batches', // for new HTML cards
+      value: 'View Your Batch', 
+      icon: 'fas fa-users', 
+      color: '#4338CA', 
+      info: 'Full Stack 2025 | 45 Students', // for Profile Setting compatibility
+      subText: 'Full Stack 2025 | 45 Students', // for new HTML cards
+      colorClass: 'stat-blue', // for [ngClass] in new HTML
+      route: 'batches' 
+    },
+    { 
+      label: 'Exam Schedule', 
+      title: 'Upcoming Exams', 
+      value: 'See Your Upcoming Exam', 
+      icon: 'fas fa-book-open', 
+      color: '#F59E0B', 
+      info: 'Next Exam: Data Structures (05 Nov)', 
+      subText: 'Next Exam: Data Structures (05 Nov)', 
+      colorClass: 'stat-yellow', 
+      route: 'exams' 
+    },
+    { 
+      label: 'Assignment Submissions', 
+      title: 'Assignments', 
+      value: 'Check Your Assignments', 
+      icon: 'fas fa-tasks', 
+      color: '#10B981', 
+      info: '3 Pending Assignments | Due This Week', 
+      subText: '3 Pending Assignments | Due This Week', 
+      colorClass: 'stat-green', 
+      route: 'assignments' 
+    },
+    { 
+      label: 'Fee Status', 
+      title: 'Payment Details', 
+      value: 'See Your Payment Details', 
+      icon: 'fas fa-receipt', 
+      color: '#F43F5E', 
+      info: 'Next Payment Due: ₹20,000 (30 Dec 2025)', 
+      subText: 'Next Payment Due: ₹20,000 (30 Dec 2025)', 
+      colorClass: 'stat-red', 
+      route: 'payments' 
+    },
+  ];
+
+  courses: Course[] = [
+    { title: 'Advanced Algorithms', progress: 85, category: 'CS', instructor: 'Dr. E. J. Smith', code: 'CS501', colorClass: '#4338CA' },
+    { title: 'Database Management', progress: 55, category: 'IT', instructor: 'Ms. K. N. Iyer', code: 'IT402', colorClass: '#10B981' },
+    { title: 'Cloud Fundamentals', progress: 92, category: 'IT', instructor: 'Mr. A. P. Khan', code: 'IT303', colorClass: '#F59E0B' },
+  ]; 
+  nextDeadlines: ScheduleItem[] = [
+    { date: '2025-11-05', desc: 'CS501 Assignment 5 Submission', type: 'deadline', dayOfWeekShort: 'TUE', dayOfMonth: '05' },
+    { date: '2025-11-08', desc: 'IT402 Week 9 Quiz', type: 'deadline', dayOfWeekShort: 'FRI', dayOfMonth: '08' },
+    { date: '2025-11-12', desc: 'IT303 Project Proposal', type: 'deadline', dayOfWeekShort: 'TUE', dayOfMonth: '12' },
+  ]; 
 
   // --- Calendar and Schedule ---
   selectedMonthYear: string = '';
@@ -159,12 +233,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   
   // --- NEW EXAM PROPERTIES ---
   showExamModal: boolean = false;
-  activeExams: AvailableExam[] = [];
+  allExams: AvailableExam[] = []; // सभी exams store करने के लिए
+  activeExams: AvailableExam[] = []; // Filtered exams (by Course/Batch) store करने के लिए
   isLoadingExams: boolean = true;
   selectedExamId: number | null = null;
-  
-  // FIX 1: Add the missing property required by the template
   examToAttend: AvailableExam | null = null; 
+
+  // --- NEW EXAM CATEGORIZED LISTS ---
+  upcomingExams: AvailableExam[] = []; // End date is in the future
+  expiredExams: AvailableExam[] = []; // End date is in the past
+  attendedExams: AvailableExam[] = []; // Placeholder for future feature (needs API)
+  
+  // --- BATCH/COURSE FILTER PROPERTIES ---
+  studentAssignedBatches: StudentBatchDetails[] = []; // छात्र को असाइन किए गए सभी बैचेज़
+  availableCourses: FilterCourse[] = []; // Exam Modal में Course dropdown के लिए
+  availableBatches: FilterBatch[] = []; // Exam Modal में Batch dropdown के लिए
+
+  // Dropdown Selections
+  selectedCourseId: number | null = null; 
+  selectedBatchId: number | null = null; 
 
   constructor(private cdr: ChangeDetectorRef, private apiService: ApiService, private examService: examAPi) {}
 
@@ -172,7 +259,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       if (this.selectedExamId === null) {
           return undefined;
       }
-      return this.activeExams.find(e => e.examId === this.selectedExamId);
+      // activeExams se exam dhoondhe (which contains all exams filtered by Course/Batch)
+      return this.activeExams.find(e => e.examId === this.selectedExamId); 
   }
 
   // =========================================================================
@@ -181,7 +269,19 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeDataStructures();
-    this.fetchStudentDataFromStorage(); // यह अब Batch ID और Course ID को फ़ेच करेगा
+    
+    // Step 1: Courses और Batches को फ़िल्टर ड्रॉपडाउन के लिए लोड करें
+    this.fetchCoursesAndBatchesForFilter().subscribe({
+      next: () => {
+        // Step 2: Course/Batch Filter Data load होने के बाद Student Data fetch करें
+        this.fetchStudentDataFromStorage();
+      },
+      error: () => {
+        // ERROR: अगर Course/Batch Filter Data लोड नहीं होता है, तो डिफ़ॉल्ट रूप से आगे बढ़ें
+        this.fetchStudentDataFromStorage();
+      }
+    });
+
     this.updateClock();
     this.timeSubscription = interval(1000).subscribe(() => {
       this.updateClock();
@@ -192,21 +292,41 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
     const now = new Date();
     this.displayedMonthStart = new Date(now.getFullYear(), now.getMonth(), 1); 
+    // FIX: Full schedule details ko initialize kiya
+    this.fullScheduleDetails = this.createDummySchedule();
     this.populateCalendar(this.displayedMonthStart);
     this.selectedScheduleDate = this.todayDate;
     this.updateDisplayedScheduleDetails();
+    
   }
 
   ngOnDestroy(): void {
     this.timeSubscription?.unsubscribe();
   }
+  
+  // FIX: Dummy Schedule Data function
+  private createDummySchedule(): ScheduleItem[] {
+    const data: ScheduleItem[] = [
+        { date: '2025-11-04', desc: 'Daily Standup Meeting', type: 'session', dayOfWeekShort: 'MON', dayOfMonth: '04', joinButton: true },
+        { date: '2025-11-05', desc: 'CS501 Assignment 5 Submission', type: 'deadline', dayOfWeekShort: 'TUE', dayOfMonth: '05' },
+        { date: '2025-11-06', desc: 'Live Class: Advanced Angular', type: 'class', dayOfWeekShort: 'WED', dayOfMonth: '06', joinButton: true },
+        { date: '2025-11-08', desc: 'IT402 Week 9 Quiz', type: 'deadline', dayOfWeekShort: 'FRI', dayOfMonth: '08' },
+        { date: '2025-11-10', desc: 'Self Study: Data Structures', type: 'study', dayOfWeekShort: 'SUN', dayOfMonth: '10' },
+        { date: '2025-11-12', desc: 'IT303 Project Proposal', type: 'deadline', dayOfWeekShort: 'TUE', dayOfMonth: '12' },
+        { date: '2025-11-13', desc: 'Doubt Clearing Session', type: 'session', dayOfWeekShort: 'WED', dayOfMonth: '13', joinButton: true },
+    ];
+    // Sort and return the data
+    return data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
 
   private initializeDataStructures(): void {
-    this.featureCards = []; 
-    this.courses = []; 
-    this.nextDeadlines = []; 
-    this.fullScheduleDetails = [];
-    this.studyLog = [];
+    // FIX: featureCards ki jagah quickAccessCards ka use kiya jayega
+    // this.featureCards = []; 
+    // this.courses = []; 
+    // this.nextDeadlines = []; 
+    // this.fullScheduleDetails = [];
+    // this.studyLog = [];
   }
 
   private fetchStudentDataFromStorage(): void {
@@ -215,92 +335,117 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.loadingDashboardData = true; 
     this.cdr.detectChanges(); 
 
-    // FIX: Check for userId
+    // --- FALLBACK LOGIC HELPER ---
+    const setDefaultFilters = () => {
+        // यदि studentAssignedBatches खाली है
+        const firstAvailableCourse = this.availableCourses.length > 0 ? this.availableCourses[0] : null;
+        const firstAvailableBatch = this.availableBatches.length > 0 ? this.availableBatches[0] : null;
+
+        if (firstAvailableCourse && firstAvailableBatch) {
+            this.selectedCourseId = firstAvailableCourse.course_id;
+            this.selectedBatchId = firstAvailableBatch.batchid;
+            this.studentProfileData = {
+                ...this.studentProfileData,
+                batchId: firstAvailableBatch.batchid,
+                courseId: firstAvailableCourse.course_id
+            };
+            console.warn('Student batch data missing. Using first available Course/Batch for default filter.');
+            this.showMessage('No assigned batch found. Using first available course/batch for exam filter.', 'warning');
+        } else {
+             // अंतिम फ़ॉलबैक, यदि कोई Course/Batch लोड ही नहीं हुआ है
+            const defaultId = 1;
+            this.selectedCourseId = defaultId;
+            this.selectedBatchId = defaultId;
+            this.studentProfileData = {
+                ...this.studentProfileData,
+                batchId: defaultId,
+                courseId: defaultId
+            };
+            console.error('No Course/Batch data available. Using hardcoded default IDs (1).');
+            this.showMessage('Error: No Course/Batch data available. Using default IDs 1.', 'error');
+        }
+    };
+    // ----------------------------
+    
     if (loginData && loginData.userId) {
       const studentId = loginData.userId;
       
-      // FIX: Nullish coalescing operator (?) का उपयोग करके 'info' और 'full_name' को सुरक्षित रूप से एक्सेस करें
-      // अगर info या full_name अनुपलब्ध है, तो fallback के रूप में 'username' का उपयोग करें।
       const fullName = loginData.info?.full_name || loginData.username || 'Student'; 
       const email = loginData.info?.email || loginData.username || 'johndoe@university.edu';
-      
       const initial = this.getProfileInitial(fullName);
       
       this.studentName = fullName; 
       this.profileInitial = initial; 
       this.profileImagePlaceholder = true; 
       
-      // 1. Update basic profile data immediately
       this.studentProfileData = {
           ...this.studentProfileData,
           full_name: fullName,
           email: email, 
-          student_id: studentId, // student_id now holds the userId
+          student_id: studentId, 
+          // FIX: featureCards data set karne ke liye, Profile setting me iska istemal hota hai
+          featureCards: this.quickAccessCards.map(card => ({
+              ...card,
+              // ProfileSettingComponent expects 'label' and 'info' to be present
+              // We map 'title' to 'label' and 'subText' to 'info' for backwards compatibility
+              label: card.title, 
+              info: card.subText,
+              // 'value' is already present
+          }))
       };
       
-      console.log('--- Student Data Found. Fetching Batch Details using ID:', studentId, '---');
+      console.log('--- Student Data Found. Fetching All Batch Details for ID:', studentId, '---');
       
-      // 2. Fetch Batch/Course details using the new fetchStudentBatches API
+      // 2. Fetch ALL Batch/Course details for the student
       this.apiService.fetchStudentBatches(studentId).pipe(
           tap((batchDetails: StudentBatchDetails[]) => {
               
               if (batchDetails && batchDetails.length > 0) {
-                  // छात्र कई बैच में हो सकता है; हम पहले बैच का उपयोग कर रहे हैं।
+                  // छात्र के सभी असाइन किए गए बैच store करें
+                  this.studentAssignedBatches = batchDetails;
+                  
+                  // डिफ़ॉल्ट रूप से, पहले बैच/कोर्स को filter selection में सेट करें
                   const firstBatch = batchDetails[0];
-                  const studentBatchId = firstBatch.batchid; 
-                  const studentCourseId = firstBatch.course_id; 
-
-                  // 3. Update Batch/Course data
                   this.studentProfileData = {
                       ...this.studentProfileData,
-                      batchId: studentBatchId, 
-                      courseId: studentCourseId
+                      batchId: firstBatch.batchid, // Default Batch ID
+                      courseId: firstBatch.course_id // Default Course ID
                   };
+                  this.selectedBatchId = firstBatch.batchid;
+                  this.selectedCourseId = firstBatch.course_id;
                   
-                  // 4. Update UI and fetch exams
-                  console.log('--- Batches Loaded. Filtering Exams with BATCH ID:', studentBatchId, 'and COURSE ID:', studentCourseId, '---');
-                  this.fetchActiveExamsForStudent(studentBatchId, studentCourseId);
+                  console.log('--- Batches Loaded. Fetching ALL Active Exams. ---');
                   
               } else {
-                  // यदि कोई बैच असाइन नहीं है
-                  const defaultId = 1;
-                  this.studentProfileData = {
-                      ...this.studentProfileData,
-                      batchId: defaultId, 
-                      courseId: defaultId
-                  };
-                  console.warn('Student has no assigned batches. Using default IDs 1 for exam filtering.');
-                  this.showMessage('No batches assigned. Using default IDs for exams.', 'warning');
-                  this.fetchActiveExamsForStudent(defaultId, defaultId); 
+                  // यदि कोई बैच असाइन नहीं है, तो फ़ॉलबैक लॉजिक का उपयोग करें
+                  setDefaultFilters();
               }
               
               this.loadingDashboardData = false;
               this.cdr.detectChanges(); 
+              this.fetchExamsAndFilter(); // exams fetch करें और फ़िल्टर लागू करें
               
           }),
           catchError((error) => {
-              // API फ़ेल होने पर या ID न मिलने पर डिफ़ॉल्ट ID का उपयोग करें
-              console.error('Error fetching student batches (batch/course ID):', error);
-              const defaultId = 1; 
-              this.studentProfileData = {
-                  ...this.studentProfileData,
-                  batchId: defaultId,
-                  courseId: defaultId
-              };
+              console.error('Error fetching student batches:', error);
+              // API कॉल विफल होने पर फ़ॉलबैक लॉजिक का उपयोग करें
+              setDefaultFilters();
               this.loadingDashboardData = false;
-              this.showMessage('Error fetching Batch/Course ID. Using default IDs 1 for exams.', 'error');
               this.cdr.detectChanges();
-              this.fetchActiveExamsForStudent(defaultId, defaultId);
-              return of(null); // Return observable null to complete the stream
+              this.fetchExamsAndFilter(); // exams fetch करें और फ़िल्टर लागू करें
+              return of(null); 
           })
       ).subscribe();
 
     } else {
-      // Login Data (userId) उपलब्ध नहीं है, default/guest data सेट करें
+      // Login Data (userId) उपलब्ध नहीं है
       this.studentName = 'Guest User';
-      const defaultId = 1; 
       this.profileInitial = this.getProfileInitial(this.studentName);
       this.profileImagePlaceholder = true;
+      
+      // Login Data न होने पर भी फ़ॉलबैक लॉजिक का उपयोग करें
+      setDefaultFilters();
+      
       this.loadingDashboardData = false;
       this.showMessage('Login data (userId) not found. Showing default content.', 'warning');
       
@@ -310,11 +455,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           email: 'guest@university.edu',
           student_id: 'STU-0000',
           profileInitial: this.profileInitial,
-          batchId: defaultId,
-          courseId: defaultId
+          // batchId और courseId setDefaultFilters() द्वारा सेट किए गए हैं
+          // FIX: quickAccessCards data set karna
+          featureCards: this.quickAccessCards.map(card => ({
+              ...card,
+              label: card.title, 
+              info: card.subText,
+          }))
       };
       this.cdr.detectChanges(); 
-      this.fetchActiveExamsForStudent(defaultId, defaultId); 
+      this.fetchExamsAndFilter(); // exams fetch करें और फ़िल्टर लागू करें
     }
   }
 
@@ -333,69 +483,219 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
   
   // =========================================================================
-  // NEW/UPDATED: EXAM LOGIC (Batch ID and Course ID filtering)
+  // NEW/UPDATED: EXAM LOGIC (Multi-Batch/Course Filtering & Categorization)
   // =========================================================================
-  
-  // Fetch available exams based on the student's batch ID and course ID
-  fetchActiveExamsForStudent(batchId: number, courseId: number): void {
-      this.isLoadingExams = true;
-      this.activeExams = []; 
-      this.cdr.detectChanges();
-      
-      console.log(`Fetching student-specific exams using API for Batch ID: ${batchId} and Course ID: ${courseId}`);
 
-      // FIX: Changed from this.examService.listExams() to the new filtered API
-      this.examService.fetchStudentExams(courseId, batchId).pipe(
-          map((response: any[]) => {
-              // 1. API Response को map करें (फिल्टरिंग अब Django में हो रही है)
-              return response
-                  .map(exam => ({
-                      examId: exam.examid,
-                      examName: exam.examname,
-                      start_datetime: exam.start_datetime, 
-                      end_datetime: exam.end_datetime,     
-                      is_active: exam.is_active,           
-                      courseid: exam.courseid,
-                      batchid: exam.batchid, 
-                      subjectid: exam.subjectid,
-                      // Batch और Subject data को सुरक्षित रूप से मैप करें, या fallback mock data का उपयोग करें
-                      batch: { 
-                          batchId: exam.batchid, 
-                          batchName: exam.batch?.batchName || `Batch ${exam.batchid}` 
-                      },
-                      subject: { 
-                          subjectid: exam.subjectid, 
-                          subjectname: exam.subject?.subjectname || `Subject ID ${exam.subjectid}` 
-                      },
-                      durationMinutes: exam.durationMinutes || 60, // Default duration if not provided
-                      totalQuestions: exam.totalQuestions || 20 // Default questions if not provided
-                  }))
-                  .filter((exam: AvailableExam) => {
-                      // 2. Client-side filter को केवल isActive के लिए रखें (यदि Django इसे पहले से नहीं करता है)
-                      // यदि Django व्यू (StudentExamListView) केवल Active exams भेजता है, तो यह filter अनावश्यक है।
-                      // सुरक्षा के लिए इसे अभी रखा गया है।
-                      return exam.is_active === true;
-                  });
-          }),
-          catchError((error) => {
-              console.error(`Student Exam list fetch failed for Batch ID ${batchId} / Course ID ${courseId}. API error details:`, error);
-              this.showMessage('Error fetching live exams. Check API server and Django student-exams URL.', 'error');
-              
-              return of([]); 
-          })
-      ).subscribe(
-          (exams: AvailableExam[]) => {
-              this.activeExams = exams;
-              this.isLoadingExams = false;
-              if (exams.length === 0) {
-                  this.showMessage(`No active exams found for your Batch (${batchId}) and Course (${courseId}).`, 'warning');
-              } else {
-                  this.showMessage(`${exams.length} active exam(s) found for your batch/course.`, 'success');
-              }
-              this.cdr.detectChanges(); 
-          }
-      );
+  /**
+   * Exam Modal के ड्रॉपडाउन को पॉपुलेट करने के लिए सभी courses और batches को fetch करता है।
+   */
+  fetchCoursesAndBatchesForFilter(): Observable<any> {
+    // 1. Courses fetch करें (examService.fetchCourses)
+    return this.examService.fetchCourses().pipe(
+        // 2. Batches fetch करें (एक-एक Course के लिए)
+        switchMap((courses: any[]) => {
+            this.availableCourses = courses.map(c => ({
+                course_id: c.courseid,
+                course_name: c.coursename
+            }));
+
+            // सभी courses के लिए batches fetch करने के लिए forkJoin का उपयोग करें
+            const batchRequests = courses.map(c => 
+                this.examService.fetchBatches(c.courseid).pipe(
+                    map((batches: any[]) => batches.map(b => ({
+                        batchid: b.batchId,
+                        batch_name: b.name,
+                        course_id: c.courseid 
+                    })))
+                )
+            );
+            return forkJoin(batchRequests).pipe(
+                map(allBatchesArrays => allBatchesArrays.flat())
+            );
+        }),
+        tap((allBatches: FilterBatch[]) => {
+            // 3. Batches को availableBatches में स्टोर करें
+            this.availableBatches = allBatches;
+            this.cdr.detectChanges(); 
+        }),
+        catchError((error) => {
+            console.error('Error fetching courses/batches for filter:', error);
+            this.showMessage('Error loading course/batch options for filtering.', 'error');
+            return throwError(() => new Error('Course/Batch filter data failed to load.')); 
+        })
+    );
   }
+
+  /**
+   * API से सभी active exams fetch करें और उन्हें `allExams` में स्टोर करें।
+   */
+  fetchAllActiveExams(): Observable<AvailableExam[]> {
+    this.isLoadingExams = true;
+    this.cdr.detectChanges();
+    console.log('Fetching ALL active exams from API for student to filter.');
+
+    // FIX: Changed to fetch all active exams (assuming a listAllExams() exists or can be simulated)
+    // NOTE: Django API में exams/exam-list/ endpoint का उपयोग किया जा रहा है
+    return this.examService.listAllExams().pipe(
+        map((response: any[]) => {
+            return response
+                .map(exam => ({
+                    examId: exam.examid,
+                    examName: exam.examname,
+                    start_datetime: exam.start_datetime, 
+                    end_datetime: exam.end_datetime,     
+                    is_active: exam.is_active,           
+                    courseid: exam.courseid,
+                    batchid: exam.batchid, 
+                    subjectid: exam.subjectid,
+                    batch: { 
+                        batchId: exam.batchid, 
+                        batchName: exam.batch?.batchName || `Batch ${exam.batchid}` 
+                    },
+                    subject: { 
+                        subjectid: exam.subjectid, 
+                        subjectname: exam.subject?.subjectname || `Subject ID ${exam.subjectid}` 
+                    },
+                    durationMinutes: exam.durationMinutes || 60,
+                    totalQuestions: exam.totalQuestions || 20 
+                }))
+                // Removed .filter((exam: AvailableExam) => exam.is_active === true) 
+                // because we need all exams (even expired ones) for categorization.
+                .filter((exam: AvailableExam) => exam.examId !== null && exam.examId !== undefined); // Ensure exam has an ID
+        }),
+        catchError((error) => {
+            console.error('Global Exam list fetch failed. API error details:', error);
+            this.showMessage('Error fetching global exam list. Check API server.', 'error');
+            return of([]); 
+        })
+    );
+  }
+  
+  /**
+   * Exams fetch करें (अगर पहली बार) और उन्हें चयनित Course/Batch ID के आधार पर filter करें।
+   */
+  fetchExamsAndFilter(): void {
+    this.isLoadingExams = true;
+    this.selectedExamId = null;
+    this.cdr.detectChanges();
+
+    // 1. यदि allExams खाली है, तो पहले सभी Exams fetch करें
+    if (this.allExams.length === 0) {
+        this.fetchAllActiveExams().subscribe(exams => {
+            this.allExams = exams;
+            this.applyExamFilter();
+        });
+    } else {
+        // 2. यदि allExams पहले से भरे हुए हैं, तो तुरंत filter लागू करें
+        this.applyExamFilter();
+    }
+  }
+
+  /**
+   * `allExams` को `selectedCourseId` और `selectedBatchId` के आधार पर filter करता है
+   * और उन्हें Upcoming/Expired/Attended श्रेणियों में विभाजित करता है।
+   */
+  applyExamFilter(): void {
+    const courseId = this.selectedCourseId;
+    const batchId = this.selectedBatchId;
+    
+    // Safety check: ensure both IDs are selected before filtering
+    if (courseId === null || batchId === null) {
+        this.activeExams = [];
+        this.upcomingExams = [];
+        this.expiredExams = [];
+        this.attendedExams = [];
+        this.isLoadingExams = false;
+        this.cdr.detectChanges();
+        // this.showMessage('Please select both Course and Batch to view exams.', 'warning'); // यह मैसेज अब setDefaultFilters() के विफल होने पर ही आएगा
+        return;
+    }
+
+    // Step 1: Filter by Course and Batch
+    this.activeExams = this.allExams.filter(exam => {
+        const courseMatch = exam.courseid === courseId;
+        const batchMatch = exam.batchid === batchId;
+        return courseMatch && batchMatch;
+    });
+
+    // Step 2: Categorize by Date (Upcoming/Expired)
+    this.upcomingExams = [];
+    this.expiredExams = [];
+    this.attendedExams = []; // Placeholder for Attended
+
+    const now = new Date().getTime();
+
+    this.activeExams.forEach(exam => {
+        const endDate = new Date(exam.end_datetime).getTime();
+        
+        // Expired Exam: Exam end date is in the past
+        if (endDate <= now) {
+            this.expiredExams.push(exam);
+        } 
+        // Upcoming/Ongoing Exam: Exam end date is in the future
+        else { 
+            this.upcomingExams.push(exam);
+        }
+        
+        // For the 'Attended' list: Requires a specific server check if student submitted the exam.
+        // For now, keeping it empty as per current API structure.
+    });
+
+
+    this.isLoadingExams = false;
+    
+    if (this.activeExams.length === 0) {
+        this.showMessage(`No exams found for selected Course (ID: ${courseId}) and Batch (ID: ${batchId}).`, 'warning');
+    } else {
+        this.showMessage(`${this.activeExams.length} exams found. ${this.upcomingExams.length} upcoming.`, 'success');
+    }
+    this.cdr.detectChanges(); 
+  }
+  
+  /**
+   * Batch dropdown में केवल चयनित Course के batches दिखाने के लिए filter list
+   */
+  get filteredBatches(): FilterBatch[] {
+      if (this.selectedCourseId === null) {
+          return [];
+      }
+      return this.availableBatches.filter(b => b.course_id === this.selectedCourseId);
+  }
+  
+  /**
+   * Course dropdown में केवल वही courses दिखाएं जो student को असाइन किए गए हैं
+   */
+  get studentCoursesForFilter(): FilterCourse[] {
+      // यदि studentAssignedBatches उपलब्ध है, तो केवल उन्हीं courses को दिखाएं जो छात्र को असाइन किए गए हैं
+      if (this.studentAssignedBatches.length > 0) {
+          const courseIds = new Set(this.studentAssignedBatches.map(b => b.course_id));
+          return this.availableCourses.filter(c => courseIds.has(c.course_id));
+      }
+      // यदि studentAssignedBatches उपलब्ध नहीं है, तो सभी उपलब्ध courses दिखाएं
+      return this.availableCourses;
+  }
+  
+  /**
+   * Course dropdown में केवल वही batches दिखाएं जो student को असाइन किए गए हैं
+   * और जो current selected course से भी मेल खाते हों
+   */
+  get studentBatchesForFilter(): FilterBatch[] {
+      if (this.selectedCourseId === null) {
+          return [];
+      }
+      
+      const batchesInSelectedCourse = this.availableBatches.filter(b => b.course_id === this.selectedCourseId);
+
+      // यदि studentAssignedBatches उपलब्ध है, तो केवल उन्हीं batches को दिखाएं जो छात्र को असाइन किए गए हैं
+      if (this.studentAssignedBatches.length > 0) {
+          const assignedBatchIds = new Set(this.studentAssignedBatches.map(b => b.batchid));
+          return batchesInSelectedCourse.filter(b => assignedBatchIds.has(b.batchid));
+      }
+      
+      // यदि studentAssignedBatches उपलब्ध नहीं है, तो चुने गए कोर्स के सभी batches दिखाएं
+      return batchesInSelectedCourse;
+  }
+
 
   // Open the Exam Selection Modal
   openExamModal(): void {
@@ -407,17 +707,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.showExamModal = true;
     this.selectedExamId = null; 
     
-    const currentBatchId = this.studentProfileData.batchId;
-    const currentCourseId = this.studentProfileData.courseId;
+    // Exam fetch करें और filter लागू करें
+    this.fetchExamsAndFilter();
     
-    if (currentBatchId && currentCourseId) {
-        // Re-fetch exams using the real-time batch ID and course ID
-        this.fetchActiveExamsForStudent(currentBatchId, currentCourseId);
-    } else {
-        const fallbackId = 1;
-        this.showMessage(`Batch/Course ID is missing. Using default IDs ${fallbackId} for filtering.`, 'warning');
-        this.fetchActiveExamsForStudent(fallbackId, fallbackId); 
-    }
     this.cdr.detectChanges(); 
   }
 
@@ -427,7 +719,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
   
   // Start the selected exam
-  // FIX 2: Update startExam to set examToAttend and navigate to the exam page
   startExam(): void {
     if (!this.selectedExamId || !this.selectedExam) {
         this.showMessage('Please select an exam to start.', 'warning');
@@ -435,6 +726,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
     
     const examDetails = this.selectedExam;
+
+    // Check if the exam is in the upcoming list before starting
+    if (!this.upcomingExams.find(e => e.examId === examDetails.examId)) {
+         this.showMessage('Cannot start this exam. It might be expired or already submitted.', 'error');
+         return;
+    }
 
     this.showMessage(`Starting Exam: ${examDetails.examName}`, 'success');
     
@@ -446,12 +743,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.activePage = 'attend-exam'; 
     
     this.cdr.detectChanges(); 
-    
-    // NOTE: We don't need to fetch questions here; AttendExamComponent 
-    // will handle that in its own ngOnInit, using the inputs we pass it.
   }
 
-  // FIX 3: Add the missing method required by the template
   /**
    * Handles the event when the AttendExamComponent finishes (submitted or expired).
    * It changes the view back to the dashboard and shows a message.
@@ -462,6 +755,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       // Reset state and go back to dashboard
       this.examToAttend = null; 
       this.activePage = 'dashboard';
+      // Exams को re-fetch करने की आवश्यकता नहीं है, filter अपने आप applied रहेगा
       this.cdr.detectChanges();
   }
 
@@ -469,7 +763,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
   // CLOCK AND GREETING LOGIC 
   // =========================================================================
-
+  // ... (unchanged clock and greeting logic) ...
   private updateClock(): void {
     const now = new Date();
     this.currentDayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
@@ -496,7 +790,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
   // TIME TRACKING LOGIC 
   // =========================================================================
-
+  // ... (unchanged time tracking logic) ...
   private parseDurationToSeconds(duration: string): number {
     const parts = duration.split(':').map(Number);
     if (parts.length === 2) { 
@@ -608,7 +902,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
   // CALENDAR POPULATION AND NAVIGATION 
   // =========================================================================
-
+  // ... (unchanged calendar logic) ...
   populateCalendar(startDate: Date): void {
     this.calendarDays = [];
     const year = startDate.getFullYear();
@@ -702,9 +996,38 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     if (validPages.includes(page)) {
       this.activePage = page;
       this.clearMessage();
+      // FIX: New card clicks ke liye navigation logic
+      if (page === 'assignments' && this.activePage === 'dashboard') {
+          // If clicked from the dashboard card, go to the assignments page
+          this.activePage = 'assignments';
+      }
+      // Future: add logic for 'batches' and 'payments' pages
     } else {
       this.showMessage(`Invalid page requested: ${page}`, 'error');
     }
+  }
+  
+  // FIX: New method for handling quick card clicks
+  handleQuickCardClick(route: string): void {
+      switch (route) {
+          case 'batches':
+              this.showMessage('Navigating to Batch Details page...', 'warning');
+              // Implement actual page navigation or open a modal here
+              break;
+          case 'exams':
+              this.openExamModal();
+              break;
+          case 'assignments':
+              this.setActivePage('assignments'); // Navigate to the main assignments tab
+              break;
+          case 'payments':
+              this.showMessage('Navigating to Payment Details page...', 'warning');
+              // Implement actual page navigation or open a modal here
+              break;
+          default:
+              this.showMessage(`Feature route "${route}" is not yet implemented.`, 'warning');
+              break;
+      }
   }
 
   openFeature(route: string): void {
