@@ -1,0 +1,111 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Main Course Management View -->
+<div class="course-management-view">
+    
+    <div class="main-content-header">
+        <h1>Course Management</h1>
+        <p>View all available courses and manage their details, subjects, and deletion.</p>
+    </div>
+
+    <!-- Filter/Action Controls -->
+    <div class="filter-controls-wrapper">
+        <div class="filter-controls">
+            <!-- Course Filter Buttons (Example for future use) -->
+            <button 
+                class="filter-button" 
+                [class.active]="currentFilter() === 'all'"
+                (click)="filterCourses('all')"
+                style="display: none;"
+            >
+                All Courses
+            </button>
+        </div>
+        
+        <!-- बटन को group किया गया है ताकि वे दाईं ओर एक साथ दिखें -->
+        <div class="action-buttons-group">
+            <!-- Action Button -->
+            <button class="create-course-button" (click)="navigateToCreateCourse()">
+                <i class="fas fa-plus"></i> Create New Course
+            </button>
+            
+            <button class="refresh-button" (click)="fetchCourses()" title="Refresh Courses">
+                <i class="fas fa-sync-alt" [class.rotate]="isLoadingCourses()"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dynamic Message Box -->
+    <div *ngIf="courseMessage()" class="course-message-box" [class.success]="!courseMessage()?.isError" [class.error]="courseMessage()?.isError">
+        <p><strong>{{ courseMessage()?.isError ? 'Error!' : 'Success!' }}</strong> {{ courseMessage()?.text }}</p>
+    </div>
+    
+    <!-- Course List Cards - Scrollable Container -->
+    <div class="card-scroll-container">
+        <div class="card-grid">
+            <div *ngIf="isLoadingCourses()" class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> Fetching courses...
+            </div>
+            
+            <div *ngIf="!isLoadingCourses() && filteredCourses.length === 0" class="no-courses-found">
+                <i class="fas fa-info-circle"></i> No courses found matching the current criteria.
+            </div>
+
+            <ng-container *ngIf="!isLoadingCourses() && filteredCourses.length > 0">
+                <div *ngFor="let course of filteredCourses" class="course-card">
+                    <div class="course-card-header">
+                        <div class="course-title">{{ course.courseName }}</div>
+                        <div class="course-id">ID: {{ course.courseId }}</div>
+                    </div>
+                    
+                    <div class="course-card-body">
+                        <p title="{{ course.contentUrl }}">
+                            <i class="fas fa-link"></i> <strong>Content URL:</strong> {{ course.contentUrl | slice:0:30 }}...
+                        </p>
+                        <p class="course-subjects">
+                            <i class="fas fa-tags"></i> <strong>Subjects:</strong> {{ getSubjectsDisplay(course) | slice:0:45 }}...
+                        </p>
+                    </div>
+
+                    <div class="course-card-actions">
+                        <!-- Update Button: Will navigate to the CreateCourse form with data pre-filled -->
+                        <button 
+                            (click)="navigateToEditCourse(course.courseId)" 
+                            class="action-button update-button"
+                            title="Update Course Details"
+                        >
+                            Update
+                        </button>
+                        <!-- Delete Button: Uses custom modal -->
+                        <button 
+                            (click)="showConfirmation(course.courseId, course.courseName)" 
+                            class="action-button delete-button"
+                            title="Delete Permanently"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+        
+<!-- Custom Confirmation Modal for Deletion -->
+<div *ngIf="isModalOpen()" class="custom-modal-backdrop" (click)="closeModal()">
+    <div class="custom-modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h4>Confirm Deletion</h4>
+            <button (click)="closeModal()" class="close-modal-button">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>{{ modalData()?.message }}</p>
+            <div class="modal-buttons">
+                <button (click)="closeModal()" class="btn-cancel">Cancel</button>
+                <button (click)="confirmAction()" class="btn-confirm-delete">
+                    Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

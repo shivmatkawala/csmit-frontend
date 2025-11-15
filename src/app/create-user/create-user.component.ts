@@ -1,13 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService, User } from '../services/user.service'; 
+import { UserService } from '../services/user.service'; 
 import { Router } from '@angular/router';
-
-// Interface for the custom confirmation modal data
-interface ConfirmationData {
-    message: string;
-    userId: string; // This holds the user's ID string (e.g., USR001)
-    action: 'deactivate' | 'reactivate' | 'delete';
-}
 
 @Component({
   selector: 'app-create-user',
@@ -28,16 +21,7 @@ export class CreateUserComponent implements OnInit {
   message: string = '';
   isError: boolean = false;
 
-  // User Management Panel properties
-  isPanelOpen: boolean = false;
-  allUsers: User[] = [];
-  filteredUsers: User[] = [];
-  currentFilter: number | null = null; 
-  isLoadingUsers: boolean = false;
-  
-  // Custom Modal Properties
-  isModalOpen: boolean = false;
-  modalData: ConfirmationData | null = null;
+  // यूज़र मैनेजमेंट पैनल और मॉडल से संबंधित सभी प्रॉपर्टीज़ यहाँ से हटा दी गई हैं।
 
 
   constructor(
@@ -49,7 +33,7 @@ export class CreateUserComponent implements OnInit {
     // Component initialization logic
   }
 
-  // --- User Creation Logic ---
+  // --- यूज़र क्रिएशन लॉजिक ---
   
   createUser(): void {
     if (!this.username || !this.password || !this.roleid) {
@@ -70,9 +54,7 @@ export class CreateUserComponent implements OnInit {
         this.username = '';
         this.password = ''; 
         this.roleid = 1;
-        if (this.isPanelOpen) {
-          this.fetchUsers();
-        }
+        // यूज़र लिस्ट को फ़ेच करने का लॉजिक हटा दिया गया है
       },
       error: (err) => {
         let errorMessage = 'An unknown error occurred during registration.';
@@ -97,128 +79,9 @@ export class CreateUserComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin-panel']);
+    // यूज़र बनाने के बाद एडमिन डैशबोर्ड पर वापस जाएँ
+    this.router.navigate(['/']); 
   }
 
-
-  // --- User Management Panel Logic ---
-
-  togglePanel(): void {
-    this.isPanelOpen = !this.isPanelOpen;
-    if (this.isPanelOpen) {
-      this.fetchUsers();
-    } else {
-      this.allUsers = [];
-      this.filteredUsers = [];
-      this.currentFilter = null;
-    }
-  }
-
-  fetchUsers(): void {
-    this.isLoadingUsers = true;
-    this.userService.getAllUsers().subscribe({
-      next: (data) => {
-        // Data is assigned directly, assuming it matches the User[] interface
-        this.allUsers = data; 
-        this.filterUsers(this.currentFilter); 
-        this.isLoadingUsers = false;
-      },
-      error: (err) => {
-        this.showMessage('Failed to fetch user list. Check API connection.', true);
-        this.isLoadingUsers = false;
-        console.error('Fetch Users Error:', err);
-      }
-    });
-  }
-
-  filterUsers(roleId: number | null): void {
-    this.currentFilter = roleId;
-    if (roleId === null) {
-      this.filteredUsers = this.allUsers;
-    } else {
-      this.filteredUsers = this.allUsers.filter(user => user.roleid === roleId);
-    }
-  }
-
-  getRoleName(roleId: number): string {
-    return this.roles.find(r => r.id === roleId)?.name || 'Unknown Role';
-  }
-  
-  // --- Action Handlers (Deactivate, Reactivate, Delete) ---
-
-  // Shows the custom confirmation modal
-  showConfirmation(userId: string, action: 'deactivate' | 'reactivate' | 'delete'): void {
-    let message = '';
-    if (action === 'deactivate') {
-      message = `Are you sure you want to DEACTIVATE user ${userId}? The user will not be able to log in.`;
-    } else if (action === 'reactivate') {
-      message = `Are you sure you want to REACTIVATE user ${userId}? The user will regain access.`;
-    } else if (action === 'delete') {
-      message = `Are you sure you want to DELETE user ${userId} permanently? This action cannot be undone.`;
-    }
-
-    this.modalData = { message, userId, action };
-    this.isModalOpen = true;
-  }
-  
-  // Closes the custom modal
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.modalData = null;
-  }
-
-  // Executes the confirmed action
-  confirmAction(): void {
-    if (!this.modalData) return;
-    
-    const { userId, action } = this.modalData;
-    this.closeModal();
-
-    if (action === 'deactivate') {
-        this.deactivateUser(userId);
-    } else if (action === 'reactivate') {
-        this.reactivateUser(userId);
-    } else if (action === 'delete') {
-        this.deleteUser(userId);
-    }
-  }
-
-  deactivateUser(userId: string): void {
-    this.userService.deactivateUser(userId).subscribe({
-      next: () => {
-        this.showMessage(`User ${userId} successfully deactivated.`, false);
-        this.fetchUsers(); 
-      },
-      error: (err) => {
-        this.showMessage(`Failed to deactivate user ${userId}.`, true);
-        console.error('Deactivate User Error:', err);
-      }
-    });
-  }
-
-  reactivateUser(userId: string): void {
-    this.userService.reactivateUser(userId).subscribe({
-        next: () => {
-            this.showMessage(`User ${userId} successfully reactivated.`, false);
-            this.fetchUsers(); 
-        },
-        error: (err) => {
-            this.showMessage(`Failed to reactivate user ${userId}.`, true);
-            console.error('Reactivate User Error:', err);
-        }
-    });
-  }
-
-  deleteUser(userId: string): void {
-    this.userService.deleteUser(userId).subscribe({
-      next: () => {
-        this.showMessage(`User ${userId} successfully deleted.`, false);
-        this.fetchUsers(); 
-      },
-      error: (err) => {
-        this.showMessage(`Failed to delete user ${userId}.`, true);
-        console.error('Delete User Error:', err);
-      }
-    });
-  }
+  // यूज़र मैनेजमेंट से संबंधित सभी सहायक फ़ंक्शन (togglePanel, fetchUsers, filterUsers, showConfirmation, आदि) हटा दिए गए हैं।
 }

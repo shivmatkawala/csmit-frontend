@@ -1,0 +1,129 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Main User Management View -->
+<div class="user-management-view">
+    
+    <div class="main-content-header">
+        <h1>User Management</h1>
+        <p>View all registered users and manage their roles and access status.</p>
+    </div>
+
+    <!-- Filter Controls (Search bar removed, moved to Admin Panel Header) -->
+    <div class="filter-controls-wrapper">
+        <div class="filter-controls">
+            <button 
+                class="filter-button" 
+                [class.active]="currentFilter() === null"
+                (click)="filterUsers(null)"
+            >
+                All Users
+            </button>
+            <button 
+                *ngFor="let role of roles"
+                class="filter-button" 
+                [class.active]="currentFilter() === role.id"
+                [ngClass]="'role-' + role.id"
+                (click)="filterUsers(role.id)"
+            >
+                {{ role.name }}
+            </button>
+            <button class="refresh-button" (click)="fetchUsers()" title="Refresh Users">
+                <i class="fas fa-sync-alt" [class.rotate]="isLoadingUsers()"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dynamic Message Box -->
+    <div *ngIf="userTabMessage()" class="user-message-box" [class.success]="!userTabMessage()?.isError" [class.error]="userTabMessage()?.isError">
+        <p><strong>{{ userTabMessage()?.isError ? 'Error!' : 'Success!' }}</strong> {{ userTabMessage()?.text }}</p>
+    </div>
+    
+    <!-- User List Cards - Scrollable Container Added Here -->
+    <div class="card-scroll-container">
+        <div class="card-grid"> <!-- Aligns like admin-panel cards -->
+            <div *ngIf="isLoadingUsers()" class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> Fetching users...
+            </div>
+            
+            <div *ngIf="!isLoadingUsers() && filteredUsers.length === 0" class="no-users-found">
+                <i class="fas fa-info-circle"></i> No users found matching the current criteria.
+            </div>
+
+            <ng-container *ngIf="!isLoadingUsers() && filteredUsers.length > 0">
+                <div *ngFor="let user of filteredUsers" class="user-card" [ngClass]="'card-role-' + user.roleid">
+                    <div class="user-card-header">
+                        <!-- Icon styled to match admin card look -->
+                        <div class="user-icon-circle" [ngClass]="'role-' + user.roleid">
+                            <i class="fas fa-user"></i>
+                        </div>
+
+                        <div class="user-details">
+                            <div class="user-role">{{ getRoleName(user.roleid) }}</div>
+                            <div class="user-status" [class.active]="user.is_active" [class.inactive]="!user.is_active">
+                                <i class="fas fa-circle"></i> {{ user.is_active ? 'Active' : 'Inactive' }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card-body">
+                        <p class="user-username"><i class="fas fa-envelope"></i> <strong>Email ID:</strong> {{ user.username }}</p>
+                        <p class="user-id"><i class="fas fa-fingerprint"></i> <strong>User ID:</strong> {{ user.userid }}</p>
+                    </div>
+
+                    <div class="user-card-actions">
+                        <!-- Deactivate/Reactivate Button -->
+                        <button 
+                            *ngIf="user.is_active"
+                            (click)="showConfirmation(user.userid, 'deactivate')" 
+                            class="action-button deactivate-button"
+                            title="Deactivate User"
+                        >
+                            Deactivate
+                        </button>
+                        <button 
+                            *ngIf="!user.is_active"
+                            (click)="showConfirmation(user.userid, 'reactivate')" 
+                            class="action-button reactivate-button"
+                            title="Reactivate User"
+                        >
+                            Reactivate
+                        </button>
+                        <!-- Delete Button -->
+                        <button 
+                            (click)="showConfirmation(user.userid, 'delete')" 
+                            class="action-button delete-button"
+                            title="Delete Permanently"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+        
+<!-- Custom Confirmation Modal -->
+<div *ngIf="isModalOpen()" class="custom-modal-backdrop" (click)="closeModal()">
+    <div class="custom-modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h4>Confirm Action</h4>
+            <button (click)="closeModal()" class="close-modal-button">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>{{ modalData()?.message }}</p>
+            <div class="modal-buttons">
+                <button (click)="closeModal()" class="btn-cancel">Cancel</button>
+                <button (click)="confirmAction()" 
+                    [ngClass]="{
+                        'btn-confirm-delete': modalData()?.action === 'delete',
+                        'btn-confirm-deactivate': modalData()?.action === 'deactivate',
+                        'btn-confirm-reactivate': modalData()?.action === 'reactivate'
+                    }"
+                >
+                    Confirm {{ modalData()?.action | titlecase }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

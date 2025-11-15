@@ -15,28 +15,13 @@
 </div>
 </div>
 <div class="header-right">
-<!-- 'Attend Exam' button: Hides when activePage is 'attend-exam' (User's request) -->
-<button class="btn-request" (click)="openExamModal()" style="background-color: #F59E0B;"
-    *ngIf="activePage !== 'attend-exam'">
-    <i class="fas fa-edit"></i> Attend Exam
+<!-- User Request: 'Download Resume' button changed to 'Setup Profile' -->
+<!-- FIX: Header button now calls goToProfileSetupForm which redirects to the full form -->
+<button class="btn-request" (click)="goToProfileSetupForm()" style="background-color: #F43F5E;">
+<i class="fas fa-user-edit"></i> Setup Profile
 </button>
 
-<!-- 'Download Resume' button as the secondary button -->
-<button class="btn-request" (click)="downloadResume()">
-<i class="fas fa-file-download"></i> Download Resume
-</button>
-
-    <!-- Profile Picture or Initial Text. Click to go to Profile Setting. -->
-    <div class="user-avatar" title="{{ studentName }}" (click)="setActivePage('profile-setting')">
-      <ng-container *ngIf="!profileImagePlaceholder && profileImageUrl">
-        <!-- If image URL exists, image will display here -->
-        <img [src]="profileImageUrl" alt="Student Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-      </ng-container>
-      <ng-container *ngIf="profileImagePlaceholder || !profileImageUrl">
-        <!-- If no image URL, the name initial will display -->
-        <span class="initial-text">{{ profileInitial }}</span>
-      </ng-container>
-    </div>
+    <!-- User's Request: Profile Picture or Initial Text removed from header -->
   </div>
 </header>
 
@@ -49,6 +34,9 @@
       <a [class.active]="activePage === 'courses'" (click)="setActivePage('courses')"><i class="fas fa-book"></i>Courses</a>
       <a [class.active]="activePage === 'assignments'" (click)="setActivePage('assignments')"><i class="fas fa-tasks"></i>Assignments</a>
       <a [class.active]="activePage === 'career'" (click)="setActivePage('career')"><i class="fas fa-briefcase"></i>Career</a>
+      
+      <!-- FIX: 'Resume' link now calls goToResumeView() to display the PDF viewer on the dashboard -->
+      <a [class.active]="activePage === 'generate-resume'" (click)="goToResumeView()" title="Generate/Download ATS Resume PDF"><i class="fas fa-file-alt"></i>Resume</a>
     </nav>
   </div>
   <div class="sidebar-bottom">
@@ -61,13 +49,17 @@
 </aside>
 
 <!-- Right Schedule Card (Calendar and Schedule) -->
-<section class="right-schedule-card" *ngIf="activePage !== 'attend-exam'">
+<!-- FIX: Hide the calendar when the resume is displayed (which takes full-width) -->
+<section class="right-schedule-card" *ngIf="activePage !== 'attend-exam' && activePage !== 'generate-resume'">
   <div class="current-time-display">
     <p class="current-time-text">Current Time: {{ currentTime }}</p>
   </div>
   <div class="right-schedule-header">
     <h3>My Academic Schedule</h3>
-    <button aria-label="Open Calendar"><i class="fas fa-calendar-alt"></i></button>
+    <!-- Added button to open Exam Modal here, since header button was removed -->
+    <button aria-label="Open Exam Schedule" (click)="openExamModal()" title="View and Attend Exams" style="color: #F59E0B; font-size: 16px;">
+        <i class="fas fa-edit"></i> Exams
+    </button>
   </div>
 
   <!-- Calendar Controls (Monthly View) -->
@@ -112,7 +104,6 @@
     <!-- Next Deadlines (Summary at bottom of Schedule Card) -->
     <div class="schedule-section" style="margin-top: 20px; border-top: 1px solid #CBD5E1; padding-top: 15px;">
       <h5>Upcoming Deadlines Summary</h5>
-      <!-- FIX: deadline-item, schedule-item के समान स्टाइल का उपयोग करने के लिए अपडेट किया गया -->
       <div *ngFor="let deadline of nextDeadlines" class="schedule-item deadline-item">
         <div class="date">
           {{ deadline.date | date:'EEE' | uppercase }} <br> {{ deadline.date | date:'dd' }}
@@ -127,45 +118,43 @@
 </section>
 
 <!-- Main Content Area -->
-<main class="main-content" [class.full-width]="activePage === 'attend-exam'">
+<!-- FIX: If activePage is 'generate-resume', it should be full-width -->
+<main class="main-content" [class.full-width]="activePage === 'attend-exam' || activePage === 'generate-resume'">
   <!-- 1. DASHBOARD CONTENT (Default) -->
   <ng-container *ngIf="activePage === 'dashboard'">
     
-    <!-- 1. Good Morning Card (Greeting + Clock) -> Trainer's first card position (.trainer-info-card) -->
-    <section class="trainer-info-card">
-        <img [src]="profileImageUrl" 
-             alt="{{ studentName }}" 
-             class="profile-img" 
-             title="{{ studentName }}"
-             *ngIf="!profileImagePlaceholder">
-        <div class="profile-img" style="background-color: #4338CA; border-color: #F43F5E;" *ngIf="profileImagePlaceholder">
+    <!-- 1. Good Morning Card (Greeting + Clock) -> Attractive Design -->
+    <section class="trainer-info-card attractive-greeting-card" style="justify-content: flex-start; gap: 10px;">
+        <!-- Profile Circle: Attractive Design -->
+        <div class="profile-img attractive-profile-circle" 
+             style="background-color: #4338CA; border-color: #F43F5E; margin-bottom: 5px;">
             <span style="font-size: 32px; font-weight: 700; color: white;">{{ profileInitial }}</span>
         </div>
 
         <!-- studentName is updated from API service storage -->
+        <!-- FIX: Showing studentName here -->
         <h2>{{ studentName }}</h2> 
-        <p class="role">{{ greeting }}</p>
+        <!-- Real-time Greeting -->
+        <p class="role attractive-greeting-text" style="margin-bottom: 5px;">{{ greeting }}</p>
         
-        <!-- Replaced batch-details with Today's Date/Day -->
-        <div class="batch-details" style="border-top: none; padding-top: 0;">
-            <p style="color: #4338CA; margin-bottom: 4px;">{{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</p>
-            <span style="font-size: 12px; font-weight: 500; color: #94A3B8;">Realtime Progress and Study Goals</span>
+        <!-- Day/Date -->
+        <div class="batch-details" style="border-top: none; padding-top: 0; margin-bottom: 15px;">
+            <p style="color: white; margin-bottom: 4px;">{{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</p>
+            <span style="font-size: 12px; font-weight: 500; color: #E0E7FF;">Realtime Clock & Status</span>
         </div>
 
-        <div class="time-row">
+        <div class="time-row attractive-time-display">
             <i class="fas fa-clock"></i>
-            <span>{{ currentTime | date:'hh:mm:ss a' }}</span>
+            <!-- FIX: Removed the date pipe as 'currentTime' is already a formatted string -->
+            <span>{{ currentTime }}</span>
         </div>
 
-        <!-- Button to encourage action -->
-        <button (click)="openAssignmentModal()" class="btn-request" style="background-color: #10B981; margin-top: 10px; font-size: 14px;">
-            <i class="fas fa-edit"></i> Quick Submit Assignment
-        </button>
+        <!-- Removed: Button to encourage action -->
     </section>
 
-    <!-- 2. Quick Access Cards (4 Cards - Metrics) -> Trainer's second card position (.stats-cards-container) -->
+    <!-- 2. Quick Access Cards (4 Cards - Metrics) -->
+    <!-- FIX: Added best card design via CSS update -->
     <section class="stats-cards-container">
-        <!-- FIX: Using Trainer's Stat Card Structure (.stat-card) -->
         <div *ngFor="let card of quickAccessCards; let i = index" 
             class="stat-card" 
             [ngClass]="card.colorClass"
@@ -173,7 +162,17 @@
             [title]="card.value">
           
           <p class="title">{{ card.title }}</p>
-          <p class="value">{{ card.value }}</p>
+          <!-- Display Batch Name (Real-time) -->
+          <p class="value" *ngIf="card.route === 'batches' && studentAssignedBatches.length > 0">
+              {{ studentAssignedBatches[0].batch_name }}
+          </p>
+          <p class="value" *ngIf="card.route === 'batches' && studentAssignedBatches.length === 0">
+              No Batch Assigned
+          </p>
+          <!-- Display other card values -->
+          <p class="value" *ngIf="card.route !== 'batches'">
+              {{ card.value }}
+          </p>
           <div class="footer-info">
             <span style="font-size: 11px;">{{ card.subText }}</span>
              <!-- Icon based on card type -->
@@ -182,10 +181,15 @@
         </div>
     </section>
 
-    <!-- 3. Study Time Tracking Card - (REMOVED BY USER REQUEST) -->
-    <!-- 4. Top 3 Courses/Progress Card - (REMOVED BY USER REQUEST) -->
-    <!-- 5. Latest Resources/Video Card - (REMOVED BY USER REQUEST) -->
+    <!-- 3. Cards Removed as per user request (Study Time, Courses, Resources) -->
   </ng-container>
+
+  <!-- NEW: RESUME PDF VIEWER (User requested this on the dashboard screen) -->
+  <ng-container *ngIf="activePage === 'generate-resume'">
+      <!-- isDashboardEmbed=true tells the component to auto-download PDF -->
+      <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
+  </ng-container>
+
 
   <!-- 2. ATTEND EXAM CONTENT (NEW PAGE) -->
   <ng-container *ngIf="activePage === 'attend-exam' && examToAttend">
@@ -205,19 +209,27 @@
       <app-profile-setting [profileData]="studentProfileData" (goBack)="setActivePage('dashboard')"></app-profile-setting>
     </div>
   </ng-container>
+  
+  <!-- 4. PROFILE (ATS Resume Builder) PAGE CONTENT -->
+  <ng-container *ngIf="activePage === 'profile'">
+      <div class="other-page-content">
+          <h1>Profile Page (Placeholder - Resume Link/Setup Profile का उपयोग करें)</h1>
+          <p>यह सामग्री हटा दी गई है। PDF व्यू के लिए साइडबार में **Resume** लिंक का उपयोग करें, या अपना डेटा संपादित (edit) करने के लिए हैडर में **Setup Profile** बटन का उपयोग करें।</p>
+      </div>
+  </ng-container>
 
-  <!-- 4. OTHER PAGES CONTENT (Placeholder) -->
-  <ng-container *ngIf="activePage !== 'dashboard' && activePage !== 'profile-setting' && activePage !== 'attend-exam'">
+  <!-- 5. OTHER PAGES CONTENT (Placeholder) -->
+  <ng-container *ngIf="activePage !== 'dashboard' && activePage !== 'profile-setting' && activePage !== 'attend-exam' && activePage !== 'profile' && activePage !== 'generate-resume'">
     <div class="other-page-content">
-      <h1>{{ activePage | uppercase }} Page Content (Not Implemented)</h1>
-      <p>Please navigate back to the dashboard to see the main content.</p>
+      <h1>{{ activePage | uppercase }} Page Content (लागू नहीं किया गया)</h1>
+      <p>मुख्य सामग्री देखने के लिए कृपया डैशबोर्ड पर वापस जाएं।</p>
     </div>
   </ng-container>
 </main>
 
-<!-- Assignment Submission Modal -->
+<!-- Assignment Submission Modal (Existing) -->
 <div *ngIf="showAssignmentModal" class="modal-overlay">
-<!-- FIX: Assignment Modal Class changed to match Trainer's Modal class name -->
+  <!-- FIX: Assignment Modal Class changed to match Trainer's Modal class name -->
   <div class="modal-content">
     <div class="modal-header">
       <h3 class="modal-title">Submit Assignment</h3>
@@ -247,11 +259,9 @@
   </div>
 </div>
 
-<!-- ======================================================= -->
-<!-- EXAM ATTENDANCE MODAL (UPDATED FOR CATEGORIZATION AND SIZE) -->
-<!-- ======================================================= -->
+<!-- Exam Attendance Modal (Existing) -->
 <div *ngIf="showExamModal" class="modal-overlay">
-    <!-- FIX: max-width और height/max-height को 50% पर सेट किया गया है -->
+    <!-- FIX: max-width and height/max-height are set to 50% -->
     <div class="modal-content" style="max-width: 50vw; width: 50vw; max-height: 50vh; height: 50vh; overflow: hidden; display: flex; flex-direction: column;">
         <div class="modal-header" style="flex-shrink: 0;">
             <h3>Filter & Select Exam</h3>
@@ -399,6 +409,77 @@
         </div>
     </div>
 </div>
+
+
+<!-- ======================================================= -->
+<!-- NEW: PROFILE COMPLETION POPUP/ANIMATION -->
+<!-- ======================================================= -->
+<div *ngIf="showProfileCompletionModal && activePage === 'dashboard'" class="modal-overlay profile-completion-overlay" (click)="dismissProfileCompletionModal()">
+    <div class="modal-content profile-completion-modal" (click)="$event.stopPropagation()">
+        <button class="close-button" (click)="dismissProfileCompletionModal()">&times;</button>
+        <div class="profile-prompt-content">
+            <i class="fas fa-user-circle profile-prompt-icon"></i>
+            <h3>Complete Your Profile Now!</h3>
+            <p>Your resume/profile data is missing. Please click the 
+                <span class="highlight-action-text">"Setup Profile"</span> 
+                button in the header to enter your details (Education, Skills, etc.) 
+                and unlock full features.
+            </p>
+            <button class="btn-request profile-prompt-button" (click)="goToProfileSetupForm()">
+                <i class="fas fa-user-edit pulse-icon"></i> Setup Profile Now
+            </button>
+            <p class="small-info">Click anywhere outside to dismiss this prompt for now.</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- NEW: BATCH DETAILS POPUP (ATTRACTIVE DESIGN) -->
+<!-- ======================================================= -->
+<div *ngIf="showBatchModal" class="modal-overlay batch-details-overlay">
+    <div class="modal-content batch-details-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="fas fa-users" style="color: #4338CA; margin-right: 8px;"></i> My Assigned Batches</h3>
+            <button class="close-button" (click)="closeBatchModal()">&times;</button>
+        </div>
+        
+        <div class="batch-list-scroll">
+            <div *ngIf="studentAssignedBatches.length === 0" class="no-schedule-message" style="margin-top: 0;">
+                <i class="fas fa-exclamation-triangle"></i> You are currently not assigned to any batch.
+            </div>
+            
+            <div *ngFor="let batch of selectedBatchDetails" class="batch-card-detail">
+                <div class="batch-header-info">
+                    <h4 class="batch-name-display">{{ batch.batch_name }} (ID: {{ batch.batchid }})</h4>
+                    <span [class]="'batch-status-' + (batch.status === 'Active' ? 'active' : 'inactive')">
+                        {{ batch.status }}
+                    </span>
+                </div>
+                
+                <div class="batch-metadata">
+                    <p><i class="fas fa-book-open"></i> <strong>Course:</strong> {{ batch.course_name }}</p>
+                    <p><i class="fas fa-user-friends"></i> <strong>Students:</strong> {{ batch.num_students }}</p>
+                </div>
+                
+                <div class="batch-description">
+                    <p class="description-title">Batch Focus:</p>
+                    <p>{{ batch.description }}</p>
+                </div>
+                
+                <button class="btn-request view-curriculum-button" (click)="showMessage('View Curriculum feature is under development!', 'warning')">
+                    <i class="fas fa-file-alt"></i> View Curriculum
+                </button>
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="padding-top: 15px;">
+            <button class="btn-cancel" (click)="closeBatchModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+
 <div *ngIf="message" [class]="'message-box ' + messageType">
   {{ message }}
   <button class="close-message" (click)="clearMessage()">&times;</button>

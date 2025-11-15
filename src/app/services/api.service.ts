@@ -1,7 +1,9 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+// Note: StudentBatchDetails and other interfaces used below need to be defined or imported. 
+// Since they were defined in your user-provided content, I'm including them here for completeness/autonomy.
 
 // NEW INTERFACE: /api/users/all/ endpoint से आने वाले User data के लिए
 export interface User {
@@ -36,7 +38,7 @@ export interface StudentInfo {
 // Login Response Structure (UPDATED)
 export interface LoginResponse {
   message: string;
-  role: string; // Server द्वारा भेजा गया role का नाम (e.g., 'Student')
+  role: string; 
   userId: string; // FIX: छात्र का मुख्य ID (User ID)
   username: string;
   info: StudentInfo;
@@ -73,15 +75,44 @@ export interface Student {
   address?: string;
 }
 
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
+  
+  // NOTE: Inject HttpClient here instead of in the constructor for modern Angular structure
+  private http = inject(HttpClient); 
 
   private baseUrl = 'http://127.0.0.1:8000/api/'; 
   private readonly STORAGE_KEY = 'cshub_student_login_data'; // SessionStorage key
+  // FIX: Removed hardcoded default ID here: private readonly DEFAULT_USER_ID = 'USR006';
 
-  constructor(private http: HttpClient) {}
+  // The original constructor remains, though 'http' is typically injected via 'inject()' now.
+  // constructor(private http: HttpClient) {} 
+  
+  /**
+   * Retrieves the current user ID (userId) from session storage.
+   * FIX: Removed default user ID. Returns empty string if not found.
+   * @returns The current user ID string or empty string.
+   */
+  getUserId(): string {
+    const storedData = sessionStorage.getItem(this.STORAGE_KEY);
+    try {
+      if (storedData) {
+        const loginData = JSON.parse(storedData);
+        // Assuming the login API returns 'userId'
+        if (loginData && loginData.userId) {
+          return loginData.userId;
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing login data from sessionStorage', e);
+    }
+    console.warn(`No user ID found in session. Please log in.`);
+    // FIX: Returning empty string instead of a default hardcoded ID
+    return ''; 
+  }
 
   /** LOGIN - Server को username और password bhejkar authentication karein */
   login(username: string, password: string): Observable<LoginResponse> {
@@ -119,15 +150,17 @@ export class ApiService {
   }
 
   /**
-   * NEW: Student ID का उपयोग करके StudentBatchDetails fetch करें (BATCH & COURSE ID के लिए)।
-   * @param userId - छात्र का userId।
-   * @returns StudentBatchDetails[]
-   */
+    * NEW: Student ID का उपयोग करके StudentBatchDetails fetch करें (BATCH & COURSE ID के लिए)।
+    * @param userId - छात्र का userId।
+    * @returns StudentBatchDetails[]
+    */
   fetchStudentBatches(userId: string): Observable<StudentBatchDetails[]> {
       // Django URL: /exams/student-batches/<str:user_id>/
       const apiUrl = `${this.baseUrl}exams/student-batches/${userId}/`;
       console.log(`Fetching student batches (batch/course ID) for ID: ${userId} from ${apiUrl}`);
       // API एक array of StudentBatchDetails लौटाता है
+      // NOTE: Using 'of([])' as a temporary mock if the actual import/service linkage is complex. 
+      // Using http.get as intended by the original file:
       return this.http.get<StudentBatchDetails[]>(apiUrl) 
           .pipe(catchError(this.handleError));
   }
@@ -159,14 +192,17 @@ export class ApiService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Client Error: ${error.error.message}`;
     } else {
-      // Check if error.error is a string or an object with a message property
-      errorMessage = error.error?.message || error.error?.error || error.error || error.message; 
-      
-      if (typeof error.error === 'string' && error.error.length > 0) {
-        errorMessage = error.error;
+      // Check if error.error is an object and try to extract a specific message
+      const errorBody = error.error;
+      if (typeof errorBody === 'object' && errorBody !== null) {
+          errorMessage = errorBody.message || errorBody.error || error.statusText || `Server Error (Status: ${error.status})`;
+      } else if (typeof errorBody === 'string' && errorBody.length > 0) {
+          errorMessage = errorBody;
+      } else {
+          errorMessage = error.message;
       }
     }
-    console.error('API Error:', errorMessage);
+    console.error('API Error:', errorMessage, error);
     return throwError(() => new Error(errorMessage)); 
   }
 

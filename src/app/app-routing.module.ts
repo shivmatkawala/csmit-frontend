@@ -9,7 +9,6 @@ import { ChatbotComponent } from './chatbot/chatbot.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { CreateBatchComponent } from './create-batch/create-batch.component';
 import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
-import { AdminFormComponent } from './admin-panel/admin-form/admin-form.component';
 import { CreateCourseComponent } from './create-course/create-course.component';
 import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 import { CreateUserComponent } from './create-user/create-user.component';
@@ -28,14 +27,14 @@ const routes: Routes = [
   {path:'student-dashboard',component:StudentDashboardComponent},
   {path: 'generate-ats-resume', component: GenerateAtsResumeComponent},
   {path:'create-batch',component:CreateBatchComponent},
-  {path:'admin-form',component:AdminFormComponent},
   {path:'create-course',component:CreateCourseComponent},
   {path:'trainer-dashboard',component:TrainerDashboardComponent},
   {path:'create-user',component:CreateUserComponent},
   {path:'assign-user-to-batch',component:AssignUserToBatchComponent},
   {path:'upload-job',component:CreateJobComponent},
   {path:'create-exam',component:CreateExamComponent},
-  {path:'attend-exam',component:AttendExamComponent}
+  {path:'attend-exam',component:AttendExamComponent},
+  
 ];
 
 @NgModule({

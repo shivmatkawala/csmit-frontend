@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { examAPi } from '../services/createexam.service';
-import { ApiService, LoginResponse } from '../services/api.service';
+import { ApiService, LoginResponse} from '../services/api.service';
 import { Subscription, interval, timer, forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, concatMap, tap } from 'rxjs/operators';
 

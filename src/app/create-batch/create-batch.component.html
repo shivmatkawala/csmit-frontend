@@ -2,32 +2,12 @@
 <div class="main-container">
   <div class="form-card" style="max-width: 550px; position: relative; overflow: hidden;">
 
-    <!-- Header (with Hamburger Menu Button) -->
-    <div class="form-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- Header (Hamburger Menu Button removed) -->
+    <div class="form-header">
       <h1 class="form-header-title">
         Create New Batch
       </h1>
-      <!-- Hamburger Menu Icon (SVG) -->
-      <button 
-        type="button" 
-        (click)="toggleBatchListPanel()"
-        class="submit-button" 
-        style="padding: 10px; background-color: #3498db; width: 44px; height: 44px; flex-shrink: 0;"
-        [title]="showBatchListPanel ? 'Hide Batch List' : 'Show Batch List'"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 24 24" 
-          fill="white" 
-          width="24px" 
-          height="24px"
-          style="display: block; margin: 0 auto;"
-        >
-          <path d="M0 0h24v24H0z" fill="none"/>
-          <!-- Menu Icon Path -->
-          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-        </svg>
-      </button>
+      <!-- Hamburger Menu Icon removed -->
     </div>
     
     <p class="form-header-subtitle">
@@ -114,103 +94,3 @@
 
   </div>
 </div>
-
-<!-- Side Panel for Batch List -->
-<div 
-  class="course-list-panel" 
-  [class.open]="showBatchListPanel"
->
-  <!-- Close Button -->
-  <button 
-    type="button" 
-    (click)="toggleBatchListPanel()" 
-    style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #34495e;"
-  >
-    &times;
-  </button>
-  
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #34495e; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">
-    Manage Batches by Course
-  </h2>
-
-  <!-- Course Filter Select -->
-  <div class="form-group" style="margin-bottom: 20px;">
-    <label for="listCourseId" class="input-label">Filter by Course</label>
-    <select
-      id="listCourseId"
-      name="listCourseId"
-      required
-      [ngModel]="selectedCourseIdForList"
-      (change)="onCourseFilterChange($event)"
-      class="input-field select-field"
-    >
-      <option [ngValue]="null" disabled>
-        {{ courses.length === 0 ? 'Courses loading...' : '-- Select a Course --' }}
-      </option>
-      
-      <option *ngFor="let c of courses" [ngValue]="c.courseid">
-          ID {{ c.courseid }}: {{ c.coursename }} 
-      </option>
-    </select>
-  </div>
-
-
-  <!-- List Loading/Error State -->
-  <div *ngIf="isListLoading" style="text-align: center; color: #7f8c8d; padding: 20px;">
-    <p>Loading batches...</p>
-  </div>
-
-  <div *ngIf="listErrorMessage && !isListLoading" class="error-message" style="color: #e74c3c; padding: 10px; border: 1px dashed #e74c3c; border-radius: 8px; margin-top: 15px;">
-    {{ listErrorMessage }}
-  </div>
-  
-  <!-- Batch List -->
-  <div *ngIf="batches.length > 0 && !isListLoading" class="batch-list">
-    <div 
-      *ngFor="let batch of batches" 
-      style="
-        background-color: white; 
-        border: 1px solid #ecf0f1; 
-        border-radius: 8px; 
-        padding: 15px; 
-        margin-bottom: 15px; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      "
-    >
-      <div style="font-weight: 700; color: #34495e; font-size: 1.1rem; margin-bottom: 5px;">
-        {{ batch.batchName }} 
-        <span style="float: right; font-size: 0.9rem; color: #7f8c8d;">ID: {{ batch.batchId }}</span>
-      </div>
-      <p style="font-size: 0.9rem; margin: 0 0 10px 0;">
-        Status: 
-        <span 
-          [style.color]="batch.is_active ? '#2ecc71' : '#e74c3c'" 
-          style="font-weight: 600;"
-        >
-          {{ batch.is_active ? 'Active' : 'Deactivated' }}
-        </span>
-      </p>
-      
-      <!-- Actions -->
-      <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button 
-          type="button" 
-          (click)="toggleBatchStatus(batch)"
-          class="submit-button" 
-          [style.background-color]="batch.is_active ? '#e74c3c' : '#2ecc71'"
-          style="flex: 1; padding: 8px; color: white; font-size: 0.9rem;"
-        >
-          {{ batch.is_active ? 'Deactivate' : 'Activate' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Panel Overlay for better UX -->
-<div 
-  class="course-list-overlay" 
-  [class.open]="showBatchListPanel"
-  (click)="toggleBatchListPanel()"
-></div>

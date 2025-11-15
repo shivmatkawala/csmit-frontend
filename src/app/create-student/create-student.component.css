@@ -217,6 +217,14 @@
     font-weight: 600;
     color: #64748b;
 }
+.radio-group label {
+    flex: 1; /* Make labels equally spaced */
+}
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
 .radio-label:hover {
     background-color: #e2e8f0;
 }
@@ -231,6 +239,7 @@
     background-color: #e3f2fd;
     box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
+
 
 /* DYNAMIC LIST ITEMS (Education, Experience, Projects) */
 .item-card {
@@ -446,6 +455,8 @@
     width: 450px;
     text-align: center;
     animation: modalSlideDown 0.3s ease-out;
+    /* FIX: Added pre-wrap for better message display */
+    white-space: pre-wrap; 
 }
 .custom-modal h3 {
     color: #1a73e8;
@@ -513,8 +524,10 @@
         gap: 1rem;
     }
 
-    .button-row button {
+    .button-row button, .button-row a {
         width: 100%; /* Full width buttons on mobile */
+        text-align: center;
+        box-sizing: border-box;
     }
     
     .experience-toggle-group {

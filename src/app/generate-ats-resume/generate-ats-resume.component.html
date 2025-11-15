@@ -1,8 +1,15 @@
 <!-- Tailwind CSS classes have been removed and migrated to generate-ats-resume.component.css -->
-<div class="app-container" *ngIf="resumeData">
+<div class="app-container">
+  
+  <div *ngIf="isLoading()" style="text-align: center; padding: 50px; color: #4338CA;">
+      <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+      <p style="margin-top: 10px;">Loading ATS Resume Data...</p>
+      <!-- FIX: Added a message for automatic download -->
+      <p *ngIf="isDashboardEmbed" style="margin-top: 10px; color: #F43F5E; font-weight: 600;">Trying to download your Resume....</p>
+  </div>
   
   <!-- Resume Container (Outer border for screen, full bleed container for print/PDF) -->
-  <div id="resume-content">
+  <div id="resume-content" *ngIf="resumeData && !isLoading()">
     
     <!-- New wrapper for all content to apply controlled internal padding/margin -->
     <div class="resume-page">
@@ -13,15 +20,15 @@
           
           <!-- Contact Info: Responsive layout -->
           <div class="contact-info">
-            <span *ngIf="resumeData.location">{{ resumeData.location }}</span>
-            <span *ngIf="resumeData.phone">{{ resumeData.phone }}</span>
-            <span *ngIf="resumeData.email">{{ resumeData.email }}</span>
+            <span *ngIf="resumeData.location"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> {{ resumeData.location }}</span>
+            <span *ngIf="resumeData.phone"><i class="fas fa-phone-alt" style="margin-right: 5px;"></i> {{ resumeData.phone }}</span>
+            <span *ngIf="resumeData.email"><i class="fas fa-envelope" style="margin-right: 5px;"></i> {{ resumeData.email }}</span>
             
             <span *ngIf="resumeData.linkedin">
-              <a [href]="resumeData.linkedin" target="_blank">LinkedIn</a>
+              <i class="fab fa-linkedin" style="margin-right: 5px;"></i> <a [href]="resumeData.linkedin" target="_blank">LinkedIn</a>
             </span>
             <span *ngIf="resumeData.portfolio">
-              <a [href]="resumeData.portfolio" target="_blank">Portfolio</a>
+              <i class="fab fa-github" style="margin-right: 5px;"></i> <a [href]="resumeData.portfolio" target="_blank">Portfolio/GitHub</a>
             </span>
           </div>
         </header>
@@ -30,26 +37,30 @@
         <section>
           <h2>Professional Summary</h2>
           <p>
-            {{ resumeData.experience_type }} candidate with a strong foundation in 
-            <span *ngIf="resumeData.skills.length > 0">{{ getSkillNames() }}</span>.
-            Experienced in building scalable applications and leveraging modern software development practices.
+            **{{ resumeData.experience_type }}** candidate with a strong foundation in 
+            <span *ngIf="resumeData.skills.length > 0">**{{ getSkillNames() }}**</span>.
+            Proficient in full-stack development methodologies and leveraging modern software development practices. Seeking opportunities to apply technical skills in a challenging environment.
           </p>
         </section>
         
         <!-- Skills Section (Responsive Grid) -->
         <section>
-          <h2>Skills</h2>
+          <h2>Technical Skills</h2>
           <div class="skill-grid">
             <!-- First column for skills -->
             <ul class="skill-list" *ngIf="skillColumn1.length > 0">
               <li *ngFor="let skill of skillColumn1" class="skill-item">
                 <span class="skill-bullet">•</span> {{ skill.name }}
+                <!-- Display proficiency level if available -->
+                <span *ngIf="skill.level" style="font-size: 0.7rem; color: #6b7280; margin-left: 5px;">({{ skill.level }})</span>
               </li>
             </ul>
             <!-- Second column for skills -->
             <ul class="skill-list col-2-start" *ngIf="skillColumn2.length > 0">
               <li *ngFor="let skill of skillColumn2" class="skill-item">
                 <span class="skill-bullet">•</span> {{ skill.name }}
+                <!-- Display proficiency level if available -->
+                <span *ngIf="skill.level" style="font-size: 0.7rem; color: #6b7280; margin-left: 5px;">({{ skill.level }})</span>
               </li>
             </ul>
             <p *ngIf="!resumeData.skills || resumeData.skills.length === 0" class="no-data">No skills listed in the profile data.</p>
@@ -58,7 +69,7 @@
 
         <!-- Experience Section (Dynamic) -->
         <section>
-          <h2>Experience</h2>
+          <h2>Professional Experience</h2>
           
           <div *ngIf="!resumeData.experience || resumeData.experience.length === 0">
             <p class="no-data">No formal work experience listed ({{ resumeData.experience_type }}).</p>
@@ -70,35 +81,40 @@
                 <strong>{{ exp.title }} | {{ exp.company }}</strong>
                 <span>{{ exp.start_date }} to {{ exp.end_date || 'Present'}}</span>
               </div>
-              <p>{{ exp.description }}</p>
+              <p>
+                <span style="font-style: italic; color: #4f46e5; margin-right: 5px;">({{ exp.start_date }})</span>
+                {{ exp.description }}
+              </p>
             </li>
           </ul>
         </section>
 
         <!-- Projects Section (Dynamic) -->
         <section>
-          <h2>Personal Projects</h2>
+          <h2>Selected Projects</h2>
           <ul class="project-list">
             <li *ngFor="let project of resumeData.projects">
-              <strong>{{ project.title }}</strong> – <span class="tech-used">{{ project.tech_used }}</span><br>
-              <span class="project-desc">{{ project.description }}</span>
+              <strong>{{ project.title }}</strong> 
+              <span *ngIf="project.tech_used"> – <span class="tech-used">Tech: {{ project.tech_used }}</span></span>
               <span *ngIf="project.url"> 
-                <a [href]="project.url" target="_blank" class="project-link">(View Project)</a>
+                <a [href]="project.url" target="_blank" class="project-link">(GitHub)</a>
               </span>
+              <br>
+              <span class="project-desc">{{ project.description }}</span>
             </li>
           </ul>
           <p *ngIf="!resumeData.projects || resumeData.projects.length === 0" class="no-data">No projects listed in the profile data.</p>
         </section>
 
-        <!-- Education Section (Dynamic) -->
+        
         <section class="last-section">
           <h2>Education</h2>
           <div *ngFor="let edu of resumeData.education" class="education-item">
             <div class="title-row">
               <p>
-                {{ edu.degree }} - {{ edu.institution }} 
+                **{{ edu.degree }}** from {{ edu.institution }} 
               </p>
-              <span *ngIf="edu.start_year && edu.end_year"> ({{ edu.start_year }} - {{ edu.end_year }})</span>
+              <span *ngIf="edu.start_year"> ({{ edu.start_year }} - {{ edu.end_year || 'Present' }})</span>
             </div>
             <p class="grade">Grade/CGPA: <span>{{ edu.grade }}</span></p>
           </div>
@@ -107,18 +123,36 @@
     
     </div> <!-- End .resume-page -->
   </div> <!-- End #resume-content -->
+  
+  <!-- No Data State (This shows if resumeData is null AND not loading) -->
+  <div *ngIf="!resumeData && !isLoading()" style="text-align: center; padding: 50px; background-color: #ffffff; border-radius: 12px; max-width: 800px; margin: 50px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+      <h3 style="color: #F43F5E; font-size: 1.5rem;"><i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i> Profile Incomplete</h3>
+      <p style="color: #64748B; margin-top: 15px;">Your ATS Resume cannot be generated because your profile data is missing or incomplete. Redirecting to setup form...</p>
+      <!-- FIX: Button action is the same, but the text changes based on context -->
+      <button (click)="backToDashboard()" class="action-button btn-primary" style="background-color: #4338CA; margin-top: 20px;">
+        <i class="fas fa-tachometer-alt" style="margin-right: 5px;"></i> Go to Dashboard / Setup Form
+      </button>
+  </div>
+
 
   <!-- Action Buttons (Fixed at the bottom of the viewport on larger screens for easy access) -->
-  <div class="print-hidden">
+  <div class="print-hidden" *ngIf="resumeData">
     <!-- Action buttons container (Toggle on/off) -->
     <div class="action-buttons-container" *ngIf="isButtonContainerVisible()">
+      
+      <!-- Back to Dashboard -->
+      <!-- FIX: Button redirects to the dashboard page if embedded (or refreshes the page) -->
+      <button (click)="backToDashboard()" class="action-button btn-secondary" style="border-color: #4338CA; color: #4338CA;">
+        <span class="text-xl mr-2">←</span> Close Resume Viewer
+      </button>
+
       <!-- Print Button (Secondary/Outlined Style) -->
       <button (click)="printResume()" class="action-button btn-secondary">
         <span class="text-xl mr-2">🖨️</span> Print Resume
       </button>
       <!-- Download as PDF Button (Primary/Solid Style) -->
       <button (click)="downloadResume()" class="action-button btn-primary">
-        <span class="text-xl mr-2">⬇️</span> Download as PDF
+        <span class="text-xl mr-2">⬇️</span> Download as PDF (ATS)
       </button>
     </div>
 

@@ -9,12 +9,6 @@
     --input-background: #ffffff;
     --card-background: #ffffff;
     --border-light: #e0e0e0;
-    --deactivate-orange: #ff9800;
-    --deactivate-hover: #f57c00;
-    --reactivate-blue: #3498db; /* New color for Reactivate */
-    --reactivate-hover: #2980b9; 
-    --delete-red: #e74c3c;
-    --delete-hover: #c0392b;
 
     display: flex;
     justify-content: center;
@@ -23,7 +17,6 @@
     background-color: #ffffff;
     font-family: 'Roboto', sans-serif;
     padding: 20px;
-    overflow: hidden; 
 }
 
 /* --- Form Container (Card) --- */
@@ -36,7 +29,6 @@
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     position: relative; 
-    overflow: hidden; 
     z-index: 1;
 }
 
@@ -44,10 +36,11 @@
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-/* --- Action Buttons (Back & Hamburger) */
-.back-button, .hamburger-button {
+/* --- Action Button (Back Button Only) */
+.back-button { /* Hamburger button style हटा दिया गया है */
     position: absolute;
     top: 20px;
+    left: 20px;
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -62,8 +55,6 @@
     transition: all 0.3s ease;
     z-index: 10;
 }
-.back-button { left: 20px; }
-.hamburger-button { right: 20px; }
 
 .back-button:hover {
     color: white;
@@ -71,13 +62,7 @@
     transform: translateY(-1px);
     box-shadow: 0 6px 15px rgba(26, 77, 46, 0.2);
 }
-.hamburger-button:hover {
-    color: white;
-    background-color: var(--accent-color);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(224, 159, 62, 0.2);
-}
-.back-button svg, .hamburger-button svg {
+.back-button svg {
     width: 24px;
     height: 24px;
 }
@@ -204,371 +189,18 @@
 }
 
 /* ==================================== */
-/* --- User Management Panel Styles --- */
+/* --- Removed: User Management Panel & Modal Styles --- */
 /* ==================================== */
-
-.user-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    max-width:400px ;
-    height: 100%; 
-    background-color: var(--card-background);
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    transform: translateX(100%); 
-    transition: transform 0.4s ease-in-out;
-    padding: 20px; 
-    z-index: 20;
-    display: flex;
-    flex-direction: column;
-}
-
-.user-panel.open {
-    transform: translateX(0); 
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid var(--border-light);
-    flex-shrink: 0; 
-}
-
-.panel-header h3 {
-    font-size: 1.4rem; 
-    font-weight: 700;
-    color: var(--primary-green);
-    margin: 0;
-    word-break: break-word; 
-    max-width: 80%; 
-}
-
-.close-panel-button {
-    background: none;
-    border: none;
-    color: var(--text-dark);
-    font-size: 1.5rem; 
-    cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s;
-    flex-shrink: 0; 
-    padding: 0;
-}
-.close-panel-button:hover {
-    color: var(--delete-red);
-}
-
-.filter-controls {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    overflow-x: auto; 
-    padding-bottom: 5px;
-    flex-shrink: 0; 
-}
-
-.filter-button {
-    flex-shrink: 0;
-    padding: 6px 12px;
-    border: 1px solid var(--border-light);
-    border-radius: 20px;
-    background-color: #f9f9f9;
-    color: var(--text-dark);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-.filter-button.active {
-    background-color: var(--primary-green);
-    color: white;
-    border-color: var(--primary-green);
-    box-shadow: 0 2px 5px rgba(26, 77, 46, 0.2);
-}
-
-.filter-button:hover:not(.active) {
-    background-color: #e8e8e8;
-}
-
-.user-list-container {
-    flex-grow: 1; 
-    overflow-y: auto; 
-    padding-right: 5px;
-    min-height: 50px; 
-}
-
-/* User List Item Style */
-.user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed var(--border-light);
-}
-.user-item:last-child {
-    border-bottom: none; 
-}
-
-.user-info {
-    flex-grow: 1;
-    min-width: 0;
-    padding-right: 10px;
-    flex-shrink: 1; 
-    flex-basis: 55%;
-}
-
-.user-info .username {
-    font-weight: 600;
-    color: var(--text-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; 
-    margin-bottom: 2px;
-}
-
-.user-info .role {
-    font-size: 0.8rem;
-    color: var(--text-light);
-    font-style: italic;
-}
-
-.user-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-    padding-left: 5px;
-}
-
-.action-button {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Deactivate Button Styling (Orange) */
-.deactivate-button {
-    background-color: var(--deactivate-orange); 
-    color: white;
-}
-.deactivate-button:hover {
-    background-color: var(--deactivate-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
-}
-
-/* Reactivate Button Styling (Blue) */
-.reactivate-button {
-    background-color: var(--reactivate-blue); 
-    color: white;
-}
-.reactivate-button:hover {
-    background-color: var(--reactivate-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
-}
-
-/* Delete Button Styling (Red) */
-.delete-button {
-    background-color: var(--delete-red); 
-    color: white;
-}
-.delete-button:hover {
-    background-color: var(--delete-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
-}
-
-.loading-indicator {
-    text-align: center;
-    color: var(--text-light);
-    padding: 20px;
-}
-
-/* Hide scrollbar for aesthetics in the host element only */
-.user-list-container::-webkit-scrollbar {
-    width: 6px;
-}
-.user-list-container::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 10px;
-}
-.user-list-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-/* ==================================== */
-/* --- Custom Modal Styles --- */
-/* ==================================== */
-
-.custom-modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 30; /* Above the side panel */
-}
-
-.custom-modal-content {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 400px;
-    transform: scale(1);
-    transition: transform 0.3s ease-out;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-light);
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
-.modal-header h4 {
-    margin: 0;
-    color: var(--primary-green);
-    font-weight: 700;
-}
-
-.close-modal-button {
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    color: var(--text-light);
-    padding: 0;
-    transition: color 0.2s;
-}
-.close-modal-button:hover {
-    color: var(--delete-red);
-}
-
-.modal-body p {
-    font-size: 1rem;
-    color: var(--text-dark);
-    margin-bottom: 25px;
-    line-height: 1.4;
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.btn-cancel,
-.btn-confirm-delete,
-.btn-confirm-deactivate,
-.btn-confirm-reactivate {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-.btn-cancel {
-    background-color: #ecf0f1;
-    color: var(--text-dark);
-}
-.btn-cancel:hover {
-    background-color: #bdc3c7;
-}
-
-.btn-confirm-delete {
-    background-color: var(--delete-red);
-    color: white;
-}
-.btn-confirm-delete:hover {
-    background-color: var(--delete-hover);
-}
-
-.btn-confirm-deactivate {
-    background-color: var(--deactivate-orange);
-    color: white;
-}
-.btn-confirm-deactivate:hover {
-    background-color: var(--deactivate-hover);
-}
-
-.btn-confirm-reactivate {
-    background-color: var(--reactivate-blue); /* Reactivate color */
-    color: white;
-}
-.btn-confirm-reactivate:hover {
-    background-color: var(--reactivate-hover);
-}
-
 
 /* Responsive adjustment for very small screens */
 @media (max-width: 400px) {
     .form-card {
         padding: 30px 15px 15px 15px;
     }
-    .back-button, .hamburger-button {
+    .back-button {
         width: 38px;
         height: 38px;
         top: 10px;
-    }
-    .back-button {
         left: 10px;
-    }
-    .hamburger-button {
-        right: 10px;
-    }
-    
-    .user-item {
-        align-items: center; 
-    }
-    .user-info {
-        max-width: 50%; 
-        flex-basis: 50%;
-    }
-    .user-info .username {
-        max-width: 100%;
-        font-size: 0.9rem;
-    }
-    .action-button {
-        padding: 3px 6px; 
-        font-size: 0.65rem; 
-        font-weight: 600;
-    }
-    .user-actions {
-        gap: 2px; 
-    }
-    .custom-modal-content {
-        padding: 20px;
-    }
-    .modal-buttons {
-        flex-direction: column;
-        gap: 8px;
-    }
-    .btn-cancel,
-    .btn-confirm-delete,
-    .btn-confirm-deactivate,
-    .btn-confirm-reactivate {
-        width: 100%;
-        text-align: center;
     }
 }

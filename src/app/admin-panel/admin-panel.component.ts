@@ -1,9 +1,14 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router'; 
+import { UserManagementComponent } from './user-management/user-management.component'; // Import UserManagementComponent
+import { ManageCourseComponent } from './manage-course/manage-course.component'; // Import new ManageCourseComponent
+import { BatchManagementComponent } from './batch-management/batch-management.component'; // Import new BatchManagementComponent
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 // --- Interfaces for Data Models ---
 
-type TabId = 'dashboard' | 'users' | 'courses' | 'settings'; 
+type TabId = 'dashboard' | 'users' | 'courses' | 'batches' | 'settings'; 
 
 interface NavLink {
   id: TabId; 
@@ -15,7 +20,7 @@ interface NavLink {
 interface AdminCard {
   title: string;
   subtitle: string;
-  iconSvg: string; 
+  iconImage: string; // Changed from iconSvg to iconImage
   buttonText: string;
   colorClass: string; 
   route: string;
@@ -23,7 +28,7 @@ interface AdminCard {
 
 // --- HARDCODED CONFIGURATION DATA ---
 const ADMIN_CONFIG = {
-  SEARCH_PLACEHOLDER: "Search Users, Batches, Courses...", 
+  SEARCH_PLACEHOLDER: "Search Users, Batches...", 
   HEADER_BUTTON: {
     label: "View Reports", 
     icon: "fas fa-chart-bar"
@@ -33,18 +38,20 @@ const ADMIN_CONFIG = {
     role: 'System Administrator',
     profileUrl: 'https://placehold.co/80x80/2C3E50/ffffff?text=AD' 
   },
+  // Removed 'settings' link
   SIDEBAR_LINKS: [
-    { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-th-large', route: '/' }, 
+    { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-th-large', route: '/admin-panel' }, 
     { id: 'users', label: 'Users', icon: 'fas fa-users', route: '/users' }, 
     { id: 'courses', label: 'Courses', icon: 'fas fa-book-open', route: '/courses' }, 
-    { id: 'settings', label: 'Settings', icon: 'fas fa-cogs', route: '/settings' } 
+    { id: 'batches', label: 'Batches', icon: 'fas fa-graduation-cap', route: '/batches' }, 
   ] as NavLink[],
   
+  // Updated cards to use image paths
   ADMIN_CARDS: [
     { 
       title: 'Create New User', 
       subtitle: 'Register new users (Admin, Trainer, Student) and assign roles.', 
-      iconSvg: '<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m8-11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm10 5v-2a4 4 0 0 0-3-3.87M23 3l-3 3-3-3"/>', 
+      iconImage: 'new_user.png', // Using image file name
       buttonText: 'Go to Create User', 
       colorClass: 'indigo', 
       route: '/create-user' 
@@ -52,7 +59,7 @@ const ADMIN_CONFIG = {
     { 
       title: 'Update New Batch', 
       subtitle: 'Manage batch start dates, capacity, and student allocations.', 
-      iconSvg: '<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>', 
+      iconImage: 'batch.png', // Using image file name
       buttonText: 'Go to Create New Batch', 
       colorClass: 'violet', 
       route: '/create-batch' 
@@ -60,7 +67,7 @@ const ADMIN_CONFIG = {
     { 
       title: 'Create New Course', 
       subtitle: 'Define new course structure, duration, and assign a dedicated trainer.', 
-      iconSvg: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>', 
+      iconImage: 'course.png', // Using image file name
       buttonText: 'Go to Create Course', 
       colorClass: 'violet', 
       route: '/create-course' 
@@ -68,7 +75,7 @@ const ADMIN_CONFIG = {
     { 
       title: 'Assign User to Batch', 
       subtitle: 'Map users (Student/Trainer) to specific batches and roles.', 
-      iconSvg: '<path d="M17 17H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M12 7V3"/><path d="M12 21v-4"/>', 
+      iconImage: 'assign-user (1).png', // Using image file name
       buttonText: 'Assign User to Batch', 
       colorClass: 'teal', 
       route: '/assign-user-to-batch' 
@@ -76,7 +83,7 @@ const ADMIN_CONFIG = {
     { 
       title: 'Create Exam', 
       subtitle: 'Design, configure, and schedule new tests and assessments.', 
-      iconSvg: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-7M9 15h3m-3-4h6M22 2l-3 3-3-3"/>', 
+      iconImage: 'exam.png', // Using image file name
       buttonText: 'Go to Create Exam', 
       colorClass: 'amber', 
       route: '/create-exam' 
@@ -84,7 +91,7 @@ const ADMIN_CONFIG = {
     { 
       title: 'Upload Jobs', 
       subtitle: 'Post and manage new job openings for ongoing placement drives.', 
-      iconSvg: '<path d="M16 4h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4m12 0h-4M4 8h16M2 8l8 5 8-5"/>', 
+      iconImage: 'upload-job.png', // Using image file name
       buttonText: 'Go to Upload Jobs', 
       colorClass: 'red', 
       route: '/upload-job' 
@@ -98,14 +105,74 @@ const ADMIN_CONFIG = {
   styleUrls: ['./admin-panel.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminPanelComponent {
+export class AdminPanelComponent implements OnInit, AfterViewInit {
   config = ADMIN_CONFIG;
   darkModeActive = signal(false);
   activeTab = signal<TabId>('dashboard');
+  
+  // Global Search Properties for Header (NEW)
+  headerSearchQuery = signal<string>(''); 
+  private searchTerms = new Subject<string>();
+  
+  // ViewChild to access child components
+  @ViewChild(UserManagementComponent) userManagementComponent!: UserManagementComponent; 
+  @ViewChild(ManageCourseComponent) manageCourseComponent!: ManageCourseComponent;
+  @ViewChild(BatchManagementComponent) batchManagementComponent!: BatchManagementComponent; // New ViewChild
+  
 
   constructor(private router: Router) { }
 
-  navigateTo(route: string): void {
+  ngOnInit(): void {
+    // Set active tab based on URL path on load
+    const path = this.router.url.split('?')[0];
+    // Check against updated SIDEBAR_LINKS (which no longer contains 'settings')
+    const matchingLink = this.config.SIDEBAR_LINKS.find(link => link.route === path);
+    if (matchingLink) {
+        this.activeTab.set(matchingLink.id);
+    }
+  }
+  
+  ngAfterViewInit(): void {
+      this.searchTerms.pipe(
+          debounceTime(300), 
+          distinctUntilChanged() 
+      ).subscribe(term => {
+          this.headerSearchQuery.set(term);
+          const currentTab = this.activeTab();
+          
+          // Trigger search on the active management tab
+          if (currentTab === 'users' && this.userManagementComponent) {
+              this.userManagementComponent.triggerExternalSearch();
+          } else if (currentTab === 'courses' && this.manageCourseComponent) {
+              this.manageCourseComponent.triggerExternalSearch();
+          } else if (currentTab === 'batches' && this.batchManagementComponent) { // New condition for batches
+              this.batchManagementComponent.triggerExternalSearch();
+          }
+      });
+  }
+  
+  /**
+   * Handles input changes from the main header search bar.
+   * @param event The input change event.
+   */
+  onHeaderSearch(event: Event): void {
+    const term = (event.target as HTMLInputElement).value;
+    this.searchTerms.next(term);
+  }
+
+  /**
+   * Handles sidebar navigation and updates the active tab signal.
+   * @param route The target route.
+   * @param tabId The ID of the tab (e.g., 'dashboard', 'users').
+   */
+  navigateTo(route: string, tabId: TabId): void { 
+    this.activeTab.set(tabId);
+    
+    // Optional: Clear the search when switching away from the current tab
+    if (tabId !== this.activeTab() && this.headerSearchQuery() !== '') {
+        this.headerSearchQuery.set('');
+    }
+    
     if (route) {
         this.router.navigate([route]).catch(err => {
             console.error(`Navigation Error: Could not navigate to ${route}. Please ensure this route is configured.`, err);
@@ -116,6 +183,22 @@ export class AdminPanelComponent {
     }
   }
 
+  // New function for handling logout
+  logoutUser(): void {
+    // 1. Show message box indicating successful logout
+    this.showMessageBox('Logged out successfully. Redirecting to login page...');
+
+    // 2. Perform actual logout logic (e.g., clear tokens, call backend)
+    // For demonstration, we use a timeout to simulate a redirect.
+    setTimeout(() => {
+        // 3. Navigate to the login page
+        // this.router.navigate(['/login']); 
+        // Showing a console log instead of actual navigation since the login route is unknown
+        console.log('Redirecting to /login page...');
+    }, 1500); // Wait for the message box to be visible
+  }
+
+  // Dashboard general message box logic remains the same
   showMessageBox(message: string, type: 'success' | 'error' = 'success'): void {
     const box = document.getElementById('messageBox');
     if (box) {
@@ -143,7 +226,5 @@ export class AdminPanelComponent {
       document.getElementById('messageBox')?.classList.remove('active');
   }
 
-  getIconSvg(card: AdminCard): string {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${card.iconSvg}</svg>`;
-  }
+  // Removed getIconSvg as we are using <img> now
 }

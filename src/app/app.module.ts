@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CreateStudentComponent } from './create-student/create-student.component';
-import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
+// import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component'; // NOTE: Commented out if already imported globally
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { HeaderComponent } from './header/header.component';
@@ -15,10 +15,9 @@ import { LoginFormComponent } from './login-form/login-form.component';
 import { AdminPanelComponent } from './admin-panel/admin-panel.component';
 import { FooterComponent } from './footer/footer.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
-import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
-import { AdminFormComponent } from './admin-panel/admin-form/admin-form.component';
+// import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component'; // NOTE: Commented out if already imported globally
 import { ProfileSettingComponent } from './student-dashboard/profile-setting/profile-setting.component';
-import { CreateCourseComponent } from './create-course/create-course.component'; // Keep the import
+import { CreateCourseComponent } from './create-course/create-course.component';
 import { AboutCsmitComponent } from './about-csmit/about-csmit.component';
 import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 import { CreateUserComponent } from './create-user/create-user.component';
@@ -27,11 +26,20 @@ import { CreateJobComponent } from './create-job/create-job.component';
 import { CreateExamComponent } from './createexam/createexam.component';
 import { CreateBatchComponent } from './create-batch/create-batch.component';
 import { AttendExamComponent } from './attend-exam/attend-exam.component';
+import { UserManagementComponent } from './admin-panel/user-management/user-management.component';
+import { ManageCourseComponent } from './admin-panel/manage-course/manage-course.component';
+import { BatchManagementComponent } from './admin-panel/batch-management/batch-management.component';
+import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
+import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
+import { CommonModule } from '@angular/common'; // <-- Required for Pipes and *ngIf/for
+// NOTE: Assuming InputFieldComponent and FilterByCategoryPipe are small, local helper components. 
+// If they are standalone, they should not be declared here. Since your original plan was to break files, 
+// I'll assume they were meant to be declared here.
+
 @NgModule({
   declarations: [
     AppComponent,
     CreateStudentComponent,
-    GenerateAtsResumeComponent,
     LandingPageComponent,
     HeaderComponent,
     NavbarComponent,
@@ -40,7 +48,6 @@ import { AttendExamComponent } from './attend-exam/attend-exam.component';
     AdminPanelComponent,
     FooterComponent,
     ChatbotComponent,
-    StudentDashboardComponent,
     ProfileSettingComponent,
     CreateCourseComponent,
     AboutCsmitComponent,
@@ -50,15 +57,21 @@ import { AttendExamComponent } from './attend-exam/attend-exam.component';
     CreateJobComponent,
     CreateExamComponent,
     CreateBatchComponent,
-    AttendExamComponent
+    AttendExamComponent,
+    UserManagementComponent,
+    ManageCourseComponent,
+    BatchManagementComponent,
+    StudentDashboardComponent,
+    GenerateAtsResumeComponent// <-- FIX 2: Fixes *ngIf, *ngFor, and the 'date' pipe error.
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    ReactiveFormsModule,
+    ReactiveFormsModule, // <-- FIX 1: Fixes [formControl] and FormGroup errors
     HttpClientModule,
     FormsModule,
-    AdminFormComponent,
+    CommonModule, 
+    
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,0 +1,139 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Main Batch Management View -->
+<div class="batch-management-view">
+    
+    <div class="main-content-header">
+        <h1>Batch Management</h1>
+        <p>View all created batches, filter by course, and manage their active status.</p>
+    </div>
+
+    <!-- Filter/Action Controls -->
+    <div class="filter-controls-wrapper">
+        <div class="filter-controls">
+            <!-- Course Filter Dropdown -->
+            <select
+                (change)="filterBatches($event)"
+                class="filter-dropdown"
+                [ngModel]="currentFilter()"
+                title="Filter Batches by Course"
+            >
+                <option [ngValue]="'all'">All Courses</option>
+                <option *ngFor="let course of allCourses" [ngValue]="course.courseid">
+                    {{ course.coursename }} (ID: {{ course.courseid }})
+                </option>
+            </select>
+        </div>
+        
+        <div class="action-buttons-group">
+            <!-- Action Button: Navigate to Create Batch form -->
+            <button class="create-batch-button" (click)="navigateToCreateBatch()">
+                <i class="fas fa-plus"></i> Create New Batch
+            </button>
+            
+            <button class="refresh-button" (click)="fetchCourses()" title="Refresh Batches">
+                <i class="fas fa-sync-alt" [class.rotate]="isLoadingBatches()"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dynamic Message Box -->
+    <div *ngIf="batchMessage()" class="batch-message-box" [class.success]="!batchMessage()?.isError" [class.error]="batchMessage()?.isError">
+        <p><strong>{{ batchMessage()?.isError ? 'Error!' : 'Success!' }}</strong> {{ batchMessage()?.text }}</p>
+    </div>
+    
+    <!-- Batch List Cards - Scrollable Container -->
+    <div class="card-scroll-container">
+        <div class="card-grid">
+            <div *ngIf="isLoadingBatches()" class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> Fetching batches...
+            </div>
+            
+            <div *ngIf="!isLoadingBatches() && filteredBatches.length === 0" class="no-batches-found">
+                <i class="fas fa-info-circle"></i> No batches found matching the current criteria.
+            </div>
+
+            <ng-container *ngIf="!isLoadingBatches() && filteredBatches.length > 0">
+                <div *ngFor="let batch of filteredBatches" class="batch-card" [class.inactive]="!batch.is_active">
+                    <div class="batch-card-header">
+                        <!-- Use {{ batch.batchName }} as the main title -->
+                        <div class="batch-title">{{ batch.batchName }}</div> 
+                        <div class="batch-id">ID: {{ batch.batchId }}</div>
+                    </div>
+                    
+                    <div class="batch-card-body">
+                        <!-- Display Course Name (Adding null check for course object) -->
+                        <p class="batch-course">
+                            <i class="fas fa-book-open" [style.color]="batch.is_active ? '#9b59b6' : '#e74c3c'"></i> 
+                            <strong>Course:</strong> 
+                            <ng-container *ngIf="batch.course?.coursename; else missingCourse">
+                                {{ batch.course.coursename }} (ID: {{ batch.course.courseid }})
+                            </ng-container>
+                            <ng-template #missingCourse>
+                                N/A (Course data missing)
+                            </ng-template>
+                        </p>
+                        <!-- Display Status clearly -->
+                        <p class="batch-status">
+                            <i class="fas fa-circle" [style.color]="batch.is_active ? '#2ecc71' : '#e74c3c'"></i> 
+                            <strong>Status:</strong> 
+                            <span [style.color]="batch.is_active ? '#2ecc71' : '#e74c3c'">
+                                {{ batch.is_active ? 'Active' : 'Deactivated' }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="batch-card-actions">
+                        <!-- ACTION BUTTONS: Activate/Deactivate -->
+                        
+                        <!-- Deactivate Button (Visible when Active) -->
+                        <button 
+                            *ngIf="batch.is_active"
+                            (click)="showConfirmation(batch, 'Deactivate')" 
+                            class="action-button deactivate-button"
+                            title="Deactivate Batch"
+                        >
+                            Deactivate
+                        </button>
+                        
+                        <!-- Activate Button (Visible when Inactive) -->
+                        <button
+                            *ngIf="!batch.is_active"
+                            (click)="showConfirmation(batch, 'Activate')" 
+                            class="action-button activate-button"
+                            title="Activate Batch"
+                        >
+                            Activate
+                        </button>
+
+                        <!-- Removed Update button as per request, keeping one action button for status -->
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+        
+<!-- Custom Confirmation Modal for Activation/Deactivation -->
+<div *ngIf="isModalOpen()" class="custom-modal-backdrop" (click)="closeModal()">
+    <div class="custom-modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h4>Confirm {{ modalData()?.action }}</h4>
+            <button (click)="closeModal()" class="close-modal-button">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>{{ modalData()?.message }}</p>
+            <div class="modal-buttons">
+                <button (click)="closeModal()" class="btn-cancel">Cancel</button>
+                <button 
+                    (click)="confirmAction()" 
+                    class="btn-confirm" 
+                    [class.btn-confirm-delete]="modalData()?.action === 'Deactivate'"
+                    [class.btn-confirm-activate]="modalData()?.action === 'Activate'"
+                >
+                    Confirm {{ modalData()?.action }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

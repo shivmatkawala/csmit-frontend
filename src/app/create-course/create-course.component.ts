@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { CreateCourseService, Course, Subject } from '../services/create-course.service'; // FIX: Added Subject import
+import { CreateCourseService, Course, Subject } from '../services/create-course.service'; 
 import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin, Observable } from 'rxjs';
-
-// We will use the 'Course' interface from the service file now.
 
 @Component({
   selector: 'app-create-course',
@@ -23,19 +21,14 @@ export class CreateCourseComponent implements OnInit {
   isEditMode: boolean = false; // To switch between Create and Update mode
   currentCourseId: number | undefined; // Stores the ID of the course being edited
   
-  // List State
-  courses: Course[] = []; // Fetched course list
-  showCourseListPanel: boolean = false; // State for the side panel visibility
-  listErrorMessage: string | null = null;
+  // List State (Removed: courses, showCourseListPanel, listErrorMessage)
   
   // Data model for the form
-  // subjectsInput: to handle subjects as a comma-separated string
   courseData: { 
     courseName: string, 
     contentUrl: string, 
     subjectsInput: string 
   } = {
-    // FIX: Initializing with the user's provided data, ensuring subjects are represented as a comma-separated string for the form
     courseName: 'Robbotics eith ROS',
     contentUrl: 'https://example.com/robotis-ros-course-materials',
     subjectsInput: 'Golang, Python, Robotics Operating System'
@@ -44,64 +37,11 @@ export class CreateCourseComponent implements OnInit {
   constructor(private createCourseService: CreateCourseService) { } 
 
   ngOnInit(): void {
-
+    // Note: If this component is navigated to with a course ID, you would load that course here.
+    // Assuming for simplicity that this component is currently only for creation via direct navigation.
   }
   
-  /**
-   * FIX: Helper method to safely format the subjects array for display in the template.
-   * This resolves the Parser Error and TS type error related to complex template logic (map).
-   * @param course The course object.
-   * @returns A comma-separated string of subject names, or 'N/A'.
-   */
-  getSubjectsDisplay(course: Course): string {
-    if (!course.subjects || course.subjects.length === 0) {
-        return 'N/A';
-    }
-    // We explicitly cast the array elements to Subject for type safety in map()
-    return (course.subjects as Subject[])
-           .map(s => s.subjectname)
-           .join(', ');
-  }
-
-  /**
-   * Toggles the visibility of the course list side panel.
-   * Fetch the list when the panel opens.
-   */
-  toggleCourseListPanel(): void {
-    this.showCourseListPanel = !this.showCourseListPanel;
-    if (this.showCourseListPanel) {
-      this.fetchCourseList();
-    }
-  }
-
-  /**
-   * Fetches the list of courses from the backend API.
-   */
-  fetchCourseList(): void {
-    this.listErrorMessage = null;
-    this.createCourseService.listCourses().subscribe({
-        next: (data) => {
-            // FIX: Map the incoming data to ensure 'courseId' is present and correct (camelCase).
-            // This addresses the issue where the API might return 'courseid' (lowercase).
-            this.courses = data.map((course: any) => ({
-                ...course,
-                courseId: course.courseId || course.courseid // Use existing courseId or map from courseid
-            })) as Course[];
-
-            // Check if courseId is present in the first item just for a sanity check
-            if (this.courses.length > 0 && !this.courses[0].courseId) {
-                console.warn("API returned course list but courseId is missing on the first item even after mapping. Check API response structure.");
-            }
-            if (this.courses.length === 0) {
-              this.listErrorMessage = 'No courses found. Please create a new course.';
-            }
-        },
-        error: (error: HttpErrorResponse) => {
-            console.error('Error fetching course list:', error);
-            this.listErrorMessage = 'Error loading course list: Could not contact the server.';
-        }
-    });
-  }
+  // Removed: getSubjectsDisplay, toggleCourseListPanel, fetchCourseList
 
   /**
    * Resets the form and state to default 'Create' mode.
@@ -121,10 +61,10 @@ export class CreateCourseComponent implements OnInit {
   
   /**
    * Pre-fills the form with the selected course data for editing.
+   * This method remains but would typically be called by a parent/router service.
    * @param course The course object to load into the form.
    */
   loadCourseForEdit(course: Course): void {
-    // FIX: Check for both undefined and null (or 0, if 0 is invalid)
     if (!course.courseId) {
         console.error('Cannot edit a course without a valid ID.', course);
         this.errorMessage = 'Course ID is not available for update.';
@@ -144,7 +84,6 @@ export class CreateCourseComponent implements OnInit {
                        : '' 
     };
 
-    this.showCourseListPanel = false; // Close the panel
     this.errorMessage = null;
     this.successMessage = `Course ID ${course.courseId} loaded for 'Update'.`;
   }
@@ -169,7 +108,7 @@ export class CreateCourseComponent implements OnInit {
                             .map(s => s.trim())
                             .filter(s => s.length > 0);
 
-    // Construct the API payload object (The backend expects a payload with subjects as string[])
+    // Construct the API payload object
     let payload: { 
         courseId?: number, 
         courseName: string, 
@@ -178,7 +117,7 @@ export class CreateCourseComponent implements OnInit {
     } = {
         courseName: this.courseData.courseName,
         contentUrl: this.courseData.contentUrl,
-        subjects: subjectsArray // This is now string[]
+        subjects: subjectsArray 
     };
     
     let apiCall: Observable<any>;
@@ -187,7 +126,7 @@ export class CreateCourseComponent implements OnInit {
     if (this.isEditMode && this.currentCourseId) {
         // UPDATE operation
         payload.courseId = this.currentCourseId;
-        apiCall = this.createCourseService.updateCourse(payload as any); // Type is inferred as correct here now
+        apiCall = this.createCourseService.updateCourse(payload as any);
         action = 'update';
     } else {
         // CREATE operation
@@ -203,7 +142,7 @@ export class CreateCourseComponent implements OnInit {
             this.errorMessage = null;
             this.formSubmitted = true;
             this.resetFormState(form); // Reset form
-            this.fetchCourseList(); // Update list
+            // Removed: this.fetchCourseList(); 
         },
         error: (error: HttpErrorResponse) => {
             console.error('API Error:', error);
@@ -215,11 +154,11 @@ export class CreateCourseComponent implements OnInit {
   }
   
   /**
-   * Handles the course deletion process.
+   * Handles the course deletion process. (Typically managed by the list view now)
+   * Keeping it simple, only for internal use if needed.
    * @param courseId The ID of the course to delete.
    */
   confirmDelete(courseId: number | undefined): void {
-    // FIX: Check for both undefined and null
     if (!courseId) {
       this.errorMessage = 'Course ID is not available for deletion.';
       return;
@@ -237,9 +176,8 @@ export class CreateCourseComponent implements OnInit {
             console.log('Delete API Response:', response);
             this.isSubmitting = false;
             this.successMessage = `Course ID ${courseId} successfully deleted.`;
-            this.fetchCourseList(); // Update list
+            // Removed: this.fetchCourseList(); 
             if (this.currentCourseId === courseId) {
-              // If the currently edited course was deleted, reset the form
               this.resetFormState({} as NgForm); 
             }
         },

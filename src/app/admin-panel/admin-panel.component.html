@@ -7,7 +7,12 @@
                 <img src="assets/logo.jpg" alt="institute Logo" class="institute-logo" title="institute logo">
             </div>
             <div class="search-wrapper">
-                <input type="search" [placeholder]="config.SEARCH_PLACEHOLDER" />
+                <input 
+                    type="search" 
+                    [placeholder]="activeTab() === 'users' ? 'Search Users by Email ID...' : activeTab() === 'courses' ? 'Search Courses by Name...' : activeTab() === 'batches' ? 'Search Batches by Name/ID...' : config.SEARCH_PLACEHOLDER"
+                    [value]="headerSearchQuery()"
+                    (input)="onHeaderSearch($event)"
+                /> <!-- Search for Users/Courses/Batches based on active tab -->
                 <i class="fas fa-search"></i>
             </div>
         </div>
@@ -27,7 +32,7 @@
             <nav class="sidebar-nav">
                 <a *ngFor="let link of config.SIDEBAR_LINKS"
                    [class.active]="activeTab() === link.id" 
-                   (click)="activeTab.set(link.id); navigateTo(link.route)" 
+                   (click)="navigateTo(link.route, link.id)" 
                    [title]="link.label">
                     <i [class]="link.icon"></i>{{ link.label }}
                 </a>
@@ -37,57 +42,83 @@
             <div class="toggle-switch" [class.active]="darkModeActive()" (click)="darkModeActive.set(!darkModeActive())" title="Toggle Dark Mode">
                 <span></span>
             </div>
-            <a title="Logout" (click)="showMessageBox('Logged out successfully.')"><i class="fas fa-sign-out-alt"></i></a>
+            <!-- Logout functionality updated to call the new logoutUser method -->
+            <a title="Logout" (click)="logoutUser()"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </aside>
 
-    <!-- Main content area now spans the full remaining width -->
+    <!-- Main content area -->
     <main class="main-content">
-        <div class="main-content-header">
-            <h1>Admin Actions: Quick Access</h1>
-            <p>Select an action card below to perform core administrative functions.</p>
-        </div>
         
-        <div class="card-grid">
+        <!-- DASHBOARD VIEW -->
+        <div *ngIf="activeTab() === 'dashboard'">
+            <div class="main-content-header">
+                <h1>Admin Actions: Quick Access</h1>
+                <p>Select an action card below to perform core administrative functions.</p>
+            </div>
+            
+            <div class="card-grid">
 
-            <div *ngFor="let card of config.ADMIN_CARDS" 
-                 class="card" 
-                 [class]="card.colorClass" 
-                 tabindex="0" 
-                 (click)="navigateTo(card.route)">
-                <div class="card-content">
-                    <div class="card-icon" [ngClass]="'icon-' + card.colorClass" [innerHTML]="getIconSvg(card)">
+                <div *ngFor="let card of config.ADMIN_CARDS" 
+                    class="card" 
+                    [class]="card.colorClass" 
+                    tabindex="0" 
+                    (click)="navigateTo(card.route, 'dashboard')">
+                    
+                    <!-- New structure based on desired design -->
+                    <div class="card-image-wrapper">
+                        <!-- Image with Zoom Effect on hover -->
+                        <img [src]="'assets/' + card.iconImage" [alt]="card.title + ' Image'">
+                        
+                        <!-- Content Overlay on Image -->
+                        <div class="card-overlay">
+                            <p>{{ card.subtitle }}</p>
+                            <!-- The button moves to the bottom of the card -->
+                        </div>
                     </div>
 
-                    <h2>{{ card.title }}</h2>
-                    <p>{{ card.subtitle }}</p>
-                </div>
-
-                <div class="card-action">
-                    <button [ngClass]="'btn-' + card.colorClass">{{ card.buttonText }}</button>
-                </div>
-            </div>
-
-            <div class="card card-placeholder" tabindex="0" (click)="showMessageBox('Feature coming soon.', 'error')">
-                <div class="card-content">
-                    <div class="card-icon" style="background-color: #BDC3C7;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#7F8C8D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4v16h16V4zM9 10h6m-6 4h6"/>
-                        </svg>
+                    <div class="card-action">
+                        <button [ngClass]="'btn-' + card.colorClass">{{ card.buttonText }}</button>
                     </div>
-                    <h2>More Features...</h2>
-                    <p>Analytics reports, system maintenance, and API management coming soon.</p>
                 </div>
-                <div class="card-action">
-                    <button style="background-color: #BDC3C7; cursor: not-allowed;">Coming Soon</button>
-                </div>
-            </div>
 
+                <div class="card card-placeholder" tabindex="0" (click)="showMessageBox('Feature coming soon.', 'error')">
+                    <div class="card-image-wrapper placeholder-wrapper">
+                         <img src="https://placehold.co/600x400/BDC3C7/7F8C8D?text=Coming+Soon" alt="Placeholder Image">
+                         <div class="card-overlay">
+                            <h2>More Features...</h2>
+                            <p>Analytics reports, system maintenance, and API management coming soon.</p>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <button style="background-color: #BDC3C7; cursor: not-allowed;">Coming Soon</button>
+                    </div>
+                </div>
+
+            </div>
         </div>
+
+        <!-- USER MANAGEMENT VIEW -->
+        <app-user-management 
+            *ngIf="activeTab() === 'users'"
+            [globalSearchQuery]="headerSearchQuery()"
+        ></app-user-management> <!-- Pass global search query as Input to child component -->
+        
+        <!-- COURSE MANAGEMENT VIEW (New Component) -->
+        <app-manage-course
+            *ngIf="activeTab() === 'courses'"
+            [globalSearchQuery]="headerSearchQuery()"
+        ></app-manage-course>
+        
+        <!-- BATCH MANAGEMENT VIEW (NEW COMPONENT) -->
+        <app-batch-management
+            *ngIf="activeTab() === 'batches'"
+            [globalSearchQuery]="headerSearchQuery()"
+        ></app-batch-management>
+        
     </main>
 
-    <!-- The right-admin-status-card section has been removed from the HTML -->
-
+    <!-- General Dashboard Message Box -->
     <div class="message-box" id="messageBox">
         <p>Action Successful!</p>
         <button class="close-btn" (click)="closeMessageBox()">X</button>

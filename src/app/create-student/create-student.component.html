@@ -1,7 +1,7 @@
 <div class="main-container">
   <header class="header">
-    <h1>ATS-Optimized Resume Builder</h1>
-    <p>Fill all required fields for best ATS compatibility. Fields marked with <span class="mandatory">*</span> are mandatory.</p>
+    <h1>Profile-Setup</h1>
+    <p>Fill all required fields because this data will be use for buil your ATS friendly resume. Fields marked with <span class="mandatory">*</span> are mandatory.</p>
   </header>
 
   <!-- STEPPER HEADER / PROGRESS BAR (Improved Look) -->
@@ -28,13 +28,13 @@
         Session User ID: {{ currentUserId() }}
       </p>
       <p *ngIf="!currentUserId()" class="error-message" style="text-align: center; margin-bottom: 20px;">
-        Warning: User ID not found in session. Please log in first. Submission might fail.
+        Warning: User ID not found in session. Submission might fail.
       </p>
 
       <div class="grid-2-cols">
         <label class="input-group">
           Full Name<span class="mandatory">*</span>
-          <input type="text" formControlName="fullName" placeholder="Your full name" />
+          <input type="text" formControlName="fullName" placeholder="Your full name (e.g., Aarav Patel)" />
           <div *ngIf="isInvalid('fullName')" class="error-message">Full Name is required.</div>
         </label>
 
@@ -55,8 +55,8 @@
 
         <label class="input-group">
           Phone Number<span class="mandatory">*</span>
-          <input type="tel" formControlName="phone" placeholder="+91 9876543210" />
-          <div *ngIf="isInvalid('phone')" class="error-message">A valid phone number is required.</div>
+          <input type="tel" formControlName="phone" placeholder="9876543210 (10-15 digits)" />
+          <div *ngIf="isInvalid('phone')" class="error-message">A valid phone number (10-15 digits) is required.</div>
         </label>
       </div>
 
@@ -68,7 +68,7 @@
         </label>
         
         <label class="input-group">
-          Portfolio/GitHub URL
+          Portfolio/GitHub URL (Used for githubId)
           <input type="url" formControlName="portfolio" placeholder="https://github.com/username/portfolio" />
         </label>
       </div>
@@ -87,6 +87,7 @@
     <!-- STEP 2: EDUCATION -->
     <section class="form-section fade-in" *ngIf="currentStep() === 2">
       <h2>Education</h2>
+      <p class="section-description">ATS resumes rely heavily on structured education details. Please provide at least one entry.</p>
       
       <div *ngIf="educationControls.length === 0 && isSubmitted()" class="error-message mb-4">
         At least one education entry is required.
@@ -100,13 +101,13 @@
           <div class="grid-2-cols">
             <label class="input-group">
               Degree/Certification<span class="mandatory">*</span>
-              <input formControlName="degree" placeholder="B.Tech, M.Sc, Diploma, etc." />
+              <input formControlName="degree" placeholder="B.Tech Computer Science" />
               <!-- Validation Added -->
               <div *ngIf="educationControl.get('degree')?.invalid && (educationControl.get('degree')?.touched || isSubmitted())" class="error-message">Degree/Certification is required.</div>
             </label>
             <label class="input-group">
               Institution/University<span class="mandatory">*</span>
-              <input formControlName="institution" placeholder="University Name" />
+              <input formControlName="institution" placeholder="IIT Delhi" />
               <!-- Validation Added: THIS IS LIKELY THE MISSING FIELD IN YOUR SCREENSHOT -->
               <div *ngIf="educationControl.get('institution')?.invalid && (educationControl.get('institution')?.touched || isSubmitted())" class="error-message">Institution name is required.</div>
             </label>
@@ -132,8 +133,8 @@
             </div>
             <!-- ADDED: Grade/CGPA field as it was in the required JSON -->
             <label class="input-group">
-              Grade/CGPA
-              <input formControlName="grade" placeholder="9.0 CGPA or 90%" />
+              Grade/CGPA (e.g., 8.5 CGPA or 90%)
+              <input formControlName="grade" placeholder="8.5 CGPA" />
             </label>
           </div>
           <button type="button" (click)="removeEducation(i)" class="btn btn-remove remove-item-btn">Remove Entry</button>
@@ -151,25 +152,26 @@
     <!-- STEP 3: EXPERIENCE -->
     <section class="form-section fade-in" *ngIf="currentStep() === 3">
       <h2>Work Experience</h2>
+      <p class="section-description">Select your experience level. Intern/Experienced profiles must include at least one work history entry.</p>
       
       <!-- Experience Type Selection -->
       <label class="input-group full-width">
-        Experience Type<span class="mandatory">*</span>
-        <div class="radio-group">
-          <label *ngFor="let level of experienceLevels">
+        Experience Level<span class="mandatory">*</span>
+        <div class="radio-group" style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+          <label *ngFor="let level of experienceLevels" class="radio-label">
             <input type="radio" formControlName="experienceType" [value]="level" />
-            {{ level }}
+            <span>{{ level }}</span>
           </label>
         </div>
       </label>
       
       <!-- Only show experience array if type is Intern or Experienced -->
       <div *ngIf="selectedExperienceType() !== 'Fresher'">
-        <h3 class="mb-4">Work History <span class="mandatory">*</span></h3>
+        <h3 class="mt-5 mb-4" style="font-size: 1.25rem;">Work History <span class="mandatory">*</span></h3>
         
         <!-- General error check if required fields are missing in an array item -->
         <div *ngIf="experienceControls.controls.length === 0 && selectedExperienceType() !== 'Fresher' && isSubmitted()" class="error-message mb-4">
-          At least one experience entry is required for your selected experience type.
+          At least one experience entry is required for your selected experience level.
         </div>
 
         <!-- FIX: Added formArrayName="experience" wrapper -->
@@ -212,7 +214,7 @@
             </div>
             <label class="input-group full-width">
               Description / Responsibilities<span class="mandatory" *ngIf="experienceControl.get('description')?.hasValidator(Validators.required)">*</span>
-              <textarea formControlName="description" rows="3" placeholder="Key achievements and responsibilities"></textarea>
+              <textarea formControlName="description" rows="3" placeholder="Key achievements and responsibilities (e.g., Developed backend APIs using Django and SQL Server.)"></textarea>
               <!-- Validation Added (conditional required for experienced/intern) -->
               <div *ngIf="experienceControl.get('description')?.invalid && (experienceControl.get('description')?.touched || isSubmitted())" class="error-message">Description is required.</div>
             </label>
@@ -231,11 +233,11 @@
     <!-- STEP 4: SKILLS -->
     <section class="form-section fade-in" *ngIf="currentStep() === 4">
       <h2>Skills</h2>
-      <p class="section-description">Add your core technical and soft skills here. (Remove if empty, but at least one skill is recommended.)</p>
+      <p class="section-description">Add your core technical and soft skills here. ATS systems match keywords, so be accurate. (At least one skill is recommended.)</p>
       
       <div class="skill-input-row">
         <label class="input-group skill-input">
-          Search Skill
+          Search Skill (or type a new one)
           <!-- FIXED: Changed to use [formControl] instead of [ngModel] / (ngModelChange) -->
           <input type="text" 
                  [formControl]="skillSearchControl"
@@ -256,7 +258,7 @@
       <!-- FIX: Added formArrayName="skills" wrapper to the container -->
       <div class="skill-card-container" formArrayName="skills">
         <!-- Updated: Display all proficiency levels dynamically -->
-        <div class="skill-card" [formGroupName]="i" *ngFor="let skillControl of skillsControls.controls; let i = index">
+        <div class="item-card" [formGroupName]="i" *ngFor="let skillControl of skillsControls.controls; let i = index">
           <div class="grid-2-cols">
             <label class="input-group">
               Skill Name<span class="mandatory">*</span>
@@ -289,7 +291,7 @@
     <!-- STEP 5: PROJECTS -->
     <section class="form-section fade-in" *ngIf="currentStep() === 5">
       <h2>Projects</h2>
-      <p class="section-description">Detail your most important projects.</p>
+      <p class="section-description">Detail your most important projects. If you provide **tech used**, it will be checked and added to the API master list if new.</p>
 
       <!-- FIX: Added formArrayName="projects" wrapper -->
       <div formArrayName="projects">
@@ -304,19 +306,19 @@
 
           <!-- FIX: ADDED TECHUSED INPUT FIELD -->
           <label class="input-group full-width">Technology Used (Comma Separated, e.g., Angular, Django)
-            <input formControlName="techUsed" placeholder="E.g., Angular, Django" /> 
+            <input formControlName="techUsed" placeholder="E.g., Docker, Python, Flask" /> 
           </label>
           
           <label class="input-group full-width">Project URL (Github Link)
-            <input formControlName="url" placeholder="https://github.com/shivkumar/lms" />
+            <input formControlName="url" placeholder="https://github.com/aaravpatel/resume-builder" />
           </label>
           
           <label class="input-group full-width">Description / Achievements
-            <textarea formControlName="description" rows="3" placeholder="Designed normalized schema, reduced load time by 30%"></textarea>
+            <textarea formControlName="description" rows="3" placeholder="Created resume management system using Django and React." [required]="false"></textarea>
           </label>
           
           <!-- Optional Fields (Duration/Role - keeping them for better UX, even if not directly in API payload) -->
-          <div class="grid-2-cols">
+          <div class="grid-2-cols" style="margin-top: 1rem;">
             <label class="input-group">Duration</label>
             <label class="input-group">Role</label>
           </div>
@@ -332,7 +334,7 @@
       <button type="button" class="btn btn-secondary add-btn" (click)="addProject()">+ Add Project</button>
       <div class="button-row">
         <button type="button" class="btn btn-secondary" (click)="prevStep()">Previous</button>
-        <button type="submit" class="btn btn-submit">Generate Resume</button>
+        <button type="submit" class="btn btn-submit">Submit Data</button>
       </div>
     </section>
 
@@ -347,9 +349,16 @@
   <div *ngIf="modalMessage()" class="custom-modal-backdrop" (click)="modalMessage.set('')">
     <div class="custom-modal" (click)="$event.stopPropagation()">
       <h3>Notification</h3>
-      <p>{{ modalMessage() }}</p>
+      <p style="white-space: pre-wrap;">{{ modalMessage() }}</p>
       <button class="btn btn-primary" (click)="modalMessage.set('')">OK</button>
     </div>
+  </div>
+  
+  <!-- Back to Dashboard button added at the bottom of the page, outside the form -->
+  <div class="button-row" style="margin-top: 3rem; border-top: none; justify-content: flex-start;">
+    <a href="student-dashboard" class="btn btn-secondary" style="text-decoration: none;">
+        ← Back to Dashboard
+    </a>
   </div>
 
 </div>

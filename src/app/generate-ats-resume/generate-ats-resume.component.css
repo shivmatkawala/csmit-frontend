@@ -50,8 +50,9 @@
 /* New internal container for padding, used in both screen and print for consistent internal margins */
 .resume-page {
     /* Set internal padding that acts as the margin within the A4 page */
-    padding: 0.5in; /* 0.5 इंच आंतरिक पैडिंग */
+    padding: 0.5in; /* 0.5 inch internal padding for A4 margins */
     display: block; /* Ensure it behaves like a container */
+    font-family: 'Inter', sans-serif; /* Ensure font is consistent */
 }
 
 
@@ -75,7 +76,7 @@
   #resume-content header h1 { font-size: 2.2rem; }
 }
 
-/* Contact Info */
+/* Contact Info (ATS-friendly, single line on desktop) */
 .contact-info {
   display: flex;
   flex-direction: column;
@@ -87,12 +88,13 @@
   font-weight: 500;
   gap: 0.2rem; /* Reduced from 0.25rem */
 }
-@media (min-width: 640px) {
+@media print, (min-width: 640px) {
   .contact-info {
     flex-direction: row;
     gap: 0;
     column-gap: 0.5rem; /* 0.75rem से कम किया गया */
     font-size: 0.75rem; /* 0.8rem से कम किया गया */
+    flex-wrap: wrap;
   }
   .contact-info > span:not(:first-child) {
     border-left: 1px solid #d1d5db;
@@ -131,6 +133,10 @@
   line-height: 1.4; /* 1.5 से कम किया गया */
   color: #374151; /* text-gray-700 */
 }
+#resume-content p strong {
+    font-weight: 700;
+    color: #1f2937;
+}
 
 /* Skills/General List Item Style */
 .skill-grid {
@@ -157,6 +163,12 @@
 @media (max-width: 639px) {
     .skill-list + .skill-list {
         margin-top: 0.5rem; /* Reduced from 0.75rem */
+    }
+    .skill-list {
+        min-width: 100%;
+    }
+    .skill-grid {
+        flex-direction: column;
     }
 }
 
@@ -224,6 +236,7 @@
 }
 .project-list .tech-used {
   color: #4f46e5;
+  font-style: italic;
 }
 .project-list .project-desc {
   color: #4b5563;
@@ -404,12 +417,17 @@
   #resume-content section {
     /* यह महत्वपूर्ण है: यह सुनिश्चित करता है कि सेक्शन बीच से न कटे */
     page-break-inside: avoid !important;
-    margin-bottom: 0.8rem !important; /* प्रिंट मोड के लिए कम मार्जिन */
+    margin-bottom: 0.8rem !important; /* प्रिंट मोड के लिए कम मार्gin */
   }
   
   /* यह सुनिश्चित करता है कि अगर section लंबा हो तो उसके बाद एक नया पेज शुरू हो */
   #resume-content section h2 {
     page-break-after: avoid !important;
+  }
+  
+  /* Ensure contact info stays together */
+  .contact-info {
+      page-break-inside: avoid !important;
   }
 
   /* Prevent a page break immediately after the last section */

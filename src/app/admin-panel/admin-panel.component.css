@@ -2,6 +2,13 @@
 /* Admin Panel Styles - Optimized for 2-Column Layout (Sidebar + Main Content) */
 /* ------------------------------------------------------------------------ */
 
+:root {
+    /* Action Colors (Removed user management specific colors like --deactivate-orange, etc.) */
+    --primary-green-user: #1a4d2e; /* Keeping this one for general success messages if needed */
+    --border-light: #e0e0e0;
+}
+
+
 :host {
     display: block;
     font-family: 'Inter', sans-serif;
@@ -17,11 +24,13 @@
     position: relative;
     max-width: 1440px;
     width: 100%;
-    min-height: 98vh; 
+    /* Container height should accommodate header + main area */
+    min-height: 100vh; 
     margin: 0 auto;
     background-color: #F8FAFC;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); 
 }
+/* ... (Existing header and sidebar styles are kept) ... */
 header {
     position: relative;
     width: 100%;
@@ -134,13 +143,13 @@ header {
 }
 
 
-/* --- Sidebar --- */
+/* --- Sidebar (Desktop View) --- */
 aside.sidebar {
     position: absolute;
     top: 88px;
     left: 34px;
     width: 121px;
-    height: 874px;
+    height: calc(100vh - 88px - 34px); /* Adjusted to use full viewport height */
     background-color: white;
     border: 1px solid #E2E8F0; 
     border-radius: 8px; 
@@ -229,17 +238,23 @@ nav.sidebar-nav a i {
 }
 
 
-/* --- Main Content Area (Center Column for Cards) --- */
-/* Expanded to take full available width after sidebar */
+/* --- Main Content Area (Desktop View) --- */
 .main-content {
     position: absolute;
     top: 88px;
-    left: 180px; /* Start after sidebar (121px + padding) */
-    right: 34px; /* Stop before the container's right edge (removed right-panel space) */
+    left: 180px; 
+    right: 34px; 
     padding: 20px;
+    background-color: white;
     box-sizing: border-box;
-    min-height: 874px;
-    width: auto; /* Allow content to fill space */
+    /* Match the height of the sidebar */
+    min-height: calc(100vh - 88px - 34px); 
+    height: calc(100vh - 88px - 34px); /* Set explicit height */
+    width: auto; 
+    overflow-y: auto; /* Allow scrolling if content is too big */
+    border: 1px solid #E2E8F0; /* Added border to match sidebar container */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 .main-content-header {
     margin-bottom: 30px;
@@ -259,96 +274,120 @@ nav.sidebar-nav a i {
 }
 
 /* -------------------------------------- */
-/* Card Grid Layout */
+/* Card Grid Layout (Dashboard View) */
 /* -------------------------------------- */
 .card-grid {
     display: grid;
-    /* Default for medium screens and above */
     grid-template-columns: repeat(3, 1fr);
     gap: 25px;
+    /* Use flex or grid layout within main-content to manage card height */
+    max-height: calc(100% - 100px); /* main-content height minus header/padding */
+    overflow-y: auto; /* Scrollable grid if cards exceed space */
+    padding-bottom: 20px; /* Add some bottom padding for scroll area */
 }
-
-@media (min-width: 1300px) {
-    /* New 4-column layout for better use of wide screens */
-    .card-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-@media (max-width: 1024px) {
-    /* 2 columns for smaller desktops/large tablets */
-    .card-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-@media (max-width: 768px) {
-    /* 1 column for tablets/mobile */
-    .card-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* -------------------------------------- */
-/* Individual Card Styling */
-/* -------------------------------------- */
+/* ... (Existing individual card styles are kept) ... */
 .card {
+    /* Fixed card size for consistent, clean dashboard look */
+    width: 100%;
+    max-width: 350px; /* Optional max width */
+    height: 380px; /* Set a fixed height for consistency */
+    
     background-color: #ffffff;
     border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    padding: 0; /* Remove internal padding as content is now full-bleed/overlaid */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 220px; /* Increased min-height for better look */
-    border-left: 5px solid; 
+    position: relative;
+    overflow: hidden; 
+    border-left: none; /* Removed the left border for this design */
 }
 
+/* New Hover Effects */
 .card:hover, .card:focus {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    transform: translateY(-5px); 
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* Deeper shadow on hover */
+    transform: translateY(-8px); /* Subtle lift */
     outline: none; 
 }
 
-.card-content h2 {
-    font-size: 1.4rem; /* Slightly larger title */
-    color: #34495e;
-    margin-top: 10px;
-    margin-bottom: 8px;
+/* Image Wrapper (Top section of the card) */
+.card-image-wrapper {
+    position: relative;
+    height: 100%; /* Take up most of the card height */
+    overflow: hidden;
+    border-radius: 12px; /* Match card radius */
+    
+    /* Ensure only the image wrapper has the border line color for theme identity */
+    border-bottom: 5px solid transparent; 
+    transition: border-bottom-color 0.4s ease;
+}
+
+.card.indigo .card-image-wrapper { border-bottom-color: #673AB7; }
+.card.amber .card-image-wrapper { border-bottom-color: #f1c40f; }
+.card.red .card-image-wrapper { border-bottom-color: #e74c3c; }
+.card.violet .card-image-wrapper { border-bottom-color: #9b59b6; }
+.card.teal .card-image-wrapper { border-bottom-color: #1abc9c; }
+
+
+.card-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; 
+    transition: transform 0.6s ease;
+}
+
+.card:hover .card-image-wrapper img {
+    transform: scale(1.1); /* Image zoom on hover */
+}
+
+/* Content Overlay (Semi-transparent overlay for text) */
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.1));
+    color: white;
+    border-radius: 0 0 12px 12px;
+    transition: all 0.4s ease;
+}
+
+.card-overlay h2 {
+    font-size: 1.4rem; 
+    margin: 0 0 5px 0;
+    color: white;
     font-weight: 700;
     line-height: 1.2;
 }
 
-.card-content p {
-    font-size: 0.95rem; /* Slightly larger description font */
-    color: #95a5a6;
-    margin-bottom: 20px;
+.card-overlay p {
+    font-size: 0.9rem; 
+    color: #CFD8DC; /* Light grey for subtitle */
+    margin: 0;
     line-height: 1.4;
-    min-height: 40px; 
+    max-height: 50px; /* Limit subtitle visibility */
+    overflow: hidden;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Icon Container */
-.card-icon {
-    width: 60px; /* Slightly larger icon */
-    height: 60px;
-    border-radius: 10px; /* Changed to rounded square for modern look */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* Action Button (Moved to the very bottom of the card) */
+.card-action {
+    padding: 10px 20px;
+    background-color: white;
+    border-top: 1px solid #E0E0E0;
+    border-radius: 0 0 12px 12px;
+    z-index: 10;
 }
 
-.card-icon svg {
-    width: 30px;
-    height: 30px;
-}
-
-/* Action Button */
 .card-action button {
-    padding: 12px 18px;
+    padding: 10px 18px; /* Slightly smaller padding */
     border: none;
     border-radius: 8px;
-    color: #ffffff;
+    color: white; 
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
@@ -359,47 +398,29 @@ nav.sidebar-nav a i {
 }
 
 .card-action button:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
     transform: translateY(-2px);
 }
 
-/* -------------------------------------- */
-/* Card Color Themes (No change in colors) */
-/* -------------------------------------- */
-
-.card.indigo { border-left-color: #673AB7; }
-.icon-indigo { background-color: #f3e5f5; }
-.icon-indigo svg { stroke: #673AB7; }
-.btn-indigo { background-color: #673AB7; }
+/* Card Color Themes (Buttons only) */
+.btn-indigo { background-color: #673AB7; color: white; }
 .btn-indigo:hover { background-color: #512DA8; }
 
-.card.amber { border-left-color: #f1c40f; }
-.icon-amber { background-color: #fcf3cf; }
-.icon-amber svg { stroke: #f1c40f; }
-.btn-amber { background-color: #f1c40f; }
+.btn-amber { background-color: #f1c40f; color: #333; } 
 .btn-amber:hover { background-color: #f39c12; }
 
-.card.red { border-left-color: #e74c3c; }
-.icon-red { background-color: #fdedec; }
-.icon-red svg { stroke: #e74c3c; }
-.btn-red { background-color: #e74c3c; }
+.btn-red { background-color: #e74c3c; color: white; }
 .btn-red:hover { background-color: #c0392b; }
 
-.card.violet { border-left-color: #9b59b6; }
-.icon-violet { background-color: #f5eef8; }
-.icon-violet svg { stroke: #9b59b6; }
-.btn-violet { background-color: #9b59b6; }
+.btn-violet { background-color: #9b59b6; color: white; }
 .btn-violet:hover { background-color: #8e44ad; }
 
-.card.teal { border-left-color: #1abc9c; } 
-.icon-teal { background-color: #e8f8f8; }
-.icon-teal svg { stroke: #1abc9c; }
-.btn-teal { background-color: #1abc9c; }
+.btn-teal { background-color: #1abc9c; color: white; }
 .btn-teal:hover { background-color: #16a085; }
 
+/* Placeholder Card Styling */
 .card-placeholder {
     background-color: #ecf0f1;
-    border-left-color: #bdc3c7;
     cursor: not-allowed;
     text-align: center;
     justify-content: center;
@@ -408,15 +429,24 @@ nav.sidebar-nav a i {
 
 .card-placeholder:hover {
     transform: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-placeholder .card-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+.card-placeholder .card-image-wrapper {
+    border-bottom-color: #bdc3c7;
+}
+
+.placeholder-wrapper img {
+    /* Use grayscale filter for placeholder image */
+    filter: grayscale(80%);
 }
 
 
-/* --- Right Panel (Removed, thus deleting .right-admin-status-card styles) --- */
-
-
 /* -------------------------------------- */
-/* Message Box (Notification System) */
+/* General Message Box (Notification System) */
 /* -------------------------------------- */
 .message-box {
     position: fixed;
@@ -466,8 +496,10 @@ nav.sidebar-nav a i {
 
 
 /* -------------------------------------- */
-/* Responsive Adjustments */
+/* Responsive Adjustments (Mobile View) */
 /* -------------------------------------- */
+
+/* Mobile view: Screen width up to 1200px (tablet/large mobile) */
 @media (max-width: 1200px) {
   .container {
     height: auto;
@@ -482,6 +514,8 @@ nav.sidebar-nav a i {
   .search-wrapper {
     max-width: none;
   }
+  
+  /* --- SIDEBAR: Move below header, full width, horizontal layout --- */
   .sidebar {
     position: relative;
     top: auto;
@@ -490,22 +524,44 @@ nav.sidebar-nav a i {
     height: auto;
     border: 1px solid #E2E8F0;
     flex-direction: row;
-    justify-content: space-around;
-    padding: 15px 0;
+    /* Use flex wrap and justify space between */
+    justify-content: space-between; 
+    align-items: center;
+    padding: 15px 20px; /* Added horizontal padding */
     margin-bottom: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
+  
+  /* Hide unused desktop elements on mobile/tablet */
+  .sidebar > div:first-child { 
+      flex-grow: 1; /* Allow nav to take required space */
+  }
+  .sidebar-bottom {
+      /* Show the toggle button but keep it discrete */
+      flex-direction: row;
+      gap: 15px;
+  }
+  .sidebar-bottom a {
+      font-size: 24px; /* Make logout icon larger for touch */
+  }
+
   nav.sidebar-nav {
     flex-direction: row;
     gap: 20px;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start; /* Align links to the start */
   }
-  .sidebar-bottom {
-    display: none; 
+  nav.sidebar-nav a {
+      padding: 5px 10px; /* Added padding for touch target */
+      border-radius: 6px;
+      transition: background-color 0.2s;
   }
-  /* Main content becomes relative and full width */
+  nav.sidebar-nav a.active {
+      background-color: #FEE2E2; /* Highlight active tab */
+  }
+  
+  /* --- MAIN CONTENT: Reset positioning and height --- */
   .main-content {
     display: flex;
     flex-direction: column;
@@ -514,18 +570,39 @@ nav.sidebar-nav a i {
     position: relative;
     top: auto;
     left: auto;
-    right: auto; /* Remove fixed right position */
+    right: auto; 
     width: auto;
     margin-left: 0;
     min-height: auto;
+    height: auto; /* Reset explicit height */
+    overflow-y: visible;
+    border: none; /* Remove redundant border */
+    box-shadow: none; /* Remove redundant shadow */
+    background-color: transparent; /* Match host background */
   }
+  .main-content-header {
+      padding: 0 10px 15px 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Adjustments for Card Grid */
   .card-grid {
-      /* On medium screens, switch back to 2 columns */
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, 1fr); /* 2 columns for tablet/landscape mobile */
+      max-height: none; 
+      overflow-y: visible; 
+  }
+  .card {
+      max-width: none; 
+      height: 350px; 
   }
 }
 
+/* Mobile view: Screen width up to 768px (standard mobile) */
 @media (max-width: 768px) {
+  /* HEADER ADJUSTMENTS */
   .header-right {
     gap: 10px;
   }
@@ -538,17 +615,39 @@ nav.sidebar-nav a i {
     width: 32px;
     height: 32px;
   }
+  
+  /* SIDEBAR ADJUSTMENTS */
+  .sidebar {
+    padding: 15px 10px;
+  }
+  nav.sidebar-nav {
+    gap: 10px;
+    flex-grow: 1;
+    overflow-x: auto; /* Allow horizontal scroll for many links */
+    padding-bottom: 5px;
+  }
   nav.sidebar-nav a {
     font-size: 10px;
     gap: 4px;
+    flex-shrink: 0; /* Prevent links from shrinking */
   }
   nav.sidebar-nav a i {
     font-size: 18px;
   }
+  .sidebar-bottom {
+      /* Hide dark mode switch to prioritize space for navigation */
+      display: none; 
+  }
+  
+  /* MAIN CONTENT & CARDS */
   .card-grid {
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr; /* Single column layout for mobile phones */
+    gap: 15px;
   }
   .main-content {
       padding: 0 10px;
+  }
+  .card {
+      height: 320px; /* Smaller height on mobile */
   }
 }

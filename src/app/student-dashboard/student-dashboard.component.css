@@ -100,7 +100,7 @@ header {
     gap: 16px; 
     flex-shrink: 0;
 }
-/* Action Button style (used for Attend Exam / Download Resume) */
+/* Action Button style (used for Attend Exam / Setup Profile) */
 .btn-request {
     background-color: #4338CA; /* Blue accent for Action */
     color: white;
@@ -119,7 +119,7 @@ header {
     background-color: #3730a3;
     transform: translateY(-1px);
 }
-/* Student Avatar matching Trainer Avatar style */
+/* Student Avatar matching Trainer Avatar style (Kept for Profile Card, removed from header) */
 .user-avatar {
     width: 48px;
     height: 48px;
@@ -168,7 +168,8 @@ aside.sidebar {
 nav.sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 48px;
+    /* FIX: Increased gap to accommodate new 'Profile' link */
+    gap: 30px; 
     align-items: center;
 }
 nav.sidebar-nav a {
@@ -190,14 +191,26 @@ nav.sidebar-nav a:hover {
     color: #F43F5E; /* Red/Rose accent for active/hover */
     font-weight: 600;
 }
+/* FIX: Profile/CV Link - using the same active class */
+nav.sidebar-nav a[title="Download CV / Create ATS Resume"].active {
+    color: #4338CA; /* Blue accent for Profile/CV link to differentiate from career/settings */
+    font-weight: 700;
+    animation: pulse-sidebar 1.5s infinite;
+}
+@keyframes pulse-sidebar {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); color: #6366F1; }
+    100% { transform: scale(1); }
+}
+
 nav.sidebar-nav a i {
     font-size: 20px;
 }
 .sidebar-bottom {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 48px;
+    align-items: center;
 }
 /* Toggle Switch - Matching Trainer Style */
 .toggle-switch {
@@ -257,7 +270,7 @@ nav.sidebar-nav a i {
 /* --- CARD STYLES (MATCHING TRAINER'S POSITIONS) --- */
 /* -------------------------------------------------------- */
 
-/* --- CARD 1: Student Info Card (Replaces Trainer's Info Card) --- */
+/* --- CARD 1: Student Info Card (Attractive Greeting Card) --- */
 .trainer-info-card {
     position: absolute;
     top: 0;
@@ -273,7 +286,8 @@ nav.sidebar-nav a i {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between; /* Space content vertically */
+    /* FIX: Changed justify-content to space-between to allow content to flow naturally, now fixed in HTML to flex-start + gap */
+    justify-content: space-between; 
 }
 .trainer-info-card .profile-img {
     width: 80px;
@@ -283,53 +297,73 @@ nav.sidebar-nav a i {
     border: 4px solid #4338CA; 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     margin-bottom: 10px;
-}
-.trainer-info-card h2 {
-    font-weight: 700;
-    font-size: 18px;
-    margin: 0 0 4px 0;
-    color: #334155;
-}
-.trainer-info-card p.role {
-    font-size: 14px;
-    color: #64748B;
-    margin: 0 0 16px 0;
-}
-.trainer-info-card .batch-details {
-    /* Student specific: Re-used for Day/Date info */
-    margin-top: auto;
-    width: 100%;
-    padding-top: 16px;
-    border-top: 1px dashed #E2E8F0;
-}
-.trainer-info-card .batch-details p {
-    margin: 4px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #4338CA;
-}
-.trainer-info-card .batch-details span {
-    font-size: 12px;
-    font-weight: 500;
-    color: #94A3B8;
-}
-.trainer-info-card .time-row {
-    display: flex;
+    /* For initials */
+    display: flex; 
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #F43F5E; /* Red accent for clock time */
-    font-weight: 600;
-    font-size: 20px;
 }
+
+/* FIX: Attractive Greeting Card Styles */
+.attractive-greeting-card {
+    background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%) !important; /* Indigo Gradient */
+    color: white;
+    padding: 30px 24px;
+    box-shadow: 0 10px 30px rgba(67, 56, 202, 0.5); /* Stronger Shadow */
+    transform: perspective(1000px) rotateX(1deg); /* Slight 3D effect */
+    transition: transform 0.3s;
+    /* FIX: Ensuring content sits at the top for better visual flow after removing button */
+    justify-content: flex-start !important;
+    gap: 8px;
+}
+.attractive-greeting-card:hover {
+    transform: perspective(1000px) rotateX(0deg) scale(1.01);
+}
+.attractive-greeting-card h2 {
+    color: white !important;
+    font-size: 24px !important;
+    margin: 0; /* Removed margin-bottom: 8px; */
+}
+.attractive-greeting-text {
+    font-size: 16px !important;
+    font-style: italic;
+    margin: 0; /* Reduced margin-bottom: 20px; */
+    color: #E0E7FF !important; /* Lighter color for greeting text */
+}
+.attractive-profile-circle {
+    width: 90px !important;
+    height: 90px !important;
+    border: 5px solid #F43F5E !important; /* Rose Accent Border */
+    box-shadow: 0 0 0 8px rgba(244, 63, 94, 0.3); /* Pulsating ring effect */
+    background-color: #F43F5E !important;
+    font-size: 36px !important;
+    animation: border-pulse 2s infinite alternate;
+    margin-bottom: 5px !important; /* Reduced bottom margin */
+}
+@keyframes border-pulse {
+    from { box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.3); }
+    to { box-shadow: 0 0 0 12px rgba(244, 63, 94, 0.0); }
+}
+.attractive-time-display {
+    color: #F59E0B !important; /* Yellow for time contrast */
+    font-size: 24px !important;
+    margin-top: 10px !important; /* Added small top margin for spacing */
+}
+.attractive-greeting-card .batch-details p {
+    color: white !important;
+    font-weight: 700 !important;
+    margin-bottom: 4px;
+}
+.attractive-greeting-card .batch-details span {
+    color: #E0E7FF !important;
+}
+
 
 /* --- CARD 2: 4 Stats Grid (Quick Access Cards) --- */
 .stats-cards-container {
     position: absolute;
     top: 0;
     left: 271px; 
-    width: 509px; /* Adjusted width to fit 800 - 251 - 20 = 529. Using 509 for spacing. */
+    width: 509px; 
     height: 288px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -339,71 +373,104 @@ nav.sidebar-nav a i {
 .stat-card {
     background-color: white;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
-    padding: 16px 20px;
+    /* FIX: More appealing shadow and border effect */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+    padding: 18px 22px; /* Increased padding */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border: 2px solid #E2E8F0;
-    cursor: pointer; /* Added for student cards */
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
-    /* FIX: Ensure content does not push card size beyond grid */
+    border: 3px solid transparent; /* Transparent border for initial state */
+    cursor: pointer; 
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s, border-color 0.4s;
     overflow: hidden; 
+    position: relative;
+    /* FIX: Background pattern/accent */
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 244, 250, 0.8));
 }
 .stat-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    border-color: #4338CA; /* Blue accent on hover */
+    transform: translateY(-8px) scale(1.02); /* More lift */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+    border-color: var(--card-hover-color, #4338CA); /* Dynamic border color */
 }
+/* Setting CSS variables for hover effect */
+.stat-blue:hover { --card-hover-color: #4338CA; }
+.stat-yellow:hover { --card-hover-color: #F59E0B; }
+.stat-green:hover { --card-hover-color: #10B981; }
+.stat-red:hover { --card-hover-color: #F43F5E; }
+
 .stat-card .title {
-    font-weight: 700;
-    font-size: 13px;
+    font-weight: 800; /* Bolder title */
+    font-size: 14px; /* Slightly larger title */
     margin: 0;
     color: #334155;
-    /* Ensure title remains one line if possible */
     white-space: nowrap; 
     overflow: hidden; 
     text-overflow: ellipsis; 
 }
 .stat-card .value {
-    /* FIX: Reduced font size to ensure text fits on two lines max */
+    /* FIX: Reduced font size to better fit short text */
     font-size: 1.25rem; 
-    font-weight: 700;
-    line-height: 1.3;
-    margin: 8px 0;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 6px 0 10px 0; /* Adjusted margin */
     color: #4338CA; /* Default value color is blue */
-    /* FIX: Set max lines for main value text */
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-line-clamp: 2; 
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .stat-card .value-small { 
+    /* FIX: Reduced font size to better fit short text */
     font-size: 1.25rem; 
-    font-weight: 700;
-    margin: 15px 0 10px 0;
-    line-height: 1.3;
+    font-weight: 900;
+    margin: 6px 0 10px 0;
+    line-height: 1.2;
     color: #334155;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
 }
 .stat-card .footer-info {
-    font-size: 11px;
+    font-size: 12px; /* Slightly larger footer text */
+    font-weight: 600;
     color: #64748B;
-    border-top: 1px dashed #E2E8F0;
+    border-top: 1px dashed #D1D5DB; /* Lighter dashed line */
     padding-top: 8px;
     line-height: 1.3;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* FIX: Ensure footer info text stays on one line */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* Adding a subtle icon background for extra flair */
+.stat-card i {
+    font-size: 1.2rem;
+}
+.stat-card::after {
+    content: attr(data-icon);
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 4rem;
+    color: rgba(0, 0, 0, 0.05);
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    pointer-events: none;
+    transition: transform 0.3s;
+}
+.stat-card:hover::after {
+    transform: scale(1.1) rotate(5deg);
+}
+/* Assigning content based on the icon (Using Font Awesome Unicode) */
+.stat-blue::after { content: "\f0c0"; } /* users */
+.stat-yellow::after { content: "\f06a"; } /* book-open - changed to exclamation triangle for visual interest */
+.stat-green::after { content: "\f0ae"; } /* tasks */
+.stat-red::after { content: "\f53d"; } /* receipt */
+
 
 /* Stat Card Colors (Student Card colors applied to Trainer structure) */
 .stat-blue .value { color: #4338CA; } /* Batches */
@@ -412,117 +479,8 @@ nav.sidebar-nav a i {
 .stat-red .value { color: #F43F5E; } /* Payments */
 .stat-purple .value-small { color: #9F7AEA; } 
 
-
-/* --- CARD 3: Study Time Tracking (Replaces Trainer's Quick Actions) --- */
-.quick-actions-card {
-    position: absolute;
-    top: 308px;
-    left: 0;
-    width: 780px; /* Adjusted to fill the whole width (251 + 20 + 509 = 780, using 780px) */
-    height: 250px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
-}
-
-/* --- CARD 4: Top Courses Progress (Replaces Trainer's Performance Analysis) --- */
-.performance-analysis-card {
-    position: absolute;
-    top: 578px;
-    left: 0;
-    width: 400px; /* Adjusted width to match original student card position */
-    height: 374px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-.performance-analysis-card h3,
-.quick-actions-card h3 {
-    font-weight: 600;
-    font-size: 18px;
-    margin: 0 0 16px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #E2E8F0;
-}
-.performance-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    flex-grow: 1;
-}
-.performance-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 6px;
-    background-color: #F8FAFC;
-    border-left: 4px solid #4338CA;
-}
-.student-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #334155;
-}
-.student-image { /* Used for course icon wrapper */
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.skill-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-weight: 700;
-    flex-shrink: 0;
-    text-align: center;
-}
-.badge-top { background-color: #10B981; color: white; } /* 80%+ */
-.badge-struggle { background-color: #F43F5E; color: white; } /* <50% */
-.badge-intermediate { background-color: #E0E7FF; color: #4338CA; } /* 50-80% */
-
-
-/* --- CARD 5: Latest Resources/Video Card (Replaces Trainer's Tasks Card) --- */
-.tasks-card {
-    position: absolute;
-    top: 578px;
-    left: 420px; 
-    width: 360px; /* Adjusted to fit the remaining space (780 - 400 - 20 = 360px) */
-    height: 374px; 
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-.tasks-card h3 {
-    font-weight: 600;
-    font-size: 18px;
-    margin: 0 0 16px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #E2E8F0;
-}
-/* Video Card (Content inside tasks-card) */
-.video-card img {
-    /* To ensure image takes full width/height of its container */
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
+/* --- Removed Cards' Positions --- */
+/* .quick-actions-card, .performance-analysis-card, .tasks-card (Removed from HTML) */
 
 /* --- CARD 6: Right Schedule Card (Matching Trainer) --- */
 .right-schedule-card {
@@ -859,6 +817,173 @@ nav.sidebar-nav a i {
 }
 
 
+/* --- NEW: PROFILE COMPLETION MODAL STYLES --- */
+.profile-completion-overlay {
+    background-color: rgba(67, 56, 202, 0.8); /* Dark Blue overlay */
+}
+.profile-completion-modal {
+    max-width: 500px;
+    width: 90%;
+    padding: 30px;
+    text-align: center;
+    border: 5px solid #F43F5E;
+    animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes bounce-in {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.profile-prompt-icon {
+    font-size: 60px;
+    color: #F43F5E;
+    margin-bottom: 15px;
+    animation: swing 2s infinite ease-in-out;
+}
+@keyframes swing {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(2deg); }
+    50% { transform: rotate(-2deg); }
+    75% { transform: rotate(1deg); }
+    100% { transform: rotate(0deg); }
+}
+.profile-completion-modal h3 {
+    font-size: 24px;
+    color: #334155;
+    margin-bottom: 10px;
+}
+.profile-completion-modal p {
+    color: #64748B;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.highlight-action-text {
+    font-weight: 700;
+    color: #4338CA;
+    text-shadow: 0 0 3px rgba(67, 56, 202, 0.2);
+}
+.profile-prompt-button {
+    background-color: #F43F5E !important; 
+    border-radius: 9999px !important;
+    padding: 12px 25px !important;
+    font-size: 16px !important;
+    margin-top: 10px;
+}
+.pulse-icon {
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.small-info {
+    font-size: 10px;
+    margin-top: 15px !important;
+}
+
+
+/* --- NEW: BATCH DETAILS MODAL STYLES (Attractive) --- */
+.batch-details-modal {
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    padding: 20px;
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+.batch-list-scroll {
+    overflow-y: auto;
+    max-height: calc(80vh - 120px); /* Adjust based on header/footer size */
+    padding-right: 15px;
+    padding-bottom: 10px;
+}
+/* Scrollbar styling for better look */
+.batch-list-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.batch-list-scroll::-webkit-scrollbar-thumb {
+    background-color: #4338CA;
+    border-radius: 4px;
+}
+.batch-list-scroll::-webkit-scrollbar-track {
+    background: #E0E7FF;
+}
+
+.batch-card-detail {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s;
+}
+.batch-card-detail:hover {
+    transform: translateY(-2px);
+    border-color: #4338CA;
+}
+.batch-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #CBD5E1;
+}
+.batch-name-display {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #4338CA;
+}
+.batch-status-active {
+    background-color: #ECFDF5;
+    color: #047857;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.batch-status-inactive {
+    background-color: #FEF2F2;
+    color: #B91C1C;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.batch-metadata p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #64748B;
+}
+.batch-metadata i {
+    margin-right: 8px;
+    color: #F43F5E;
+}
+.batch-description {
+    margin-top: 10px;
+    padding: 10px;
+    border-left: 3px solid #F59E0B;
+    background-color: #FFFBEB;
+    border-radius: 4px;
+}
+.description-title {
+    font-weight: 600;
+    color: #F59E0B;
+    margin: 0 0 5px 0;
+}
+.view-curriculum-button {
+    background-color: #10B981;
+    margin-top: 15px;
+    padding: 8px 15px;
+    font-size: 14px;
+    width: 100%;
+    justify-content: center;
+}
+
 /* --- Responsive Adjustments (Matching Trainer) --- */
 @media (max-width: 1200px) {
   .container {
@@ -910,9 +1035,6 @@ nav.sidebar-nav a i {
   /* Cards become relative and full width */
   .trainer-info-card,
   .stats-cards-container,
-  .quick-actions-card,
-  .performance-analysis-card,
-  .tasks-card,
   .right-schedule-card {
     position: relative;
     top: auto;
@@ -923,8 +1045,9 @@ nav.sidebar-nav a i {
     border-radius: 8px;
   }
   .stats-cards-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     grid-template-rows: auto;
+    gap: 15px; /* Adjust gap for smaller screens */
   }
   .right-schedule-card {
     margin-top: 20px;
@@ -946,10 +1069,6 @@ nav.sidebar-nav a i {
     font-size: 12px;
     gap: 5px;
   }
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-  }
   nav.sidebar-nav a {
     font-size: 10px;
     gap: 4px;
@@ -965,8 +1084,16 @@ nav.sidebar-nav a i {
   .trainer-info-card {
     min-height: 250px;
   }
-  .actions-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .attractive-profile-circle {
+      width: 70px !important;
+      height: 70px !important;
+      font-size: 28px !important;
+  }
+  .attractive-greeting-card h2 {
+    font-size: 20px !important;
+  }
+  .attractive-time-display {
+    font-size: 20px !important;
   }
 }
 
@@ -999,13 +1126,5 @@ nav.sidebar-nav a i {
   }
   .stats-cards-container {
     grid-template-columns: 1fr; /* Stack on small mobile */
-  }
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
-  .task-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
   }
 }

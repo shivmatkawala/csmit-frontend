@@ -1,8 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
-// FIX: ApiService से interfaces को सीधे ResumeService से उपयोग करें 
+import { Component, OnInit, signal, Input } from '@angular/core';
 import { ResumeService, StudentInfo } from '../services/create-resume.service'; 
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ApiService } from '../services/api.service'; // Added ApiService to get stored data
 
 @Component({
   selector: 'app-generate-ats-resume',
@@ -11,20 +11,27 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class GenerateAtsResumeComponent implements OnInit{
 
+  // NEW: Input property to know if this component is embedded in the dashboard
+  @Input() isDashboardEmbed: boolean = false; 
+
   // Holds the main resume data structure.
   resumeData: StudentInfo | null = null; 
   
   // Variables to hold skills divided into two columns for better layout.
-  skillColumn1: { name: string }[] = [];
-  skillColumn2: { name: string }[] = [];
+  skillColumn1: { name: string, level?: string }[] = [];
+  skillColumn2: { name: string, level?: string }[] = [];
 
   // Signal to control the visibility of the action buttons (print, download).
+  // FIX: Action buttons should be visible by default for dashboard view
   isButtonContainerVisible = signal(true); 
+  
+  // Track loading state for UI feedback
+  isLoading = signal(true);
 
-  // FIX: ApiService की जगह ResumeService का उपयोग करें
   constructor(
     private resumeService: ResumeService,
-    private router: Router 
+    private router: Router,
+    private apiService: ApiService // Injected to access session data helper
   ) {}
 
   ngOnInit(): void {
@@ -33,49 +40,84 @@ export class GenerateAtsResumeComponent implements OnInit{
   
   /**
    * Fetches the student's resume data using the GET API.
-   * FIX: Hardcoding 'USR006' as per your requirement, but ideally this comes from session/auth.
    */
   private fetchResumeData(): void {
       
-    // FIX: Get the user ID from the session, default to 'USR006' as requested
-    const userId = typeof window !== 'undefined' && window.sessionStorage.getItem('CURRENT_USER_ID') || 'USR006';
+    const loginData = this.apiService.getStoredStudentData();
+    const userId = loginData?.userId;
     
-    // ResumeService का उपयोग करके GET API कॉल करें
+    console.log('Resume Component: Attempting to fetch resume for userId:', userId); 
+
+    if (!userId) {
+        console.error('Session ID not found. Cannot fetch resume. Redirecting to dashboard.');
+        this.isLoading.set(false);
+        this.backToDashboard(); 
+        return;
+    }
+    
+    // Attempt 1: Fetch from API
     this.resumeService.getResumeData(userId).subscribe({
       next: (data: StudentInfo) => {
-        this.resumeData = data; 
-        this.divideSkillsIntoColumns(this.resumeData.skills); 
-        console.log('Resume Data Fetched Successfully:', this.resumeData);
+        this.isLoading.set(false);
+        // Check if data is valid and not the 'Not Found' fallback structure from Service
+        if (data && data.full_name && data.full_name !== 'Not Found' && data.education.length > 0) {
+            this.resumeData = data; 
+            this.divideSkillsIntoColumns(this.resumeData.skills); 
+            console.log('Resume Data Fetched Successfully from API:', this.resumeData.full_name);
+            
+            // NEW: Automatically trigger download if embedded in dashboard
+            if (this.isDashboardEmbed) {
+                this.downloadResume();
+            }
+        } else {
+            console.warn('Resume data missing from API. Attempting fallback from session storage.');
+            this.loadFallbackData(userId); 
+        }
       },
       error: (error: HttpErrorResponse) => {
-        console.error('Failed to fetch resume data from API:', error);
-        // Fallback: If API fails, try to load data stored during form submission
-        this.loadFallbackData();
+        this.isLoading.set(false);
+        console.error('Failed to fetch resume data from API. Trying fallback.', error);
+        // Attempt 2: Fallback to local session storage
+        this.loadFallbackData(userId);
       }
     });
   }
 
   /**
    * Loads the fallback data saved during the create-student submission process.
+   * If valid data is found in sessionStorage, it sets it to resumeData and prevents redirection.
    */
-  private loadFallbackData(): void {
+  private loadFallbackData(userId: string): void {
       if (typeof window !== 'undefined' && window.sessionStorage) {
           const storedData = window.sessionStorage.getItem('STUDENT_DATA');
           if (storedData) {
               const loginData = JSON.parse(storedData);
-              if (loginData && loginData.info) {
-                  this.resumeData = loginData.info;
+              // Ensure we have the necessary nested info object and that it contains key data
+              if (loginData && loginData.info && loginData.info.full_name && loginData.info.education.length > 0) {
+                  
+                  // NOTE: The fallback data structure already matches StudentInfo for display purposes
+                  this.resumeData = loginData.info as StudentInfo; 
                   if (this.resumeData) {
                       this.divideSkillsIntoColumns(this.resumeData.skills);
+                      console.log('Resume Data Loaded from Fallback Session Storage.');
+                      this.isLoading.set(false);
+                      
+                      // NEW: Automatically trigger download if embedded in dashboard
+                      if (this.isDashboardEmbed) {
+                          this.downloadResume();
+                      }
+                      return; // SUCCESS: Found local data, do not redirect!
                   }
-                  console.log('Resume Data Loaded from Fallback Storage:', this.resumeData);
-                  return;
               }
           }
       }
-      // If no data is found anywhere
-      console.log('No resume data found, redirecting to creation page.');
-      // In a production app, you would navigate: this.router.navigate(['/create-student']);
+      
+      // FAILURE: No data found anywhere (API or Session)
+      console.error('Resume data is not complete or not found in session. Redirecting to setup form.');
+      this.isLoading.set(false);
+      
+      // Redirect to setup form, allowing the user to continue filling data
+      window.location.href = 'create-student'; 
   }
 
 
@@ -83,7 +125,7 @@ export class GenerateAtsResumeComponent implements OnInit{
    * Helper function to divide the skills array roughly in half for two-column display.
    * @param skills The array of skills.
    */
-  private divideSkillsIntoColumns(skills: any[]): void {
+  private divideSkillsIntoColumns(skills: { name: string, level?: string }[]): void {
     if (skills && skills.length > 0) {
       const middleIndex = Math.ceil(skills.length / 2);
       this.skillColumn1 = skills.slice(0, middleIndex);
@@ -114,8 +156,16 @@ export class GenerateAtsResumeComponent implements OnInit{
   printResume(): void {
     window.print();
   }
+  
+  /**
+   * Redirects back to the student dashboard, or just navigates back to dashboard page if embedded.
+   */
+  backToDashboard(): void {
+      // For a clean exit of the embedded component, we navigate to dashboard
+      window.location.href = 'student-dashboard';
+  }
+  
   downloadResume(): void {
-    // #resume-content is the outer container. We target it.
     const resumeElement = document.getElementById('resume-content'); 
     if (!resumeElement) return;
 
@@ -123,7 +173,6 @@ export class GenerateAtsResumeComponent implements OnInit{
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
     script.onload = () => {
-        // html2pdf is available after the script loads.
         this.generatePdf(resumeElement);
     };
     document.body.appendChild(script);
@@ -176,6 +225,19 @@ export class GenerateAtsResumeComponent implements OnInit{
         // Restore original body styles after PDF generation is complete
         document.body.style.margin = originalBodyMargin;
         document.body.style.overflow = originalBodyOverflow;
+        
+        // If embedded, notify the user that the download has finished
+        if (this.isDashboardEmbed) {
+             // Replacing alert with console log and an internal message box is preferred, 
+             // but since we don't have the parent's message box, a temporary notification is best.
+             // window.alert is used here to ensure user sees the download confirmation.
+             // If a custom modal system were available, it would be used instead of alert.
+             if (typeof window.alert === 'function') {
+                 window.alert(`✅ ${opt.filename} successfully downloaded!`);
+             } else {
+                 console.log(`✅ ${opt.filename} successfully downloaded!`);
+             }
+        }
     });
   }
 

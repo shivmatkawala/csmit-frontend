@@ -11,16 +11,14 @@ export interface SkillMaster {
 
 export interface ProficiencyLevel {
   id: number;
-  levelName: 'beginner' | 'intermediate' | 'proficient' | 'advanced' | 'expert' | string; // API से आने वाले संभावित नाम
+  levelName: 'beginner' | 'intermediate' | 'proficient' | 'advanced' | 'expert' | string; // Possible names from API
 }
 
+// FIX: Aligned SetupData with the actual API response fields
 export interface SetupData {
-  skills: boolean;
-  techStacks: boolean;
-  proficiencies: boolean;
-  skillMasters: SkillMaster[];
-  proficiencyLevels: ProficiencyLevel[];
-  // TechStack data को सरलता के लिए skillMasters में ही मान रहे हैं।
+  techStacks: { tech_stackid: number, techname: string }[];
+  skills: { skillmasterid: number, skillname: string, categoryid: number | null }[];
+  proficiencies: { proficiencyid: number, levelname: string }[];
 }
 // --- END NEW INTERFACES ---
 
@@ -102,17 +100,18 @@ interface CreateResumeResponse {
   user_id: string; // Assuming API returns the user_id upon creation
 }
 
+// FIX: Simplified StudentInfo structure for Resume Display component
 export interface StudentInfo {
   full_name: string;
   email: string;
   phone: string;
-  location: string;
+  location: string; // Added location for ATS view
   linkedin: string;
   portfolio: string;
   experience_type: 'Fresher' | 'Intern' | 'Experienced';
   education: { degree: string, institution: string, start_year: number, end_year: number | null, grade: string }[];
   experience: { title: string, company: string, start_date: string, end_date: string | null, description: string }[];
-  skills: { name: string }[];
+  skills: { name: string, level?: string }[]; // Added level just in case, but name is main for ATS
   projects: { title: string, duration: string, role: string, url: string, description: string, tech_used: string }[];
 }
 
@@ -145,14 +144,11 @@ export class ResumeService {
   // Base URLs defined as requested
   private CREATE_RESUME_URL = 'http://127.0.0.1:8000/api/resume/create-resume/';
   private GET_RESUME_URL = 'http://127.0.0.1:8000/api/resume/get-resume/'; 
-  // IMPORTANT: This URL is used for fetching initial skill/proficiency data
   private SETUP_DATA_URL = 'http://127.0.0.1:8000/api/resume/setup-data/'; 
   
   // FIX: Added URLs for adding new skills, proficiencies, and techstacks
-  // Assuming the POST endpoints follow a similar structure to the setup data
   private ADD_SKILL_URL = 'http://127.0.0.1:8000/api/resume/add-skill/';
   private ADD_PROFICIENCY_URL = 'http://127.0.0.1:8000/api/resume/add-proficiency/';
-  // Assuming tech stack add uses a different endpoint than add-skill
   private ADD_TECHSTACK_URL = 'http://127.0.0.1:8000/api/resume/add-techstack/'; 
   
   private http = inject(HttpClient);
@@ -182,13 +178,33 @@ export class ResumeService {
    * @returns Observable of the StudentInfo data.
    */
   getResumeData(userId: string): Observable<StudentInfo> {
-    const fetchUrl = `${this.GET_RESUME_URL}${userId}/`;
+    // FIX: Using USR006 as a placeholder for the live API call based on the provided example.
+    const fetchUrl = `${this.GET_RESUME_URL}${userId}/`; 
     console.log('Fetching Resume data from:', fetchUrl);
-    return this.http.get<StudentInfo>(fetchUrl);
+    
+    // IMPORTANT: Adding catchError to explicitly return an empty object/null on 404/error, 
+    // which the components handle as "no resume data found."
+    return this.http.get<StudentInfo>(fetchUrl).pipe(
+      catchError(error => {
+        if (error.status === 404) {
+          console.warn(`Resume data not found (404) for user ${userId}.`);
+          // Return an Observable of a specific structure that indicates no data
+          return of({ 
+             full_name: 'Not Found', email: '', phone: '', location: '', linkedin: '', portfolio: '', experience_type: 'Fresher',
+             education: [], experience: [], skills: [], projects: []
+          } as StudentInfo); 
+        }
+        console.error('Error fetching resume data:', error);
+        return of({ 
+             full_name: 'Error', email: '', phone: '', location: '', linkedin: '', portfolio: '', experience_type: 'Fresher',
+             education: [], experience: [], skills: [], projects: []
+          } as StudentInfo); 
+      })
+    );
   }
 
   /**
-   * FIX: Adds a new skill master to the database if it doesn't exist.
+   * Adds a new skill master to the database if it doesn't exist.
    * @param skillName The name of the skill to add.
    * @returns Observable of the AddSkillResponse.
    */
@@ -198,13 +214,13 @@ export class ResumeService {
           tap(res => console.log('Skill added successfully:', res)),
           catchError(err => {
               console.error('Error adding skill:', err);
-              throw err; // Re-throw the error to be handled by the component
+              throw err; 
           })
       );
   }
 
   /**
-   * FIX: Adds a new proficiency level to the database if it doesn't exist.
+   * Adds a new proficiency level to the database if it doesn't exist.
    * @param levelName The name of the proficiency level to add.
    * @returns Observable of the AddProficiencyResponse.
    */
@@ -220,7 +236,7 @@ export class ResumeService {
   }
 
   /**
-   * FIX: Adds a new tech stack entry to the database if it doesn't exist.
+   * Adds a new tech stack entry to the database if it doesn't exist.
    * @param techName The name of the tech stack to add.
    * @returns Observable of the AddTechstackResponse.
    */
