@@ -1,488 +1,232 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <body>
-<!-- Main container for the dashboard -->
-<div class="container">
-<header>
-<div class="logo-search">
-<div class="logo">
-<!-- Logo Image added here, replacing CODE HUB text -->
-<img src="assets/logo.jpg" alt="Institute Logo" class="institute-logo">
-</div>
-<div class="search-wrapper">
-<!-- Search for Courses/Assignments -->
-<input type="search" placeholder="Search Courses, Assignments..." [formControl]="searchControl" />
-<i class="fas fa-search"></i>
-</div>
-</div>
-<div class="header-right">
-<!-- User Request: 'Download Resume' button changed to 'Setup Profile' -->
-<!-- FIX: Header button now calls goToProfileSetupForm which redirects to the full form -->
-<button class="btn-request" (click)="goToProfileSetupForm()" style="background-color: #F43F5E;">
-<i class="fas fa-user-edit"></i> Setup Profile
-</button>
-
-    <!-- User's Request: Profile Picture or Initial Text removed from header -->
-  </div>
-</header>
-
-<!-- Sidebar Navigation (Left) -->
-<aside class="sidebar">
-  <div>
-    <nav class="sidebar-nav">
-      <!-- Links are managed by activePage property -->
-      <a [class.active]="activePage === 'dashboard'" (click)="setActivePage('dashboard')"><i class="fas fa-chart-line"></i>Dashboard</a>
-      <a [class.active]="activePage === 'courses'" (click)="setActivePage('courses')"><i class="fas fa-book"></i>Courses</a>
-      <a [class.active]="activePage === 'assignments'" (click)="setActivePage('assignments')"><i class="fas fa-tasks"></i>Assignments</a>
-      <a [class.active]="activePage === 'career'" (click)="setActivePage('career')"><i class="fas fa-briefcase"></i>Career</a>
-      
-      <!-- FIX: 'Resume' link now calls goToResumeView() to display the PDF viewer on the dashboard -->
-      <a [class.active]="activePage === 'generate-resume'" (click)="goToResumeView()" title="Generate/Download ATS Resume PDF"><i class="fas fa-file-alt"></i>Resume</a>
-    </nav>
-  </div>
-  <div class="sidebar-bottom">
-    <div class="toggle-switch" id="toggleSwitch" [class.active]="notificationsEnabled" (click)="notificationsEnabled = !notificationsEnabled" title="Toggle Notifications">
-      <span></span>
-    </div>
-    <!-- Settings icon is linked to setActivePage('profile-setting') -->
-    <a [class.active]="activePage === 'profile-setting'" (click)="setActivePage('profile-setting')" title="Profile Settings"><i class="fas fa-cog"></i></a>
-  </div>
-</aside>
-
-<!-- Right Schedule Card (Calendar and Schedule) -->
-<!-- FIX: Hide the calendar when the resume is displayed (which takes full-width) -->
-<section class="right-schedule-card" *ngIf="activePage !== 'attend-exam' && activePage !== 'generate-resume'">
-  <div class="current-time-display">
-    <p class="current-time-text">Current Time: {{ currentTime }}</p>
-  </div>
-  <div class="right-schedule-header">
-    <h3>My Academic Schedule</h3>
-    <!-- Added button to open Exam Modal here, since header button was removed -->
-    <button aria-label="Open Exam Schedule" (click)="openExamModal()" title="View and Attend Exams" style="color: #F59E0B; font-size: 16px;">
-        <i class="fas fa-edit"></i> Exams
-    </button>
-  </div>
-
-  <!-- Calendar Controls (Monthly View) -->
-  <div class="calendar-controls">
-    <button aria-label="Previous Month" (click)="navigateCalendar(-1)">&lt;</button>
-    <p>{{ selectedMonthYear }}</p>
-    <button aria-label="Next Month" (click)="navigateCalendar(1)">&gt;</button>
-  </div>
-
-  <!-- Calendar Grid -->
-  <div class="calendar-weekdays">
-    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-  </div>
-  <div class="calendar-days">
-    <!-- Day cell -->
-    <div *ngFor="let day of calendarDays"
-      [class.inactive]="day.disabled"
-      [class.active]="day.selected"
-      (click)="!day.disabled && onDateSelect(day.fullDate)"
-      [class.selected-for-leave]="selectedScheduleDate && day.fullDate && day.fullDate.toDateString() === selectedScheduleDate.toDateString()"
-      [title]="day.fullDate ? (day.fullDate | date:'fullDate') : ''">
-      {{ day.date }}
-    </div>
-  </div>
-
-  <!-- Schedule List -->
-  <div class="schedule-list">
-    <h5>Schedule for {{ selectedScheduleDate | date:'dd MMM yyyy' }}</h5>
-    <div *ngIf="scheduleDetails.length === 0" class="no-schedule-message">
-        Select a date to see the schedule, or view your main deadlines below.
-    </div>
-    <div *ngFor="let item of scheduleDetails" class="schedule-section">
-      <div class="schedule-item" [ngClass]="item.type + '-item'">
-        <div class="date">
-          {{ item.dayOfWeekShort }} <br> {{ item.dayOfMonth }}
-        </div>
-        <p class="desc">{{ item.desc }}</p>
-        <button *ngIf="item.joinButton" class="join-button">Join Class</button>
-      </div>
-    </div>
-
-    <!-- Next Deadlines (Summary at bottom of Schedule Card) -->
-    <div class="schedule-section" style="margin-top: 20px; border-top: 1px solid #CBD5E1; padding-top: 15px;">
-      <h5>Upcoming Deadlines Summary</h5>
-      <div *ngFor="let deadline of nextDeadlines" class="schedule-item deadline-item">
-        <div class="date">
-          {{ deadline.date | date:'EEE' | uppercase }} <br> {{ deadline.date | date:'dd' }}
-        </div>
-        <p class="desc">
-          {{ deadline.desc }} <br>
-          <span style="font-style: italic; color: #4338CA;">Due: {{ deadline.date | date:'mediumDate' }}</span>
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Main Content Area -->
-<!-- FIX: If activePage is 'generate-resume', it should be full-width -->
-<main class="main-content" [class.full-width]="activePage === 'attend-exam' || activePage === 'generate-resume'">
-  <!-- 1. DASHBOARD CONTENT (Default) -->
-  <ng-container *ngIf="activePage === 'dashboard'">
+  <!-- Main container -->
+  <div class="container" [class.exam-active-mode]="activePage === 'attend-exam'">
     
-    <!-- 1. Good Morning Card (Greeting + Clock) -> Attractive Design -->
-    <section class="trainer-info-card attractive-greeting-card" style="justify-content: flex-start; gap: 10px;">
-        <!-- Profile Circle: Attractive Design -->
-        <div class="profile-img attractive-profile-circle" 
-             style="background-color: #4338CA; border-color: #F43F5E; margin-bottom: 5px;">
-            <span style="font-size: 32px; font-weight: 700; color: white;">{{ profileInitial }}</span>
+    <!-- HEADER SECTION (Hidden during Exam) -->
+    <header *ngIf="activePage !== 'attend-exam'">
+      <div class="logo-search">
+        <div class="logo">
+          <img src="assets/logo.jpg" alt="Logo" class="institute-logo">
         </div>
+        <div class="search-wrapper">
+          <input type="search" placeholder="Search Courses, Assignments..." [formControl]="searchControl" />
+          <i class="fas fa-search"></i>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-request" (click)="goToProfileSetupForm()" style="background-color: #F43F5E;">
+          <i class="fas fa-user-edit"></i> <span>Setup Profile</span>
+        </button>
+      </div>
+    </header>
 
-        <!-- studentName is updated from API service storage -->
-        <!-- FIX: Showing studentName here -->
-        <h2>{{ studentName }}</h2> 
-        <!-- Real-time Greeting -->
-        <p class="role attractive-greeting-text" style="margin-bottom: 5px;">{{ greeting }}</p>
+    <!-- DASHBOARD GRID WRAPPER (Hidden during Exam) -->
+    <div class="dashboard-grid" *ngIf="activePage !== 'attend-exam'">
+
+      <!-- 1. LEFT SIDEBAR -->
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <a [class.active]="activePage === 'dashboard'" (click)="setActivePage('dashboard')">
+              <i class="fas fa-home"></i> <span>Home</span>
+          </a>
+          <a [class.active]="activePage === 'courses'" (click)="setActivePage('courses')">
+              <i class="fas fa-book"></i> <span>Courses</span>
+          </a>
+          <a [class.active]="activePage === 'shorts'" (click)="setActivePage('shorts')" style="color: #ec4899;">
+              <i class="fas fa-play-circle" style="font-size: 26px;"></i> <span>Shorts</span>
+          </a>
+          <a [class.active]="activePage === 'assignments'" (click)="setActivePage('assignments')">
+              <i class="fas fa-tasks"></i> <span>Tasks</span>
+          </a>
+          <a [class.active]="activePage === 'profile-setting'" (click)="setActivePage('profile-setting')">
+              <i class="fas fa-user"></i> <span>Profile</span>
+          </a>
+          <a [class.active]="activePage === 'generate-resume'" (click)="goToResumeView()">
+              <i class="fas fa-file-alt"></i> <span>Resume</span>
+          </a>
+        </nav>
         
-        <!-- Day/Date -->
-        <div class="batch-details" style="border-top: none; padding-top: 0; margin-bottom: 15px;">
-            <p style="color: white; margin-bottom: 4px;">{{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</p>
-            <span style="font-size: 12px; font-weight: 500; color: #E0E7FF;">Realtime Clock & Status</span>
-        </div>
-
-        <div class="time-row attractive-time-display">
-            <i class="fas fa-clock"></i>
-            <!-- FIX: Removed the date pipe as 'currentTime' is already a formatted string -->
-            <span>{{ currentTime }}</span>
-        </div>
-
-        <!-- Removed: Button to encourage action -->
-    </section>
-
-    <!-- 2. Quick Access Cards (4 Cards - Metrics) -->
-    <!-- FIX: Added best card design via CSS update -->
-    <section class="stats-cards-container">
-        <div *ngFor="let card of quickAccessCards; let i = index" 
-            class="stat-card" 
-            [ngClass]="card.colorClass"
-            (click)="handleQuickCardClick(card.route)"
-            [title]="card.value">
-          
-          <p class="title">{{ card.title }}</p>
-          <!-- Display Batch Name (Real-time) -->
-          <p class="value" *ngIf="card.route === 'batches' && studentAssignedBatches.length > 0">
-              {{ studentAssignedBatches[0].batch_name }}
-          </p>
-          <p class="value" *ngIf="card.route === 'batches' && studentAssignedBatches.length === 0">
-              No Batch Assigned
-          </p>
-          <!-- Display other card values -->
-          <p class="value" *ngIf="card.route !== 'batches'">
-              {{ card.value }}
-          </p>
-          <div class="footer-info">
-            <span style="font-size: 11px;">{{ card.subText }}</span>
-             <!-- Icon based on card type -->
-            <i [class]="card.icon" [ngStyle]="{'color': i === 0 ? '#4338CA' : i === 1 ? '#F59E0B' : i === 2 ? '#10B981' : '#F43F5E'}"></i>
+        <div class="sidebar-bottom">
+          <div class="toggle-switch" id="toggleSwitch" [class.active]="notificationsEnabled" (click)="notificationsEnabled = !notificationsEnabled">
+            <span></span>
           </div>
         </div>
-    </section>
+      </aside>
 
-    <!-- 3. Cards Removed as per user request (Study Time, Courses, Resources) -->
-  </ng-container>
+      <!-- 2. CENTER CONTENT (Dashboard, Shorts, etc.) -->
+      <main class="main-content">
+        
+        <!-- DASHBOARD HOME -->
+        <ng-container *ngIf="activePage === 'dashboard'">
+          <section class="trainer-info-card attractive-greeting-card">
+              <div class="profile-upload-container" (click)="triggerProfileUpload()">
+                  <div class="attractive-profile-circle" 
+                       [style.backgroundColor]="uploadedProfileImage ? 'transparent' : '#4338CA'">
+                      <img *ngIf="uploadedProfileImage" [src]="uploadedProfileImage" alt="Profile" class="uploaded-profile-img">
+                      <span *ngIf="!uploadedProfileImage" class="profile-initial-text">{{ profileInitial }}</span>
+                      <div class="camera-icon-overlay">
+                          <i class="fas fa-camera"></i>
+                      </div>
+                  </div>
+                  <input type="file" #fileInput (change)="onProfileImageSelected($event)" accept="image/*" style="display: none;">
+              </div>
 
-  <!-- NEW: RESUME PDF VIEWER (User requested this on the dashboard screen) -->
-  <ng-container *ngIf="activePage === 'generate-resume'">
-      <!-- isDashboardEmbed=true tells the component to auto-download PDF -->
-      <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
-  </ng-container>
+              <h2>{{ studentName }}</h2> 
+              <p class="role attractive-greeting-text">{{ greeting }}</p>
+              <div class="batch-details">
+                  <p>{{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</p>
+              </div>
+          </section>
 
+          <section class="stats-cards-container">
+              <div *ngFor="let card of quickAccessCards; let i = index" 
+                  class="stat-card" 
+                  [ngClass]="card.colorClass"
+                  (click)="handleQuickCardClick(card.route)">
+                <p class="title">{{ card.title }}</p>
+                <p class="value" *ngIf="card.route === 'batches'">{{ studentAssignedBatches.length > 0 ? studentAssignedBatches[0].batch_name : 'No Batch' }}</p>
+                <p class="value" *ngIf="card.route !== 'batches'">{{ card.value }}</p>
+                
+                <div class="footer-info">
+                  <span>{{ card.subText }}</span>
+                  <i [class]="card.icon" [ngStyle]="{'color': i === 0 ? '#4338CA' : i === 1 ? '#F59E0B' : i === 2 ? '#10B981' : '#F43F5E'}"></i>
+                </div>
+              </div>
+          </section>
+        </ng-container>
 
-  <!-- 2. ATTEND EXAM CONTENT (NEW PAGE) -->
-  <ng-container *ngIf="activePage === 'attend-exam' && examToAttend">
-      <!-- Assuming <app-attend-exam> component exists and handles the exam logic -->
-      <app-attend-exam
-          [examId]="examToAttend.examId"
-          [examName]="examToAttend.examName"
-          [durationMinutes]="examToAttend.durationMinutes"
-          (examFinished)="onExamFinished($event)">
-      </app-attend-exam>
-  </ng-container>
+        <!-- SHORTS PAGE -->
+        <ng-container *ngIf="activePage === 'shorts'">
+            <div class="shorts-wrapper">
+                <div class="shorts-container">
+                    <div class="short-item" *ngFor="let short of shortsList">
+                        <div class="video-container">
+                            <iframe 
+                                [src]="short.safeUrl" 
+                                title="YouTube video player" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
 
+        <!-- OTHER PAGES -->
+        <ng-container *ngIf="activePage === 'profile-setting'">
+          <div class="profile-setting-wrapper">
+            <app-profile-setting [profileData]="studentProfileData" (goBack)="setActivePage('dashboard')"></app-profile-setting>
+          </div>
+        </ng-container>
+        
+        <ng-container *ngIf="activePage === 'generate-resume'">
+            <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
+        </ng-container>
 
-  <!-- 3. PROFILE SETTING CONTENT -->
-  <ng-container *ngIf="activePage === 'profile-setting'">
-    <div class="profile-setting-wrapper">
-      <app-profile-setting [profileData]="studentProfileData" (goBack)="setActivePage('dashboard')"></app-profile-setting>
+        <ng-container *ngIf="['courses', 'assignments', 'career'].includes(activePage)">
+            <div class="other-page-content">
+                <i class="fas fa-tools" style="font-size: 48px; color: #cbd5e1; margin-bottom: 20px;"></i>
+                <h1>{{ activePage | titlecase }}</h1>
+                <p>This section is currently under development.</p>
+                <button class="btn-cancel" (click)="setActivePage('dashboard')">Back to Home</button>
+            </div>
+        </ng-container>
+      </main>
+
+      <!-- 3. RIGHT SIDEBAR (Schedule) - Hidden on mobile via CSS, hidden logic handled by grid -->
+      <section class="right-schedule-card" *ngIf="activePage === 'dashboard'">
+        <div class="current-time-display">
+          <p class="current-time-text">Current Time: {{ currentTime }}</p>
+        </div>
+        <div class="right-schedule-header">
+          <h3>My Schedule</h3>
+          <button (click)="openExamModal()" style="color: #F59E0B; font-size: 16px;">
+              <i class="fas fa-edit"></i> Exams
+          </button>
+        </div>
+
+        <div class="calendar-controls">
+          <button (click)="navigateCalendar(-1)">&lt;</button>
+          <p>{{ selectedMonthYear }}</p>
+          <button (click)="navigateCalendar(1)">&gt;</button>
+        </div>
+
+        <div class="calendar-weekdays">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="calendar-days">
+          <div *ngFor="let day of calendarDays"
+            [class.inactive]="day.disabled"
+            [class.active]="day.selected"
+            (click)="!day.disabled && onDateSelect(day.fullDate)">
+            {{ day.date }}
+          </div>
+        </div>
+
+        <div class="schedule-list">
+          <h5>Schedule for {{ selectedScheduleDate | date:'dd MMM' }}</h5>
+          <div *ngIf="scheduleDetails.length === 0" class="no-schedule-message">No classes today.</div>
+          <div *ngFor="let item of scheduleDetails" class="schedule-section">
+            <div class="schedule-item" [ngClass]="item.type + '-item'">
+              <div class="date">{{ item.dayOfWeekShort }} <br> {{ item.dayOfMonth }}</div>
+              <p class="desc">{{ item.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div> <!-- End Dashboard Grid -->
+
+    <!-- FULL SCREEN EXAM CONTAINER (Only visible during exam) -->
+    <div class="exam-fullscreen-container" *ngIf="activePage === 'attend-exam' && examToAttend">
+         <app-attend-exam 
+            [examId]="examToAttend.examId" 
+            [examName]="examToAttend.examName" 
+            [durationMinutes]="examToAttend.durationMinutes" 
+            (examFinished)="onExamFinished($event)">
+        </app-attend-exam>
     </div>
-  </ng-container>
-  
-  <!-- 4. PROFILE (ATS Resume Builder) PAGE CONTENT -->
-  <ng-container *ngIf="activePage === 'profile'">
-      <div class="other-page-content">
-          <h1>Profile Page (Placeholder - Resume Link/Setup Profile का उपयोग करें)</h1>
-          <p>यह सामग्री हटा दी गई है। PDF व्यू के लिए साइडबार में **Resume** लिंक का उपयोग करें, या अपना डेटा संपादित (edit) करने के लिए हैडर में **Setup Profile** बटन का उपयोग करें।</p>
-      </div>
-  </ng-container>
 
-  <!-- 5. OTHER PAGES CONTENT (Placeholder) -->
-  <ng-container *ngIf="activePage !== 'dashboard' && activePage !== 'profile-setting' && activePage !== 'attend-exam' && activePage !== 'profile' && activePage !== 'generate-resume'">
-    <div class="other-page-content">
-      <h1>{{ activePage | uppercase }} Page Content (लागू नहीं किया गया)</h1>
-      <p>मुख्य सामग्री देखने के लिए कृपया डैशबोर्ड पर वापस जाएं।</p>
+    <!-- Modals -->
+    <div *ngIf="showBatchModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>My Batches</h3>
+                <button class="close-button" (click)="closeBatchModal()">&times;</button>
+            </div>
+            <div class="modal-body" *ngFor="let batch of selectedBatchDetails">
+                <h4>{{ batch.batch_name }}</h4>
+                <p>{{ batch.description }}</p>
+            </div>
+            <div class="modal-footer"><button class="btn-cancel" (click)="closeBatchModal()">Close</button></div>
+        </div>
     </div>
-  </ng-container>
-</main>
 
-<!-- Assignment Submission Modal (Existing) -->
-<div *ngIf="showAssignmentModal" class="modal-overlay">
-  <!-- FIX: Assignment Modal Class changed to match Trainer's Modal class name -->
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 class="modal-title">Submit Assignment</h3>
-      <button class="close-button" (click)="closeAssignmentModal()">&times;</button>
+    <div *ngIf="showExamModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Exams</h3>
+                <button class="close-button" (click)="closeExamModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="upcomingExams.length === 0">No upcoming exams.</p>
+                <div *ngFor="let exam of upcomingExams" class="exam-list-item">
+                    <div class="exam-info">
+                        <strong>{{ exam.examName }}</strong>
+                        <span class="exam-meta">{{ exam.durationMinutes }} Mins | {{ exam.totalQuestions }} Qs</span>
+                    </div>
+                    <button class="btn-submit" (click)="selectedExamId = exam.examId; startExam()">Start</button>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn-cancel" (click)="closeExamModal()">Close</button></div>
+        </div>
     </div>
-    <div class="form-group">
-      <label for="assignmentTitle">Assignment Title:</label>
-      <select id="assignmentTitle" [formControl]="assignmentTitleControl" required>
-        <option value="">Select Assignment</option>
-        <option value="CS501 - Final Project">CS501 - Final Project</option>
-        <option value="IT402 - Week 8 Quiz">IT402 - Week 8 Quiz</option>
-        <option value="IT303 - DB Schema">IT303 - DB Schema</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="submissionDetails">Submission Details/Link (Optional):</label>
-      <textarea id="submissionDetails" [formControl]="assignmentDetailsControl" rows="4"></textarea>
-    </div>
-    <div class="form-group file-upload">
-      <label>Upload File:</label>
-      <input type="file" />
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-cancel" (click)="closeAssignmentModal()">Cancel</button>
-      <button type="submit" class="btn-submit" (click)="submitAssignment()" [disabled]="assignmentTitleControl.invalid">Submit Work</button>
+
+    <div *ngIf="message" [class]="'message-box ' + messageType">
+      {{ message }}
     </div>
   </div>
-</div>
-
-<!-- Exam Attendance Modal (Existing) -->
-<div *ngIf="showExamModal" class="modal-overlay">
-    <!-- FIX: max-width and height/max-height are set to 50% -->
-    <div class="modal-content" style="max-width: 50vw; width: 50vw; max-height: 50vh; height: 50vh; overflow: hidden; display: flex; flex-direction: column;">
-        <div class="modal-header" style="flex-shrink: 0;">
-            <h3>Filter & Select Exam</h3>
-            <button class="close-button" (click)="closeExamModal()">&times;</button>
-        </div>
-        <div class="modal-body" style="flex-grow: 1; overflow-y: auto; padding: 0 25px 20px 25px;">
-            <!-- Loading State -->
-            <div *ngIf="isLoadingExams && allExams.length === 0" style="text-align: center; padding: 20px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #4338CA;"></i>
-                <p style="margin-top: 10px; color: #64748B;">Loading available Exams...</p>
-            </div>
-            
-            <!-- Filter Section (Course and Batch) -->
-            <div style="padding: 10px; background-color: #eef2ff; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c0c7e2;">
-                <h4 style="font-size: 16px; margin-top: 0; color: #4338CA; border-bottom: 1px solid #d4dcf5; padding-bottom: 8px; margin-bottom: 12px;">Filter Exams by Course/Batch</h4>
-                
-                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <!-- Course Filter -->
-                    <div>
-                        <label for="filterCourseId" style="font-weight: 600;">Your Assigned Course</label>
-                        <select 
-                            id="filterCourseId" 
-                            [(ngModel)]="selectedCourseId" 
-                            (change)="applyExamFilter()" 
-                            class="form-control"
-                        >
-                            <option [ngValue]="null" disabled>Select Course</option>
-                            <option *ngFor="let course of studentCoursesForFilter" [ngValue]="course.course_id">
-                                {{ course.course_name }} (ID: {{ course.course_id }})
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Batch Filter -->
-                    <div>
-                        <label for="filterBatchId" style="font-weight: 600;">Your Assigned Batch</label>
-                        <select 
-                            id="filterBatchId" 
-                            [(ngModel)]="selectedBatchId" 
-                            (change)="applyExamFilter()" 
-                            [disabled]="!selectedCourseId || studentBatchesForFilter.length === 0"
-                            class="form-control"
-                        >
-                            <option [ngValue]="null" disabled>Select Batch</option>
-                            <option *ngFor="let batch of studentBatchesForFilter" [ngValue]="batch.batchid">
-                                {{ batch.batch_name }} (ID: {{ batch.batchid }})
-                            </option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- No Exams Available State -->
-            <div *ngIf="!isLoadingExams && activeExams.length === 0 && selectedCourseId !== null && selectedBatchId !== null" 
-                style="text-align: center; padding: 20px; border: 1px dashed #F43F5E; border-radius: 8px;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 20px; color: #F43F5E;"></i>
-                <p style="margin-top: 10px; font-weight: 600; color: #334155;">
-                    Sorry! No Exams found for the selected Course and Batch.
-                </p>
-                <p style="font-size: 12px; color: #64748B; margin-top: 5px;">Please check your selection or contact the administrator.</p>
-            </div>
-            
-            <!-- NEW SECTION: Categorized Exam Lists -->
-            <div *ngIf="!isLoadingExams && activeExams.length > 0" class="exam-categories-wrapper">
-                
-                <!-- UPCOMING/ACTIVE EXAMS (Selectable) -->
-                <h4 style="font-size: 18px; color: #10B981; margin-top: 25px; border-bottom: 1px solid #10B981; padding-bottom: 5px;">
-                    <i class="fas fa-calendar-check" style="margin-right: 8px;"></i> Upcoming/Active Exams ({{ upcomingExams.length }})
-                </h4>
-                <div *ngIf="upcomingExams.length > 0; else noUpcomingExams">
-                    <div class="form-group">
-                        <label for="selectExamUpcoming" style="font-weight: 600;">Select an Exam to Start:</label>
-                        <select id="selectExamUpcoming" [(ngModel)]="selectedExamId" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #10B981; border-radius: 4px;">
-                            <option [ngValue]="null">--- Select Exam to Start ---</option>
-                            <option *ngFor="let exam of upcomingExams" [ngValue]="exam.examId">
-                                {{ exam.examName }} (Starts: {{ exam.start_datetime | date:'short' }} | {{ exam.durationMinutes }} Min)
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <ng-template #noUpcomingExams>
-                    <p style="text-align: center; padding: 10px; border: 1px dashed #10B981; border-radius: 6px; color: #10B981; background-color: #f6fff9;">No Upcoming Exams found for this selection.</p>
-                </ng-template>
-
-                <!-- ATTENDED EXAMS (Read-only/Placeholder) -->
-                <h4 style="font-size: 18px; color: #4338CA; margin-top: 25px; border-bottom: 1px solid #4338CA; padding-bottom: 5px;">
-                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i> Attended Exams ({{ attendedExams.length }})
-                </h4>
-                <p *ngIf="attendedExams.length === 0" style="text-align: center; padding: 10px; border: 1px dashed #4338CA; border-radius: 6px; color: #4338CA; background-color: #f5f6ff; font-size: 14px;">
-                    No Attended Exams found. (Requires attempt history API from server)
-                </p>
-                <div *ngIf="attendedExams.length > 0">
-                    <!-- Placeholder list for attended exams -->
-                    <ul style="list-style: none; padding: 0;">
-                        <li *ngFor="let exam of attendedExams" style="margin-bottom: 8px; padding: 8px; background-color: #f0f4ff; border-radius: 4px; font-size: 14px; color: #4338CA;">
-                            {{ exam.examName }} - View Result (Future Feature)
-                        </li>
-                    </ul>
-                </div>
-
-
-                <!-- EXPIRED EXAMS (Read-only) -->
-                <h4 style="font-size: 18px; color: #F43F5E; margin-top: 25px; border-bottom: 1px solid #F43F5E; padding-bottom: 5px;">
-                    <i class="fas fa-times-circle" style="margin-right: 8px;"></i> Expired Exams ({{ expiredExams.length }})
-                </h4>
-                <div *ngIf="expiredExams.length > 0; else noExpiredExams">
-                     <ul style="list-style: none; padding: 0;">
-                        <li *ngFor="let exam of expiredExams" style="margin-bottom: 8px; padding: 8px; background-color: #fef2f2; border-radius: 4px; font-size: 14px; color: #F43F5E;">
-                            {{ exam.examName }} - Ended on: {{ exam.end_datetime | date:'short' }}
-                        </li>
-                    </ul>
-                </div>
-                <ng-template #noExpiredExams>
-                    <p style="text-align: center; padding: 10px; border: 1px dashed #F43F5E; border-radius: 6px; color: #F43F5E; background-color: #fff8f8;">No Expired Exams found for this selection.</p>
-                </ng-template>
-
-            </div>
-        
-            <!-- Exam Details (Conditional Display, moved outside the categorized sections) -->
-            <div *ngIf="selectedExam as currentExam" style="background-color: #f0f4ff; border: 1px solid #4338CA; border-radius: 8px; padding: 15px; margin-top: 20px;">
-                <ng-container>
-                    <h4 style="font-size: 16px; margin-top: 0; color: #4338CA;">Exam Details</h4>
-                    <p style="margin: 5px 0; font-size: 14px;"><i class="fas fa-book" style="margin-right: 8px; color: #4338CA;"></i> <strong>Subject:</strong> {{ currentExam.subject.subjectname || ('ID: ' + currentExam.subjectid) }}</p>
-                    <p style="margin: 5px 0; font-size: 14px;"><i class="fas fa-clock" style="margin-right: 8px; color: #4338CA;"></i> <strong>Duration:</strong> {{ currentExam.durationMinutes }} Minutes</p>
-                    <p style="margin: 5px 0; font-size: 14px;"><i class="fas fa-question-circle" style="margin-right: 8px; color: #4338CA;"></i> <strong>Total Questions:</strong> {{ currentExam.totalQuestions }}</p>
-                    <p style="margin: 5px 0; font-size: 14px;"><i class="fas fa-users" style="margin-right: 8px; color: #4338CA;"></i> <strong>Target:</strong> Batch ID {{ currentExam.batchid }}, Course ID {{ currentExam.courseid }}</p>
-                    
-                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #c0c7e2;">
-                        <p style="margin: 5px 0; font-size: 14px; color: #22C55E;"><i class="fas fa-calendar-alt" style="margin-right: 8px;"></i> <strong>Start Time:</strong> {{ currentExam.start_datetime | date:'medium' }}</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #EF4444;"><i class="fas fa-calendar-times" style="margin-right: 8px;"></i> <strong>End Time:</strong> {{ currentExam.end_datetime | date:'medium' }}</p>
-                    </div>
-                    
-                    <p style="margin-top: 15px; font-size: 12px; color: #F43F5E;">**Warning:** Once the exam starts, you cannot stop or pause it.</p>
-                </ng-container>
-            </div>
-        </div>
-        <div class="modal-footer" style="flex-shrink: 0; margin-top: 0; padding-top: 20px;">
-            <button class="btn-cancel" (click)="closeExamModal()">Cancel</button>
-            <button class="btn-submit" 
-                    (click)="startExam()" 
-                    [disabled]="!selectedExamId || isLoadingExams || upcomingExams.length === 0"
-                    style="background-color: #10B981;">
-                <i class="fas fa-play" style="margin-right: 5px;"></i> Start Exam
-            </button>
-        </div>
-    </div>
-</div>
-
-
-<!-- ======================================================= -->
-<!-- NEW: PROFILE COMPLETION POPUP/ANIMATION -->
-<!-- ======================================================= -->
-<div *ngIf="showProfileCompletionModal && activePage === 'dashboard'" class="modal-overlay profile-completion-overlay" (click)="dismissProfileCompletionModal()">
-    <div class="modal-content profile-completion-modal" (click)="$event.stopPropagation()">
-        <button class="close-button" (click)="dismissProfileCompletionModal()">&times;</button>
-        <div class="profile-prompt-content">
-            <i class="fas fa-user-circle profile-prompt-icon"></i>
-            <h3>Complete Your Profile Now!</h3>
-            <p>Your resume/profile data is missing. Please click the 
-                <span class="highlight-action-text">"Setup Profile"</span> 
-                button in the header to enter your details (Education, Skills, etc.) 
-                and unlock full features.
-            </p>
-            <button class="btn-request profile-prompt-button" (click)="goToProfileSetupForm()">
-                <i class="fas fa-user-edit pulse-icon"></i> Setup Profile Now
-            </button>
-            <p class="small-info">Click anywhere outside to dismiss this prompt for now.</p>
-        </div>
-    </div>
-</div>
-
-
-<!-- ======================================================= -->
-<!-- NEW: BATCH DETAILS POPUP (ATTRACTIVE DESIGN) -->
-<!-- ======================================================= -->
-<div *ngIf="showBatchModal" class="modal-overlay batch-details-overlay">
-    <div class="modal-content batch-details-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3><i class="fas fa-users" style="color: #4338CA; margin-right: 8px;"></i> My Assigned Batches</h3>
-            <button class="close-button" (click)="closeBatchModal()">&times;</button>
-        </div>
-        
-        <div class="batch-list-scroll">
-            <div *ngIf="studentAssignedBatches.length === 0" class="no-schedule-message" style="margin-top: 0;">
-                <i class="fas fa-exclamation-triangle"></i> You are currently not assigned to any batch.
-            </div>
-            
-            <div *ngFor="let batch of selectedBatchDetails" class="batch-card-detail">
-                <div class="batch-header-info">
-                    <h4 class="batch-name-display">{{ batch.batch_name }} (ID: {{ batch.batchid }})</h4>
-                    <span [class]="'batch-status-' + (batch.status === 'Active' ? 'active' : 'inactive')">
-                        {{ batch.status }}
-                    </span>
-                </div>
-                
-                <div class="batch-metadata">
-                    <p><i class="fas fa-book-open"></i> <strong>Course:</strong> {{ batch.course_name }}</p>
-                    <p><i class="fas fa-user-friends"></i> <strong>Students:</strong> {{ batch.num_students }}</p>
-                </div>
-                
-                <div class="batch-description">
-                    <p class="description-title">Batch Focus:</p>
-                    <p>{{ batch.description }}</p>
-                </div>
-                
-                <button class="btn-request view-curriculum-button" (click)="showMessage('View Curriculum feature is under development!', 'warning')">
-                    <i class="fas fa-file-alt"></i> View Curriculum
-                </button>
-            </div>
-        </div>
-        
-        <div class="modal-footer" style="padding-top: 15px;">
-            <button class="btn-cancel" (click)="closeBatchModal()">Close</button>
-        </div>
-    </div>
-</div>
-
-
-<div *ngIf="message" [class]="'message-box ' + messageType">
-  {{ message }}
-  <button class="close-message" (click)="clearMessage()">&times;</button>
-</div>
-</div>
 </body>

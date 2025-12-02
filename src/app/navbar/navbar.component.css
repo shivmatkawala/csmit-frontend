@@ -1,819 +1,444 @@
-/* Google Font Import */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
-
-/* Global Styles & Color Palette Update */
-:root {
-  --primary-color: #6366f1; /* Indigo */
-  --primary-hover: #4f46e5;
-  --secondary-color: #ec4899; /* Pink */
-  --text-dark: #1f2937; /* Very Dark Text */
-  --text-light: #6b7280;
-  --text-dark-2: #374151;
-  --border-color: #e5e7eb;
-  --background-light: #ffffff; /* Explicitly White */
-  --background-panel: #f8f9fc; /* Very Light Grey */
-  --shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 15px 30px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
-  /* Attractive, bright gradient for buttons and highlights */
-  --gradient: linear-gradient(90deg, #6366f1 0%, #a855f7 100%); 
+/* --- Dashboard Container --- */
+.feature-dashboard-section {
+  position: relative;
+  padding: 4rem 0;
+  background-color: white;
+  min-height: 80vh; /* Minimum height maintain karega */
 }
 
-/* 1. Background Color White for the entire body */
-body, html {
-  font-family: 'Poppins', sans-serif;
-  background-color: var(--background-light); 
-  color: var(--text-dark); /* Default body text color */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-/* Class to prevent body scroll when panel/modal is open */
-.body-no-scroll {
-  overflow: hidden;
+/* --- 1. MODERN TABS DESIGN (Mobile Scrollable) --- */
+.dashboard-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  position: sticky; /* Sticky positioning magic */
+  top: 70px; /* Header height (70px) ke neeche stick karega */
+  z-index: 95; /* Header (z=1000) ke neeche, content ke upar */
+  padding: 10px 0;
+  background: linear-gradient(to bottom, white 0%, rgba(249, 250, 251, 0.9) 80%, transparent 100%); /* Blur blend effect */
 }
 
-/* --- Navbar Styling --- */
-.navbar {
-  background-color: var(--background-light);
-  /* Clean, subtle shadow for a premium floating look */
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-  height: 75px; 
+.dashboard-tabs {
+  background: white;
+  padding: 0.5rem;
+  border-radius: 99px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  display: flex;
+  gap: 0.5rem;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+.tab-btn {
+  border: none;
+  background: transparent;
+  padding: 0.8rem 2rem;
+  border-radius: 99px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap; /* Text break nahi hoga */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  padding: 0 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 999;
+  gap: 8px;
 }
 
-.navbar-container {
+.tab-btn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.tab-btn.active {
+  background-color: #2563eb; /* Primary Blue */
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transform: scale(1.02);
+}
+
+/* --- 2. BATCH VIEW STYLING --- */
+.batch-card-hero {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: stretch;
+  border: 1px solid rgba(0,0,0,0.03);
+  margin-bottom: 2rem;
+}
+
+.batch-image-side {
+  width: 45%;
+  position: relative;
+  min-height: 300px;
+}
+.batch-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.batch-card-hero:hover .batch-img {
+  transform: scale(1.05);
+}
+
+.live-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(220, 38, 38, 0.95);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse-dot 1.5s infinite;
+}
+
+.batch-info-side {
+  width: 55%;
+  padding: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+.tag {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.batch-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+.batch-desc {
+  color: #4b5563;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
+}
+
+.batch-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+.meta-item { display: flex; flex-direction: column; gap: 6px; }
+.meta-label { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; }
+.meta-val { font-weight: 700; color: #0f172a; font-size: 1rem; }
+
+.action-btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 14px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+.action-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
+}
+
+/* --- 3. NOTES VIEW STYLING --- */
+.notes-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  align-items: flex-end;
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
+.notes-header h3 { font-size: 2rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
+.notes-header p { color: #6b7280; font-size: 1.1rem; }
 
-/* --- Logo Design --- */
-.logo-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    font-size: 1.75rem; /* Logo size badhaya gaya hai */
-    font-weight: 900; /* Extra bold */
-    color: var(--text-dark);
-    cursor: pointer;
-    text-transform: uppercase;
+.modern-select {
+  padding: 0.8rem 3rem 0.8rem 1.5rem;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 1rem center;
+  background-size: 1.2em;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  min-width: 280px;
+  transition: border-color 0.2s;
 }
-.logo-accent {
-    color: var(--primary-color); /* 'Hub' ko primary color mein */
-    transition: color 0.3s ease;
-}
-.logo-link:hover .logo-accent {
-    color: var(--secondary-color); /* Hover par thoda pink tint */
-}
+.modern-select:focus { border-color: #2563eb; }
 
-
-.nav-right {
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+.stat-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 2.5rem; 
+  gap: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s;
 }
+.stat-box:hover { transform: translateY(-5px); }
+.stat-icon { font-size: 2.5rem; background: #f0f9ff; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.stat-info { display: flex; flex-direction: column; }
+.stat-val { font-size: 1.8rem; font-weight: 800; color: #111827; line-height: 1; margin-bottom: 5px; }
+.stat-lbl { font-size: 0.95rem; color: #64748b; font-weight: 500; }
 
-/* --- Navigation Links Design --- */
-.nav-link {
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.resource-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+.resource-card:hover {
+  border-color: #2563eb;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
+}
+.res-icon-box {
+  background: #f8fafc;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.res-details { flex-grow: 1; }
+.res-details h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; color: #1f2937; }
+.res-meta { font-size: 0.85rem; color: #9ca3af; font-weight: 500; display: block; }
+.download-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #64748b;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: var(--text-dark-2); /* Thoda lighter color for normal state */
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 0.75rem 0;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.2rem;
+}
+.resource-card:hover .download-btn {
+  background: #2563eb;
+  color: white;
+}
+
+/* --- 4. SUCCESS STORIES (Wall of Fame) --- */
+.section-title-center { text-align: center; margin-bottom: 4rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+.section-title-center h3 { font-size: 2.5rem; font-weight: 900; color: #111827; letter-spacing: -0.5px; margin-bottom: 1rem; }
+.section-title-center p { color: #6b7280; font-size: 1.2rem; }
+
+.stories-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  padding-bottom: 2rem;
+}
+.success-card {
+  background: white;
+  border-radius: 24px;
+  padding: 3rem 2rem 2rem 2rem;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+  border: 1px solid white;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
-  transition: color 0.3s ease;
+  margin-top: 2rem; /* Space for image sticking out */
 }
-
-/* Active state for navigation links - Modern, thick gradient underline */
-.nav-link.active {
-    color: var(--primary-color);
+.success-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.08);
 }
-.nav-link.active::after {
-    width: 100%;
-}
-
-.nav-link::after {
-  content: '';
+.card-top {
   position: absolute;
-  width: 0;
-  height: 4px; 
-  bottom: -8px; /* Thoda niche shift kiya gaya */
+  top: -40px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--gradient);
-  border-radius: 2px;
-  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  width: 90px;
+  height: 90px;
 }
-
-.nav-link:hover {
-  color: var(--primary-hover);
-}
-
-.nav-link:hover::after {
+.candidate-img {
   width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.company-logo-small {
+  position: absolute;
+  bottom: 0;
+  right: -5px;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  object-fit: contain;
+}
+.card-content { margin-top: 1rem; }
+.candidate-name { font-size: 1.3rem; font-weight: 800; color: #111827; margin-bottom: 0.3rem; }
+.candidate-role { font-size: 0.95rem; color: #6b7280; margin-bottom: 1.5rem; }
+.candidate-role strong { color: #2563eb; }
+.package-badge {
+  background: #ecfdf5;
+  color: #059669;
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #d1fae5;
+}
+.candidate-quote { font-style: italic; color: #4b5563; font-size: 0.95rem; line-height: 1.6; }
+
+/* --- ANIMATIONS --- */
+.fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse-dot { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+
+/* =========================================
+   MOBILE RESPONSIVE RULES (Critical Updates)
+   ========================================= */
+
+@media (max-width: 1024px) {
+  .batch-image-side { width: 100%; height: 300px; }
+  .batch-info-side { padding: 2.5rem; }
+  .batch-title { font-size: 2rem; }
+  .modern-select { min-width: 200px; }
+  .stats-row { gap: 1rem; }
+  .stat-box { padding: 1.5rem; gap: 1rem; }
+  .stat-icon { width: 50px; height: 50px; font-size: 1.8rem; }
+  .stat-val { font-size: 1.4rem; }
 }
 
-.nav-icon {
-  width: 20px;
-  height: 20px;
-}
-
-/* --- CTA Button Design (Navbar Button) - Button color visibility fixed here --- */
-.cta-btn {
-    background: var(--gradient); /* Attractive Gradient Background */
-    
-    padding: 0.75rem 1.8rem; 
-    border: none;
-    border-radius: 9999px; /* Pill shape */
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    /* Stronger, noticeable shadow based on primary color */
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1); 
-    transition: all 0.3s ease;
-    margin-left: 1.5rem;
-}
-
-.cta-btn:hover {
-    transform: translateY(-3px) scale(1.02); 
-    /* Enhanced shadow on hover */
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.7), 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* --- Dynamic Feature Display Area (Content Card) --- */
-/* FEATURE DISPLAY CONTAINER: Vertical gap/padding kam kiya gaya hai (4rem se 3rem) */
-.feature-display-container {
-    background-color: var(--background-light); 
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.03); 
-    border-bottom: 1px solid var(--border-color);
-    padding: 3rem 0; /* Changed from 4rem to 3rem for less vertical gap */
-    position: relative;
-    overflow: hidden;
-    min-height: 300px; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.feature-content {
-    max-width: 1200px;
-    width: 90%;
-    padding: 1rem;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInSlideUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-}
-
-@keyframes fadeInSlideUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.feature-title-english { 
-    text-align: center;
-    font-size: 2.8rem; 
-    font-weight: 800;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-}
-
-.feature-subtitle {
-    text-align: center;
-    color: var(--text-light);
-    margin-bottom: 2.5rem; /* Thoda kam kiya gaya */
-    font-size: 1.1rem;
-}
-
-/* Batch Feature Styling (Rotating Content) */
-.batch-feature-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-.batch-feature-card {
-    display: flex;
-    align-items: center;
-    gap: 3rem;
-    background-color: var(--background-panel); 
-    padding: 2.5rem 4rem; /* Padding kam kiya gaya */
-    border-radius: 1.5rem; 
-    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1); 
-    border: 1px solid #e0e7ff; 
-    max-width: 900px;
-    width: 100%;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.batch-feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 50px rgba(99, 102, 241, 0.15);
-}
-
-.info-icon {
-    font-size: 5rem; 
-    line-height: 1;
-    animation: pulse 2s infinite ease-in-out;
-    color: var(--primary-color);
-    flex-shrink: 0; /* Mobile par icon ko shrink hone se rokega */
-}
-
-.rotating-batch-details {
-    flex-grow: 1;
-    text-align: left;
-    animation: batchFade 0.5s ease-in-out; 
-}
-.batch-feature-content .feature-title-english { 
-    font-size: 2rem;
+@media (max-width: 768px) {
+  .feature-dashboard-section { padding: 2rem 0; }
+  
+  /* --- STICKY TABS MOBILE FIX --- */
+  .dashboard-tabs-wrapper {
+    top: 65px; /* Adjust based on your header height */
+    justify-content: flex-start; /* Start align for scroll */
+    padding: 10px 1rem; /* Side padding */
     margin-bottom: 1.5rem;
-}
+    overflow-x: auto; /* Allow wrapper scroll if needed */
+  }
 
-.rotating-title {
-    font-size: 2.25rem; 
-    color: var(--text-dark);
-    margin: 0 0 0.5rem 0;
-    font-weight: 900;
-}
-
-.rotating-description {
-    color: var(--text-dark-2);
-    margin-bottom: 1.5rem;
-    font-size: 1.05rem;
-}
-
-.rotating-footer {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.rotating-date {
-    font-weight: 700;
-    color: var(--secondary-color); 
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-/* Keyframe for subtle pulsing effect */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-/* --- Enroll Button Design (Batch Card Button) - Button color visibility fixed here --- */
-.feature-enroll-btn {
-    background: var(--gradient); 
-    
-    text-decoration: none;
-    padding: 0.9rem 2rem;
-    border-radius: 9999px;
-    font-size: 1rem;
-    font-weight: 700;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.feature-enroll-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.7), 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* --- Notes Feature Styling (Enhanced for CodeWithHarry style dynamic content) --- */
-.notes-main-card {
-    background-color: var(--background-panel); 
-    padding: 3rem 5rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
-    border: 1px solid #e0e7ff;
-    max-width: 1000px;
+  .dashboard-tabs {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    overflow-x: auto; /* Enable Horizontal Scroll */
+    white-space: nowrap; /* Prevent wrapping */
+    justify-content: flex-start; /* Items start from left */
+    padding: 0.5rem;
+    border-radius: 12px; /* Less rounded on mobile */
+    /* Hide scrollbar */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+  }
+  .dashboard-tabs::-webkit-scrollbar { display: none; }
 
-.syllabus-filter-container {
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-    margin-bottom: 3rem;
-    padding: 1.5rem;
-    background-color: var(--background-light); 
-    border-radius: 1rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-color);
-}
-
-.syllabus-filter-container label {
-    font-weight: 700;
-    color: var(--primary-color);
-    font-size: 1.1rem;
-    flex-shrink: 0; /* Phone par label ko shrink hone se rokega */
-}
-
-.syllabus-select {
-    padding: 0.9rem 1.5rem;
-    border-radius: 0.75rem;
-    border: 2px solid var(--border-color);
-    background-color: #fcfcfc;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: var(--text-dark);
-    cursor: pointer;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    min-width: 280px;
-}
-
-.syllabus-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
-}
-
-/* Download Button: Using secondary color for distinction */
-.download-btn {
-    background: var(--secondary-color);
-    
-    padding: 0.9rem 2rem;
-    border: none;
-    border-radius: 9999px; 
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.5); /* Pink shadow */
-}
-
-.download-btn:hover {
-    background-color: #d12d8a;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(236, 72, 153, 0.7);
-}
-
-/* Notes Content Animation Wrapper */
-/* यह क्लास ngIf/ngFor के re-render होने पर content को fade-in effect देगी */
-.note-animation-wrap {
-    width: 100%;
-    animation: contentFadeIn 0.5s ease-out forwards;
-}
-@keyframes contentFadeIn {
-    from { opacity: 0.5; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-
-.notes-metrics {
-    display: flex;
-    justify-content: center;
-    gap: 2.5rem;
-    margin-bottom: 3rem;
-    text-align: center;
-    width: 100%;
-}
-
-.metric-card {
-    background-color: #ffffff;
-    padding: 2rem 1.5rem;
-    border-radius: 1.25rem;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    flex: 1;
-    max-width: 220px; 
-    border: 1px solid var(--border-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.metric-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 15px 40px rgba(236, 72, 153, 0.3); 
-}
-
-.metric-value {
-    font-size: 3rem; 
-    font-weight: 900;
-    background: var(--secondary-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1;
-    margin-bottom: 0.75rem;
-}
-
-.metric-label {
-    font-weight: 700;
-    color: var(--text-dark);
-    font-size: 1rem;
-}
-
-.notes-subtitle {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.notes-topics {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    margin-top: 1.5rem;
-}
-
-.topic-tag {
-    background-color: #eef2ff; 
-    color: var(--primary-color);
-    padding: 0.6rem 1.2rem;
-    border-radius: 9999px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border: 1px solid #c7d2fe;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    /* Code with Harry style: subtle shadow for depth */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); 
-}
-
-.topic-tag:hover {
-    background-color: #d1d9ff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
-}
-
-
-/* --- Success Stories Feature Styling --- */
-.stories-main-card {
-    background-color: var(--background-panel); 
-    padding: 3rem 5rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
-    border: 1px solid #e0e7ff;
-    max-width: 1200px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.success-stories-grid-compact {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-    gap: 2rem;
-    width: 100%;
-    max-width: 1000px;
-    margin-top: 2rem;
-    position: relative;
-    /* रोटेशन के लिए animation */
-    animation: storyFadeInOut 0.8s ease-in-out forwards;
-}
-
-/* Keyframe for story rotation visual effect */
-@keyframes storyFadeInOut {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-
-.story-compact-card {
-    background-color: #fff;
-    border-radius: 1.25rem;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid var(--border-color);
-    position: relative;
-    overflow: hidden;
-}
-
-.story-compact-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 6px; 
-    background: var(--gradient);
-    transform: translateY(-100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.story-compact-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
-}
-
-.story-compact-card:hover::before {
-    transform: translateY(0);
-}
-
-.story-compact-photo {
-    width: 80px; 
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 1rem;
-    border: 4px solid var(--background-light);
-    box-shadow: 0 0 0 3px var(--secondary-color); 
-}
-
-.story-compact-name {
-    font-weight: 800;
-    color: var(--text-dark);
-    font-size: 1.1rem;
-    margin: 0 0 0.25rem 0;
-}
-
-.story-compact-company {
-    color: var(--text-light);
+  .tab-btn {
+    flex: 0 0 auto; /* Don't shrink buttons */
+    padding: 0.7rem 1.2rem;
     font-size: 0.9rem;
-    margin: 0;
-    font-weight: 600;
-}
+  }
 
-.story-compact-read-btn {
-    background: var(--primary-color);
-    
-    padding: 0.6rem 1.2rem;
-    border-radius: 9999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    margin-top: 1.25rem;
-    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-}
-
-.story-compact-read-btn:hover {
-    background: var(--primary-hover);
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(99, 102, 241, 0.5);
-}
-
-
-/* --- Modal Styles (Improved Aesthetics) --- */
-
-.story-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(17, 24, 39, 0.9); 
-    backdrop-filter: blur(12px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    padding: 1rem;
-    opacity: 0;
-    animation: fadeIn 0.4s ease forwards;
-}
-@keyframes fadeIn {
-    to { opacity: 1; }
-}
-@keyframes zoomIn {
-    to { opacity: 1; transform: scale(1); }
-}
-
-.story-modal-content {
-    background: var(--background-light); 
-    color: var(--text-dark); 
-    padding: 3.5rem;
-    padding-top: 6rem; 
-    border-radius: 1.5rem; 
-    max-width: 750px;
-    width: 100%;
-    position: relative;
-    text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); 
-    overflow: hidden;
-    opacity: 0;
-    transform: scale(0.9);
-    animation: zoomIn 0.4s ease 0.1s forwards;
-    border-top: 10px solid; 
-    border-image: var(--gradient) 1; 
-}
-
-.modal-student-photo {
-    position: absolute; 
-    top: -70px; 
-    left: 50%;
-    transform: translateX(-50%);
-    width: 140px; 
-    height: 140px;
-    border-radius: 50%;
+  /* --- BATCH CARD MOBILE --- */
+  .batch-card-hero {
+    flex-direction: column; /* Stack vertically */
+    border-radius: 16px;
     margin-bottom: 1.5rem;
-    border: 6px solid var(--background-light); 
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    z-index: 2001;
-}
+  }
+  .batch-image-side { height: 220px; }
+  .batch-info-side { width: 100%; padding: 1.5rem; }
+  .batch-title { font-size: 1.6rem; }
+  .batch-meta-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; }
+  .meta-item { flex-direction: row; justify-content: space-between; align-items: center; }
+  .action-btn-primary { width: 100%; text-align: center; }
 
-.story-modal-content h2 {
-    font-size: 2.2rem;
-    font-weight: 800;
-}
+  /* --- NOTES MOBILE --- */
+  .notes-header { flex-direction: column; align-items: flex-start; gap: 1rem; border-bottom: none; margin-bottom: 2rem; }
+  .notes-header h3 { font-size: 1.8rem; }
+  .modern-select { width: 100%; }
+  
+  .stats-row { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem; }
+  .stat-box { padding: 1.2rem; }
+  
+  .resources-grid { grid-template-columns: 1fr; }
+  .resource-card { padding: 1rem; }
 
-.story-modal-content h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 0 0 2rem 0;
-}
-
-.story-modal-content p {
-    font-size: 1.1rem;
-    line-height: 2; 
-    color: var(--text-dark-2); 
-}
-.modal-close-btn {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 2002;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-dark-2);
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-.modal-close-btn:hover {
-    color: var(--primary-color);
-    transform: rotate(90deg);
-}
-
-/* --- RESPONSIVE ADJUSTMENTS --- */
-@media (max-width: 900px) {
-    .navbar {
-        padding: 0 1rem;
-        height: 65px;
-    }
-    .logo-link {
-        font-size: 1.5rem;
-    }
-    .nav-right {
-        gap: 0.5rem;
-    }
-    /* Navigation links ko chhota karo */
-    .nav-link {
-        padding: 0.5rem 0.25rem;
-        font-size: 0.85rem; 
-        gap: 0.25rem;
-    }
-    .nav-icon {
-        width: 18px;
-        height: 18px;
-    }
-    .cta-btn {
-        margin-left: 0.5rem;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-    }
-
-    /* Feature Display Mobile Adjustments */
-    .feature-display-container {
-        padding: 2rem 1rem;
-    }
-    .feature-title-english { 
-        font-size: 2rem;
-    }
-    .feature-subtitle {
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Batch Card: Vertically stack elements */
-    .batch-feature-card {
-        flex-direction: column;
-        text-align: center;
-        gap: 2rem;
-        padding: 2rem;
-    }
-    .rotating-batch-details {
-        text-align: center; /* Text center align for mobile */
-    }
-    .info-icon {
-        font-size: 4rem;
-    }
-    .rotating-title {
-        font-size: 1.8rem;
-    }
-    .rotating-footer {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .rotating-date {
-        font-size: 1rem;
-    }
-
-    /* Notes Filter & Metrics: Vertically stack */
-    .notes-metrics {
-        flex-direction: column;
-        gap: 1.5rem;
-        width: 100%;
-    }
-    .metric-card {
-        max-width: 100%; /* Full width for metrics on phone */
-    }
-    .syllabus-filter-container {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-    }
-    .syllabus-select, .download-btn {
-        width: 100%;
-        min-width: unset;
-    }
-    .notes-main-card {
-        padding: 1.5rem;
-    }
-    .notes-topics {
-        gap: 0.75rem;
-        justify-content: flex-start; /* Topics left align */
-    }
-
-    /* Success Stories Grid: 2 columns */
-    .stories-main-card {
-        padding: 1.5rem;
-    }
-    .success-stories-grid-compact {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on phone/tablet */
-        gap: 1rem;
-    }
-    .story-compact-photo {
-        width: 65px;
-        height: 65px;
-    }
-    
-    /* Modal adjustments */
-    .story-modal-overlay {
-        align-items: flex-start; /* Modal ko thoda upar shift kiya */
-        padding-top: 5rem;
-    }
-    .story-modal-content {
-        padding: 1.5rem;
-        padding-top: 4rem;
-        border-radius: 1rem;
-        max-height: 80vh; /* Phone par scrollable rakha */
-        overflow-y: auto;
-    }
-    .modal-student-photo {
-        width: 100px;
-        height: 100px;
-        top: -50px;
-    }
-    .story-modal-content p {
-        font-size: 0.95rem;
-        line-height: 1.7;
-    }
-}
-
-@media (max-width: 480px) {
-    /* Navbar links ko phone par sirf icons ke roop me dikhane ke liye (Text hide) */
-    .nav-link span {
-        display: none;
-    }
-    /* Links ko aur close kiya */
-    .nav-right {
-        gap: 0.4rem;
-    }
-    /* CTA button chhota aur compact */
-    .cta-btn {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.8rem;
-        margin-left: 0.4rem;
-    }
-    
-    /* Features title chhota */
-    .feature-title-english { 
-        font-size: 1.8rem;
-    }
-
-    /* Stories grid: 1 column on very small phones (optional, but safer for content) */
-    .success-stories-grid-compact {
-        grid-template-columns: 1fr;
-    }
-    .story-compact-card {
-        padding: 1rem;
-    }
+  /* --- SUCCESS STORIES MOBILE --- */
+  .section-title-center h3 { font-size: 2rem; }
+  .stories-grid-modern { grid-template-columns: 1fr; gap: 3rem; }
+  .success-card { margin-top: 30px; }
 }

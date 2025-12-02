@@ -10,7 +10,6 @@ interface AttemptResult {
   status_message: string;
 }
 
-// NEW: विस्तृत AI फीडबैक के साथ उत्तरों के लिए इंटरफ़ेस
 interface DetailedAnswer {
     questionid: number;
     question_text: string;

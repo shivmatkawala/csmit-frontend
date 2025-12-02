@@ -1,13 +1,13 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input, ViewChild, ElementRef } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { interval, Subscription, timer, Observable, of, throwError } from 'rxjs';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ApiService, LoginResponse, StudentInfo, StudentProfileDetails, StudentBatchDetails } from '../services/api.service'; 
+import { interval, Subscription, timer, Observable, of, throwError, forkJoin } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ApiService, LoginResponse, StudentBatchDetails } from '../services/api.service'; 
 import { examAPi } from '../services/createexam.service'; 
 import { ResumeService } from '../services/create-resume.service'; 
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
-import { forkJoin } from 'rxjs'; 
 
+// --- Interfaces ---
 interface Course {
   title: string;
   progress: number;
@@ -28,7 +28,6 @@ interface FeatureCard {
   route: string;
   info?: string; 
 }
-
 
 interface ScheduleItem {
   date: string; 
@@ -88,7 +87,6 @@ interface BatchDetailsModal {
     description: string;
 }
 
-
 @Component({
   selector: 'app-student-dashboard',
   templateUrl: './student-dashboard.component.html',
@@ -96,16 +94,16 @@ interface BatchDetailsModal {
 })
 export class StudentDashboardComponent implements OnInit, OnDestroy {
   
-  loadingDashboardData: boolean = true; 
+  @ViewChild('fileInput') fileInputRef!: ElementRef;
 
+  loadingDashboardData: boolean = true; 
   searchControl = new FormControl('');
   notificationsEnabled: boolean = true; 
 
   // --- Page Navigation ---
-  // FIX: Added 'generate-resume' and 'create-profile' as potential active pages
   activePage: string = 'dashboard'; 
   
-  // --- Profile Data for settings component ---
+  // --- Profile Data ---
   studentProfileData: StudentProfileData = {
     full_name: 'Loading...',
     email: 'loading@example.com',
@@ -119,12 +117,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     courseId: undefined, 
   };
 
-  // --- User & Clock Data (For real-time updates) ---
+  // --- User & Clock Data ---
   studentName: string = 'Loading...'; 
   profileImageUrl: string = ''; 
   profileImagePlaceholder: boolean = true; 
   profileInitial: string = ''; 
-  
+  uploadedProfileImage: string | ArrayBuffer | null = null;
+
   greeting: string = '';
   currentDayOfWeek: string = '';
   currentMonth: string = '';
@@ -133,15 +132,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   todayDate: Date = new Date();
   private timeSubscription?: Subscription;
 
-  // --- NEW PROFILE COMPLETION/MODAL PROPERTIES ---
+  // --- Modal Properties ---
   isProfileComplete: boolean = false; 
   showProfileCompletionModal: boolean = false; 
-  
-  // --- BATCH MODAL PROPERTIES ---
   showBatchModal: boolean = false; 
   selectedBatchDetails: BatchDetailsModal[] = []; 
 
-  // --- Feature Cards, Courses, Assignments ---
+  // --- Feature Cards ---
   quickAccessCards: FeatureCard[] = [
     { 
       label: 'Batches Status', 
@@ -192,7 +189,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   courses: Course[] = []; 
   nextDeadlines: ScheduleItem[] = []; 
 
-  // --- Calendar and Schedule ---
+  // --- Calendar ---
   selectedMonthYear: string = '';
   displayedMonthStart: Date = new Date(); 
   calendarDays: { date: number | string; disabled: boolean; selected: boolean; fullDate: Date | null }[] = [];
@@ -200,14 +197,14 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   scheduleDetails: ScheduleItem[] = []; 
   selectedScheduleDate: Date | null = null;
 
-  // --- Form & Message Properties ---
+  // --- Assignments ---
   showAssignmentModal: boolean = false; 
   assignmentTitleControl = new FormControl('', Validators.required);
   assignmentDetailsControl = new FormControl('');
   message: string = '';
   messageType: 'success' | 'error' | 'warning' | '' = '';
   
-  // --- NEW EXAM PROPERTIES ---
+  // --- EXAM PROPERTIES ---
   showExamModal: boolean = false; 
   allExams: AvailableExam[] = []; 
   activeExams: AvailableExam[] = []; 
@@ -218,20 +215,26 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   expiredExams: AvailableExam[] = []; 
   attendedExams: AvailableExam[] = []; 
   
-  // --- BATCH/COURSE FILTER PROPERTIES ---
+  // --- Filters ---
   studentAssignedBatches: StudentBatchDetails[] = []; 
   availableCourses: FilterCourse[] = []; 
   availableBatches: FilterBatch[] = []; 
 
-  // Dropdown Selections
   selectedCourseId: number | null = null; 
   selectedBatchId: number | null = null; 
+  
+  // FIX: Explicitly defined arrays to solve "Property does not exist" error
+  studentCoursesForFilter: FilterCourse[] = [];
+  studentBatchesForFilter: FilterBatch[] = [];
+
+  shortsList: any[] = [];
 
   constructor(
       private cdr: ChangeDetectorRef, 
       private apiService: ApiService, 
       private examService: examAPi, 
-      private resumeService: ResumeService 
+      private resumeService: ResumeService,
+      private sanitizer: DomSanitizer
   ) {}
 
   get selectedExam(): AvailableExam | undefined {
@@ -246,18 +249,15 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
 
   ngOnInit(): void {
-    
-    // Step 1: Load Courses and Batches for filter dropdowns
+    // 1. Load Filter Data
     this.fetchCoursesAndBatchesForFilter().subscribe({
       next: () => {
-        // Step 2: Fetch Student Data (this includes the profile completion check)
+        // 2. Load Student Data
         this.fetchStudentDataFromStorage().subscribe(() => {
-            // Step 3: Profile completion check after student data loads
             this.checkProfileCompletion();
         });
       },
       error: () => {
-        // ERROR: If Course/Batch Filter Data fails to load, proceed with fallback
         this.fetchStudentDataFromStorage().subscribe(() => {
             this.checkProfileCompletion();
         });
@@ -276,10 +276,40 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.selectedScheduleDate = this.todayDate;
     this.updateDisplayedScheduleDetails();
     
+    this.initializeShorts();
   }
 
   ngOnDestroy(): void {
     this.timeSubscription?.unsubscribe();
+  }
+
+  initializeShorts() {
+    const rawShorts = [
+        { title: 'Angular Tips', url: 'https://www.youtube.com/embed/placeholder1', likes: '1.2k', comments: '100', channel: 'CodeMaster' },
+        { title: 'CSS Tricks', url: 'https://www.youtube.com/embed/placeholder2', likes: '850', comments: '50', channel: 'WebDev' },
+        { title: 'TypeScript Basics', url: 'https://www.youtube.com/embed/placeholder3', likes: '2k', comments: '200', channel: 'JSWorld' }
+    ];
+
+    this.shortsList = rawShorts.map(short => ({
+        ...short,
+        safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(short.url)
+    }));
+  }
+
+  triggerProfileUpload(): void {
+    this.fileInputRef.nativeElement.click();
+  }
+
+  onProfileImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.uploadedProfileImage = e.target?.result || null;
+            this.showMessage('Profile picture updated temporarily!', 'success');
+        };
+        reader.readAsDataURL(file);
+    }
   }
   
   private createDummySchedule(): ScheduleItem[] {
@@ -295,10 +325,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
+  // =========================================================================
+  // DATA FETCHING METHODS
+  // =========================================================================
 
-  /**
-   * Fetches student login data and processes batch/course details for filtering.
-   */
   private fetchStudentDataFromStorage(): Observable<any> {
     const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
     const studentId = loginData?.userId;
@@ -306,7 +336,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.loadingDashboardData = true; 
     this.cdr.detectChanges(); 
 
-    // --- FALLBACK LOGIC HELPER for Filters ---
     const setDefaultFilters = (fallbackId: number, fallbackName: string) => {
         this.selectedCourseId = fallbackId;
         this.selectedBatchId = fallbackId;
@@ -316,14 +345,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             courseId: fallbackId
         };
         this.updateBatchCard(fallbackName, true);
-        console.warn(`No assigned batch/course data. Using fallback (${fallbackName}).`);
-        this.showMessage('Batch/Course data missing. Using defaults for filter.', 'warning');
+        this.updateFilterOptions(); // Update filters on fallback
+        this.showMessage('Batch/Course data missing. Using defaults.', 'warning');
     };
-    // ----------------------------
     
     if (studentId) {
-      
-      // FIX: Check session storage for full name saved during resume submission
       let fullName = loginData?.info?.full_name || loginData?.username || 'Student'; 
       const storedStudentData = window.sessionStorage.getItem('STUDENT_DATA');
       if (storedStudentData) {
@@ -345,7 +371,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           full_name: fullName,
           email: email, 
           student_id: studentId, 
-          profileInitial: initial, // Update initial in profile data
+          profileInitial: initial,
           featureCards: this.quickAccessCards.map(card => ({
               ...card,
               label: card.title, 
@@ -353,18 +379,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           }))
       };
       
-      console.log('--- Student Data Found. Fetching All Batch Details for ID:', studentId, '---');
-      
-      // 2. Fetch ALL Batch/Course details for the student
       return this.apiService.fetchStudentBatches(studentId).pipe(
           tap((batchDetails: StudentBatchDetails[]) => {
-              
               if (batchDetails && batchDetails.length > 0) {
                   this.studentAssignedBatches = batchDetails;
                   const firstBatch = batchDetails[0];
                   this.updateBatchCard(firstBatch.batch_name);
                   
-                  // Set default filter to the first assigned batch/course
                   this.studentProfileData = {
                       ...this.studentProfileData,
                       batchId: firstBatch.batchid, 
@@ -373,18 +394,15 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                   this.selectedBatchId = firstBatch.batchid;
                   this.selectedCourseId = firstBatch.course_id;
               } else {
-                  // FIX: Use fallback ID 1 for unassigned users
                   setDefaultFilters(1, 'No Assigned Batch');
               }
-              
+              this.updateFilterOptions(); // Update filters after loading data
               this.loadingDashboardData = false;
               this.cdr.detectChanges(); 
               this.fetchExamsAndFilter(); 
-              
           }),
           catchError((error) => {
               console.error('Error fetching student batches:', error);
-              // Use fallback logic if API call fails
               setDefaultFilters(1, 'API Error Fallback');
               this.loadingDashboardData = false;
               this.cdr.detectChanges();
@@ -392,16 +410,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               return of(null); 
           })
       );
-
     } else {
-      // Login Data (userId) is not available (Guest User)
       this.studentName = 'Guest User';
       this.profileInitial = this.getProfileInitial(this.studentName);
       this.profileImagePlaceholder = true;
-      // FIX: Use a high ID for guest users that won't clash with real data, but still needs a fallback structure
       setDefaultFilters(9999, 'No User Logged In'); 
       this.loadingDashboardData = false;
-      this.showMessage('User ID not found. Showing default Guest content.', 'error');
+      this.showMessage('User ID not found. Showing Guest content.', 'error');
       
       this.studentProfileData = {
           ...this.studentProfileData,
@@ -415,13 +430,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               info: card.subText,
           }))
       };
+      this.updateFilterOptions();
       this.cdr.detectChanges(); 
       this.fetchExamsAndFilter(); 
       return of(null); 
     }
   }
 
-  // Logic to calculate profile initial
   getProfileInitial(fullName: string): string {
     if (!fullName) return 'U'; 
     const parts = fullName.split(/\s+/).filter(p => p.length > 0);
@@ -429,7 +444,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       return parts[0][0].toUpperCase();
     }
     if (parts.length > 1) {
-      // First letter of first name and last name
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return fullName[0].toUpperCase();
@@ -453,14 +467,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }
   }
 
-
-  // =========================================================================
-  // PROFILE COMPLETION LOGIC
-  // =========================================================================
-  
-  /**
-   * Checks if the student has completed their resume profile (used only for initial prompt).
-   */
   private checkProfileCompletion(): void {
       const loginData = this.apiService.getStoredStudentData();
       const userId = loginData?.userId;
@@ -471,11 +477,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           return;
       }
       
-      // If the flag is NOT set, perform the API check for the first time.
       this.resumeService.getResumeData(userId).pipe(
           map(resume => {
               this.isProfileComplete = !!resume && resume.full_name !== 'Not Found' && !!resume.full_name && !!resume.email && (resume.education?.length > 0);
-              
               if (this.isProfileComplete) {
                    sessionStorage.setItem('cshub_profile_complete_once', 'true');
               }
@@ -497,14 +501,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       sessionStorage.setItem('cshub_profile_prompt_dismissed', 'true');
   }
 
-
   // =========================================================================
-  // NAVIGATION & BUTTON HANDLERS
+  // NAVIGATION
   // =========================================================================
   
   setActivePage(page: string): void {
-    // FIX: Added 'generate-resume' to validPages
-    const validPages = ['dashboard', 'courses', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume'];
+    const validPages = ['dashboard', 'courses', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts'];
     if (validPages.includes(page)) {
       this.activePage = page;
       this.clearMessage();
@@ -519,6 +521,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               this.openBatchModal();
               break;
           case 'exams':
+              // Opens the Exam Modal when clicking "View Exams" on the dashboard card
               this.openExamModal(); 
               break;
           case 'assignments':
@@ -533,35 +536,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }
   }
   
-  /**
-   * FIX: This function now ONLY redirects to the setup form (create-student).
-   */
   goToProfileSetupForm(): void {
     this.dismissProfileCompletionModal(); 
-    this.showMessage('Redirecting to ATS Profile Setup Form for update/create...', 'success');
-    // Navigation always goes to the form
+    this.showMessage('Redirecting to Profile Setup...', 'success');
     window.location.href = 'create-student'; 
   }
 
-  /**
-   * NEW: Sets the activePage to display the GenerateAtsResumeComponent inside the dashboard.
-   */
   goToResumeView(): void {
       this.setActivePage('generate-resume');
-      this.showMessage('ATS Resume PDF Viewer opened in dashboard. PDF will attempt to download automatically.', 'success');
+      this.showMessage('Resume Viewer opened.', 'success');
   }
   
-  // FIX: Old goToProfileSetup function renamed to goToProfileSetupForm and updated
   goToProfileSetup(): void {
       this.goToProfileSetupForm();
   }
 
-
   // =========================================================================
-  // MODAL/MESSAGE LOGIC (Fixing missing functions and data structure usage)
+  // MODAL/MESSAGE LOGIC
   // =========================================================================
   
-  // FIX: Added missing assignment modal functions to resolve compilation errors
   openAssignmentModal(): void {
     this.showAssignmentModal = true;
     this.assignmentTitleControl.setValue('');
@@ -574,7 +567,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   submitAssignment(): void {
     if (this.assignmentTitleControl.valid) {
-      this.showMessage(`Assignment '${this.assignmentTitleControl.value}' submitted successfully!`, 'success');
+      this.showMessage(`Assignment submitted successfully!`, 'success');
       this.closeAssignmentModal();
     } else {
       this.showMessage('Please provide an assignment title.', 'warning');
@@ -583,12 +576,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   openBatchModal(): void {
       if (this.loadingDashboardData) {
-          this.showMessage('Please wait, dashboard data is still loading...', 'warning');
+          this.showMessage('Please wait, dashboard data is loading...', 'warning');
           return;
       }
       
       if (this.studentAssignedBatches.length === 0) {
-          this.showMessage('No batches are currently assigned to you. Contact admin.', 'warning');
+          this.showMessage('No batches assigned.', 'warning');
           return;
       }
       
@@ -601,7 +594,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               course_id: batch.course_id,
               num_students: Math.floor(Math.random() * (60 - 30 + 1)) + 30, 
               status: 'Active', 
-              description: `This batch focuses on the core curriculum of ${course?.course_name || 'Assigned Course'} and meets specific industry requirements.`
+              description: `Batch for ${course?.course_name || 'Assigned Course'}.`
           } as BatchDetailsModal; 
       });
       
@@ -616,9 +609,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   
   openExamModal(): void {
     if (this.loadingDashboardData) {
-        this.showMessage('Please wait, dashboard data is still loading...', 'warning');
+        this.showMessage('Please wait, dashboard data is loading...', 'warning');
         return;
     }
+    // Ensures modal opens and re-filters exams just in case
     this.showExamModal = true;
     this.selectedExamId = null; 
     this.fetchExamsAndFilter();
@@ -630,17 +624,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
   
   startExam(): void {
-    if (!this.selectedExamId || !this.selectedExam) {
+    // 1. Validate Selection
+    if (!this.selectedExamId) {
         this.showMessage('Please select an exam to start.', 'warning');
         return;
     }
-    const examDetails = this.selectedExam;
-    if (!this.upcomingExams.find(e => e.examId === examDetails.examId)) {
-         this.showMessage('Cannot start this exam. It might be expired or already submitted.', 'error');
-         return;
+    
+    // 2. Find Exam Details
+    const examDetails = this.allExams.find(e => e.examId === this.selectedExamId);
+    
+    if (!examDetails) {
+        this.showMessage('Error finding exam details. Please try again.', 'error');
+        return;
     }
-    this.showMessage(`Starting Exam: ${examDetails.examName}`, 'success');
+
+    // 3. Set State for Exam Component
     this.examToAttend = examDetails;
+    this.showMessage(`Starting Exam: ${examDetails.examName}`, 'success');
+    
+    // 4. Close Modal and Switch Page
     this.closeExamModal();
     this.activePage = 'attend-exam'; 
     this.cdr.detectChanges(); 
@@ -666,7 +668,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.messageType = '';
   }
 
-  // --- Clock/Calendar Logic (Omitted for brevity, assumed functional) ---
+  // --- Clock/Calendar Logic ---
   private updateClock(): void {
     const now = new Date();
     this.currentDayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
@@ -768,7 +770,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return '#ef4444'; 
   }
   
-  // --- Exam/Filter Logic (Omitted for brevity, assumed functional) ---
+  // --- Exam/Filter Logic ---
   fetchCoursesAndBatchesForFilter(): Observable<any> {
     return this.examService.fetchCourses().pipe(
         switchMap((courses: any[]) => {
@@ -791,12 +793,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         }),
         tap((allBatches: FilterBatch[]) => {
             this.availableBatches = allBatches;
+            this.updateFilterOptions(); // Update options when data loads
             this.cdr.detectChanges(); 
         }),
         catchError((error) => {
             console.error('Error fetching courses/batches for filter:', error);
-            this.showMessage('Error loading course/batch options for filtering.', 'error');
-            return throwError(() => new Error('Course/Batch filter data failed to load.')); 
+            this.showMessage('Error loading course/batch options.', 'error');
+            return throwError(() => new Error('Filter data failed.')); 
         })
     );
   }
@@ -830,8 +833,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                 .filter((exam: AvailableExam) => exam.examId !== null && exam.examId !== undefined); 
         }),
         catchError((error) => {
-            console.error('Global Exam list fetch failed. API error details:', error);
-            this.showMessage('Error fetching global exam list. Check API server.', 'error');
+            console.error('Global Exam list fetch failed:', error);
+            this.showMessage('Error fetching exams.', 'error');
             return of([]); 
         })
     );
@@ -841,70 +844,75 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.isLoadingExams = true;
     this.selectedExamId = null;
     this.cdr.detectChanges();
-    if (this.allExams.length === 0) {
-        this.fetchAllActiveExams().subscribe(exams => {
-            this.allExams = exams;
-            this.applyExamFilter();
-        });
-    } else {
+    // Always fetch fresh exams or ensure list is populated
+    this.fetchAllActiveExams().subscribe(exams => {
+        this.allExams = exams;
         this.applyExamFilter();
-    }
+    });
   }
 
   applyExamFilter(): void {
+    // 1. Update batch dropdown based on new course selection
+    this.updateFilterOptions();
+
     const courseId = this.selectedCourseId;
     const batchId = this.selectedBatchId;
-    if (courseId === null || batchId === null) {
+    
+    // 2. Filter Exams
+    if (this.allExams.length > 0) {
+         if (courseId && batchId) {
+             this.activeExams = this.allExams.filter(exam => exam.courseid === courseId && exam.batchid === batchId);
+         } else {
+             // If no filter selected, show all
+             this.activeExams = this.allExams;
+         }
+    } else {
         this.activeExams = [];
-        this.upcomingExams = [];
-        this.expiredExams = [];
-        this.attendedExams = [];
-        this.isLoadingExams = false;
-        this.cdr.detectChanges();
-        return;
     }
-    this.activeExams = this.allExams.filter(exam => exam.courseid === courseId && exam.batchid === batchId);
+
     this.upcomingExams = [];
     this.expiredExams = [];
     this.attendedExams = []; 
+    
     const now = new Date().getTime();
     this.activeExams.forEach(exam => {
         const endDate = new Date(exam.end_datetime).getTime();
-        if (endDate <= now) {
-            this.expiredExams.push(exam);
-        } else { 
+        // Simple logic: if end date is future, it is upcoming/active
+        if (endDate > now) {
             this.upcomingExams.push(exam);
+        } else { 
+            this.expiredExams.push(exam);
         }
     });
     this.isLoadingExams = false;
     this.cdr.detectChanges(); 
   }
 
-  get filteredBatches(): FilterBatch[] {
-      if (this.selectedCourseId === null) {
-          return [];
-      }
-      return this.availableBatches.filter(b => b.course_id === this.selectedCourseId);
-  }
-  
-  get studentCoursesForFilter(): FilterCourse[] {
-      if (this.studentAssignedBatches.length > 0) {
-          const courseIds = new Set(this.studentAssignedBatches.map(b => b.course_id));
-          return this.availableCourses.filter(c => courseIds.has(c.course_id));
-      }
-      return this.availableCourses;
-  }
-  
-  get studentBatchesForFilter(): FilterBatch[] {
-      if (this.selectedCourseId === null) {
-          return [];
-      }
-      const batchesInSelectedCourse = this.availableBatches.filter(b => b.course_id === this.selectedCourseId);
-      if (this.studentAssignedBatches.length > 0) {
-          const assignedBatchIds = new Set(this.studentAssignedBatches.map(b => b.batchid));
-          return batchesInSelectedCourse.filter(b => assignedBatchIds.has(b.batchid));
-      }
-      return batchesInSelectedCourse;
-  }
+  // --- Filter Logic ---
+  // Replaces the getters with a method to update array properties directly
+  updateFilterOptions(): void {
+    // 1. Update Courses
+    if (this.studentAssignedBatches.length > 0) {
+        const courseIds = new Set(this.studentAssignedBatches.map(b => b.course_id));
+        this.studentCoursesForFilter = this.availableCourses.filter(c => courseIds.has(c.course_id));
+    } else {
+        this.studentCoursesForFilter = [...this.availableCourses];
+    }
 
+    // 2. Update Batches
+    if (this.selectedCourseId === null) {
+        this.studentBatchesForFilter = [];
+    } else {
+        // First get batches for the selected course
+        const batchesInSelectedCourse = this.availableBatches.filter(b => b.course_id === this.selectedCourseId);
+        
+        // If student has assigned batches, filter further
+        if (this.studentAssignedBatches.length > 0) {
+            const assignedBatchIds = new Set(this.studentAssignedBatches.map(b => b.batchid));
+            this.studentBatchesForFilter = batchesInSelectedCourse.filter(b => assignedBatchIds.has(b.batchid));
+        } else {
+            this.studentBatchesForFilter = batchesInSelectedCourse;
+        }
+    }
+  }
 }

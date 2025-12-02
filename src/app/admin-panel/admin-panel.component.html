@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <div class="container">
+    <!-- Header -->
     <header>
         <div class="logo-search">
             <div class="logo">
@@ -9,24 +10,25 @@
             <div class="search-wrapper">
                 <input 
                     type="search" 
-                    [placeholder]="activeTab() === 'users' ? 'Search Users by Email ID...' : activeTab() === 'courses' ? 'Search Courses by Name...' : activeTab() === 'batches' ? 'Search Batches by Name/ID...' : config.SEARCH_PLACEHOLDER"
+                    [placeholder]="activeTab() === 'users' ? 'Search Users...' : activeTab() === 'courses' ? 'Search Courses...' : activeTab() === 'batches' ? 'Search Batches...' : 'Search...'"
                     [value]="headerSearchQuery()"
                     (input)="onHeaderSearch($event)"
-                /> <!-- Search for Users/Courses/Batches based on active tab -->
+                />
                 <i class="fas fa-search"></i>
             </div>
         </div>
         <div class="header-right">
             <button class="btn-header-action" (click)="showMessageBox('Reports generated successfully!')">
-                <i [class]="config.HEADER_BUTTON.icon"></i> {{ config.HEADER_BUTTON.label }}
+                <i [class]="config.HEADER_BUTTON.icon"></i>
+                <span>{{ config.HEADER_BUTTON.label }}</span>
             </button>
-
             <div class="user-avatar" title="{{ config.ADMIN_DETAILS.name }}">
-                <img [src]="config.ADMIN_DETAILS.profileUrl" alt="Admin Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <img [src]="config.ADMIN_DETAILS.profileUrl" alt="Admin" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
             </div>
         </div>
     </header>
 
+    <!-- Sidebar -->
     <aside class="sidebar">
         <div>
             <nav class="sidebar-nav">
@@ -34,83 +36,88 @@
                    [class.active]="activeTab() === link.id" 
                    (click)="navigateTo(link.route, link.id)" 
                    [title]="link.label">
-                    <i [class]="link.icon"></i>{{ link.label }}
+                    <i [class]="link.icon"></i>
+                    <span>{{ link.label }}</span>
                 </a>
             </nav>
         </div>
         <div class="sidebar-bottom">
-            <div class="toggle-switch" [class.active]="darkModeActive()" (click)="darkModeActive.set(!darkModeActive())" title="Toggle Dark Mode">
+            <div class="toggle-switch" 
+                 [class.active]="darkModeActive()" 
+                 (click)="darkModeActive.set(!darkModeActive())" 
+                 title="Dark Mode">
                 <span></span>
             </div>
-            <!-- Logout functionality updated to call the new logoutUser method -->
-            <a title="Logout" (click)="logoutUser()"><i class="fas fa-sign-out-alt"></i></a>
+            <a title="Logout" (click)="logoutUser()">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
         </div>
     </aside>
 
-    <!-- Main content area -->
+    <!-- Main Content -->
     <main class="main-content">
         
-        <!-- DASHBOARD VIEW -->
+        <!-- Dashboard View -->
         <div *ngIf="activeTab() === 'dashboard'">
             <div class="main-content-header">
-                <h1>Admin Actions: Quick Access</h1>
-                <p>Select an action card below to perform core administrative functions.</p>
+                <h1>Admin Dashboard</h1>
+                <p>Quick access to core administrative functions</p>
             </div>
             
             <div class="card-grid">
-
                 <div *ngFor="let card of config.ADMIN_CARDS" 
                     class="card" 
                     [class]="card.colorClass" 
                     tabindex="0" 
                     (click)="navigateTo(card.route, 'dashboard')">
                     
-                    <!-- New structure based on desired design -->
                     <div class="card-image-wrapper">
-                        <!-- Image with Zoom Effect on hover -->
-                        <img [src]="'assets/' + card.iconImage" [alt]="card.title + ' Image'">
-                        
-                        <!-- Content Overlay on Image -->
+                        <img [src]="'assets/' + card.iconImage" [alt]="card.title">
                         <div class="card-overlay">
+                            <h2>{{ card.title }}</h2>
                             <p>{{ card.subtitle }}</p>
-                            <!-- The button moves to the bottom of the card -->
                         </div>
                     </div>
 
                     <div class="card-action">
-                        <button [ngClass]="'btn-' + card.colorClass">{{ card.buttonText }}</button>
+                        <button [ngClass]="'btn-' + card.colorClass">
+                            {{ card.buttonText }}
+                        </button>
                     </div>
                 </div>
 
-                <div class="card card-placeholder" tabindex="0" (click)="showMessageBox('Feature coming soon.', 'error')">
+                <div class="card card-placeholder" 
+                     tabindex="0" 
+                     (click)="showMessageBox('Feature coming soon.', 'error')">
                     <div class="card-image-wrapper placeholder-wrapper">
-                         <img src="https://placehold.co/600x400/BDC3C7/7F8C8D?text=Coming+Soon" alt="Placeholder Image">
-                         <div class="card-overlay">
-                            <h2>More Features...</h2>
-                            <p>Analytics reports, system maintenance, and API management coming soon.</p>
+                        <img src="https://placehold.co/600x400/BDC3C7/7F8C8D?text=Coming+Soon" alt="Coming Soon">
+                        <div class="card-overlay">
+                            <h2>More Features</h2>
+                            <p>Analytics, maintenance, and API management coming soon.</p>
                         </div>
                     </div>
                     <div class="card-action">
-                        <button style="background-color: #BDC3C7; cursor: not-allowed;">Coming Soon</button>
+                        <button style="background: linear-gradient(135deg, #9ca3af, #6b7280); cursor: not-allowed;">
+                            Coming Soon
+                        </button>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <!-- USER MANAGEMENT VIEW -->
+        <!-- User Management -->
         <app-user-management 
             *ngIf="activeTab() === 'users'"
             [globalSearchQuery]="headerSearchQuery()"
-        ></app-user-management> <!-- Pass global search query as Input to child component -->
+        ></app-user-management>
         
-        <!-- COURSE MANAGEMENT VIEW (New Component) -->
+        <!-- Course Management -->
         <app-manage-course
             *ngIf="activeTab() === 'courses'"
             [globalSearchQuery]="headerSearchQuery()"
         ></app-manage-course>
         
-        <!-- BATCH MANAGEMENT VIEW (NEW COMPONENT) -->
+        <!-- Batch Management -->
         <app-batch-management
             *ngIf="activeTab() === 'batches'"
             [globalSearchQuery]="headerSearchQuery()"
@@ -118,10 +125,10 @@
         
     </main>
 
-    <!-- General Dashboard Message Box -->
+    <!-- Message Box -->
     <div class="message-box" id="messageBox">
         <p>Action Successful!</p>
-        <button class="close-btn" (click)="closeMessageBox()">X</button>
+        <button class="close-btn" (click)="closeMessageBox()">✕</button>
     </div>
 
 </div>

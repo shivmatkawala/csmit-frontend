@@ -5,33 +5,30 @@
 
   <div class="container header-container">
 
-    <!-- Left side: Animated Logo -->
+    <!-- Left side: Logo -->
     <div class="logo-container">
-      <a href="#" class="logo-link logo-image-container" (click)="zoomLogo()">
-        <img src="assets/logo.jpg" alt="Company Logo" class="circular-logo-img" [class.zoomed]="isLogoZoomed">
+      <a href="#" class="logo-link" (click)="zoomLogo()">
+        <img src="assets/logo.jpg" alt="Company Logo" class="logo-img" [class.zoomed]="isLogoZoomed">
+        <span class="logo-text">CSMIT</span>
       </a>
     </div>
 
-    <!-- CENTER: Search Bar -->
-    <div class="search-container">
-       <input type="text" placeholder="Search courses, categories..." class="search-input"> 
-       <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-    </div>
+    <!-- CENTER: Main Navigation Links (Desktop) -->
+    <nav class="main-nav desktop-nav-links">
+        <ul>
+          <li><a href="#">Courses</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
 
-    <!-- Right Group: Nav Links + Login Button + Hamburger -->
+    <!-- Right Group: Search Bar + Login Button + Hamburger -->
     <div class="actions-container right-group">
-      <!-- Main Navigation Links (Desktop) -->
-      <nav class="main-nav desktop-nav-links">
-          <ul>
-            <li><a href="#"><span>Courses</span></a></li>
-            <li><a href="#"><span>Careers</span></a></li>
-            <li><a href="#"><span>Blog</span></a></li>
-            <li><a href="#"><span>Contact</span></a></li>
-          </ul>
-      </nav>
-      <!-- Login Button: Creative Design -->
+      
+
+
+      <!-- Login Button: Modern Pill Design -->
       <a routerLink="/login" class="login-btn desktop-login-btn">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.5a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.638z" />
@@ -54,10 +51,10 @@
   <nav class="mobile-nav" [class.open]="isMenuOpen">
       <div class="mobile-nav-inner">
         <!-- Links for mobile menu -->
-        <a href="#" style="--delay: 0.15s;">Courses</a>
-        <a href="#" style="--delay: 0.25s;">Careers</a>
-        <a href="#" style="--delay: 0.35s;">Blog</a>
-        <a href="#" style="--delay: 0.45s;">Contact</a>
+        <a href="#" style="--delay: 0.15s;" (click)="toggleMenu()">Courses</a>
+        <a href="#" style="--delay: 0.25s;" (click)="toggleMenu()">Careers</a>
+        <a href="#" style="--delay: 0.35s;" (click)="toggleMenu()">Blog</a>
+        <a href="#" style="--delay: 0.45s;" (click)="toggleMenu()">Contact</a>
         <hr style="--delay: 0.55s;">
         <div class="mobile-auth-buttons" style="--delay: 0.65s;">
           <a routerLink="/login" class="login-btn mobile-login-btn-full" (click)="toggleMenu()">
@@ -69,7 +66,7 @@
         </div>
       </div>
   </nav>
-  <div class="mobile-menu-overlay" [class.open]="isMenuOpen"></div>
+  <div class="mobile-menu-overlay" [class.open]="isMenuOpen" (click)="toggleMenu()"></div>
 
 </header>
 

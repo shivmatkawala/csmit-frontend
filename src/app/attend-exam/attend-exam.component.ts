@@ -15,7 +15,6 @@ interface ExamQuestion {
   points: number;
   questiontypeid: number; // 1: MCQ, 2: Descriptive, 3: Coding
   options: QuestionOption[];
-  // studentAnswer MCQ के लिए optionid (number) या अन्य के लिए text (string) स्टोर करेगा
   studentAnswer: string | number | null; 
   status: 'unanswered' | 'answered' | 'marked';
 }
@@ -27,7 +26,6 @@ interface AttemptResult {
   status_message: string;
 }
 
-// NEW: विस्तृत AI फीडबैक के साथ उत्तरों के लिए इंटरफ़ेस
 interface DetailedAnswer {
     questionid: number;
     question_text: string;
@@ -67,9 +65,7 @@ export class AttendExamComponent implements OnInit, OnDestroy {
   finalResult: AttemptResult | null = null;
   attemptId: number | null = null; 
 
-  // NEW: State for detailed feedback
-  detailedAnswers: DetailedAnswer[] = []; // AI feedback सहित उत्तरों की सूची
-  showDetailedFeedback: boolean = false; // डिटेल फीडबैक स्क्रीन दिखाने के लिए फ्लैग
+  detailedAnswers: DetailedAnswer[] = []; 
 
   constructor(private examService: examAPi, private apiService: ApiService) {}
 
@@ -103,7 +99,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
              optionid: opt.optionid, 
              option_text: opt.optiontext
           })),
-          // MCQ के लिए option ID (number), अन्य के लिए empty string
           studentAnswer: q.questiontypeid === 1 ? null : '', 
           status: 'unanswered'
         } as ExamQuestion));
@@ -165,10 +160,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     }
   }
   
-  /**
-   * FIX: यह फ़ंक्शन अब MCQs के लिए optionid (number) और अन्य के लिए text (string) को 
-   * studentAnswer में स्टोर करता है, और status अपडेट करता है।
-   */
   handleAnswer(answer: string | number | null): void {
     const currentQuestion = this.questions[this.currentQuestionIndex];
     currentQuestion.studentAnswer = answer;
@@ -176,24 +167,16 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     if (currentQuestion.status === 'marked') return;
     
     const isAnswered = currentQuestion.questiontypeid === 1 
-      ? answer !== null && answer !== undefined // MCQ: optionid मौजूद होना चाहिए
-      : answer && String(answer).trim().length > 0; // Descriptive/Coding: Text मौजूद होना चाहिए
+      ? answer !== null && answer !== undefined 
+      : answer && String(answer).trim().length > 0;
     
     currentQuestion.status = isAnswered ? 'answered' : 'unanswered';
   }
   
-  /**
-   * MCQ पर क्लिक होने पर optionid को handleAnswer में भेजें।
-   * @param optionId - Backend से प्राप्त optionid (number)।
-   */
   onMcqSelect(optionId: number): void {
     this.handleAnswer(optionId);
   }
   
-  /**
-   * Textarea में टेक्स्ट बदलने पर text को handleAnswer में भेजें।
-   * @param text - छात्र द्वारा टाइप किया गया उत्तर।
-   */
   onTextChange(text: string): void {
       this.handleAnswer(text);
   }
@@ -201,7 +184,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
   markForReview(): void {
     const currentQuestion = this.questions[this.currentQuestionIndex];
     if (currentQuestion.status === 'marked') {
-        // 'marked' से वापस 'answered' या 'unanswered' में बदलें
         const isAnswered = currentQuestion.questiontypeid === 1 
             ? currentQuestion.studentAnswer !== null && currentQuestion.studentAnswer !== undefined 
             : currentQuestion.studentAnswer && String(currentQuestion.studentAnswer).trim().length > 0;
@@ -216,10 +198,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     this.autoSubmitExam('submitted');
   }
 
-  /**
-   * MCQ, Descriptive, और Coding तीनों प्रकार के उत्तरों को सबमिट करता है 
-   * और फिर `evaluate-complete` API को कॉल करके परिणाम प्राप्त करता है।
-   */
   autoSubmitExam(status: 'submitted' | 'expired'): void {
     if (this.isSubmitting) return; 
 
@@ -233,7 +211,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
       examid: this.examId!,
       userid: studentId,
       attemptdate: new Date().toISOString(),
-      // ये मान सर्वर पर ओवरराइड किए जाएंगे, लेकिन API structure के लिए भेज रहे हैं।
       total_score: 0.00,
       ai_evaluated: false, 
       updated_at: new Date().toISOString()
@@ -248,7 +225,6 @@ export class AttendExamComponent implements OnInit, OnDestroy {
       concatMap(attemptRes => {
         const attemptId = attemptRes.attemptid;
         
-        // Step 2/3: Submit all answers
         const answerRequests: Observable<any>[] = this.questions.map(q => {
           const isMCQ = q.questiontypeid === 1;
           const isDescriptive = q.questiontypeid === 2;
@@ -261,14 +237,11 @@ export class AttendExamComponent implements OnInit, OnDestroy {
               const answerPayload = {
                 attemptid: attemptId,
                 questionid: q.questionid,
-                // FIX: MCQ के लिए optionid (जो number है) को सीधे भेजें
                 selectedoptionid: isMCQ ? q.studentAnswer : null, 
-                // Descriptive और Coding के लिए studentAnswer (जो string है) को भेजें
                 descriptive_answer: isDescriptive ? q.studentAnswer : null,
                 code_answer: isCoding ? q.studentAnswer : null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                // सर्वर पर मूल्यांकन के लिए ये मान False/0.00 रहने दें
                 is_correct: false, 
                 points_earned: 0.00
               };
@@ -288,18 +261,15 @@ export class AttendExamComponent implements OnInit, OnDestroy {
         );
       }),
       
-      // Step 3/3: Call the single 'evaluate-complete' POST API to trigger evaluation and fetch result
       concatMap(attemptId => {
-        this.error = 'Submitting Exam... Please wait. (Step 3/3: Evaluating and Fetching Results)';
-        // 'evaluateAndFetchResult' अब आपके निर्देशानुसार POST मेथड का उपयोग करता है और सभी मूल्यांकन करता है
+        this.error = 'Evaluator running...';
         return this.examService.evaluateAndFetchResult(attemptId).pipe(
              catchError(err => {
-                // Evaluation सफल हो सकती है, लेकिन API से error आने पर
                 return of({ 
                     attemptid: attemptId, 
                     total_score: 0,
                     max_score: 0,
-                    status_message: 'Evaluation failed or result fetch error. Check dashboard later.'
+                    status_message: 'Result fetch warning. Feedback might be delayed.'
                 } as AttemptResult);
              })
         );
@@ -307,7 +277,7 @@ export class AttendExamComponent implements OnInit, OnDestroy {
 
       catchError(err => {
         this.isSubmitting = false;
-        this.error = `Submission failed. The exam was not recorded completely. Details: ${err.message || 'API Error'}`;
+        this.error = `Submission failed. ${err.message || 'API Error'}`;
         this.examFinished.emit({
           status: 'submitted',
           message: this.error 
@@ -322,9 +292,9 @@ export class AttendExamComponent implements OnInit, OnDestroy {
           this.error = null; 
           
           this.finalResult = result;
-          this.showResult = true; // परिणाम स्क्रीन दिखाएँ
+          this.showResult = true; 
           
-          // NEW: Fetch detailed answers and AI feedback
+          // Auto fetch detailed feedback immediately
           if (this.attemptId) {
             this.fetchResultsWithFeedback(this.attemptId);
           }
@@ -333,12 +303,10 @@ export class AttendExamComponent implements OnInit, OnDestroy {
     });
   }
   
-  // NEW: Function to fetch detailed results with AI feedback
   fetchResultsWithFeedback(attemptId: number): void {
       this.examService.fetchDetailedAnswers(attemptId).pipe(
           catchError(err => {
               console.error("Failed to fetch detailed answers:", err);
-              // Gracefully handle error, leave detailedAnswers empty
               return of([]); 
           })
       ).subscribe(answers => {
@@ -346,16 +314,10 @@ export class AttendExamComponent implements OnInit, OnDestroy {
       });
   }
 
-  // NEW: Function to toggle detailed view
-  toggleDetailedFeedback(): void {
-      this.showDetailedFeedback = !this.showDetailedFeedback;
-  }
-
-
   exitResultView(): void {
     this.examFinished.emit({
         status: 'submitted',
-        message: 'Exam results viewed. Check your profile for detailed history.'
+        message: 'Exam completed.'
     });
   }
 
