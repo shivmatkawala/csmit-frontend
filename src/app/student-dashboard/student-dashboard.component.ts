@@ -283,6 +283,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.timeSubscription?.unsubscribe();
   }
 
+  // --- LOGOUT FUNCTIONALITY ---
+  logout(): void {
+      // 1. Clear Local Storage (Removes persistent data like User ID and Resume data)
+      localStorage.clear();
+      
+      // 2. Clear Session Storage (Just to be safe, removes current session flags)
+      sessionStorage.clear();
+      
+      // 3. Show Message
+      this.showMessage('Logging out securely...', 'success');
+      
+      // 4. Redirect to Login Page after a brief delay
+      setTimeout(() => {
+          // Assuming the login page is at the root '/' or '/login'
+          // Adjust this URL based on your actual routing
+          window.location.href = 'student-login'; 
+      }, 1000);
+  }
+
   initializeShorts() {
     const rawShorts = [
         { title: 'Angular Tips', url: 'https://www.youtube.com/embed/placeholder1', likes: '1.2k', comments: '100', channel: 'CodeMaster' },
@@ -351,7 +370,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     
     if (studentId) {
       let fullName = loginData?.info?.full_name || loginData?.username || 'Student'; 
-      const storedStudentData = window.sessionStorage.getItem('STUDENT_DATA');
+      // FIX: Check localStorage first for persisted data
+      const storedStudentData = window.localStorage.getItem('STUDENT_DATA') || window.sessionStorage.getItem('STUDENT_DATA');
       if (storedStudentData) {
           const storedInfo = JSON.parse(storedStudentData).info;
           if (storedInfo && storedInfo.full_name) {
@@ -470,7 +490,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   private checkProfileCompletion(): void {
       const loginData = this.apiService.getStoredStudentData();
       const userId = loginData?.userId;
-      const isCompleteOnce = sessionStorage.getItem('cshub_profile_complete_once') === 'true'; 
+      // FIX: Check localStorage for persistent flags
+      const isCompleteOnce = (localStorage.getItem('cshub_profile_complete_once') || sessionStorage.getItem('cshub_profile_complete_once')) === 'true'; 
       
       if (!userId || isCompleteOnce) {
           this.isProfileComplete = isCompleteOnce; 
@@ -478,18 +499,81 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }
       
       this.resumeService.getResumeData(userId).pipe(
-          map(resume => {
-              this.isProfileComplete = !!resume && resume.full_name !== 'Not Found' && !!resume.full_name && !!resume.email && (resume.education?.length > 0);
+          map(resumeData => {
+              const apiData = resumeData as any;
+              
+              // === DATA MAPPING & NORMALIZATION LOGIC ===
+              // Map Flat API structure to Nested Frontend Structure
+              const mappedResume = {
+                  full_name: apiData.full_name || `${apiData.firstName || ''} ${apiData.lastName || ''}`.trim(),
+                  email: apiData.email,
+                  phone: apiData.phone,
+                  location: apiData.location || apiData.address,
+                  linkedin: apiData.linkedin || apiData.linkedinId,
+                  portfolio: apiData.portfolio || apiData.githubId,
+                  
+                  // Map Education: API uses 'qualification', 'university' -> Frontend 'degree', 'institution'
+                  education: (apiData.education || []).map((edu: any) => ({
+                      degree: edu.qualification || edu.degree,
+                      institution: edu.university || edu.institution,
+                      start_year: edu.joined_on || edu.start_year,
+                      end_year: edu.left_on || edu.end_year,
+                      grade: edu.marks || edu.grade
+                  })),
+                  
+                  // Map Skills: API uses 'skillName', 'proficiency' -> Frontend 'name', 'level'
+                  skills: (apiData.skills || []).map((skill: any) => ({
+                      name: skill.skillName || skill.name,
+                      level: skill.proficiency || skill.level
+                  })),
+                  
+                  // Map Projects: API uses 'projectName', 'techStack' -> Frontend 'title', 'tech_used'
+                  projects: (apiData.projects || []).map((proj: any) => ({
+                      title: proj.projectName || proj.title,
+                      url: proj.githubLink || proj.url,
+                      description: (proj.descriptions && proj.descriptions.length > 0) 
+                                   ? proj.descriptions[0].description 
+                                   : (proj.description || ''),
+                      tech_used: Array.isArray(proj.techStack) 
+                                 ? proj.techStack.map((t: any) => t.techName).join(', ') 
+                                 : (proj.techUsed || '')
+                  }))
+              };
+
+              // 1. Check for Completeness based on Mapped Data
+              const hasName = mappedResume.full_name && mappedResume.full_name !== 'Not Found';
+              const hasEmail = !!mappedResume.email;
+              const hasEducation = mappedResume.education.length > 0;
+
+              // 2. Determine completeness
+              this.isProfileComplete = !!hasName && !!hasEmail && hasEducation;
+
               if (this.isProfileComplete) {
-                   sessionStorage.setItem('cshub_profile_complete_once', 'true');
+                   console.log('Profile validated via API. Saving mapped data locally.');
+                   localStorage.setItem('cshub_profile_complete_once', 'true'); 
+                   
+                   // CRITICAL: Save the MAPPED data to localStorage so other components (Resume Gen) can use it!
+                   const studentDataToSave = {
+                       info: mappedResume,
+                       userId: userId
+                   };
+                   localStorage.setItem('STUDENT_DATA', JSON.stringify(studentDataToSave));
+                   
+                   // Update current dashboard state
+                   this.studentName = mappedResume.full_name;
+                   this.studentProfileData.full_name = mappedResume.full_name;
+              } else {
+                   console.warn('Profile incomplete based on API data');
               }
           }),
           catchError(error => {
+              console.error('Profile check API failed:', error);
               this.isProfileComplete = false;
               return of(null);
           })
       ).subscribe(() => {
-          if (!this.isProfileComplete && sessionStorage.getItem('cshub_profile_prompt_dismissed') !== 'true') {
+          const isDismissed = (localStorage.getItem('cshub_profile_prompt_dismissed') || sessionStorage.getItem('cshub_profile_prompt_dismissed')) === 'true';
+          if (!this.isProfileComplete && !isDismissed) {
               this.showProfileCompletionModal = true;
           }
           this.cdr.detectChanges();
@@ -498,7 +582,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   dismissProfileCompletionModal(): void {
       this.showProfileCompletionModal = false;
-      sessionStorage.setItem('cshub_profile_prompt_dismissed', 'true');
+      // FIX: Save dismiss state to localStorage
+      localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
   }
 
   // =========================================================================

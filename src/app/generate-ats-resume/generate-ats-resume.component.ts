@@ -88,8 +88,9 @@ export class GenerateAtsResumeComponent implements OnInit{
    * If valid data is found in sessionStorage, it sets it to resumeData and prevents redirection.
    */
   private loadFallbackData(userId: string): void {
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-          const storedData = window.sessionStorage.getItem('STUDENT_DATA');
+      if (typeof window !== 'undefined' && window.localStorage) { // FIX: Changed to localStorage
+          // FIX: Check localStorage first
+          const storedData = window.localStorage.getItem('STUDENT_DATA') || window.sessionStorage.getItem('STUDENT_DATA');
           if (storedData) {
               const loginData = JSON.parse(storedData);
               // Ensure we have the necessary nested info object and that it contains key data
@@ -99,7 +100,7 @@ export class GenerateAtsResumeComponent implements OnInit{
                   this.resumeData = loginData.info as StudentInfo; 
                   if (this.resumeData) {
                       this.divideSkillsIntoColumns(this.resumeData.skills);
-                      console.log('Resume Data Loaded from Fallback Session Storage.');
+                      console.log('Resume Data Loaded from Fallback Storage.');
                       this.isLoading.set(false);
                       
                       // NEW: Automatically trigger download if embedded in dashboard
@@ -228,10 +229,6 @@ export class GenerateAtsResumeComponent implements OnInit{
         
         // If embedded, notify the user that the download has finished
         if (this.isDashboardEmbed) {
-             // Replacing alert with console log and an internal message box is preferred, 
-             // but since we don't have the parent's message box, a temporary notification is best.
-             // window.alert is used here to ensure user sees the download confirmation.
-             // If a custom modal system were available, it would be used instead of alert.
              if (typeof window.alert === 'function') {
                  window.alert(`✅ ${opt.filename} successfully downloaded!`);
              } else {

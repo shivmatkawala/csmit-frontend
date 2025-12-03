@@ -74,9 +74,10 @@ export class CreateStudentComponent implements OnInit, OnDestroy {
   }
   
   loadSessionData(): void {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      // FIX: Rely only on the session storage item
-      const loginData = window.sessionStorage.getItem('cshub_student_login_data');
+    if (typeof window !== 'undefined' && window.localStorage) { // FIX: Changed to localStorage
+      // FIX: Check localStorage instead of sessionStorage
+      // Note: Ensure your login logic also saves to localStorage now!
+      const loginData = window.localStorage.getItem('cshub_student_login_data') || window.sessionStorage.getItem('cshub_student_login_data');
       let userId: string | null = null;
       
       if (loginData) {
@@ -91,9 +92,9 @@ export class CreateStudentComponent implements OnInit, OnDestroy {
       this.currentUserId.set(userId); 
       
       if (!userId) {
-        console.warn('CURRENT_USER_ID is not set in session storage. Please ensure user is authenticated.');
+        console.warn('CURRENT_USER_ID is not set in storage. Please ensure user is authenticated.');
       } else {
-        console.log('User ID loaded/set in session:', userId);
+        console.log('User ID loaded/set in storage:', userId);
       }
     }
   }
@@ -623,12 +624,11 @@ export class CreateStudentComponent implements OnInit, OnDestroy {
           info: studentInfoForAts 
         };
         
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-           window.sessionStorage.setItem('STUDENT_DATA', JSON.stringify(mockLoginData));
-           // Set permanent completion flag
-           window.sessionStorage.setItem('cshub_profile_complete_once', 'true');
-           // Dismiss transient modal flag
-           window.sessionStorage.setItem('cshub_profile_prompt_dismissed', 'true');
+        if (typeof window !== 'undefined' && window.localStorage) { // FIX: Changed to localStorage
+           // FIX: Persist data across browser sessions
+           window.localStorage.setItem('STUDENT_DATA', JSON.stringify(mockLoginData));
+           window.localStorage.setItem('cshub_profile_complete_once', 'true');
+           window.localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
         }
         
 
