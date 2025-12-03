@@ -1,0 +1,150 @@
+<div class="batch-management-container">
+  
+  <!-- LOADING SPINNER -->
+  <div *ngIf="loading" class="loader-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header-section">
+    <div class="title-group">
+      <h1 *ngIf="!selectedBatch">My Batches</h1>
+      <h1 *ngIf="selectedBatch">
+        <span class="breadcrumb-link" (click)="goBackToList()">My Batches</span> 
+        <i class="fas fa-chevron-right separator"></i> 
+        {{ selectedBatch.batch_name }}
+      </h1>
+      <p class="subtitle">Manage your learning journey and track progress.</p>
+    </div>
+    <button class="btn-back-home" (click)="goHome()" *ngIf="!selectedBatch">
+      <i class="fas fa-arrow-left"></i> Dashboard
+    </button>
+  </div>
+
+  <!-- VIEW 1: BATCH LIST (GRID) -->
+  <div class="batch-grid" *ngIf="!selectedBatch && batches.length > 0">
+    <div class="batch-card" *ngFor="let batch of batches">
+      <div class="card-image" [style.backgroundImage]="'url(' + batch.coverImage + ')'">
+        <div class="overlay">
+          <span class="status-badge">Active</span>
+        </div>
+      </div>
+      <div class="card-content">
+        <h3>{{ batch.batch_name }}</h3>
+        <p class="course-name"><i class="fas fa-book"></i> Course ID: {{ batch.course_id }}</p>
+        
+        <div class="progress-container">
+          <div class="progress-info">
+            <span>Progress</span>
+            <span>{{ batch.progress }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="fill" [style.width.%]="batch.progress"></div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="instructor">
+            <div class="avatar">{{ batch.instructor?.charAt(0) }}</div>
+            <span>{{ batch.instructor }}</span>
+          </div>
+          <button class="btn-view-details" (click)="viewBatchDetails(batch)">
+            View Details <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 1 EMPTY STATE -->
+  <div *ngIf="!selectedBatch && batches.length === 0" class="empty-state">
+    <img src="https://cdni.iconscout.com/illustration/premium/thumb/empty-state-2130362-1800926.png" alt="No Batches">
+    <h3>No Batches Assigned</h3>
+    <p>You haven't been enrolled in any batches yet.</p>
+  </div>
+
+  <!-- VIEW 2: DETAILED BATCH VIEW -->
+  <div class="batch-detail-view" *ngIf="selectedBatch">
+    
+    <div class="detail-sidebar">
+      <div class="course-info-box">
+        <h2>{{ selectedBatch.batch_name }}</h2>
+        <p>Course ID: {{ selectedBatch.course_id }}</p>
+      </div>
+      
+      <ul class="detail-nav">
+        <li class="active"><i class="fas fa-list"></i> Content</li>
+        <li><i class="fas fa-calendar-alt"></i> Schedule</li>
+        <li><i class="fas fa-users"></i> Classmates</li>
+        <li><i class="fas fa-bullhorn"></i> Notices</li>
+      </ul>
+
+      <div class="instructor-card">
+        <h4>Instructor</h4>
+        <div class="instructor-profile">
+          <div class="big-avatar">{{ selectedBatch.instructor?.charAt(0) }}</div>
+          <div>
+            <strong>{{ selectedBatch.instructor }}</strong>
+            <span>Lead Trainer</span>
+          </div>
+        </div>
+        <button class="btn-msg">Message</button>
+      </div>
+    </div>
+
+    <div class="detail-content">
+      <div class="banner" [style.backgroundImage]="'url(' + selectedBatch.coverImage + ')'">
+        <div class="banner-content">
+            <h2>Welcome to Class</h2>
+            <p>Continue where you left off</p>
+            <button class="btn-resume">Resume Learning</button>
+        </div>
+      </div>
+
+      <div class="content-sections">
+        <!-- Subjects List -->
+        <div class="section-block">
+            <h3><i class="fas fa-layer-group"></i> Course Modules & Subjects</h3>
+            <div class="subject-list">
+                <div class="subject-item" *ngFor="let subject of selectedBatch.subjects; let i = index">
+                    <div class="index-box">{{ i + 1 }}</div>
+                    <div class="subject-info">
+                        <h4>{{ subject.subjectname }}</h4>
+                        <span>Video Lessons & Notes available</span>
+                    </div>
+                    <button class="btn-access"><i class="fas fa-play"></i></button>
+                </div>
+                <div *ngIf="!selectedBatch.subjects?.length" class="no-data">No subjects loaded.</div>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="mini-stat">
+                <i class="fas fa-clock" style="color: #6366f1;"></i>
+                <div>
+                    <strong>120</strong>
+                    <span>Hours Left</span>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                <div>
+                    <strong>24</strong>
+                    <span>Completed</span>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <i class="fas fa-trophy" style="color: #f59e0b;"></i>
+                <div>
+                    <strong>High</strong>
+                    <span>Performance</span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

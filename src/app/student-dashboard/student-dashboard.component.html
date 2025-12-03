@@ -30,8 +30,9 @@
           <a [class.active]="activePage === 'dashboard'" (click)="setActivePage('dashboard')">
               <i class="fas fa-home"></i> <span>Home</span>
           </a>
-          <a [class.active]="activePage === 'courses'" (click)="setActivePage('courses')">
-              <i class="fas fa-book"></i> <span>Courses</span>
+          <!-- UPDATED: Renamed to My Batches -->
+          <a [class.active]="activePage === 'batches'" (click)="setActivePage('batches')">
+              <i class="fas fa-book-reader"></i> <span>My Batches</span>
           </a>
           <a [class.active]="activePage === 'shorts'" (click)="setActivePage('shorts')" style="color: #ec4899;">
               <i class="fas fa-play-circle" style="font-size: 26px;"></i> <span>Shorts</span>
@@ -46,7 +47,7 @@
               <i class="fas fa-file-alt"></i> <span>Resume</span>
           </a>
 
-          <!-- NEW: Logout Button -->
+          <!-- Logout Button -->
           <a (click)="logout()" style="color: #ef4444; margin-top: 10px; border-top: 1px solid #f3f4f6;">
               <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
           </a>
@@ -59,7 +60,7 @@
         </div>
       </aside>
 
-      <!-- 2. CENTER CONTENT (Dashboard, Shorts, etc.) -->
+      <!-- 2. CENTER CONTENT -->
       <main class="main-content">
         
         <!-- DASHBOARD HOME -->
@@ -84,12 +85,14 @@
               </div>
           </section>
 
+          <!-- Quick Access Cards -->
           <section class="stats-cards-container">
               <div *ngFor="let card of quickAccessCards; let i = index" 
                   class="stat-card" 
                   [ngClass]="card.colorClass"
                   (click)="handleQuickCardClick(card.route)">
                 <p class="title">{{ card.title }}</p>
+                <!-- Display Batch Name specially -->
                 <p class="value" *ngIf="card.route === 'batches'">{{ studentAssignedBatches.length > 0 ? studentAssignedBatches[0].batch_name : 'No Batch' }}</p>
                 <p class="value" *ngIf="card.route !== 'batches'">{{ card.value }}</p>
                 
@@ -99,6 +102,16 @@
                 </div>
               </div>
           </section>
+        </ng-container>
+
+        <!-- NEW: BATCH MANAGEMENT COMPONENT -->
+        <ng-container *ngIf="activePage === 'batches'">
+          <!-- We pass studentId and the initial batches loaded -->
+          <app-course-batch-management 
+            [studentId]="studentProfileData.student_id" 
+            [initialBatches]="studentAssignedBatches"
+            (backToDashboard)="setActivePage('dashboard')">
+          </app-course-batch-management>
         </ng-container>
 
         <!-- SHORTS PAGE -->
@@ -131,7 +144,7 @@
             <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
         </ng-container>
 
-        <ng-container *ngIf="['courses', 'assignments', 'career'].includes(activePage)">
+        <ng-container *ngIf="['assignments', 'career'].includes(activePage)">
             <div class="other-page-content">
                 <i class="fas fa-tools" style="font-size: 48px; color: #cbd5e1; margin-bottom: 20px;"></i>
                 <h1>{{ activePage | titlecase }}</h1>
@@ -141,7 +154,7 @@
         </ng-container>
       </main>
 
-      <!-- 3. RIGHT SIDEBAR (Schedule) - Hidden on mobile via CSS, hidden logic handled by grid -->
+      <!-- 3. RIGHT SIDEBAR (Schedule) -->
       <section class="right-schedule-card" *ngIf="activePage === 'dashboard'">
         <div class="current-time-display">
           <p class="current-time-text">Current Time: {{ currentTime }}</p>
@@ -183,9 +196,9 @@
         </div>
       </section>
 
-    </div> <!-- End Dashboard Grid -->
+    </div>
 
-    <!-- FULL SCREEN EXAM CONTAINER (Only visible during exam) -->
+    <!-- FULL SCREEN EXAM CONTAINER -->
     <div class="exam-fullscreen-container" *ngIf="activePage === 'attend-exam' && examToAttend">
          <app-attend-exam 
             [examId]="examToAttend.examId" 
@@ -196,20 +209,6 @@
     </div>
 
     <!-- Modals -->
-    <div *ngIf="showBatchModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>My Batches</h3>
-                <button class="close-button" (click)="closeBatchModal()">&times;</button>
-            </div>
-            <div class="modal-body" *ngFor="let batch of selectedBatchDetails">
-                <h4>{{ batch.batch_name }}</h4>
-                <p>{{ batch.description }}</p>
-            </div>
-            <div class="modal-footer"><button class="btn-cancel" (click)="closeBatchModal()">Close</button></div>
-        </div>
-    </div>
-
     <div *ngIf="showExamModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">

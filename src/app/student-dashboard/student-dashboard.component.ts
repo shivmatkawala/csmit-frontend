@@ -107,7 +107,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   studentProfileData: StudentProfileData = {
     full_name: 'Loading...',
     email: 'loading@example.com',
-    student_id: 'STU-0000', 
+    student_id: '',  // Initialize empty
     profileImageUrl: '',
     profileInitial: '',
     profileImagePlaceholder: true, 
@@ -143,11 +143,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     { 
       label: 'Batches Status', 
       title: 'My Batches', 
-      value: 'View Batch', 
+      value: 'View Details', // Updated
       icon: 'fas fa-users', 
       color: '#4338CA', 
       info: 'Loading Batch Status...', 
-      subText: 'Loading Batch Status...', 
+      subText: 'Click to view', // Updated
       colorClass: 'stat-blue', 
       route: 'batches' 
     },
@@ -285,19 +285,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   // --- LOGOUT FUNCTIONALITY ---
   logout(): void {
-      // 1. Clear Local Storage (Removes persistent data like User ID and Resume data)
       localStorage.clear();
-      
-      // 2. Clear Session Storage (Just to be safe, removes current session flags)
       sessionStorage.clear();
-      
-      // 3. Show Message
       this.showMessage('Logging out securely...', 'success');
-      
-      // 4. Redirect to Login Page after a brief delay
       setTimeout(() => {
-          // Assuming the login page is at the root '/' or '/login'
-          // Adjust this URL based on your actual routing
           window.location.href = 'student-login'; 
       }, 1000);
   }
@@ -364,13 +355,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             courseId: fallbackId
         };
         this.updateBatchCard(fallbackName, true);
-        this.updateFilterOptions(); // Update filters on fallback
+        this.updateFilterOptions(); 
         this.showMessage('Batch/Course data missing. Using defaults.', 'warning');
     };
     
     if (studentId) {
       let fullName = loginData?.info?.full_name || loginData?.username || 'Student'; 
-      // FIX: Check localStorage first for persisted data
       const storedStudentData = window.localStorage.getItem('STUDENT_DATA') || window.sessionStorage.getItem('STUDENT_DATA');
       if (storedStudentData) {
           const storedInfo = JSON.parse(storedStudentData).info;
@@ -392,11 +382,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           email: email, 
           student_id: studentId, 
           profileInitial: initial,
-          featureCards: this.quickAccessCards.map(card => ({
-              ...card,
-              label: card.title, 
-              info: card.subText,
-          }))
+          featureCards: this.quickAccessCards
       };
       
       return this.apiService.fetchStudentBatches(studentId).pipe(
@@ -416,7 +402,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               } else {
                   setDefaultFilters(1, 'No Assigned Batch');
               }
-              this.updateFilterOptions(); // Update filters after loading data
+              this.updateFilterOptions(); 
               this.loadingDashboardData = false;
               this.cdr.detectChanges(); 
               this.fetchExamsAndFilter(); 
@@ -444,11 +430,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           email: 'guest@university.edu',
           student_id: 'STU-0000',
           profileInitial: this.profileInitial,
-          featureCards: this.quickAccessCards.map(card => ({
-              ...card,
-              label: card.title, 
-              info: card.subText,
-          }))
+          featureCards: this.quickAccessCards
       };
       this.updateFilterOptions();
       this.cdr.detectChanges(); 
@@ -480,7 +462,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           } else if (isFallback) {
              batchInfo = `${batchName} (No Assignment Found)`;
           }
-          batchCard.value = batchName; 
+          batchCard.value = 'View Details'; 
           batchCard.subText = batchInfo;
           batchCard.info = batchInfo; 
           this.cdr.detectChanges();
@@ -490,7 +472,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   private checkProfileCompletion(): void {
       const loginData = this.apiService.getStoredStudentData();
       const userId = loginData?.userId;
-      // FIX: Check localStorage for persistent flags
       const isCompleteOnce = (localStorage.getItem('cshub_profile_complete_once') || sessionStorage.getItem('cshub_profile_complete_once')) === 'true'; 
       
       if (!userId || isCompleteOnce) {
@@ -502,8 +483,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           map(resumeData => {
               const apiData = resumeData as any;
               
-              // === DATA MAPPING & NORMALIZATION LOGIC ===
-              // Map Flat API structure to Nested Frontend Structure
               const mappedResume = {
                   full_name: apiData.full_name || `${apiData.firstName || ''} ${apiData.lastName || ''}`.trim(),
                   email: apiData.email,
@@ -512,7 +491,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                   linkedin: apiData.linkedin || apiData.linkedinId,
                   portfolio: apiData.portfolio || apiData.githubId,
                   
-                  // Map Education: API uses 'qualification', 'university' -> Frontend 'degree', 'institution'
                   education: (apiData.education || []).map((edu: any) => ({
                       degree: edu.qualification || edu.degree,
                       institution: edu.university || edu.institution,
@@ -521,13 +499,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                       grade: edu.marks || edu.grade
                   })),
                   
-                  // Map Skills: API uses 'skillName', 'proficiency' -> Frontend 'name', 'level'
                   skills: (apiData.skills || []).map((skill: any) => ({
                       name: skill.skillName || skill.name,
                       level: skill.proficiency || skill.level
                   })),
                   
-                  // Map Projects: API uses 'projectName', 'techStack' -> Frontend 'title', 'tech_used'
                   projects: (apiData.projects || []).map((proj: any) => ({
                       title: proj.projectName || proj.title,
                       url: proj.githubLink || proj.url,
@@ -540,34 +516,24 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                   }))
               };
 
-              // 1. Check for Completeness based on Mapped Data
               const hasName = mappedResume.full_name && mappedResume.full_name !== 'Not Found';
               const hasEmail = !!mappedResume.email;
               const hasEducation = mappedResume.education.length > 0;
 
-              // 2. Determine completeness
               this.isProfileComplete = !!hasName && !!hasEmail && hasEducation;
 
               if (this.isProfileComplete) {
-                   console.log('Profile validated via API. Saving mapped data locally.');
                    localStorage.setItem('cshub_profile_complete_once', 'true'); 
-                   
-                   // CRITICAL: Save the MAPPED data to localStorage so other components (Resume Gen) can use it!
                    const studentDataToSave = {
                        info: mappedResume,
                        userId: userId
                    };
                    localStorage.setItem('STUDENT_DATA', JSON.stringify(studentDataToSave));
-                   
-                   // Update current dashboard state
                    this.studentName = mappedResume.full_name;
                    this.studentProfileData.full_name = mappedResume.full_name;
-              } else {
-                   console.warn('Profile incomplete based on API data');
               }
           }),
           catchError(error => {
-              console.error('Profile check API failed:', error);
               this.isProfileComplete = false;
               return of(null);
           })
@@ -582,7 +548,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   dismissProfileCompletionModal(): void {
       this.showProfileCompletionModal = false;
-      // FIX: Save dismiss state to localStorage
       localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
   }
 
@@ -591,7 +556,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
   
   setActivePage(page: string): void {
-    const validPages = ['dashboard', 'courses', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts'];
+    const validPages = ['dashboard', 'courses', 'batches', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts'];
     if (validPages.includes(page)) {
       this.activePage = page;
       this.clearMessage();
@@ -603,10 +568,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   handleQuickCardClick(route: string): void {
       switch (route) {
           case 'batches':
-              this.openBatchModal();
+              // MODIFIED: Navigate to the full batch page instead of opening a modal
+              this.setActivePage('batches');
               break;
           case 'exams':
-              // Opens the Exam Modal when clicking "View Exams" on the dashboard card
               this.openExamModal(); 
               break;
           case 'assignments':
@@ -660,31 +625,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   openBatchModal(): void {
-      if (this.loadingDashboardData) {
-          this.showMessage('Please wait, dashboard data is loading...', 'warning');
-          return;
-      }
-      
-      if (this.studentAssignedBatches.length === 0) {
-          this.showMessage('No batches assigned.', 'warning');
-          return;
-      }
-      
-      this.selectedBatchDetails = this.studentAssignedBatches.map(batch => {
-          const course = this.availableCourses.find(c => c.course_id === batch.course_id);
-          return {
-              batchid: batch.batchid,
-              batch_name: batch.batch_name,
-              course_name: course ? course.course_name : `Course ID ${batch.course_id}`,
-              course_id: batch.course_id,
-              num_students: Math.floor(Math.random() * (60 - 30 + 1)) + 30, 
-              status: 'Active', 
-              description: `Batch for ${course?.course_name || 'Assigned Course'}.`
-          } as BatchDetailsModal; 
-      });
-      
-      this.showBatchModal = true;
-      this.cdr.detectChanges();
+     // NOTE: This legacy modal function is now superseded by the full page view,
+     // but kept in case specific fallback logic is needed.
+     this.handleQuickCardClick('batches');
   }
   
   closeBatchModal(): void {
@@ -697,7 +640,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         this.showMessage('Please wait, dashboard data is loading...', 'warning');
         return;
     }
-    // Ensures modal opens and re-filters exams just in case
     this.showExamModal = true;
     this.selectedExamId = null; 
     this.fetchExamsAndFilter();
@@ -709,13 +651,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
   
   startExam(): void {
-    // 1. Validate Selection
     if (!this.selectedExamId) {
         this.showMessage('Please select an exam to start.', 'warning');
         return;
     }
     
-    // 2. Find Exam Details
     const examDetails = this.allExams.find(e => e.examId === this.selectedExamId);
     
     if (!examDetails) {
@@ -723,11 +663,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         return;
     }
 
-    // 3. Set State for Exam Component
     this.examToAttend = examDetails;
     this.showMessage(`Starting Exam: ${examDetails.examName}`, 'success');
     
-    // 4. Close Modal and Switch Page
     this.closeExamModal();
     this.activePage = 'attend-exam'; 
     this.cdr.detectChanges(); 
@@ -878,7 +816,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         }),
         tap((allBatches: FilterBatch[]) => {
             this.availableBatches = allBatches;
-            this.updateFilterOptions(); // Update options when data loads
+            this.updateFilterOptions(); 
             this.cdr.detectChanges(); 
         }),
         catchError((error) => {
@@ -929,7 +867,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.isLoadingExams = true;
     this.selectedExamId = null;
     this.cdr.detectChanges();
-    // Always fetch fresh exams or ensure list is populated
     this.fetchAllActiveExams().subscribe(exams => {
         this.allExams = exams;
         this.applyExamFilter();
@@ -937,18 +874,15 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   applyExamFilter(): void {
-    // 1. Update batch dropdown based on new course selection
     this.updateFilterOptions();
 
     const courseId = this.selectedCourseId;
     const batchId = this.selectedBatchId;
     
-    // 2. Filter Exams
     if (this.allExams.length > 0) {
          if (courseId && batchId) {
              this.activeExams = this.allExams.filter(exam => exam.courseid === courseId && exam.batchid === batchId);
          } else {
-             // If no filter selected, show all
              this.activeExams = this.allExams;
          }
     } else {
@@ -962,7 +896,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     const now = new Date().getTime();
     this.activeExams.forEach(exam => {
         const endDate = new Date(exam.end_datetime).getTime();
-        // Simple logic: if end date is future, it is upcoming/active
         if (endDate > now) {
             this.upcomingExams.push(exam);
         } else { 
@@ -973,10 +906,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges(); 
   }
 
-  // --- Filter Logic ---
-  // Replaces the getters with a method to update array properties directly
   updateFilterOptions(): void {
-    // 1. Update Courses
     if (this.studentAssignedBatches.length > 0) {
         const courseIds = new Set(this.studentAssignedBatches.map(b => b.course_id));
         this.studentCoursesForFilter = this.availableCourses.filter(c => courseIds.has(c.course_id));
@@ -984,14 +914,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         this.studentCoursesForFilter = [...this.availableCourses];
     }
 
-    // 2. Update Batches
     if (this.selectedCourseId === null) {
         this.studentBatchesForFilter = [];
     } else {
-        // First get batches for the selected course
         const batchesInSelectedCourse = this.availableBatches.filter(b => b.course_id === this.selectedCourseId);
-        
-        // If student has assigned batches, filter further
         if (this.studentAssignedBatches.length > 0) {
             const assignedBatchIds = new Set(this.studentAssignedBatches.map(b => b.batchid));
             this.studentBatchesForFilter = batchesInSelectedCourse.filter(b => assignedBatchIds.has(b.batchid));

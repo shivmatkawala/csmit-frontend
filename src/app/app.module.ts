@@ -31,7 +31,8 @@ import { ManageCourseComponent } from './admin-panel/manage-course/manage-course
 import { BatchManagementComponent } from './admin-panel/batch-management/batch-management.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
-import { CommonModule } from '@angular/common'; // <-- Required for Pipes and *ngIf/for
+import { CommonModule } from '@angular/common';
+import { CourseBatchManagementComponent } from './student-dashboard/course-batch-management/course-batch-management.component'; // <-- Required for Pipes and *ngIf/for
 // NOTE: Assuming InputFieldComponent and FilterByCategoryPipe are small, local helper components. 
 // If they are standalone, they should not be declared here. Since your original plan was to break files, 
 // I'll assume they were meant to be declared here.
@@ -62,7 +63,8 @@ import { CommonModule } from '@angular/common'; // <-- Required for Pipes and *n
     ManageCourseComponent,
     BatchManagementComponent,
     StudentDashboardComponent,
-    GenerateAtsResumeComponent// <-- FIX 2: Fixes *ngIf, *ngFor, and the 'date' pipe error.
+    GenerateAtsResumeComponent,
+    CourseBatchManagementComponent// <-- FIX 2: Fixes *ngIf, *ngFor, and the 'date' pipe error.
   ],
   imports: [
     BrowserModule,
