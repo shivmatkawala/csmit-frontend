@@ -1,1011 +1,465 @@
-/* * Trainer Dashboard Styles - Synchronization with Student Theme 
- * Theme: Light background, Indigo Primary (#4338CA), Rose Accent (#F43F5E)
- * Font: Inter, sans-serif
- * Layout: Fixed Container with Left Sidebar and Right Schedule Card (Matching Student Layout)
- */
+:root {
+    --primary-indigo: #6366f1;
+    --primary-purple: #8b5cf6;
+    --primary-teal: #14b8a6;
+    --primary-amber: #f59e0b;
+    --primary-rose: #f43f5e;
+    --success: #10b981;
+    --error: #ef4444;
+    
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    --radius-xl: 20px;
+    --radius-2xl: 28px;
+}
 
-/* --- Base Theme & Global Styles (Matching Student) --- */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #F8FAFC; /* Light background for clean look */
-    color: #334155;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-attachment: fixed;
     margin: 0;
-    overflow-x: hidden;
+    min-height: 100vh;
 }
 
-/* --- Container and Header Layout (Matching Student) --- */
 .container {
-    position: relative;
-    max-width: 1440px;
-    width: 100%;
-    height: 979px; /* Fixed height for the immersive container structure */
+    max-width: 1600px;
     margin: 0 auto;
-    background-color: #F8FAFC;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); /* Soft shadow for container */
+    background: linear-gradient(to bottom, rgba(249, 250, 251, 0.98), rgba(255, 255, 255, 0.95));
+    min-height: 100vh;
+    padding-bottom: 20px;
 }
+
+/* ================= HEADER ================= */
 header {
-    position: relative;
-    width: 100%;
-    height: 64px;
-    background-color: white;
-    border-bottom: 1px solid #CBD5E1;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+    position: sticky;
+    top: 0;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
-    box-sizing: border-box;
+    padding: 0 28px;
     z-index: 100;
-}
-.logo-search {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-.logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-/* Trainer Logo style matching Student */
-.institute-logo {
-    width: 48px; 
-    height: 48px;
-    border-radius: 50%; /* Circular */
-    object-fit: cover;
-    border: 3px solid #E0E7FF; /* Light blue border */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
-}
-.institute-logo:hover {
-    border-color: #F43F5E; /* Accent color on hover */
-    transform: scale(1.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
-.search-wrapper {
-    position: relative;
-    flex-grow: 1;
-    max-width: 400px;
-}
-.search-wrapper input {
-    width: 100%;
-    max-width: 400px;
-    padding: 8px 12px 8px 36px;
-    border: 1px solid #CBD5E1;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #64748B;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.search-wrapper input:focus {
-    border-color: #4338CA;
-    box-shadow: 0 0 0 2px rgba(67, 56, 202, 0.2); /* Soft blue glow */
-}
-.search-wrapper i {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94A3B8;
-    font-size: 14px;
-    pointer-events: none;
-}
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px; 
-    flex-shrink: 0;
-}
-/* Replaced Student's 'Download Resume' with Trainer's 'Create Announcement' button style */
-.btn-request {
-    background-color: #4338CA; /* Blue accent for Action */
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background-color 0.2s ease, transform 0.1s;
-}
-.btn-request:hover {
-    background-color: #3730a3;
-    transform: translateY(-1px);
-}
-/* Trainer Avatar matching Student Avatar style */
-.user-avatar {
+.logo-search { display: flex; align-items: center; gap: 20px; }
+
+.institute-logo {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    object-fit: cover;
+    border: 3px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, var(--primary-indigo), var(--primary-purple)) border-box;
     cursor: pointer;
-    border: 3px solid #E0E7FF; /* Light blue border */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-    background-color: #F43F5E; /* Default background for initials (Red accent) */
-    color: white;
+}
+
+.search-wrapper { position: relative; width: 400px; }
+.search-wrapper input {
+    width: 100%; padding: 10px 18px 10px 45px;
+    border-radius: 50px; border: 1px solid transparent;
+    background: #f3f4f6; outline: none;
+}
+.search-wrapper i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #6366f1; }
+
+.btn-request {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    color: white; border: none; padding: 10px 24px;
+    border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px;
     font-weight: 600;
-    font-size: 18px; 
-    user-select: none;
-}
-.user-avatar:hover {
-    transform: scale(1.05);
-    border-color: #F43F5E; /* Accent color on hover */
-}
-.initial-text {
-    line-height: 1; 
 }
 
+.user-avatar {
+    width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer;
+}
 
-/* --- Sidebar (Matching Student) --- */
-aside.sidebar {
-    position: absolute;
-    top: 88px;
-    left: 34px;
-    width: 121px;
-    height: 874px;
-    background-color: white;
-    border: 1px solid #E2E8F0; 
-    border-radius: 8px; 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* ================= GRID LAYOUT SYSTEM ================= */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr 350px; 
+    gap: 24px; 
+    padding: 24px 28px; 
+    align-items: start; 
+    min-height: calc(100vh - 80px); 
+}
+
+/* ================= LEFT SIDEBAR ================= */
+.sidebar {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 20px 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 24px 8px;
-    box-sizing: border-box;
-    z-index: 10; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
-nav.sidebar-nav {
+
+.sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 48px;
-    align-items: center;
+    gap: 10px;
 }
-nav.sidebar-nav a {
-    background: none;
-    border: none;
-    color: #64748B;
-    font-size: 12px;
-    cursor: pointer;
+
+.sidebar-nav a {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    transition: color 0.2s ease, font-weight 0.2s;
-    user-select: none;
+    padding: 12px;
+    color: #6b7280;
     text-decoration: none;
-}
-nav.sidebar-nav a.active,
-nav.sidebar-nav a:hover {
-    color: #F43F5E; /* Red/Rose accent for active/hover */
-    font-weight: 600;
-}
-nav.sidebar-nav a i {
-    font-size: 20px;
-}
-.sidebar-bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 48px;
-}
-/* Toggle Switch - Matching Student Style */
-.toggle-switch {
-    position: relative;
-    width: 48px;
-    height: 24px;
-    background-color: #E0E7FF;
-    border-radius: 9999px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.2s;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.sidebar-nav a i { font-size: 20px; margin-bottom: 5px; }
+
+.sidebar-nav a:hover, .sidebar-nav a.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-indigo);
+}
+.sidebar-nav a.active { font-weight: bold; }
+
+.sidebar-bottom { text-align: center; margin-top: auto; padding-top: 20px; }
+
+.toggle-switch {
+    width: 48px; height: 26px; background: #e5e7eb;
+    border-radius: 50px; position: relative; cursor: pointer; margin: 0 auto;
 }
 .toggle-switch span {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background-color: #4338CA;
-    border-radius: 9999px;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-    transition: left 0.3s ease, background-color 0.3s;
+    width: 20px; height: 20px; background: white;
+    border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-.toggle-switch.active {
-    background-color: #22C55E; /* Green when active */
-}
-.toggle-switch.active span {
-    left: 26px;
-    background-color: white;
-}
-.sidebar-bottom a {
-    background: none;
-    border: none;
-    color: #64748B;
-    font-size: 20px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-    text-decoration: none;
-}
-.sidebar-bottom a:hover,
-.sidebar-bottom a.active {
-    color: #F43F5E;
-}
+.toggle-switch.active { background: #10b981; }
+.toggle-switch.active span { left: 25px; }
 
 
-/* --- Main Content Area (Layout matching Student) --- */
+/* ================= MAIN CONTENT (CENTER) ================= */
 .main-content {
-    position: absolute;
-    top: 88px;
-    left: 180px; /* Start after sidebar */
-    width: 800px; /* Width for left and middle columns combined in student design */
-    height: 874px;
-    /* Removed padding/margin to allow internal card positioning to take over */
-}
-
-
-/* -------------------------------------------------------- */
-/* --- CARD STYLES (ADAPTING TRAINER CONTENT TO STUDENT POSITIONS) --- */
-/* -------------------------------------------------------- */
-
-/* --- CARD 1: Trainer/Batch Info Card (Replaces Student's Good Morning Card) --- */
-.trainer-info-card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 251px;
-    height: 288px;
-    background-color: white;
-    border-radius: 8px; /* Consistent rounded corners */
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
-    text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: space-between; /* Space content vertically */
-}
-.trainer-info-card .profile-img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #4338CA; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    margin-bottom: 10px;
-}
-.trainer-info-card h2 {
-    font-weight: 700;
-    font-size: 18px;
-    margin: 0 0 4px 0;
-    color: #334155;
-}
-.trainer-info-card p.role {
-    font-size: 14px;
-    color: #64748B;
-    margin: 0 0 16px 0;
-}
-.trainer-info-card .batch-details {
-    margin-top: auto;
-    width: 100%;
-    padding-top: 16px;
-    border-top: 1px dashed #E2E8F0;
-}
-.trainer-info-card .batch-details p {
-    margin: 4px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #4338CA;
-}
-.trainer-info-card .batch-details span {
-    font-size: 12px;
-    font-weight: 500;
-    color: #94A3B8;
-}
-.trainer-info-card .time-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #F43F5E; /* Red accent for clock time */
-    font-weight: 600;
-    font-size: 20px;
+    gap: 24px;
 }
 
-/* --- CARD 2: 4 Stats Grid (Replaces Student's Metrics Container) --- */
+/* --- Trainer Info Card --- */
+.trainer-info-card {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column; /* Changed to column to match student card layout preference */
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    text-align: center;
+}
+
+/* PROFILE UPLOAD STYLES (Copied from Student Dashboard) */
+.profile-upload-container {
+    width: 100px; height: 100px; margin: 0 auto 15px;
+    cursor: pointer; position: relative;
+    z-index: 2;
+}
+.attractive-profile-circle {
+    width: 100%; height: 100%; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; background: rgba(255,255,255,0.1);
+    position: relative;
+}
+.uploaded-profile-img { width: 100%; height: 100%; object-fit: cover; }
+.camera-icon-overlay {
+    position: absolute; bottom: 0; right: 0;
+    background: #f43f5e; color: white; width: 30px; height: 30px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border: 2px solid white;
+}
+
+.trainer-text h2 { margin: 0; font-size: 24px; font-weight: 800; z-index: 2; position: relative; }
+.trainer-text .role { margin: 5px 0 0; opacity: 0.9; font-size: 14px; z-index: 2; position: relative; }
+.attractive-greeting-text { font-style: italic; opacity: 0.9; margin-top: 5px; }
+
+
+.batch-info-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 10px 20px;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    z-index: 2;
+    display: inline-block;
+}
+.batch-info-badge p { margin: 0; font-weight: bold; font-size: 16px; }
+.batch-info-badge span { font-size: 12px; opacity: 0.8; }
+
+/* --- Stats Cards --- */
 .stats-cards-container {
-    position: absolute;
-    top: 0;
-    left: 271px; 
-    width: 480px;
-    height: 288px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 134px);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
 }
 .stat-card {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
-    padding: 16px 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border: 2px solid #E2E8F0;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
+    background: white; padding: 20px; border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer;
+    transition: transform 0.2s; border-top: 4px solid transparent;
 }
-.stat-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-.stat-card .title {
-    font-weight: 700;
-    font-size: 13px;
-    margin: 0;
-    color: #334155;
-}
-.stat-card .value {
-    font-size: 2.5rem; 
-    font-weight: 800;
-    line-height: 1.1;
-    margin: 8px 0;
-}
-.stat-card .value-small { /* For Active Batch Name */
-    font-size: 1.25rem; 
-    font-weight: 700;
-    margin: 15px 0 10px 0;
-    line-height: 1.3;
-    color: #334155;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-}
-.stat-card .footer-info {
-    font-size: 11px;
-    color: #64748B;
-    border-top: 1px dashed #E2E8F0;
-    padding-top: 8px;
-    line-height: 1.3;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.stat-card:hover { transform: translateY(-5px); }
+
+.stat-card.stat-blue { border-top-color: var(--primary-indigo); }
+.stat-card.stat-yellow { border-top-color: var(--primary-amber); }
+.stat-card.stat-purple { border-top-color: var(--primary-purple); }
+.stat-card.stat-green { border-top-color: var(--success); }
+
+.stat-card .title { font-size: 13px; color: #6b7280; font-weight: 600; margin: 0; }
+.stat-card .value { font-size: 28px; font-weight: 800; margin: 10px 0; color: #1f2937; }
+.stat-card .value-small { font-size: 18px; font-weight: 700; margin: 15px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.stat-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #9ca3af; margin-top: auto;}
+
+/* --- Content Grid (Quick Actions & Bottom Panels) --- */
+.content-grid-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2/3 for Actions/Performance, 1/3 for Tasks */
+    gap: 24px;
 }
 
-/* Stat Card Colors (Using Student Feature Card Colors) */
-.stat-blue .value { color: #4338CA; }
-.stat-yellow .value { color: #F59E0B; }
-.stat-green .value { color: #10B981; }
-.stat-red .value { color: #F43F5E; }
-.stat-purple .value-small { color: #9F7AEA; } /* Active Batch */
-
-.quick-review-button {
-    background-color: #F59E0B; /* Yellow */
-    color: white;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 9999px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-/* --- CARD 3: Quick Actions (Replaces Student's Study Time Tracking Card) --- */
+/* Quick Actions */
 .quick-actions-card {
-    position: absolute;
-    top: 308px;
-    left: 0;
-    width: 751px; /* Combining student time tracking and half of next-holidays width */
-    height: 250px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
+    background: white; border-radius: 20px; padding: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
+.section-header { margin-bottom: 20px; font-size: 18px; font-weight: 700; color: #1f2937; border-bottom: 1px solid #f3f4f6; padding-bottom: 10px;}
+
 .actions-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
 }
 .action-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #F8FAFC;
-    color: #334155;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    padding: 12px 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 15px 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; cursor: pointer; transition: all 0.2s;
+    text-align: center; color: #4b5563;
+    font-size: 12px; font-weight: 600;
 }
-.action-button i {
-    font-size: 1.5rem;
-    margin-bottom: 8px;
-    color: #4338CA;
-}
+.action-button i { font-size: 24px; color: var(--primary-indigo); }
 .action-button:hover {
-    background-color: #4338CA;
-    color: white;
-    border-color: #4338CA;
-    box-shadow: 0 4px 10px rgba(67, 56, 202, 0.3);
-    transform: translateY(-2px);
+    background: var(--primary-indigo); color: white; border-color: var(--primary-indigo);
+    transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
 }
-.action-button:hover i {
-    color: white;
+.action-button:hover i { color: white; }
+
+/* Performance & Tasks Split */
+.split-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
 }
 
-/* --- CARD 4: Performance Analysis (Replaces Student's Top Courses Progress) --- */
-.performance-analysis-card {
-    position: absolute;
-    top: 578px;
-    left: 0;
-    width: 402px; /* Same width as student time tracking */
-    height: 374px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+.panel-card {
+    background: white; border-radius: 20px; padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    display: flex; flex-direction: column;
+    height: 400px; /* Fixed height for consistency */
 }
-.performance-analysis-card h3,
-.quick-actions-card h3 {
-    font-weight: 600;
-    font-size: 18px;
-    margin: 0 0 16px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #E2E8F0;
-}
-.performance-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    flex-grow: 1;
-}
+
+/* Performance List */
+.performance-list { overflow-y: auto; padding-right: 5px; }
 .performance-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 6px;
-    background-color: #F8FAFC;
-    border-left: 4px solid #4338CA;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px; background: #f9fafb; border-radius: 12px;
+    margin-bottom: 10px; border-left: 4px solid transparent;
 }
-.student-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #334155;
-}
-.student-image {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.skill-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-weight: 700;
-    flex-shrink: 0;
-    text-align: center;
-}
-.badge-top { background-color: #10B981; color: white; }
-.badge-struggle { background-color: #F43F5E; color: white; }
-/* NEW: Intermediate badge class for dynamic rendering */
-.badge-intermediate { background-color: #E0E7FF; color: #4338CA; }
+.performance-item.top { border-left-color: var(--success); }
+.performance-item.mid { border-left-color: var(--primary-indigo); }
+.performance-item.low { border-left-color: var(--error); }
 
+.student-mini { display: flex; align-items: center; gap: 10px; }
+.student-mini img { width: 32px; height: 32px; border-radius: 50%; }
+.status-badge { font-size: 10px; padding: 4px 8px; border-radius: 20px; font-weight: bold; }
+.status-badge.top { background: #d1fae5; color: #065f46; }
+.status-badge.mid { background: #e0e7ff; color: #3730a3; }
+.status-badge.low { background: #fee2e2; color: #991b1b; }
 
-/* --- CARD 5: Trainer To-Do/Tasks (Replaces Student's Video Card) --- */
-.tasks-card {
-    position: absolute;
-    top: 578px;
-    left: 422px; 
-    width: 375px; 
-    height: 374px; 
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    padding: 24px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-.tasks-card h3 {
-    font-weight: 600;
-    font-size: 18px;
-    margin: 0 0 16px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #E2E8F0;
-}
-.task-list {
-    flex-grow: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+/* Task List */
+.task-list { overflow-y: auto; padding-right: 5px; }
 .task-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-radius: 6px;
-    background-color: #F8FAFC;
-    border-left: 4px solid #F59E0B; /* Yellow for attention */
+    background: #fff; border: 1px solid #f3f4f6;
+    padding: 12px; border-radius: 12px; margin-bottom: 10px;
+    display: flex; flex-direction: column; gap: 5px;
+    position: relative; transition: all 0.2s;
 }
-.task-details {
-    flex-grow: 1;
+.task-item:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.05); transform: translateX(2px); }
+.task-priority { 
+    position: absolute; top: 12px; right: 12px; 
+    font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;
 }
-.task-details .text {
-    font-size: 14px;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 4px;
-}
-.task-details .countdown {
-    font-size: 11px;
-    color: #64748B;
-}
-.task-priority-tag {
-    font-size: 10px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: 700;
-    flex-shrink: 0;
-    background-color: #FEF2F2;
-    color: #F43F5E;
-}
-.task-item.high { border-left-color: #F43F5E; }
-.task-item.medium { border-left-color: #F59E0B; }
-.task-item.low { border-left-color: #4338CA; }
+.priority-High { background: #fee2e2; color: #ef4444; }
+.priority-Medium { background: #fef3c7; color: #d97706; }
+.task-text { font-weight: 600; font-size: 13px; color: #374151; padding-right: 60px; }
+.task-meta { font-size: 11px; color: #9ca3af; }
 
 
-/* --- CARD 6: Right Schedule Card (Matching Student) --- */
+/* ================= RIGHT SIDEBAR (SCHEDULE) ================= */
 .right-schedule-card {
-    position: absolute;
-    top: 88px;
-    left: 995px;
-    width: 350px;
-    height: 874px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
     padding: 24px;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    user-select: none;
+    box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.8);
 }
+
 .current-time-display {
-  text-align: right;
-  font-size: 12px;
-  color: #64748B;
-  margin-bottom: 15px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white; padding: 16px; border-radius: 16px;
+    text-align: center; margin-bottom: 24px;
+    font-weight: 600; font-size: 15px;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
 }
-.right-schedule-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-.right-schedule-header h3 {
-    font-weight: 600;
-    font-size: 18px;
-    margin: 0;
-}
-.right-schedule-header button {
-    background: none;
-    border: none;
-    color: #94A3B8;
-    font-size: 18px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-.right-schedule-header button:hover {
-    color: #334155;
-}
+
 .calendar-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; font-weight: 700; color: #374151;
 }
 .calendar-controls button {
-    background-color: #4338CA;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    background: #f3f4f6; border: none; width: 32px; height: 32px;
+    border-radius: 50%; cursor: pointer; color: #6b7280;
+    display: flex; align-items: center; justify-content: center;
 }
-.calendar-controls button:hover {
-    background-color: #3730a3;
-}
-.calendar-controls p {
-    font-weight: 600;
-    font-size: 14px;
-    margin: 0;
-}
+.calendar-controls button:hover { background: #e5e7eb; color: #111827; }
+
 .calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    font-size: 12px;
-    color: #64748B;
-    text-align: center;
-    margin-bottom: 8px;
-    user-select: none;
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    text-align: center; margin-bottom: 8px; font-size: 11px;
+    font-weight: 600; color: #9ca3af;
 }
+
 .calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    font-size: 12px;
-    color: #334155;
-    text-align: center;
-    height: auto;
-    margin-bottom: 16px;
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+    margin-bottom: 24px;
 }
-.calendar-days > div {
-    height: 32px;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: auto;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.calendar-days div {
+    height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500;
+    color: #4b5563; transition: all 0.2s;
 }
-.calendar-days > div:not(.inactive):hover {
-    background-color: #eef2ff;
+.calendar-days div:hover:not(.active):not(.inactive) { background: #f3f4f6; }
+.calendar-days div.active { background: #6366f1; color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4); }
+.calendar-days div.has-event { position: relative; }
+.calendar-days div.has-event::after {
+    content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px;
+    background: #f43f5e; border-radius: 50%;
 }
-.calendar-days .inactive {
-    color: #94A3B8;
-    cursor: default;
-}
-.calendar-days .active {
-    background-color: #4338CA;
-    color: white;
-    user-select: none;
-}
-.schedule-list {
-    flex-grow: 1;
-    overflow-y: auto;
-    font-size: 12px;
-    color: #64748B;
-    border-top: 1px solid #CBD5E1;
-    padding-top: 16px;
-}
-.schedule-list h5 {
-    font-weight: 600;
-    font-size: 14px;
-    color: #334155;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-}
+
+.schedule-list h5 { font-size: 11px; color: #6b7280; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+
 .schedule-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-    padding: 8px;
-    border-radius: 6px;
-    background-color: #F8FAFC;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    background: white; padding: 12px; border-radius: 12px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;
+    position: relative; overflow: hidden;
 }
+.schedule-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.schedule-item.class-item::before { background: #6366f1; }
+.schedule-item.meeting-item::before { background: #f59e0b; }
+.schedule-item.admin-item::before { background: #ef4444; }
+
 .schedule-item .date {
-    font-weight: 600;
-    font-size: 14px;
-    color: #334155;
-    flex-shrink: 0;
-    text-align: center;
-    line-height: 1.2;
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 36px; font-size: 10px; font-weight: 700; color: #6b7280;
+    background: #f9fafb; padding: 4px; border-radius: 6px;
 }
-.schedule-item .desc {
-    flex-grow: 1;
-    white-space: normal;
-    line-height: 1.2;
-    color: #64748B;
-}
-/* Styling for different item types (Trainer Specific) */
-.schedule-item.class-item {
-  background-color: #EFF6FF; 
-  border-left: 4px solid #3B82F6; /* Blue border */
-}
-.schedule-item.meeting-item {
-  background-color: #FFFBEB; 
-  border-left: 4px solid #F59E0B; /* Yellow border */
-}
-.schedule-item.admin-item {
-  background-color: #FEF2F2; 
-  border-left: 4px solid #EF4444; /* Red border */
-}
-.schedule-item.study-item {
-  background-color: #ECFDF5; 
-  border-left: 4px solid #10B981; /* Green border */
+.schedule-item .desc { font-size: 12px; color: #374151; margin: 0; font-weight: 500; }
+.join-button {
+    margin-left: auto; background: #10b981; color: white;
+    border: none; padding: 4px 10px; border-radius: 6px; font-size: 10px;
+    font-weight: bold; cursor: pointer;
 }
 
-.schedule-item .join-button {
-    background-color: #22C55E; /* Green join button */
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    flex-shrink: 0;
-}
-.schedule-item .join-button:hover {
-    background-color: #16a34a;
-}
-.no-schedule-message {
-  text-align: center;
-  padding: 15px;
-  color: #94A3B8;
-  font-size: 12px;
-  border: 1px dashed #E2E8F0;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-/* --- Modal Styles (Matching Student) --- */
+/* ================= MODAL ================= */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 2000;
+    display: flex; justify-content: center; align-items: center;
 }
 .modal-content {
-  background-color: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 450px;
-  display: flex;
-  flex-direction: column;
+    background: white; width: 90%; max-width: 450px; border-radius: 16px;
+    padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease;
 }
-.modal-content .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-.modal-content .close-button {
-  background: none;
-  border: none;
-  font-size: 1.8rem;
-  cursor: pointer;
-  color: #666;
-  padding: 0 5px;
-}
-.modal-content .form-group {
-  margin-bottom: 15px;
-}
-.modal-content label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #333;
-}
-.modal-content select,
-.modal-content textarea,
-.modal-content input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-.modal-content .modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-.modal-content .btn-cancel {
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #64748B;
-  color: white;
-  border: none;
-}
-.modal-content .btn-submit {
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #F43F5E; /* Student Accent Color */
-  color: white;
-  border: none;
-}
-.modal-content .btn-submit:disabled {
-    background-color: #94A3B8;
-    cursor: not-allowed;
-}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.modal-header h3 { margin: 0; }
+.close-button { background: none; border: none; font-size: 24px; cursor: pointer; }
 
-/* --- Responsive Adjustments (Matching Student) --- */
+.form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
+.form-group input, .form-group textarea {
+    width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+    margin-bottom: 15px; font-family: inherit;
+}
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+.btn-submit { background: #10b981; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.btn-cancel { background: #e5e7eb; color: #374151; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1200px) {
-  .container {
-    height: auto;
-    padding-bottom: 50px;
-  }
-  header {
-    padding: 0 15px;
-  }
-  .logo-search {
-    flex-grow: 1;
-  }
-  .search-wrapper {
-    max-width: none;
-  }
-  aside.sidebar {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: 100%;
-    height: auto;
-    border-right: none;
-    flex-direction: row;
-    justify-content: space-around;
-    padding: 15px 0;
-    margin-bottom: 20px;
-    border-radius: 0;
-  }
-  nav.sidebar-nav {
-    flex-direction: row;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .sidebar-bottom {
-    display: none;
-  }
-  .main-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 0 15px;
-    position: relative;
-    top: auto;
-    left: auto;
-    width: auto;
-    margin-left: 0;
-  }
-  /* Cards become relative and full width */
-  .trainer-info-card,
-  .stats-cards-container,
-  .quick-actions-card,
-  .performance-analysis-card,
-  .tasks-card,
-  .right-schedule-card {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: 100%;
-    height: auto;
-    margin-bottom: 0;
-    border-radius: 8px;
-  }
-  .stats-cards-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-  }
-  .right-schedule-card {
-    margin-top: 20px;
-  }
+    .dashboard-grid { grid-template-columns: 100px 1fr 300px; padding: 15px; }
+    .split-panels { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid { grid-template-columns: 1fr; padding: 10px 15px; }
+    .right-schedule-card { display: none; }
+    .sidebar { display: none; } /* Handled by bottom nav logic below if needed, or hide */
 }
 
 @media (max-width: 768px) {
-  .header-right {
-    gap: 10px;
-  }
-  .btn-request {
-    padding: 6px 12px;
-    font-size: 12px;
-    gap: 5px;
-  }
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-  }
-  nav.sidebar-nav a {
-    font-size: 10px;
-    gap: 4px;
-  }
-  nav.sidebar-nav a i {
-    font-size: 18px;
-  }
-  .stats-cards-container {
-    grid-template-columns: 1fr 1fr; /* Keep 2 columns if space allows */
-    gap: 10px;
-    height: auto;
-  }
-  .trainer-info-card {
-    min-height: 250px;
-  }
-  .actions-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+    header { padding: 0 15px; height: 60px; }
+    .search-wrapper { display: none; }
+    .btn-request span { display: none; } 
+    .btn-request { padding: 8px; width: 36px; height: 36px; justify-content: center; }
 
-@media (max-width: 480px) {
-  header {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 10px 15px;
-    gap: 10px;
-  }
-  .logo-search {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .search-wrapper {
-    width: 100%;
-    order: 3;
-    margin-top: 10px;
-  }
-  .header-right {
-    width: 100%;
-    justify-content: flex-end;
-  }
-  .trainer-info-card,
-  .quick-actions-card,
-  .performance-analysis-card,
-  .tasks-card,
-  .right-schedule-card {
-    padding: 15px;
-  }
-  .stats-cards-container {
-    grid-template-columns: 1fr; /* Stack on small mobile */
-  }
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
-  .task-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
+    .dashboard-grid { display: block; padding-bottom: 100px; }
+
+    /* Bottom Navigation for Mobile */
+    .sidebar {
+        display: block; position: fixed; bottom: 0; left: 0; width: 100%; height: auto;
+        background: white; border-radius: 20px 20px 0 0; 
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000; 
+        padding: 10px 0; margin: 0;
+    }
+    .sidebar-nav { flex-direction: row; justify-content: space-around; width: 100%; }
+    .sidebar-nav a { padding: 5px; gap: 4px; font-size: 10px; }
+    .sidebar-nav a i { font-size: 18px; margin: 0; }
+    .sidebar-bottom { display: none; }
+    
+    .trainer-info-card { flex-direction: column; text-align: center; padding: 20px; gap: 15px; }
+    .batch-info-badge { width: 100%; text-align: center; background: rgba(255,255,255,0.15); }
+    
+    .content-grid-row { display: flex; flex-direction: column; }
+    .split-panels { display: flex; flex-direction: column; }
+    .panel-card { height: auto; min-height: 300px; }
 }

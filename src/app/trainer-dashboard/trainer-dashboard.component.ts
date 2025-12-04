@@ -1,15 +1,18 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { ApiService, LoginResponse } from '../services/api.service'; // Assuming ApiService exists
+import { ResumeService } from '../services/create-resume.service'; // Assuming ResumeService exists
+import { catchError, map, tap } from 'rxjs/operators';
+import { of, interval, Subscription } from 'rxjs';
 
 // --- Interfaces for Data Models ---
 interface ScheduleItem {
-  date: string; // ISO date string: YYYY-MM-DD
+  date: string; 
   desc: string;
-  type: 'class' | 'meeting' | 'admin' | 'study'; // Trainer specific types
+  type: 'class' | 'meeting' | 'admin' | 'study'; 
   dayOfWeekShort?: string;
   dayOfMonth?: string;
   joinButton?: boolean;
 }
-
 interface CalendarDay {
   date: number | string;
   disabled: boolean;
@@ -25,71 +28,43 @@ interface BatchInfo {
     countdown: string;
 }
 
-interface StatCardData {
-    title: string;
-    iconPath: string; // SVG path or name for a custom icon
-    value: string;
-    subText: string;
-    colorClass: string;
-}
-
 interface TrainerDetails {
     name: string;
     role: string;
-    profileUrl: string; // Placeholder URL for profile image
+    profileUrl: string;
 }
 
-// --- NEW INTERFACE FOR CONFIGURATION DATA ---
+// --- CONFIGURATION INTERFACES ---
 interface NavLink {
-  id: 'dashboard' | 'attendance' | 'performance' | 'assignments';
+  id: 'dashboard' | 'attendance' | 'performance' | 'assignments' | 'resume';
   label: string;
-  icon: string; // Font Awesome class
+  icon: string;
 }
 
 interface ActionButton {
   label: string;
-  icon: string; // Font Awesome class
+  icon: string;
 }
 
-interface StudentPerformance {
-  name: string;
-  initials: string;
-  status: 'Top Performer' | 'Struggling' | 'Intermediate';
-  imageUrl: string; // Placeholder URL for student image
-  backgroundColor: string; // For placeholder image
-  color: string; // For placeholder image text
-}
-
-// --- HARDCODED CONFIGURATION DATA (Can be updated later) ---
-const CONFIG = {
+// --- STATIC UI CONFIG ---
+const UI_CONFIG = {
   SEARCH_PLACEHOLDER: "Search Batches, Students, Tasks...",
-  ANNOUNCEMENT_BUTTON: {
-    label: "Create Announcement",
-    icon: "fas fa-bullhorn"
-  },
+  // Removed 'Attendance' and 'Performance' from Sidebar Links
   SIDEBAR_LINKS: [
     { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-line' },
-    { id: 'attendance', label: 'Attendance', icon: 'fas fa-user-check' },
-    { id: 'performance', label: 'Performance', icon: 'fas fa-graduation-cap' },
     { id: 'assignments', label: 'Assignments', icon: 'fas fa-tasks' }
   ] as NavLink[],
+  // Restored Quick Actions
   QUICK_ACTIONS: [
-    { label: 'Take Attendance', icon: 'fas fa-user-check' },
-    { label: 'Upload Class Video', icon: 'fas fa-upload' },
-    { label: 'Create Assignment', icon: 'fas fa-edit' },
+    { label: 'Attendance', icon: 'fas fa-user-check' },
+    { label: 'Upload Video', icon: 'fas fa-upload' },
+    { label: 'New Task', icon: 'fas fa-edit' },
     { label: 'Announce', icon: 'fas fa-bullhorn' },
-    { label: 'View Performance', icon: 'fas fa-chart-bar' },
-    { label: 'Update Schedule', icon: 'fas fa-calendar-alt' },
-    { label: 'Review Labs', icon: 'fas fa-clipboard-list' },
-    { label: 'Student Chat', icon: 'fas fa-comments' },
-  ] as ActionButton[],
-  TOP_STUDENTS: [
-    { name: 'Alice S.', initials: 'AS', status: 'Top Performer', imageUrl: 'https://placehold.co/36x36/10B981/ffffff?text=AS', backgroundColor: '#10B981', color: 'white' },
-    { name: 'John K.', initials: 'JK', status: 'Struggling', imageUrl: 'https://placehold.co/36x36/F43F5E/ffffff?text=JK', backgroundColor: '#F43F5E', color: 'white' },
-    { name: 'Mary K.', initials: 'MK', status: 'Intermediate', imageUrl: 'https://placehold.co/36x36/4338CA/ffffff?text=MK', backgroundColor: '#4338CA', color: 'white' },
-    { name: 'Sam L.', initials: 'SL', status: 'Intermediate', imageUrl: 'https://placehold.co/36x36/4338CA/ffffff?text=SL', backgroundColor: '#4338CA', color: 'white' },
-    { name: 'Riya T.', initials: 'RT', status: 'Top Performer', imageUrl: 'https://placehold.co/36x36/10B981/ffffff?text=RT', backgroundColor: '#10B981', color: 'white' },
-  ] as StudentPerformance[]
+    { label: 'Performance', icon: 'fas fa-chart-bar' },
+    { label: 'Schedule', icon: 'fas fa-calendar-alt' },
+    { label: 'Labs', icon: 'fas fa-clipboard-list' },
+    { label: 'Chat', icon: 'fas fa-comments' },
+  ] as ActionButton[]
 };
 
 @Component({
@@ -98,49 +73,37 @@ const CONFIG = {
   styleUrls: ['./trainer-dashboard.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TrainerDashboardComponent {
-  // Expose CONFIG to the template
-  config = CONFIG;
+export class TrainerDashboardComponent implements OnInit, OnDestroy {
+  // Expose UI Config
+  config = UI_CONFIG;
 
-  // State for Dark Mode using Angular Signal
+  @ViewChild('fileInput') fileInputRef!: ElementRef;
+
+  // --- State Signals ---
   darkModeActive = signal(false);
-
-  // State for Student & Class Management Tabs 
-  activeTab = signal<'dashboard' | 'attendance' | 'performance' | 'assignments'>('dashboard');
-
-  // --- Trainer Data (Dummy) ---
-  trainerDetails: TrainerDetails = {
-    name: 'Dr. Anya Sharma',
-    role: 'Lead Full-Stack Trainer',
-    profileUrl: 'https://placehold.co/80x80/4338CA/ffffff?text=AS' 
-  };
-  trainerName = this.trainerDetails.name; 
-  currentTime = signal('');
-
-  // --- Dashboard Data (Mocked for all 8 modules) ---
+  activeTab = signal<'dashboard' | 'attendance' | 'performance' | 'assignments' | 'resume'>('dashboard');
   
-  // 1) My Batches
-  myBatches: BatchInfo[] = [
-    { name: 'Full-Stack 2025', strength: 45, timing: '10:00 AM - 1:00 PM', countdown: '2h 15m' }, 
-  ];
+  // Realtime Data Signals
+  currentTime = signal('');
+  greeting = signal('');
+  uploadedProfileImage = signal<string | ArrayBuffer | null>(null);
+  isLoading = signal(true);
 
-  // 2-5) Compact Stats Cards (Now 4 cards)
-  compactStats: StatCardData[] = [
-    { title: 'Attendance Today', iconPath: 'M5 13l4 4L19 7', value: '95%', subText: '5 students marked absent', colorClass: 'stat-blue' },
-    { title: 'Pending Review', iconPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-3', value: '23', subText: 'Assignments due', colorClass: 'stat-yellow' },
-    // Active Batch Info 
-    { title: 'Active Batch', iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', value: this.myBatches[0].name, subText: this.myBatches[0].strength + ' Students | ' + this.myBatches[0].timing, colorClass: 'stat-purple' },
-    // Test Performance Metric
-    { title: 'Test Performance', iconPath: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.407L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', value: '82%', subText: 'Avg. Batch Score', colorClass: 'stat-green' },
-  ];
+  // --- Trainer Data ---
+  trainerDetails: TrainerDetails = {
+    name: 'Loading...',
+    role: 'Trainer',
+    profileUrl: '' 
+  };
+  
+  // Profile Completion State
+  isProfileComplete: boolean = false;
+  showProfileCompletionModal: boolean = false;
+  userId: string | null = null;
 
-  // 6) Trainer Tasks / To-Do (Simple list for display)
-  toDoTasks = [
-    { id: 1, text: 'Review Pending Lab 3 Submissions', priority: 'High', countdown: 'Due Today' },
-    { id: 2, text: 'Prepare slides for Advanced Algorithms class', priority: 'Medium', countdown: '2 Days Left' },
-    { id: 3, text: 'Schedule 1-on-1 with Struggling Students', priority: 'High', countdown: '1 Day Left' },
-  ];
-
+  // --- Dynamic Dashboard Data ---
+  myBatches: BatchInfo[] = [];
+  
   // --- Calendar & Schedule State ---
   today = signal(new Date());
   displayedMonthStart = signal(new Date(this.today().getFullYear(), this.today().getMonth(), 1));
@@ -155,223 +118,267 @@ export class TrainerDashboardComponent {
   leaveEndDate = signal('');
   leaveReason = signal('');
 
+  private timeSubscription?: Subscription;
+
   // Computed signal for calendar header
   selectedMonthYear = computed(() =>
     this.displayedMonthStart().toLocaleString('en-US', { month: 'long', year: 'numeric' })
   );
 
-  constructor() {
-    this.updateClock();
-    setInterval(() => this.updateClock(), 1000);
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private apiService: ApiService,
+    private resumeService: ResumeService
+  ) {}
 
-    this.initializeScheduleData();
+  ngOnInit(): void {
+    this.updateClock();
+    this.timeSubscription = interval(1000).subscribe(() => this.updateClock());
+
+    // Initialize Calendar
     this.populateCalendar(this.displayedMonthStart());
-    this.updateDisplayedScheduleDetails();
+    
+    // Fetch Real Data
+    this.fetchTrainerDataFromStorage();
+  }
+
+  ngOnDestroy(): void {
+    if (this.timeSubscription) {
+      this.timeSubscription.unsubscribe();
+    }
   }
 
   // =========================================================================
-  // CLOCK LOGIC
+  // DATA FETCHING & INITIALIZATION
+  // =========================================================================
+
+  private fetchTrainerDataFromStorage(): void {
+    this.isLoading.set(true);
+    
+    // Retrieve User ID from Local Storage
+    const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
+    this.userId = loginData?.userId || null;
+
+    if (this.userId) {
+        let fullName = loginData?.info?.full_name || loginData?.username || 'Trainer';
+        const storedData = localStorage.getItem('TRAINER_DATA') || sessionStorage.getItem('TRAINER_DATA');
+        
+        if (storedData) {
+             const parsed = JSON.parse(storedData);
+             if (parsed.info && parsed.info.full_name) fullName = parsed.info.full_name;
+        }
+
+        this.trainerDetails = {
+            name: fullName,
+            role: 'Senior Trainer',
+            profileUrl: '' 
+        };
+        
+        this.checkProfileCompletion();
+        this.fetchDashboardStats();
+
+    } else {
+        this.trainerDetails.name = "Guest Trainer";
+        this.isLoading.set(false);
+    }
+  }
+
+  private checkProfileCompletion(): void {
+      if (!this.userId) return;
+
+      const isCompleteOnce = (localStorage.getItem('trainer_profile_complete') === 'true');
+
+      if (isCompleteOnce) {
+          this.isProfileComplete = true;
+          return;
+      }
+
+      this.resumeService.getResumeData(this.userId).pipe(
+          tap((data: any) => {
+              if (data && (data.full_name || data.firstName)) {
+                  this.isProfileComplete = true;
+                  localStorage.setItem('trainer_profile_complete', 'true');
+                  
+                  const name = data.full_name || `${data.firstName} ${data.lastName}`;
+                  this.trainerDetails.name = name;
+                  
+                  if (data.profileImageUrl) {
+                      this.uploadedProfileImage.set(data.profileImageUrl);
+                  }
+              } else {
+                  this.isProfileComplete = false;
+              }
+              this.cdr.detectChanges();
+          }),
+          catchError(err => {
+              console.error("Profile check failed", err);
+              this.isProfileComplete = false;
+              return of(null);
+          })
+      ).subscribe();
+  }
+
+  private fetchDashboardStats(): void {
+      setTimeout(() => {
+          // 1. Batches Data (Only this remains)
+          this.myBatches = [
+              { name: 'Full-Stack Batch A', strength: 42, timing: '10:00 AM', countdown: 'Live Now' }
+          ];
+          
+          // 5. Schedule
+          this.initializeScheduleData();
+
+          this.isLoading.set(false);
+          this.cdr.detectChanges();
+      }, 1000); 
+  }
+
+  // =========================================================================
+  // CLOCK & GREETING
   // =========================================================================
   private updateClock(): void {
     const now = new Date();
     this.currentTime.set(now.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
     }));
+    
+    const hour = now.getHours();
+    let greet = '';
+    if (hour >= 5 && hour < 12) greet = 'Good Morning! Ready to teach?';
+    else if (hour >= 12 && hour < 17) greet = 'Good Afternoon! Keep the energy up.';
+    else if (hour >= 17 && hour < 21) greet = 'Good Evening! Wrapping up soon?';
+    else greet = 'Good Night! Time to recharge.';
+    this.greeting.set(greet);
   }
 
   // =========================================================================
-  // SCHEDULE DATA AND INITIALIZATION (Dummy)
+  // PROFILE & ACTIONS
+  // =========================================================================
+
+  triggerProfileUpload(): void {
+    if(this.fileInputRef) this.fileInputRef.nativeElement.click();
+  }
+
+  onProfileImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.uploadedProfileImage.set(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+    }
+  }
+
+  goToProfileSetupForm(): void {
+    window.location.href = 'create-trainer'; 
+  }
+
+  goToResumeView(): void {
+      this.activeTab.set('resume');
+  }
+
+  // =========================================================================
+  // CALENDAR & SCHEDULE LOGIC
   // =========================================================================
 
   private initializeScheduleData(): void {
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    const dummyData: ScheduleItem[] = [];
-
-    // Add dummy classes/sessions/meetings for the current month
-    for (let i = 1; i <= 28; i++) {
-        const d = new Date(currentYear, currentMonth, i);
-        const dateISO = d.toISOString().slice(0, 10);
-        const dayOfWeekShort = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
-        const dayOfMonth = d.getDate().toString();
-
-        if (i % 7 === 1) { // Monday Class
-            dummyData.push({ date: dateISO, desc: 'CS501 Lecture: 10:00 AM - Online', type: 'class', dayOfWeekShort, dayOfMonth, joinButton: true });
-        }
-        if (i % 7 === 3) { // Wednesday Meeting
-            dummyData.push({ date: dateISO, desc: 'Student Performance Review Meeting', type: 'meeting', dayOfWeekShort, dayOfMonth, joinButton: true });
-        }
-        if (i % 7 === 5) { // Friday Admin
-            dummyData.push({ date: dateISO, desc: 'Curriculum Update Submission Deadline', type: 'admin', dayOfWeekShort, dayOfMonth });
-        }
-        if (i === 15) { // Mid-month Study/Prep
-            dummyData.push({ date: dateISO, desc: 'Personal Research & Prep Time', type: 'study', dayOfWeekShort, dayOfMonth });
-        }
-    }
-    // Sort schedule details
-    dummyData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const dummyData: ScheduleItem[] = [
+        { date: now.toISOString().slice(0, 10), desc: 'Live Class: Advanced Angular', type: 'class', dayOfWeekShort: 'TODAY', dayOfMonth: now.getDate().toString(), joinButton: true }
+    ];
     this.fullScheduleDetails.set(dummyData);
-  }
-
-  // =========================================================================
-  // CALENDAR LOGIC 
-  // =========================================================================
-
-  // Populates the calendar array for the given month.
-  populateCalendar(startDate: Date): void {
-    const year = startDate.getFullYear();
-    const month = startDate.getMonth();
-
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    const startDayOfWeek = firstDayOfMonth.getDay(); // 0 (Sun) to 6 (Sat)
-    const daysInMonth = lastDayOfMonth.getDate();
-
-    const newCalendarDays: CalendarDay[] = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // 1. Add placeholder days for the start of the week
-    for (let i = 0; i < startDayOfWeek; i++) {
-      newCalendarDays.push({ date: '', disabled: true, selected: false, fullDate: null, hasEvent: false });
-    }
-
-    // 2. Add actual days of the month
-    for (let i = 1; i <= daysInMonth; i++) {
-      const currentDay = new Date(year, month, i);
-      const dateISO = currentDay.toISOString().slice(0, 10);
-      
-      const hasEvent = this.fullScheduleDetails().some(item => item.date === dateISO);
-
-      // Check if this day is the currently selected date
-      const isSelected = this.selectedScheduleDate() 
-        ? currentDay.toDateString() === this.selectedScheduleDate()!.toDateString() 
-        : false;
-
-      newCalendarDays.push({
-        date: i,
-        disabled: false,
-        selected: isSelected, // Check against selectedScheduleDate
-        fullDate: currentDay,
-        hasEvent: hasEvent
-      });
-    }
-    this.calendarDays.set(newCalendarDays);
-  }
-
-  // Navigates the calendar view to the previous or next month.
-  navigateCalendar(direction: number): void {
-    const currentStart = this.displayedMonthStart();
-    const newMonthStart = new Date(currentStart);
-    newMonthStart.setMonth(newMonthStart.getMonth() + direction);
-    this.displayedMonthStart.set(newMonthStart);
-    
-    this.selectedScheduleDate.set(null); // Reset selection on month change
-    this.populateCalendar(newMonthStart);
     this.updateDisplayedScheduleDetails();
   }
 
-  // Handles the selection of a date on the calendar.
+  populateCalendar(startDate: Date): void {
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    const newDays: CalendarDay[] = [];
+
+    // Empty slots
+    for (let i = 0; i < startDayOfWeek; i++) {
+      newDays.push({ date: '', disabled: true, selected: false, fullDate: null, hasEvent: false });
+    }
+
+    // Days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const d = new Date(year, month, i);
+      const isSelected = this.selectedScheduleDate()?.toDateString() === d.toDateString();
+      newDays.push({
+        date: i, disabled: false, selected: isSelected, fullDate: d, hasEvent: false 
+      });
+    }
+    this.calendarDays.set(newDays);
+  }
+
+  navigateCalendar(direction: number): void {
+    const newStart = new Date(this.displayedMonthStart());
+    newStart.setMonth(newStart.getMonth() + direction);
+    this.displayedMonthStart.set(newStart);
+    this.selectedScheduleDate.set(null);
+    this.populateCalendar(newStart);
+  }
+
   onDateSelect(day: CalendarDay): void {
     if (day.fullDate) {
-      // If the same date is clicked, deselect it
-      if (this.selectedScheduleDate()?.toDateString() === day.fullDate.toDateString()) {
-          this.selectedScheduleDate.set(null);
-      } else {
-          this.selectedScheduleDate.set(day.fullDate);
-      }
-      
-      // Update calendar days array to reflect new selection state
-      this.populateCalendar(this.displayedMonthStart());
+      this.selectedScheduleDate.set(day.fullDate);
+      this.populateCalendar(this.displayedMonthStart()); // Refresh selection UI
       this.updateDisplayedScheduleDetails();
     }
   }
 
-  // Filters the full schedule data based on the selected date.
   updateDisplayedScheduleDetails(): void {
-    const selectedDate = this.selectedScheduleDate();
-    let filteredDetails: ScheduleItem[] = [];
-
-    if (selectedDate) {
-      const targetDateISO = selectedDate.toISOString().slice(0, 10);
-      filteredDetails = this.fullScheduleDetails().filter(item => item.date === targetDateISO);
-    } 
-    
-    // If no schedule details, add a 'No Event' item for the selected date.
-    if (selectedDate && filteredDetails.length === 0) {
-        const dateISO = selectedDate.toISOString().slice(0, 10);
-        const d = new Date(dateISO);
-        const dayOfWeekShort = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
-        const dayOfMonth = d.getDate().toString();
+    const selected = this.selectedScheduleDate();
+    let filtered: ScheduleItem[] = [];
+    if (selected) {
+        const iso = selected.toISOString().slice(0, 10);
+        filtered = this.fullScheduleDetails().filter(i => i.date === iso);
         
-        filteredDetails.push({
-            date: dateISO,
-            desc: 'No Classes or Meetings Scheduled Today!',
-            type: 'study',
-            dayOfWeekShort,
-            dayOfMonth
-        });
+        if (filtered.length === 0) {
+            filtered.push({ 
+                date: iso, desc: 'No events scheduled.', type: 'study', 
+                dayOfWeekShort: selected.toLocaleString('en-US', {weekday:'short'}).toUpperCase(),
+                dayOfMonth: selected.getDate().toString()
+            });
+        }
     }
-
-    this.scheduleDetails.set(filteredDetails);
+    this.scheduleDetails.set(filtered);
   }
 
-  // Helper to determine CSS class for schedule item type
   getScheduleTypeClass(type: ScheduleItem['type']): string {
     switch (type) {
       case 'class': return 'class-item';
       case 'meeting': return 'meeting-item';
       case 'admin': return 'admin-item';
-      case 'study': return 'study-item';
       default: return 'default-item';
     }
   }
 
-  // Helper function to get status-specific badge style
-  getBadgeClass(status: string): string {
-    switch (status) {
-        case 'Top Performer': return 'badge-top';
-        case 'Struggling': return 'badge-struggle';
-        case 'Intermediate': return 'badge-intermediate';
-        default: return '';
-    }
-  }
-
   // =========================================================================
-  // LEAVE FORM METHODS 
+  // LEAVE FORM
   // =========================================================================
 
   openLeaveForm(): void {
-    const selectedDate = this.selectedScheduleDate();
-    if (selectedDate) {
-      this.isLeaveFormOpen.set(true);
-      // Pre-fill start date with the selected calendar date
-      this.leaveStartDate.set(selectedDate.toISOString().substring(0, 10));
-    }
+    const d = this.selectedScheduleDate() || new Date();
+    this.leaveStartDate.set(d.toISOString().slice(0, 10));
+    this.isLeaveFormOpen.set(true);
   }
 
   closeLeaveForm(): void {
     this.isLeaveFormOpen.set(false);
-    // Reset form fields
     this.leaveStartDate.set('');
     this.leaveEndDate.set('');
     this.leaveReason.set('');
   }
 
   submitLeave(): void {
-    // Simple validation
-    if (!this.leaveStartDate() || !this.leaveEndDate() || !this.leaveReason()) {
-      console.error("Please fill all required fields.");
-      return;
-    }
-
-    // Close the form after submission (simulate success)
+    if (!this.leaveStartDate() || !this.leaveReason()) return;
     this.closeLeaveForm();
-    this.selectedScheduleDate.set(null); // Deselect date after application
-    console.log(`Leave application for ${this.leaveStartDate()} to ${this.leaveEndDate()} submitted successfully!`);
   }
 }

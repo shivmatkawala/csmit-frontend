@@ -23,6 +23,7 @@ export class LoginFormComponent {
       (res: LoginResponse) => {
         
         // FIX: Server se aaya hua role string (e.g., "Admin", "Trainer", "Student") use karenge.
+        // Hum .toUpperCase() use kar rahe hain taaki case-sensitivity ka issue na ho
         const authenticatedRole = res.role ? res.role.toUpperCase() : null; 
 
         if (!authenticatedRole) {
@@ -31,18 +32,20 @@ export class LoginFormComponent {
              return; 
         }
         
-        // ApiService ne login data (jismein userId shamil hai) ko pehle hi store kar diya hai.
-        // Yahan redundant storage hataya gaya hai.
         console.log('Login successful. ApiService stored user data for role:', authenticatedRole);
         
         // Navigation logic based STRICTLY on the authenticated role string from the server
         if (authenticatedRole === 'ADMIN') { 
           this.router.navigate(['/admin-panel']);
-        } else if (authenticatedRole === 'TRAINER') { 
+        } 
+        // FIX HERE: 'TRAINER' ke sath-sath 'ITRAINER' ko bhi check kiya
+        else if (authenticatedRole === 'TRAINER' || authenticatedRole === 'ITRAINER') { 
           this.router.navigate(['/trainer-dashboard']);
-        } else if (authenticatedRole === 'STUDENT') { 
+        } 
+        else if (authenticatedRole === 'STUDENT') { 
           this.router.navigate(['/student-dashboard']);
         } else {
+          // Agar role match nahi hua to error dikhayega
           this.errorMessage = `Login successful, but role '${res.role}' is unrecognized. Contact support.`;
         }
 
