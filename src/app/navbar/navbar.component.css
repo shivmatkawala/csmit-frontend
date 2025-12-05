@@ -1,27 +1,54 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;600;700&display=swap');
+
 /* --- Dashboard Container --- */
 .feature-dashboard-section {
   position: relative;
   padding: 4rem 0;
-  background-color: white;
-  min-height: 80vh; /* Minimum height maintain karega */
+  min-height: 80vh;
+  
+  /* --- BACKGROUND MATCHING CONTACT PAGE --- */
+  background-color: #f0f7ff;
+  background-image: 
+    linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
+    radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  /* Ensure container doesn't overflow on small screens */
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* --- 1. MODERN TABS DESIGN (Mobile Scrollable) --- */
+/* Loading & Empty States */
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 4rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  border: 2px dashed rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+}
+
+.loading-state p { font-size: 1.2rem; color: #64748b; font-weight: 500; }
+.empty-state h3 { font-size: 1.5rem; color: #1e293b; margin-bottom: 0.5rem; }
+.empty-state p { color: #64748b; }
+
+/* --- 1. Sticky Tabs Navigation --- */
 .dashboard-tabs-wrapper {
   display: flex;
   justify-content: center;
   margin-bottom: 3rem;
-  position: sticky; /* Sticky positioning magic */
-  top: 70px; /* Header height (70px) ke neeche stick karega */
-  z-index: 95; /* Header (z=1000) ke neeche, content ke upar */
+  position: sticky; 
+  top: 75px; /* Adjusted for header height */
+  z-index: 90;
   padding: 10px 0;
-  background: linear-gradient(to bottom, white 0%, rgba(249, 250, 251, 0.9) 80%, transparent 100%); /* Blur blend effect */
+  background: linear-gradient(to bottom, rgba(240, 247, 255, 0.95) 0%, rgba(240, 247, 255, 0.8) 80%, transparent 100%);
+  backdrop-filter: blur(5px);
 }
 
 .dashboard-tabs {
@@ -32,6 +59,9 @@
   display: flex;
   gap: 0.5rem;
   border: 1px solid rgba(0,0,0,0.03);
+  max-width: 100%;
+  /* Default desktop behavior */
+  overflow-x: visible; 
 }
 
 .tab-btn {
@@ -43,41 +73,41 @@
   font-weight: 600;
   color: #6b7280;
   cursor: pointer;
-  white-space: nowrap; /* Text break nahi hoga */
+  white-space: nowrap; 
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.tab-btn:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
-}
+.tab-btn:hover { background-color: #f3f4f6; color: #1f2937; }
 
 .tab-btn.active {
-  background-color: #2563eb; /* Primary Blue */
+  background-color: #2563eb; 
   color: white;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   transform: scale(1.02);
 }
 
-/* --- 2. BATCH VIEW STYLING --- */
+/* --- 2. Upcoming Batches View --- */
 .batch-card-hero {
   background: white;
   border-radius: 24px;
-  overflow: hidden;
+  overflow: hidden; /* Keeps image inside */
   box-shadow: 0 20px 40px rgba(0,0,0,0.05);
   display: flex;
   align-items: stretch;
-  border: 1px solid rgba(0,0,0,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   margin-bottom: 2rem;
+  /* Fix for mobile overflow */
+  max-width: 100%; 
 }
 
 .batch-image-side {
   width: 45%;
   position: relative;
   min-height: 300px;
+  flex-shrink: 0;
 }
 .batch-img {
   width: 100%;
@@ -85,9 +115,7 @@
   object-fit: cover;
   transition: transform 0.5s ease;
 }
-.batch-card-hero:hover .batch-img {
-  transform: scale(1.05);
-}
+.batch-card-hero:hover .batch-img { transform: scale(1.05); }
 
 .live-badge {
   position: absolute;
@@ -104,6 +132,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  z-index: 2;
 }
 .live-dot {
   width: 8px;
@@ -119,11 +148,12 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  box-sizing: border-box; /* Important for padding */
 }
 
 .tags-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Allows tags to wrap on small screens */
   gap: 10px;
   margin-bottom: 1.5rem;
 }
@@ -143,6 +173,7 @@
   color: #111827;
   margin-bottom: 1rem;
   line-height: 1.1;
+  word-wrap: break-word; /* Prevents long text overflow */
 }
 .batch-desc {
   color: #4b5563;
@@ -183,14 +214,16 @@
   box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
 }
 
-/* --- 3. NOTES VIEW STYLING --- */
+/* --- 3. Study Notes View --- */
 .notes-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 3rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  flex-wrap: wrap; /* Allows wrapping on mobile */
+  gap: 1.5rem;
 }
 .notes-header h3 { font-size: 2rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
 .notes-header p { color: #6b7280; font-size: 1.1rem; }
@@ -226,11 +259,11 @@
   align-items: center;
   gap: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   transition: transform 0.2s;
 }
 .stat-box:hover { transform: translateY(-5px); }
-.stat-icon { font-size: 2.5rem; background: #f0f9ff; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.stat-icon { font-size: 2.5rem; background: #f0f9ff; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .stat-info { display: flex; flex-direction: column; }
 .stat-val { font-size: 1.8rem; font-weight: 800; color: #111827; line-height: 1; margin-bottom: 5px; }
 .stat-lbl { font-size: 0.95rem; color: #64748b; font-weight: 500; }
@@ -268,8 +301,11 @@
   font-size: 1.6rem;
   flex-shrink: 0;
 }
-.res-details { flex-grow: 1; }
-.res-details h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; color: #1f2937; }
+.res-details { flex-grow: 1; overflow: hidden; } /* Prevents text overflow */
+.res-details h4 { 
+  font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; color: #1f2937;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Truncate long titles */
+}
 .res-meta { font-size: 0.85rem; color: #9ca3af; font-weight: 500; display: block; }
 .download-btn {
   background: #f1f5f9;
@@ -284,14 +320,15 @@
   justify-content: center;
   transition: all 0.2s;
   font-size: 1.2rem;
+  flex-shrink: 0;
 }
 .resource-card:hover .download-btn {
   background: #2563eb;
   color: white;
 }
 
-/* --- 4. SUCCESS STORIES (Wall of Fame) --- */
-.section-title-center { text-align: center; margin-bottom: 4rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+/* --- 4. Success Stories View --- */
+.section-title-center { text-align: center; margin-bottom: 4rem; max-width: 600px; margin-left: auto; margin-right: auto; padding: 0 1rem;}
 .section-title-center h3 { font-size: 2.5rem; font-weight: 900; color: #111827; letter-spacing: -0.5px; margin-bottom: 1rem; }
 .section-title-center p { color: #6b7280; font-size: 1.2rem; }
 
@@ -310,7 +347,10 @@
   border: 1px solid white;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
-  margin-top: 2rem; /* Space for image sticking out */
+  margin-top: 2rem; 
+  /* Ensure it doesn't overflow */
+  max-width: 100%; 
+  box-sizing: border-box;
 }
 .success-card:hover {
   transform: translateY(-10px);
@@ -353,7 +393,7 @@
   color: #059669;
   display: inline-block;
   padding: 6px 16px;
-  border-radius: 99px;
+  border-radius: 9999px;
   font-weight: 700;
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
@@ -361,18 +401,19 @@
 }
 .candidate-quote { font-style: italic; color: #4b5563; font-size: 0.95rem; line-height: 1.6; }
 
-/* --- ANIMATIONS --- */
 .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse-dot { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 
 /* =========================================
-   MOBILE RESPONSIVE RULES (Critical Updates)
+   MOBILE RESPONSIVE FIXES
    ========================================= */
 
+/* Tablet & Smaller Laptops */
 @media (max-width: 1024px) {
-  .batch-image-side { width: 100%; height: 300px; }
-  .batch-info-side { padding: 2.5rem; }
+  .batch-image-side { width: 100%; height: 250px; min-height: auto; }
+  .batch-card-hero { flex-direction: column; } /* Stack Batch Card */
+  .batch-info-side { width: 100%; padding: 2.5rem; }
   .batch-title { font-size: 2rem; }
   .modern-select { min-width: 200px; }
   .stats-row { gap: 1rem; }
@@ -381,64 +422,102 @@
   .stat-val { font-size: 1.4rem; }
 }
 
+/* Phones (Portrait & Landscape) */
 @media (max-width: 768px) {
   .feature-dashboard-section { padding: 2rem 0; }
-  
-  /* --- STICKY TABS MOBILE FIX --- */
+  .container { padding: 0 1rem; }
+
+  /* 1. Tabs - FIXED TO FIT SCREEN (No Cut Off) */
   .dashboard-tabs-wrapper {
-    top: 65px; /* Adjust based on your header height */
-    justify-content: flex-start; /* Start align for scroll */
-    padding: 10px 1rem; /* Side padding */
+    top: 65px; 
+    padding: 10px 0; 
     margin-bottom: 1.5rem;
-    overflow-x: auto; /* Allow wrapper scroll if needed */
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .dashboard-tabs {
     width: 100%;
-    overflow-x: auto; /* Enable Horizontal Scroll */
-    white-space: nowrap; /* Prevent wrapping */
-    justify-content: flex-start; /* Items start from left */
+    display: flex;
+    flex-wrap: wrap; /* Allows buttons to wrap to next line if needed */
+    justify-content: center; /* Center buttons */
+    gap: 8px; /* Gap between buttons */
     padding: 0.5rem;
-    border-radius: 12px; /* Less rounded on mobile */
-    /* Hide scrollbar */
-    scrollbar-width: none; 
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    border-radius: 12px; 
+    overflow: visible; /* Show everything */
+    white-space: normal;
   }
-  .dashboard-tabs::-webkit-scrollbar { display: none; }
 
   .tab-btn {
-    flex: 0 0 auto; /* Don't shrink buttons */
-    padding: 0.7rem 1.2rem;
-    font-size: 0.9rem;
+    flex: 1 1 auto; /* Allow growth but maintain base size */
+    padding: 0.6rem 0.8rem; /* Reduced Padding */
+    font-size: 0.85rem; /* Reduced Font Size */
+    margin: 0;
+    text-align: center;
+    justify-content: center;
   }
 
-  /* --- BATCH CARD MOBILE --- */
+  /* 2. Batch Card Mobile */
   .batch-card-hero {
-    flex-direction: column; /* Stack vertically */
     border-radius: 16px;
     margin-bottom: 1.5rem;
+    flex-direction: column;
   }
-  .batch-image-side { height: 220px; }
-  .batch-info-side { width: 100%; padding: 1.5rem; }
+  .batch-image-side { height: 200px; width: 100%; }
+  .batch-info-side { 
+    width: 100%; 
+    padding: 1.5rem; /* Reduced padding */
+  }
   .batch-title { font-size: 1.6rem; }
-  .batch-meta-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; }
-  .meta-item { flex-direction: row; justify-content: space-between; align-items: center; }
+  
+  /* Meta Grid - Stack vertically on small phones */
+  .batch-meta-grid { 
+    grid-template-columns: 1fr; 
+    gap: 1rem; 
+    padding: 1rem; 
+  }
+  .meta-item { 
+    flex-direction: row; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding-bottom: 8px;
+  }
+  .meta-item:last-child { border-bottom: none; padding-bottom: 0; }
+  
   .action-btn-primary { width: 100%; text-align: center; }
 
-  /* --- NOTES MOBILE --- */
-  .notes-header { flex-direction: column; align-items: flex-start; gap: 1rem; border-bottom: none; margin-bottom: 2rem; }
+  /* 3. Study Notes Mobile */
+  .notes-header { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 1rem; 
+    border-bottom: none; 
+    margin-bottom: 2rem; 
+  }
   .notes-header h3 { font-size: 1.8rem; }
   .modern-select { width: 100%; }
   
-  .stats-row { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem; }
+  /* Stats - Single Column */
+  .stats-row { 
+    grid-template-columns: 1fr; 
+    gap: 1rem; 
+    margin-bottom: 2rem; 
+  }
   .stat-box { padding: 1.2rem; }
   
+  /* Resources - Single Column */
   .resources-grid { grid-template-columns: 1fr; }
   .resource-card { padding: 1rem; }
 
-  /* --- SUCCESS STORIES MOBILE --- */
+  /* 4. Success Stories Mobile */
   .section-title-center h3 { font-size: 2rem; }
-  .stories-grid-modern { grid-template-columns: 1fr; gap: 3rem; }
-  .success-card { margin-top: 30px; }
+  .stories-grid-modern { 
+    grid-template-columns: 1fr; 
+    gap: 3rem; /* Space for the floating images */
+  }
+  .success-card { 
+    margin-top: 40px; /* Extra top margin for profile pic */
+    padding: 3rem 1.5rem 2rem 1.5rem;
+  }
 }

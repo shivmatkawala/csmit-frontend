@@ -1,0 +1,62 @@
+<div class="form-container">
+    <div class="form-header">
+        <h1>Add Success Story</h1>
+        <p>Celebrate student achievements by adding them to the Navbar Wall of Fame.</p>
+    </div>
+
+    <div *ngIf="message" class="alert" [class.success]="message.type === 'success'" [class.error]="message.type === 'error'">
+        {{ message.text }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="story-form">
+        
+        <div class="form-grid">
+            <!-- Student Details -->
+            <div class="form-group">
+                <label>Student Name</label>
+                <input type="text" [(ngModel)]="story.name" name="name" placeholder="e.g. Rahul Kumar" required>
+            </div>
+
+            <div class="form-group">
+                <label>Role / Designation</label>
+                <input type="text" [(ngModel)]="story.role" name="role" placeholder="e.g. Software Engineer" required>
+            </div>
+
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" [(ngModel)]="story.company" name="company" placeholder="e.g. Google" required>
+            </div>
+
+            <div class="form-group">
+                <label>Package (LPA)</label>
+                <input type="text" [(ngModel)]="story.package" name="package" placeholder="e.g. 12 LPA">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <!-- Images & Quote -->
+            <div class="form-group">
+                <label>Student Image URL</label>
+                <input type="text" [(ngModel)]="story.image" name="image" placeholder="https://..." required>
+            </div>
+
+            <div class="form-group">
+                <label>Company Logo URL</label>
+                <input type="text" [(ngModel)]="story.logo" name="logo" placeholder="https://..." required>
+            </div>
+        </div>
+
+        <div class="form-group full-width">
+            <label>Success Quote</label>
+            <textarea [(ngModel)]="story.quote" name="quote" rows="3" placeholder="Write a short inspiring quote from the student..."></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="goBack()">Cancel</button>
+            <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+                <span *ngIf="!isSubmitting">Publish Story</span>
+                <span *ngIf="isSubmitting">Saving...</span>
+            </button>
+        </div>
+    </form>
+</div>

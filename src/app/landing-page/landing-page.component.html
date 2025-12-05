@@ -1,32 +1,37 @@
 <div class="landing-page">
   <!-- 
-    1. Header ko 'pageChange' event listen karne ke liye update kiya.
-       Jab header se signal aayega, 'onPageChange' function chalega.
+    1. Header: Navigation signals receive karega.
   -->
   <app-header (pageChange)="onPageChange($event)"></app-header>
   
   <!-- 
-    2. HOME VIEW GROUP
-    Ye sirf tab dikhega jab currentView 'home' hoga.
-    Isme Hero Section aur Feature Navbar (Batches) hain.
+    2. HOME VIEW
+    Hero Section + Navbar (Batches)
   -->
   <div *ngIf="currentView === 'home'" class="fade-in-view">
     <app-section></app-section>
-    <app-navbar></app-navbar> <!-- Sticky Tabbed Section -->
+    <app-navbar></app-navbar> 
   </div>
 
   <!-- 
-    3. CONTACT VIEW GROUP
-    Ye sirf tab dikhega jab currentView 'contact' hoga.
-    Iska design contact.component.css se control hoga.
+    3. CONTACT VIEW
+    Smooth fade-in animation ke saath contact page
   -->
   <div *ngIf="currentView === 'contact'" class="fade-in-view">
     <app-contact></app-contact>
   </div>
 
   <!-- 
-    4. FOOTER
-    Footer loop se bahar hai, isliye ye hamesha dikhega.
+    4. BLOG VIEW (NEW ADDITION)
+    Ye section ab 'blog' click karne par smoothly open hoga.
+  -->
+  <div *ngIf="currentView === 'blog'" class="fade-in-view">
+    <app-blog></app-blog>
+  </div>
+
+  <!-- 
+    5. FOOTER
+    Footer hamesha content ke neeche rahega.
   -->
   <app-footer></app-footer>
 </div>

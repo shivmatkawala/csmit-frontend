@@ -33,10 +33,9 @@ import { StudentDashboardComponent } from './student-dashboard/student-dashboard
 import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
 import { CommonModule } from '@angular/common';
 import { CourseBatchManagementComponent } from './student-dashboard/course-batch-management/course-batch-management.component';
-import { ContactComponent } from './contact/contact.component'; // <-- Required for Pipes and *ngIf/for
-// NOTE: Assuming InputFieldComponent and FilterByCategoryPipe are small, local helper components. 
-// If they are standalone, they should not be declared here. Since your original plan was to break files, 
-// I'll assume they were meant to be declared here.
+import { ContactComponent } from './contact/contact.component';
+import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
+import { BlogComponent } from './blog/blog.component';
 
 @NgModule({
   declarations: [
@@ -66,7 +65,10 @@ import { ContactComponent } from './contact/contact.component'; // <-- Required 
     StudentDashboardComponent,
     GenerateAtsResumeComponent,
     CourseBatchManagementComponent,
-    ContactComponent// <-- FIX 2: Fixes *ngIf, *ngFor, and the 'date' pipe error.
+    ContactComponent,
+    CreateSuccessStoryComponent,
+    BlogComponent,
+    // <-- FIX 2: Fixes *ngIf, *ngFor, and the 'date' pipe error.
   ],
   imports: [
     BrowserModule,

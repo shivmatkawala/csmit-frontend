@@ -1,4 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { BatchDetail, Course, CreateBatchService } from '../services/create-batch.service';
+// Import new service
+import { SuccessStoriesService, SuccessStory } from '../services/success-stories.service';
 
 @Component({
   selector: 'app-navbar',
@@ -6,40 +10,20 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  // UI State
   selectedFeature: 'batch' | 'notes' | 'success' = 'batch';
+  isLoading = true;
   
-  // Data State
   featuredBatchIndex = 0;
-  featuredBatch: any;
-  selectedSyllabus: string = 'Full Stack Development';
+  featuredBatch: any = null;
+  upcomingBatches: any[] = [];
   
-  // Timers
+  selectedSyllabus: string = 'Full Stack Development';
   private batchInterval: any;
 
-  // --- 1. UPCOMING BATCHES DATA ---
-  upcomingBatches = [
-    {
-      courseName: 'Full Stack Java Masterclass',
-      startDate: '15th Nov 2025',
-      time: '7:00 PM - 9:00 PM',
-      mode: 'Live Online',
-      description: 'Learn Angular, Spring Boot, and Cloud deployment from scratch with live projects.',
-      tags: ['Job Guarantee', 'Live Project'],
-      imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      courseName: 'Data Science with Python',
-      startDate: '1st Dec 2025',
-      time: '8:30 PM - 10:30 PM',
-      mode: 'Hybrid',
-      description: 'Master AI/ML concepts, Pandas, NumPy and deploy models on AWS.',
-      tags: ['Placement Assist', 'Python'],
-      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80'
-    }
-  ];
+  // New Property for Real-Time Stories
+  successStories: SuccessStory[] = [];
+  isLoadingStories = false;
 
-  // --- 2. NOTES & RESOURCES DATA (Redesigned Structure) ---
   notesContentMap: any = {
     'Full Stack Development': {
       stats: [
@@ -70,61 +54,101 @@ export class NavbarComponent implements OnInit, OnDestroy {
   };
   syllabusOptions = Object.keys(this.notesContentMap);
 
-  // --- 3. SUCCESS STORIES DATA ---
-  successStories = [
-    { 
-      name: 'Rohan Sharma', 
-      role: 'SDE-1', 
-      company: 'Google', 
-      package: '24 LPA',
-      quote: "CSMIT transformed my career. The mentors were exceptional.",
-      image: 'https://randomuser.me/api/portraits/men/32.jpg',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png'
-    },
-    { 
-      name: 'Priya Verma', 
-      role: 'Frontend Dev', 
-      company: 'Microsoft', 
-      package: '18 LPA',
-      quote: "The live projects gave me the confidence to crack the interview.",
-      image: 'https://randomuser.me/api/portraits/women/44.jpg',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/2048px-Microsoft_logo.svg.png'
-    },
-    { 
-      name: 'Amit Kumar', 
-      role: 'Data Analyst', 
-      company: 'Amazon', 
-      package: '15 LPA',
-      quote: "From non-tech background to Amazon, thanks to the structured path.",
-      image: 'https://randomuser.me/api/portraits/men/86.jpg',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png'
-    },
-    { 
-      name: 'Sneha Reddy', 
-      role: 'UX Designer', 
-      company: 'Adobe', 
-      package: '12 LPA',
-      quote: "Best place to learn design thinking and implementation.",
-      image: 'https://randomuser.me/api/portraits/women/65.jpg',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Adobe_logo_2020.svg/512px-Adobe_logo_2020.svg.png'
-    }
-  ];
-
-  constructor() {}
+  constructor(
+      private batchService: CreateBatchService,
+      private successService: SuccessStoriesService
+  ) {}
 
   ngOnInit() {
-    this.featuredBatch = this.upcomingBatches[0];
-    this.startBatchRotation();
+    this.fetchRealTimeBatches();
+    this.fetchSuccessStories(); // Call API on load
   }
 
   ngOnDestroy() {
-    if (this.batchInterval) {
-      clearInterval(this.batchInterval);
-    }
+    this.stopBatchRotation();
   }
 
-  // --- Methods ---
+  // --- Success Stories API ---
+  fetchSuccessStories() {
+      this.isLoadingStories = true;
+      this.successService.getStories().subscribe({
+          next: (data) => {
+              this.successStories = data;
+              this.isLoadingStories = false;
+          },
+          error: (err) => {
+              console.error('Failed to load stories', err);
+              this.isLoadingStories = false;
+              // Optional: Keep old dummy data as fallback if API fails
+          }
+      });
+  }
 
+  // --- Batch API (Existing) ---
+  fetchRealTimeBatches() {
+    this.isLoading = true;
+    this.batchService.getCourses().subscribe({
+      next: (courses: Course[]) => {
+        if (courses.length === 0) {
+          this.handleEmptyBatches();
+          return;
+        }
+        const batchRequests = courses.map(course => 
+          this.batchService.getBatchesByCourse(course.courseid)
+        );
+        forkJoin(batchRequests).subscribe({
+          next: (responses: BatchDetail[][]) => {
+            const allActiveBatches = responses
+              .flat()
+              .filter(batch => batch.is_active === true);
+            this.mapToUIModel(allActiveBatches);
+          },
+          error: (err) => {
+            console.error('Error fetching batches', err);
+            this.handleEmptyBatches();
+          }
+        });
+      },
+      error: (err) => {
+        this.handleEmptyBatches();
+      }
+    });
+  }
+
+  mapToUIModel(backendBatches: BatchDetail[]) {
+    if (backendBatches.length === 0) {
+      this.handleEmptyBatches();
+      return;
+    }
+
+    const defaultImages = [
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80'
+    ];
+
+    this.upcomingBatches = backendBatches.map((batch, index) => ({
+      courseName: batch.course ? batch.course.coursename : 'Advanced Course',
+      startDate: 'Enrolling Now',
+      time: 'Check Schedule',
+      mode: 'Live Online',
+      description: `Join the active batch "${batch.batchName}". Comprehensive curriculum with live mentorship.`,
+      tags: ['Active', 'Placement Assist'],
+      imageUrl: defaultImages[index % defaultImages.length]
+    }));
+
+    this.featuredBatch = this.upcomingBatches[0];
+    this.isLoading = false;
+    this.startBatchRotation();
+  }
+
+  handleEmptyBatches() {
+    this.upcomingBatches = [];
+    this.featuredBatch = null;
+    this.isLoading = false;
+  }
+
+  // --- UI Logic ---
   selectFeature(feature: 'batch' | 'notes' | 'success') {
     this.selectedFeature = feature;
   }
@@ -138,9 +162,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   startBatchRotation() {
-    this.batchInterval = setInterval(() => {
-      this.featuredBatchIndex = (this.featuredBatchIndex + 1) % this.upcomingBatches.length;
-      this.featuredBatch = this.upcomingBatches[this.featuredBatchIndex];
-    }, 6000); // 6 seconds rotation
+    this.stopBatchRotation();
+    if (this.upcomingBatches.length > 1) {
+      this.batchInterval = setInterval(() => {
+        this.featuredBatchIndex = (this.featuredBatchIndex + 1) % this.upcomingBatches.length;
+        this.featuredBatch = this.upcomingBatches[this.featuredBatchIndex];
+      }, 6000);
+    }
+  }
+
+  stopBatchRotation() {
+    if (this.batchInterval) {
+      clearInterval(this.batchInterval);
+    }
   }
 }

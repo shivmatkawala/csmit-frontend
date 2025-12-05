@@ -96,6 +96,15 @@ const ADMIN_CONFIG = {
       colorClass: 'red', 
       route: '/upload-job' 
     },
+    // New Card Added Here
+    { 
+      title: 'Create Success Stories', 
+      subtitle: 'Share student placement stories and achievements on the wall of fame.', 
+      iconImage: 'success-story.png', // Make sure to add this image to your assets
+      buttonText: 'Add Success Story', 
+      colorClass: 'teal', 
+      route: '/create-success-story' 
+    },
   ] as AdminCard[]
 };
 

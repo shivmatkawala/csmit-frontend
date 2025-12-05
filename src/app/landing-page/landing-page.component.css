@@ -1,10 +1,18 @@
+/* Importing Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;600;700&display=swap');
+
 .landing-page {
-  background-color: white; 
+  background-color: #f0f7ff;
+  background-image: 
+    linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
+    radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
+    
   min-height: 100vh;
   font-family: 'Inter', sans-serif; 
+  position: relative;
 }
 
-/* Simple fade animation for smooth switching between Home and Contact */
 .fade-in-view {
   animation: fadeIn 0.5s ease-out;
 }

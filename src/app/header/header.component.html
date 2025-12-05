@@ -41,7 +41,11 @@
         </li>
 
         <li class="nav-item"><a href="#" class="nav-link">Careers</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
+        
+        <!-- UPDATED: Blog Link now triggers 'blog' view -->
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('blog', $event)">Blog</a>
+        </li>
         
         <!-- FIXED: Contact triggers 'contact' view -->
         <li class="nav-item">
@@ -92,9 +96,11 @@
         </a>
 
         <a href="#" class="mobile-item" (click)="toggleMenu()">Careers</a>
-        <a href="#" class="mobile-item" (click)="toggleMenu()">Blog</a>
         
-        <!-- FIXED: Mobile Contact also triggers 'contact' view -->
+        <!-- UPDATED: Mobile Blog Link -->
+        <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('blog', $event)">Blog</a>
+        
+        <!-- FIXED: Mobile Contact -->
         <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('contact', $event)">Contact</a>
         
         <div class="mobile-divider"></div>

@@ -1,13 +1,10 @@
 <!-- 
   MOBILE RESPONSIVE DASHBOARD
-  - Sticky Tabs below Header
-  - Horizontal Scroll on Mobile
-  - Stacked Cards on Mobile
 -->
 <section class="feature-dashboard-section" id="features">
   <div class="container">
     
-    <!-- 1. Sticky Tab Navigation (Scrollable on Mobile) -->
+    <!-- 1. Sticky Tab Navigation -->
     <div class="dashboard-tabs-wrapper">
       <div class="dashboard-tabs">
         <button 
@@ -39,9 +36,22 @@
     <!-- 2. Content Display Area -->
     <div class="dashboard-content-area">
 
-      <!-- VIEW A: Upcoming Batches -->
+      <!-- VIEW A: Upcoming Batches (Real Time) -->
       <div *ngIf="selectedFeature === 'batch'" class="content-view batch-view fade-in">
-        <div class="batch-card-hero">
+        
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-state">
+          <p>Loading active batches...</p>
+        </div>
+
+        <!-- No Batches State -->
+        <div *ngIf="!isLoading && (!upcomingBatches || upcomingBatches.length === 0)" class="empty-state">
+          <h3>No Active Batches</h3>
+          <p>Please check back later for new course announcements.</p>
+        </div>
+
+        <!-- Active Batch Card -->
+        <div *ngIf="!isLoading && featuredBatch" class="batch-card-hero">
           <div class="batch-image-side">
             <img [src]="featuredBatch.imageUrl" alt="Batch Cover" class="batch-img">
             <div class="live-badge"><span class="live-dot"></span> Enrolling Now</div>
@@ -75,8 +85,6 @@
 
       <!-- VIEW B: Notes & Resources -->
       <div *ngIf="selectedFeature === 'notes'" class="content-view notes-view fade-in">
-        
-        <!-- Header & Selector -->
         <div class="notes-header">
           <div class="header-text">
             <h3>Resource Library</h3>
@@ -89,7 +97,6 @@
           </div>
         </div>
 
-        <!-- Quick Stats Row -->
         <div class="stats-row">
           <div *ngFor="let stat of currentNotesData.stats" class="stat-box">
             <div class="stat-icon">{{ stat.icon }}</div>
@@ -100,7 +107,6 @@
           </div>
         </div>
 
-        <!-- Resources Grid -->
         <div class="resources-grid">
           <div *ngFor="let res of currentNotesData.resources" class="resource-card">
             <div class="res-icon-box">{{ res.icon }}</div>

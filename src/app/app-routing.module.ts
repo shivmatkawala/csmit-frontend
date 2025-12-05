@@ -17,6 +17,8 @@ import { CreateJobComponent } from './create-job/create-job.component';
 import { CreateExamComponent } from './createexam/createexam.component';
 import { AttendExamComponent } from './attend-exam/attend-exam.component';
 import { ContactComponent } from './contact/contact.component';
+import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
+import { BlogComponent } from './blog/blog.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -35,8 +37,9 @@ const routes: Routes = [
   {path:'upload-job',component:CreateJobComponent},
   {path:'create-exam',component:CreateExamComponent},
   {path:'attend-exam',component:AttendExamComponent},
-  { path: 'contact', component: ContactComponent }
-  
+  { path: 'contact', component: ContactComponent },
+  {path:'create-success-story',component:CreateSuccessStoryComponent},
+  {path:'blog',component:BlogComponent}
 ];
 
 @NgModule({

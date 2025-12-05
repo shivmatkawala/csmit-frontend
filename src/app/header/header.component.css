@@ -16,23 +16,34 @@
   --font-family-primary: 'Inter', sans-serif;
 }
 
-/* Base Header Styling */
+/* Base Header Styling - Updated Background to match Contact Page */
 .site-header {
   font-family: var(--font-family-primary);
   height: var(--header-height);
   padding: 0 2rem;
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 1000;
-  background-color: var(--background-light);
-  border-bottom: 1px solid transparent;
+  /* Z-INDEX BOOST: High enough to stay above everything */
+  z-index: 999; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
   transition: all var(--transition-fast);
+  /* REMOVED transform: translateZ(0) - This caused the sidebar issue */
+
+  /* --- NEW BACKGROUND (Contact Page Style) --- */
+  background-color: #f0f7ff;
+  background-image: 
+    linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
+    radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
 }
 
 .site-header.scrolled {
   height: 70px;
-  border-color: var(--border-color);
+  border-color: rgba(0,0,0,0.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* Keep background slightly more opaque on scroll */
+  background-color: rgba(240, 247, 255, 0.98); 
+  backdrop-filter: blur(10px);
 }
 
 .container {
@@ -133,7 +144,7 @@
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  z-index: 1100;
+  z-index: 1100; 
 }
 
 .dropdown-menu.show {
@@ -205,7 +216,8 @@
   padding: 0;
   width: 30px; height: 20px;
   position: relative;
-  z-index: 1010;
+  /* Very high Z-Index to ensure it's always clickable */
+  z-index: 5200; 
 }
 .hamburger-menu span {
   display: block;
@@ -223,12 +235,14 @@
   position: fixed;
   top: 0; right: 0; bottom: 0;
   width: 320px;
-  background: white;
-  z-index: 1005;
+  background: #f0f7ff; 
+  background-image: linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%);
+  /* Ensure this is much higher than the header itself */
+  z-index: 2000; 
   box-shadow: -5px 0 15px rgba(0,0,0,0.1);
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-  overflow: hidden; /* Essential for sliding panels */
+  overflow: hidden; 
 }
 .mobile-nav.open { transform: translateX(0); }
 
@@ -236,7 +250,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.5);
-  z-index: 1000;
+  /* Overlay should be above header content but below nav */
+  z-index: 1500;
   opacity: 0;
   visibility: hidden;
   transition: 0.3s;
@@ -248,8 +263,8 @@
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  padding-top: 80px; /* Space for hamburger/header area */
-  background: white;
+  padding-top: 80px;
+  background: transparent; 
   transition: transform 0.3s ease-in-out;
   overflow-y: auto;
   display: flex;
@@ -294,7 +309,7 @@
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--dark-color);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -347,7 +362,7 @@
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(5px);
-  z-index: 2000;
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;

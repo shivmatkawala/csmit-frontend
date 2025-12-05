@@ -6,15 +6,20 @@
   margin-right: auto;
 }
 
-/* --- Redesigned Hero Section (Pure White Background) --- */
+/* --- Redesigned Hero Section (Updated Background) --- */
 .hero-section {
-  /* TOP PADDING REDUCED: Reduced from 10rem to 7.5rem to look good below the compact header */
   padding: 7.5rem 0 6rem 0; 
   position: relative;
   overflow: hidden;
-  color: #111827; /* Dark text */
-  background-color: #ffffff; /* --- PURE WHITE BACKGROUND --- */
-  z-index: 10; /* Added: Ensure hero content is visually above the video section */
+  color: #111827; 
+  z-index: 10;
+  
+  /* --- BACKGROUND MATCHING CONTACT PAGE --- */
+  background-color: #f0f7ff;
+  background-image: 
+    linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
+    radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
 }
 
 .hero-container {
@@ -26,14 +31,14 @@
 
 /* Left Content: Title, Subtitle, CTA */
 .hero-content-left {
-  max-width: 60%; /* Left side takes more space now that graphics are simplified */
+  max-width: 60%; 
   padding-right: 3rem;
   z-index: 2;
   animation: fadeInDown 1s ease-out;
 }
 
 .hero-title {
-  font-size: 3.5rem; /* Large font size */
+  font-size: 3.5rem; 
   font-weight: 900;
   line-height: 1.1;
   margin-bottom: 1rem;
@@ -80,7 +85,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Added perspective for 3D effect */
     transform-style: preserve-3d;
     perspective: 800px;
     z-index: 2;
@@ -92,7 +96,7 @@
     width: 60%;
     height: 60%;
     transform-style: preserve-3d;
-    animation: rotateAround 20s linear infinite; /* Slow 3D rotation */
+    animation: rotateAround 20s linear infinite; 
 }
 
 /* Animated Rings */
@@ -103,7 +107,7 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 1px solid rgba(0, 255, 255, 0.4); /* Cyan border */
+    border: 1px solid rgba(0, 255, 255, 0.4); 
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
 }
 
@@ -125,7 +129,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #00ffff; /* Bright Cyan */
+    background: #00ffff;
     box-shadow: 0 0 40px #00ffff, 0 0 80px rgba(0, 255, 255, 0.5);
     animation: neonPulse 2s infinite alternate;
 }
@@ -133,7 +137,7 @@
 /* Floating Data Flow Lines */
 .data-flow {
     position: absolute;
-    background: rgba(224, 58, 62, 0.8); /* Use the existing red accent color */
+    background: rgba(224, 58, 62, 0.8);
     border-radius: 50%;
     opacity: 0.8;
 }
@@ -156,32 +160,27 @@
 
 /* --- New Keyframe Animations for Tech Look --- */
 
-/* Main 3D rotation of the whole core */
 @keyframes rotateAround {
     from { transform: rotateY(0deg) rotateX(0deg); }
     to { transform: rotateY(360deg) rotateX(360deg); }
 }
 
-/* Rotation for ring 1 */
 @keyframes spinRing1 {
     from { transform: rotateX(70deg) rotateZ(0deg); }
     to { transform: rotateX(70deg) rotateZ(360deg); }
 }
 
-/* Rotation for ring 2 */
 @keyframes spinRing2 {
     from { transform: rotateX(20deg) rotateZ(0deg); }
     to { transform: rotateX(20deg) rotateZ(360deg); }
 }
 
-/* Neon glow pulse for the center node */
 @keyframes neonPulse {
     0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-/* Floating data particles animation */
 @keyframes floatData {
     0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
     25% { transform: translate(-20px, 15px) scale(0.9); opacity: 0.9; }
@@ -191,7 +190,6 @@
 }
 
 
-/* --- General Animations (Updated from Hero CSS) --- */
 @keyframes fadeInDown {
   from { transform: translateY(-30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -200,15 +198,18 @@
 /* --- Demo Classes Section Styling (Design Updates) --- */
 .demo-classes-section {
   padding: 5rem 0;
-  /* UPDATED: Increased top padding to clear the fixed header */
   padding-top: 8rem; 
-  /* Updated Background: Subtle gradient glow matching the tech theme */
-  background-color: #ffffff; 
+  
+  /* --- BACKGROUND MATCHING CONTACT PAGE --- */
+  background-color: #f0f7ff;
+  background-image: 
+    linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
+    radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
+    
   position: relative;
-  /* Add an overlay effect for the tech glow */
 }
 
-/* Neon Overlay for the Video Section */
+/* Neon Overlay for the Video Section - Adjusted to blend */
 .demo-classes-section::before {
     content: '';
     position: absolute;
@@ -216,9 +217,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Subtle radial gradient from the center, using the neon cyan color */
     background: radial-gradient(circle at 50% 10%, rgba(0, 255, 255, 0.04), transparent 40%);
-    pointer-events: none; /* Allows clicks to pass through */
+    pointer-events: none; 
     opacity: 0.8;
 }
 
@@ -240,15 +240,14 @@
   margin-right: auto;
 }
 
-/* Video Scroller Styling - No functional change */
+/* Video Scroller Styling */
 .video-scroller {
   max-width: 100%;
   overflow: hidden;
-  /* Mask gradient updated to use white, matching the background */
-  -webkit-mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
-  mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+  /* Mask gradient updated to use transparent edges */
+  -webkit-mask: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  mask: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
   margin-bottom: 2rem;
-  /* FIX: z-index badhaya gaya taaki yeh mobile menu overlay ke upar click ho sake */
   z-index: 100; 
   position: relative;
 }
@@ -279,29 +278,22 @@
   }
 }
 
-/* Redesigned Demo Card for a Premium, Tech Look */
+/* Demo Card */
 .demo-card {
-  /* Card width adjusted (360px to 300px) */
   width: 300px; 
   flex-shrink: 0;
   background-color: #ffffff;
   border-radius: 1.5rem;
-  /* Updated Shadow for a subtle neon glow effect */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 0 15px rgba(0, 255, 255, 0.1); 
-  /* Add a thin neon border */
   border: 1px solid rgba(0, 255, 255, 0.2); 
   overflow: hidden;
   cursor: pointer;
-  /* Updated transition for a smoother, bouncier feel */
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
-  /* FIX: z-index badhaya gaya taaki yeh mobile menu overlay ke upar click ho sake */
   z-index: 101; 
-  position: relative; /* Added: Needed for z-index to work */
+  position: relative; 
 }
 .demo-card:hover {
-  /* UPDATE: Hover lift reduced (-3px) to minimize jump/overlap */
   transform: translateY(-3px); 
-  /* Deeper shadow with a strong cyan glow */
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 255, 255, 0.3); 
 }
 
@@ -312,14 +304,12 @@
 
 .thumbnail-image {
   width: 100%;
-  /* UPDATE: Aspect Ratio set to 16/9 (1.77) to reduce image height */
   aspect-ratio: 16 / 9; 
   object-fit: cover;
   display: block;
   transition: transform 0.4s ease;
 }
 .demo-card:hover .thumbnail-image {
-    /* Zoom in effect slightly reduced */
     transform: scale(1.01); 
 }
 
@@ -329,7 +319,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%); /* Darker overlay for play icon visibility */
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -340,22 +330,22 @@
   opacity: 1;
 }
 
-/* Play Icon: More vibrant and prominent */
+/* Play Icon */
 .play-icon {
   width: 70px;
   height: 70px;
-  background-color: rgba(255, 255, 255, 1); /* Pure white circle */
+  background-color: rgba(255, 255, 255, 1);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #e03a3e; /* Use the primary red color */
+  color: #e03a3e; 
   box-shadow: 0 0 30px rgba(0,0,0,0.3);
   transform: scale(0.7);
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .demo-card:hover .play-icon {
-    transform: scale(0.9); /* Bounce effect slightly reduced */
+    transform: scale(0.9);
 }
 .play-icon svg {
   width: 35px;
@@ -367,7 +357,7 @@
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background-color: #111827; /* Dark tag for better contrast against white background */
+  background-color: #111827; 
   color: #fff;
   padding: 4px 10px;
   border-radius: 4px;
@@ -377,12 +367,11 @@
 }
 
 .video-info {
-  /* Added padding-bottom to increase vertical gap below the card content */
   padding: 1.5rem;
-  padding-bottom: 2rem; /* Increased from 1.5rem to 2rem for better gap */
+  padding-bottom: 2rem; 
 }
 .video-title {
-  font-size: 1.3rem; /* Slightly larger title */
+  font-size: 1.3rem; 
   font-weight: 700;
   color: #111827;
   line-height: 1.4;
@@ -462,7 +451,6 @@
 /* --- RESPONSIVE DESIGN FOR SECTION (Mobile Optimization) --- */
 @media (max-width: 1024px) {
   .hero-section {
-      /* TOP PADDING ADJUSTED FOR TABLET: Accounts for 70px header height */
       padding-top: 5rem;
       padding-bottom: 4rem;
   }
@@ -481,23 +469,21 @@
   .hero-graphics-right {
     width: 80%;
     max-width: 400px;
-    height: 300px; /* Giving it height so the core displays */
+    height: 300px; 
     margin-top: 2rem;
   }
   .demo-card {
-    /* Tablet view card size adjusted */
     width: 280px; 
   }
 }
 
 @media (max-width: 640px) {
   .hero-section {
-    /* TOP PADDING ADJUSTED FOR MOBILE: Accounts for 60px header height */
     padding-top: 4rem; 
     padding-bottom: 3rem;
   }
   .hero-title {
-    font-size: 2.2rem; /* Smaller title for mobile */
+    font-size: 2.2rem; 
   }
   .hero-subtitle {
     font-size: 0.95rem;
@@ -507,38 +493,33 @@
       height: 70%;
   }
   .flow-1, .flow-2 {
-      display: none; /* Hide floating elements for mobile performance */
+      display: none; 
   }
   
-  /* UPDATE: Phone card width further reduced */
   .demo-card {
     width: 230px; 
-    /* Slightly increased margin for better mobile spacing */
     margin: 0 0.5rem; 
   }
   .video-info {
     padding: 1rem;
-    padding-bottom: 1.5rem; /* Increased bottom padding for mobile */
+    padding-bottom: 1.5rem; 
   }
   .video-title {
     font-size: 1.1rem;
   }
 
-  /* Video Modal Optimization for phone (ensuring video plays well) */
   .video-modal-content {
-    /* Full width on very small screens for maximum video size */
-    width: 98%; /* 95% से 98% किया गया */
+    width: 98%; 
   }
   .close-modal-btn {
-    top: -30px; /* Button position adjusted */
+    top: -30px; 
     right: 5px;
   }
   .close-modal-btn svg {
     width: 28px;
     height: 28px;
   }
-  /* FIX: Added specific styles for iframe wrapper on mobile to ensure proper padding */
   .video-wrapper {
-      padding-bottom: 60%; /* Aspect ratio ko thoda adjust kiya for better fit */
+      padding-bottom: 60%; 
   }
 }
