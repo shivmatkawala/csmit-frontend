@@ -1,22 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 /**
- * Interface for the Subject data structure (as received from the API).
+ * Interface for the Subject data structure.
  */
 export interface Subject {
-  subjectid?: number; // Added optional for safety, though usually present
+  subjectid?: number;
   subjectname: string;
 }
 
-
+/**
+ * Interface for the Course data structure.
+ * * FIX: We have made fields Mandatory (removed '?') again to satisfy 
+ * the strict typing in 'manage-course' and 'create-course' components.
+ * The service will handle the mapping from backend lowercase fields.
+ */
 export interface Course {
-  courseId?: number; // Keep as optional for safety, but check for it in component
-  courseName: string;
-  contentUrl: string; // Assuming the content URL is either directly here or mapped
-  subjects: Subject[]; // FIX: Now an array of Subject objects for listing/fetching
-  // Other fields like contentid, created_at, etc., can be ignored for this component's logic.
+  courseId: number;      // Now Mandatory
+  courseName: string;    // Now Mandatory
+  contentUrl: string;    // Now Mandatory
+  subjects: Subject[];
+  
+  // Optional: You can keep these if you need to access raw fields, 
+  // but the app should primarily use the camelCase versions above.
+  created_at?: string;
 }
 
 @Injectable({
@@ -28,38 +37,60 @@ export class CreateCourseService {
   constructor(private http: HttpClient) { }
 
   /**
-   * For CREATE, we assume the backend takes a simple array of subject names (strings).
+   * CREATE: Sends a POST request to create a new course.
    */
   createCourse(data: { courseName: string, contentUrl: string, subjects: string[] }): Observable<any> {
     const apiUrl = this.baseUrl + 'course-create/';
-    console.log('Sending creation payload to API:', data);
     return this.http.post(apiUrl, data);
   }
 
   /**
-   * For LISTING, we expect the Course interface with Subject[] array.
+   * LIST: Fetches the list of courses from the backend.
+   * * FIX: Uses 'pipe(map(...))' to normalize data. 
+   * This converts backend snake_case/lowercase to frontend camelCase 
+   * ensuring components always get valid strings, fixing the TS errors.
    */
   listCourses(): Observable<Course[]> {
     const apiUrl = this.baseUrl + 'course-list/';
     console.log('Fetching course list from API:', apiUrl);
-    return this.http.get<Course[]>(apiUrl);
+
+    return this.http.get<any[]>(apiUrl).pipe(
+      map(rawCourses => {
+        return rawCourses.map(course => ({
+          // Map various possible ID fields to 'courseId'
+          courseId: course.courseId || course.courseid || course.contentid || 0,
+          
+          // Map various possible Name fields to 'courseName'
+          courseName: course.courseName || course.coursename || course.contentname || 'Unnamed Course',
+          
+          // Map content URL
+          contentUrl: course.contentUrl || course.contenturl || '',
+          
+          // Ensure subjects is an array
+          subjects: course.subjects || [],
+          
+          created_at: course.created_at
+        }));
+      })
+    );
   }
 
   /**
-   * For UPDATE, we assume the backend takes a courseId and a simple array of subject names (strings).
+   * UPDATE: Updates an existing course.
    */
   updateCourse(data: { courseId: number, courseName: string, contentUrl: string, subjects: string[] }): Observable<any> {
     if (!data.courseId) {
       return new Observable(observer => observer.error('Course ID is mandatory for update operation.'));
     }
     const apiUrl = this.baseUrl + 'course-update/';
-    console.log(`Sending update payload for Course ID ${data.courseId}:`, data);
     return this.http.put(apiUrl, data);
   }
   
+  /**
+   * DELETE: Deletes a course by ID.
+   */
   deleteCourse(courseId: number): Observable<any> {
     const apiUrl = `${this.baseUrl}course-delete/${courseId}/`;
-    console.log(`Sending delete request for Course ID ${courseId}:`, apiUrl);
     return this.http.delete(apiUrl);
   }
 }

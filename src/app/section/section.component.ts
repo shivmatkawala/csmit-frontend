@@ -27,7 +27,7 @@ export class SectionComponent implements OnInit {
       title: 'Python Full Stack Development',
       instructor: 'Intellipaat',
       duration: '10:02:24',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?q=80&w=1932&auto=format&fit=crop',
+      thumbnailUrl: '',
       youtubeVideoId: 'Fazx_fB3cQc'
     },
     {

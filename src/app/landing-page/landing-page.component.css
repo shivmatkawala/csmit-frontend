@@ -4,3 +4,12 @@
   font-family: 'Inter', sans-serif; 
 }
 
+/* Simple fade animation for smooth switching between Home and Contact */
+.fade-in-view {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,9 +1,32 @@
 <div class="landing-page">
-  <!-- FIX: app-header (fixed) aur app-navbar (sticky) ka order theek kiya gaya hai -->
-  <app-header></app-header>
+  <!-- 
+    1. Header ko 'pageChange' event listen karne ke liye update kiya.
+       Jab header se signal aayega, 'onPageChange' function chalega.
+  -->
+  <app-header (pageChange)="onPageChange($event)"></app-header>
   
-  <!-- Content Sections -->
-  <app-section></app-section>
-  <app-navbar></app-navbar> <!-- यह sticky navbar है -->
+  <!-- 
+    2. HOME VIEW GROUP
+    Ye sirf tab dikhega jab currentView 'home' hoga.
+    Isme Hero Section aur Feature Navbar (Batches) hain.
+  -->
+  <div *ngIf="currentView === 'home'" class="fade-in-view">
+    <app-section></app-section>
+    <app-navbar></app-navbar> <!-- Sticky Tabbed Section -->
+  </div>
+
+  <!-- 
+    3. CONTACT VIEW GROUP
+    Ye sirf tab dikhega jab currentView 'contact' hoga.
+    Iska design contact.component.css se control hoga.
+  -->
+  <div *ngIf="currentView === 'contact'" class="fade-in-view">
+    <app-contact></app-contact>
+  </div>
+
+  <!-- 
+    4. FOOTER
+    Footer loop se bahar hai, isliye ye hamesha dikhega.
+  -->
   <app-footer></app-footer>
 </div>

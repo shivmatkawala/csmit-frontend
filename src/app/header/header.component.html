@@ -5,96 +5,165 @@
 
   <div class="container header-container">
 
-    <!-- Left side: Logo -->
+    <!-- LEFT: Logo (Clicking sends to 'home') -->
     <div class="logo-container">
-      <a href="#" class="logo-link" (click)="zoomLogo()">
-        <img src="assets/logo.jpg" alt="Company Logo" class="logo-img" [class.zoomed]="isLogoZoomed">
+      <a href="javascript:void(0)" class="logo-link" (click)="zoomLogo()">
+        <img src="assets/logo.jpg" alt="CSMIT Logo" class="logo-img" [class.zoomed]="isLogoZoomed">
         <span class="logo-text">CSMIT</span>
       </a>
     </div>
 
-    <!-- CENTER: Main Navigation Links (Desktop) -->
+    <!-- CENTER: Desktop Navigation -->
     <nav class="main-nav desktop-nav-links">
-        <ul>
-          <li><a href="#">Courses</a></li>
-          <li><a href="#">Careers</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
+      <ul class="nav-list">
+        
+        <!-- Courses Dropdown -->
+        <li class="nav-item">
+          <a class="nav-link" 
+             [class.active]="isCoursesOpen" 
+             (click)="toggleCourses($event)">
+            Courses
+            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </a>
+
+          <div class="dropdown-menu" [class.show]="isCoursesOpen" (click)="$event.stopPropagation()">
+            <a *ngFor="let course of courses" 
+               class="dropdown-item" 
+               (click)="openEnrollmentModal(course.courseName)">
+               {{ course.courseName }}
+            </a>
+            <span *ngIf="courses.length === 0" class="dropdown-item" style="cursor: default; color: #888;">
+              Loading...
+            </span>
+          </div>
+        </li>
+
+        <li class="nav-item"><a href="#" class="nav-link">Careers</a></li>
+        <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
+        
+        <!-- FIXED: Contact triggers 'contact' view -->
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('contact', $event)">Contact</a>
+        </li>
+      </ul>
     </nav>
 
-    <!-- Right Group: Search Bar + Login Button + Hamburger -->
+    <!-- RIGHT: Desktop Login & Mobile Toggle -->
     <div class="actions-container right-group">
-      
-
-
-      <!-- Login Button: Modern Pill Design -->
-      <a routerLink="/login" class="login-btn desktop-login-btn">
+      <a routerLink="/login" class="login-btn desktop-only">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.5a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.638z" />
+           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.5a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.638z" />
         </svg>
         Log In
       </a>
 
-      <!-- Animated Hamburger Menu Icon (Mobile Only) -->
       <button class="hamburger-menu" (click)="toggleMenu()">
-        <span class="line line-1"></span>
-        <span class="line line-2"></span>
-        <span class="line line-3"></span>
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
-
     </div>
-
   </div>
 
-  <!-- Mobile Menu with animations -->
+  <!-- --- MOBILE NAVIGATION DRAWER --- -->
+  <div class="mobile-overlay" [class.open]="isMenuOpen" (click)="toggleMenu()"></div>
+  
   <nav class="mobile-nav" [class.open]="isMenuOpen">
-      <div class="mobile-nav-inner">
-        <!-- Links for mobile menu -->
-        <a href="#" style="--delay: 0.15s;" (click)="toggleMenu()">Courses</a>
-        <a href="#" style="--delay: 0.25s;" (click)="toggleMenu()">Careers</a>
-        <a href="#" style="--delay: 0.35s;" (click)="toggleMenu()">Blog</a>
-        <a href="#" style="--delay: 0.45s;" (click)="toggleMenu()">Contact</a>
-        <hr style="--delay: 0.55s;">
-        <div class="mobile-auth-buttons" style="--delay: 0.65s;">
-          <a routerLink="/login" class="login-btn mobile-login-btn-full" (click)="toggleMenu()">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.5a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.638z" />
-            </svg>
-            Log In
-          </a>
-        </div>
+    
+    <!-- PANEL 1: MAIN MENU -->
+    <div class="mobile-panel main-panel" [class.slide-left]="showMobileCourses">
+      <div class="mobile-nav-header">
+        <span class="menu-title">Menu</span>
       </div>
+      
+      <div class="mobile-links">
+        <a class="mobile-item has-arrow" (click)="openMobileCourses()">
+          <span class="flex-center">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="item-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.499 5.221 69.14 69.14 0 00-2.923.295m-15.684 0a69.14 69.14 0 012.922.295M3 14h18M12 14v8m0 0V14m0 8h.01" />
+             </svg>
+             Courses
+          </span>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </a>
+
+        <a href="#" class="mobile-item" (click)="toggleMenu()">Careers</a>
+        <a href="#" class="mobile-item" (click)="toggleMenu()">Blog</a>
+        
+        <!-- FIXED: Mobile Contact also triggers 'contact' view -->
+        <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('contact', $event)">Contact</a>
+        
+        <div class="mobile-divider"></div>
+        
+        <a routerLink="/login" class="mobile-login-btn" (click)="toggleMenu()">
+          Log In
+        </a>
+      </div>
+    </div>
+
+    <!-- PANEL 2: COURSES SUB-MENU -->
+    <div class="mobile-panel sub-panel" [class.slide-in]="showMobileCourses">
+      <div class="mobile-nav-header sub-header">
+        <button class="back-btn" (click)="closeMobileCourses()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back
+        </button>
+        <span class="menu-title">All Courses</span>
+      </div>
+
+      <div class="mobile-links">
+        <a *ngFor="let course of courses" 
+           class="mobile-item" 
+           (click)="openEnrollmentModal(course.courseName)">
+           {{ course.courseName }}
+        </a>
+        <span *ngIf="courses.length === 0" class="mobile-item" style="color: #888;">
+           Loading courses...
+        </span>
+      </div>
+    </div>
+
   </nav>
-  <div class="mobile-menu-overlay" [class.open]="isMenuOpen" (click)="toggleMenu()"></div>
 
 </header>
 
-<!-- NEW: Chatbot Modal/Popup (Centered, Responsive) -->
-<div class="chatbot-modal-overlay" [class.open]="isChatbotOpen" (click)="closeChatbotIfOutside($event)">
-  <div class="chatbot-popup-container">
-    <!-- Close Button -->
-    <button class="chatbot-close-btn" (click)="toggleChatbot()">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-    
-    <!-- Chatbot Header/Title -->
-    <div class="chatbot-header">
-      <img src="assets/bot.jpg" alt="AI Assistant" class="bot-header-icon">
-      <div class="bot-info">
-        <h3>CSMIT AI Assistant</h3>
-        <p>Ask anything about courses and admissions.</p>
+<!-- Enrollment Popup (UNCHANGED) -->
+<div class="modal-backdrop" *ngIf="isEnrollmentModalOpen" (click)="closeEnrollmentModal()">
+  <div class="enrollment-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3>Enroll Now</h3>
+        <p>Start your journey in {{ selectedCourse }}</p>
       </div>
+      <button class="close-modal-btn" (click)="closeEnrollmentModal()">✕</button>
     </div>
-    
-    <!-- Chatbot Component itself -->
-    <app-chatbot></app-chatbot> 
+    <div class="modal-body">
+      <div class="enroll-message">
+        <strong>Note:</strong> If you want more details regarding the course, please fill out this form to enroll. Our expert will call you.
+      </div>
+      <form (ngSubmit)="submitEnrollment()">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="John Doe" required [(ngModel)]="enrollmentForm.name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required [(ngModel)]="enrollmentForm.email">
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98765 43210" required [(ngModel)]="enrollmentForm.phone">
+        </div>
+        <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Request Callback' }}
+        </button>
+      </form>
+    </div>
   </div>
 </div>
-
-<!-- Floating Bot Button -->
-<a href="javascript:void(0)" class="floating-bot-btn" title="Chat with our AI Assistant" (click)="toggleChatbot()">
-  <img src="assets/bot.jpg" alt="AI Chatbot Icon" class="bot-icon-img">
-</a>
