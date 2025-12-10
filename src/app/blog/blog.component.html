@@ -19,9 +19,7 @@
       </div>
     </div>
 
-    <!-- MAIN SCROLLABLE BOX 
-         Added: #scrollContainer reference and Mouse Events for Pause/Resume 
-    -->
+    <!-- MAIN SCROLLABLE BOX -->
     <div class="pdf-scroll-container" 
          #scrollContainer
          (mouseenter)="pauseScroll()" 
@@ -29,48 +27,55 @@
          (touchstart)="pauseScroll()"
          (touchend)="resumeScroll()">
       
-      <!-- List Items -->
-      <div class="pdf-item" *ngFor="let doc of filteredDocuments">
-        
-        <!-- Left Side: Icon & Info -->
-        <div class="pdf-info">
-          <div class="pdf-icon">
-            <!-- PDF Icon SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd" />
-              <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
-            </svg>
-          </div>
-          
-          <div class="text-content">
-            <h3 class="doc-title">{{ doc.title }}</h3>
-            <p class="doc-desc">{{ doc.description }}</p>
-            <span class="doc-date">Uploaded on: {{ doc.uploadDate }}</span>
-          </div>
-        </div>
-
-        <!-- Right Side: Action Buttons -->
-        <div class="pdf-actions">
-          <button class="action-btn view-btn" (click)="viewPdf(doc)" title="View PDF">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span class="btn-text">View</span>
-          </button>
-          
-          <button class="action-btn download-btn" (click)="downloadPdf(doc)" title="Download PDF">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            <span class="btn-text">Download</span>
-          </button>
-        </div>
-
+      <!-- Loading Spinner (Shown while fetching data) -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Fetching latest documents...</p>
       </div>
 
+      <!-- List Items (Shown when data is loaded) -->
+      <ng-container *ngIf="!isLoading">
+          <div class="pdf-item" *ngFor="let doc of filteredDocuments">
+            
+            <!-- Left Side: Icon & Info -->
+            <div class="pdf-info">
+              <div class="pdf-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd" />
+                  <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
+                </svg>
+              </div>
+              
+              <div class="text-content">
+                <h3 class="doc-title">{{ doc.title }}</h3>
+                <p class="doc-desc">{{ doc.description }}</p>
+                <span class="doc-date">Uploaded on: {{ doc.uploadDate }}</span>
+              </div>
+            </div>
+
+            <!-- Right Side: Action Buttons -->
+            <div class="pdf-actions">
+              <button class="action-btn view-btn" (click)="viewPdf(doc)" title="View PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="btn-text">View</span>
+              </button>
+              
+              <button class="action-btn download-btn" (click)="downloadPdf(doc)" title="Download PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                <span class="btn-text">Download</span>
+              </button>
+            </div>
+
+          </div>
+      </ng-container>
+
       <!-- Empty State -->
-      <div class="empty-list" *ngIf="filteredDocuments.length === 0">
+      <div class="empty-list" *ngIf="!isLoading && filteredDocuments.length === 0">
         <p>No documents found matching your search.</p>
       </div>
 

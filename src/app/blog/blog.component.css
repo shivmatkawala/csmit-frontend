@@ -18,17 +18,14 @@
   position: relative;
   overflow: hidden;
   
-  /* --- ABSTRACT GEOMETRIC BACKGROUND (From Contact Page) --- */
-  background-color: #f0f7ff; /* Base Light Blue */
+  /* --- ABSTRACT GEOMETRIC BACKGROUND --- */
+  background-color: #f0f7ff;
   background-image: 
-    /* Soft Diagonal Gradient */
     linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
-    /* Geometric Shapes created with gradients */
     radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
 }
 
-/* Adding sharp geometric overlays for that 'Tech' look (From Contact Page) */
 .documents-page::before {
   content: '';
   position: absolute;
@@ -57,10 +54,9 @@
 }
 
 .container {
-  max-width: 900px; /* Thoda narrow width taaki list clean dikhe */
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  /* Ensure content sits above background shapes */
   position: relative;
   z-index: 1;
 }
@@ -76,7 +72,7 @@
   font-weight: 700;
   color: var(--text-dark);
   margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 0px rgba(255,255,255,0.5); /* Added for better visibility on pattern */
+  text-shadow: 2px 2px 0px rgba(255,255,255,0.5);
 }
 
 .page-subtitle {
@@ -103,7 +99,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.2rem;
-  z-index: 2; /* Ensure icon is above input background */
+  z-index: 2;
 }
 
 .search-box input {
@@ -116,7 +112,7 @@
   transition: all 0.3s;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
   box-sizing: border-box;
-  background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent */
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .search-box input:focus {
@@ -125,27 +121,23 @@
   background-color: #fff;
 }
 
-/* --- SCROLLABLE CONTAINER (The "Box") --- */
+/* --- SCROLLABLE CONTAINER --- */
 .pdf-scroll-container {
-  background: rgba(255, 255, 255, 0.95); /* Glass-like background */
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); /* Deeper shadow for pop */
-  max-height: 600px; /* Fixed height for scrolling */
-  overflow-y: auto;  /* Enable vertical scroll */
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+  max-height: 600px;
+  overflow-y: auto;
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(5px);
-  
-  /* Smooth Scrollbar Styling */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
-/* Webkit Scrollbar */
 .pdf-scroll-container::-webkit-scrollbar { width: 8px; }
 .pdf-scroll-container::-webkit-scrollbar-track { background: #f1f5f9; }
 .pdf-scroll-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-
 
 /* --- PDF List Item --- */
 .pdf-item {
@@ -159,8 +151,8 @@
 
 .pdf-item:last-child { border-bottom: none; }
 .pdf-item:hover { 
-  background-color: #f0f9ff; /* Light blue tint on hover */
-  transform: translateX(5px); /* Subtle shift effect */
+  background-color: #f0f9ff;
+  transform: translateX(5px);
 }
 
 /* Left Side */
@@ -168,13 +160,13 @@
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  flex: 1; /* Takes available space */
+  flex: 1;
 }
 
 .pdf-icon {
   width: 48px;
   height: 48px;
-  background-color: #fee2e2; /* Light Red */
+  background-color: #fee2e2;
   color: var(--danger-color);
   border-radius: 12px;
   display: flex;
@@ -251,11 +243,31 @@
 }
 .download-btn:hover { background-color: #0056b3; }
 
-/* Empty State */
-.empty-list {
+/* Empty State & Loading Styles */
+.empty-list, .loading-state {
   text-align: center;
   padding: 2rem;
   color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* ============================

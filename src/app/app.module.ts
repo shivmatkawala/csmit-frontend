@@ -36,6 +36,7 @@ import { CourseBatchManagementComponent } from './student-dashboard/course-batch
 import { ContactComponent } from './contact/contact.component';
 import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
 import { BlogComponent } from './blog/blog.component';
+import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,6 @@ import { BlogComponent } from './blog/blog.component';
     ContactComponent,
     CreateSuccessStoryComponent,
     BlogComponent,
-    // <-- FIX 2: Fixes *ngIf, *ngFor, and the 'date' pipe error.
   ],
   imports: [
     BrowserModule,
@@ -77,6 +77,7 @@ import { BlogComponent } from './blog/blog.component';
     HttpClientModule,
     FormsModule,
     CommonModule, 
+    UploadBlogComponent
     
   ],
   providers: [],

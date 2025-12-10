@@ -1,0 +1,198 @@
+/* Using variables from global styles mostly */
+.upload-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.header-section {
+  margin-bottom: 24px;
+}
+
+.header-section h2 {
+  font-size: 1.5rem;
+  color: var(--gray-800, #1f2937);
+  margin-bottom: 8px;
+}
+
+.header-section p {
+  color: var(--gray-500, #6b7280);
+}
+
+.form-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-200, #e5e7eb);
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700, #374151);
+  margin-bottom: 8px;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--gray-200, #e5e7eb);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus, textarea:focus {
+  border-color: var(--primary-indigo, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.error-border {
+  border-color: var(--error, #ef4444) !important;
+}
+
+.error-msg {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--error, #ef4444);
+  margin-top: 4px;
+}
+
+/* File Upload Styles */
+.file-upload-wrapper {
+  border: 2px dashed var(--gray-300, #d1d5db);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--gray-50, #f9fafb);
+  position: relative;
+}
+
+.file-upload-wrapper:hover, .file-upload-wrapper.dragging {
+  border-color: var(--primary-indigo, #6366f1);
+  background: #eef2ff;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--gray-500, #6b7280);
+}
+
+.upload-placeholder i {
+  font-size: 32px;
+  color: var(--primary-indigo, #6366f1);
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.file-preview i {
+  font-size: 24px;
+  color: var(--error, #ef4444); /* PDF color */
+}
+
+.file-info {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.filename {
+  font-weight: 500;
+  color: var(--gray-800, #1f2937);
+}
+
+.filesize {
+  font-size: 0.8rem;
+  color: var(--gray-500, #6b7280);
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--gray-400, #9ca3af);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.remove-btn:hover {
+  color: var(--error, #ef4444);
+}
+
+/* Button Styles */
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary-indigo, #6366f1), var(--primary-purple, #8b5cf6));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Status Message */
+.status-message {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.status-message.success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.status-message.error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

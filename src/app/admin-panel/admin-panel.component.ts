@@ -96,7 +96,6 @@ const ADMIN_CONFIG = {
       colorClass: 'red', 
       route: '/upload-job' 
     },
-    // New Card Added Here
     { 
       title: 'Create Success Stories', 
       subtitle: 'Share student placement stories and achievements on the wall of fame.', 
@@ -104,6 +103,15 @@ const ADMIN_CONFIG = {
       buttonText: 'Add Success Story', 
       colorClass: 'teal', 
       route: '/create-success-story' 
+    },
+    // New Card Added Here
+    { 
+      title: 'Upload Blog', 
+      subtitle: 'Upload and manage PDF blogs to share with students.', 
+      iconImage: 'blog.png', 
+      buttonText: 'Go to Upload Blog', 
+      colorClass: 'red', 
+      route: '/upload-blog' 
     },
   ] as AdminCard[]
 };

@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, NgZone, inject } from '@angular/core';
+import { ManageBlogService } from 'src/app/services/manage-blog.service';
 
 interface PdfDocument {
   id: number;
@@ -6,7 +7,7 @@ interface PdfDocument {
   description: string;
   uploadDate: string;
   fileName: string;
-  fileUrl: string;
+  // fileUrl hum ab on-demand fetch karenge API se
 }
 
 @Component({
@@ -16,99 +17,89 @@ interface PdfDocument {
 })
 export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
   
+  private blogService = inject(ManageBlogService);
+  
   // Container ko access karne ke liye ViewChild
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
   searchTerm: string = '';
   private scrollInterval: any;
   private isPaused = false;
+  isLoading = true; // Loading state flag
 
-  allDocuments: PdfDocument[] = [
-    {
-      id: 1,
-      title: 'Semester 1 - Computer Science Syllabus',
-      description: 'Complete syllabus breakdown for the first semester including C++ and Data Structures.',
-      uploadDate: '05 Dec, 2023',
-      fileName: 'CS_Sem1_Syllabus.pdf',
-      fileUrl: 'assets/docs/syllabus.pdf'
-    },
-    {
-      id: 2,
-      title: 'End Term Examination Schedule 2024',
-      description: 'Datesheet for upcoming winter examinations. Please check your subject codes carefully.',
-      uploadDate: '01 Dec, 2023',
-      fileName: 'Exam_Datesheet_2024.pdf',
-      fileUrl: '#'
-    },
-    {
-      id: 3,
-      title: 'Placement Drive - Google & Microsoft',
-      description: 'Eligibility criteria and registration form for the upcoming campus drive.',
-      uploadDate: '28 Nov, 2023',
-      fileName: 'Placement_Brochure.pdf',
-      fileUrl: '#'
-    },
-    {
-      id: 4,
-      title: 'Holiday List 2024',
-      description: 'List of official gazetted holidays for the academic year 2024.',
-      uploadDate: '20 Nov, 2023',
-      fileName: 'Holidays_2024.pdf',
-      fileUrl: '#'
-    },
-    {
-      id: 5,
-      title: 'Hostel Allocation List - Boys & Girls',
-      description: 'Final list of students allotted rooms in Block A and Block B.',
-      uploadDate: '15 Nov, 2023',
-      fileName: 'Hostel_List_Final.pdf',
-      fileUrl: '#'
-    },
-    {
-      id: 6,
-      title: 'Anti-Ragging Policy Guidelines',
-      description: 'Mandatory reading for all freshers and seniors regarding campus code of conduct.',
-      uploadDate: '10 Nov, 2023',
-      fileName: 'Anti_Ragging_Policy.pdf',
-      fileUrl: '#'
-    }
-  ];
-
+  allDocuments: PdfDocument[] = [];
   filteredDocuments: PdfDocument[] = [];
 
   constructor(private ngZone: NgZone) { }
 
   ngOnInit(): void {
-    this.filteredDocuments = this.allDocuments;
+    this.fetchDocuments();
+  }
+
+  fetchDocuments() {
+    this.isLoading = true;
+    this.blogService.getBlogs().subscribe({
+      next: (data) => {
+        // API response ko frontend interface me map kar rahe hain
+        this.allDocuments = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          description: item.description || 'No description available.',
+          uploadDate: this.formatDate(item.created_at || new Date().toISOString()),
+          fileName: `${item.title}.pdf`
+        }));
+        
+        this.filteredDocuments = this.allDocuments;
+        this.isLoading = false;
+
+        // Data aane ke thodi der baad scroll start karein
+        setTimeout(() => {
+          this.startAutoScroll();
+        }, 500);
+      },
+      error: (err) => {
+        console.error('Error fetching blogs:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   ngAfterViewInit() {
-    // View init hone ke baad scroll start karein
-    this.startAutoScroll();
+    // Scroll start ab data load hone ke baad hoga
   }
 
   ngOnDestroy() {
-    // Component destroy hone par interval clear karein
     this.stopAutoScroll();
   }
 
   // --- Auto Scroll Logic ---
   startAutoScroll() {
-    this.ngZone.runOutsideAngular(() => {
-      this.scrollInterval = setInterval(() => {
-        if (!this.isPaused && this.scrollContainer) {
-          const el = this.scrollContainer.nativeElement;
-          
-          // 1px niche scroll karo
-          el.scrollTop += 1;
+    this.stopAutoScroll(); // Clear existing if any
+    
+    // Only start if content exists and is scrollable
+    if (this.scrollContainer && this.scrollContainer.nativeElement.scrollHeight > this.scrollContainer.nativeElement.clientHeight) {
+        this.ngZone.runOutsideAngular(() => {
+        this.scrollInterval = setInterval(() => {
+            if (!this.isPaused && this.scrollContainer) {
+            const el = this.scrollContainer.nativeElement;
+            
+            // 1px niche scroll karo
+            el.scrollTop += 1;
 
-          // Agar bottom par pahunch gaye, toh wapas top par jao (Loop)
-          if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
-            el.scrollTop = 0;
-          }
-        }
-      }, 50); // Speed control: 50ms (Lower is faster)
-    });
+            // Agar bottom par pahunch gaye, toh wapas top par jao (Loop)
+            if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
+                el.scrollTop = 0;
+            }
+            }
+        }, 50); 
+        });
+    }
   }
 
   stopAutoScroll() {
@@ -117,7 +108,6 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Mouse hover events ke liye handlers
   pauseScroll() {
     this.isPaused = true;
   }
@@ -134,13 +124,45 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  // --- View Functionality ---
   viewPdf(doc: PdfDocument) {
-    console.log('Viewing PDF:', doc.title);
-    alert(`Opening ${doc.fileName}...`);
+    // Pehle download URL fetch karo, fir new tab me open karo
+    this.blogService.getDownloadLink(doc.id).subscribe({
+      next: (res) => {
+        if (res.download_url) {
+           window.open(res.download_url, '_blank');
+        } else {
+           alert('Error: File URL not found.');
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching view link:', err);
+        alert('Unable to open file.');
+      }
+    });
   }
 
+  // --- Download Functionality ---
   downloadPdf(doc: PdfDocument) {
-    console.log('Downloading PDF:', doc.title);
-    alert(`Downloading ${doc.fileName}...`);
+    this.blogService.getDownloadLink(doc.id).subscribe({
+      next: (res) => {
+        if (res.download_url) {
+           // Create a hidden link and click it to trigger download/view
+           const link = document.createElement('a');
+           link.href = res.download_url;
+           link.target = '_blank';
+           link.download = doc.fileName; // Try to force filename
+           document.body.appendChild(link);
+           link.click();
+           document.body.removeChild(link);
+        } else {
+           alert('Error: Download URL not found.');
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching download link:', err);
+        alert('Unable to download file.');
+      }
+    });
   }
 }

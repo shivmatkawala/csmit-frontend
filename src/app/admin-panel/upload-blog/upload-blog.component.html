@@ -1,0 +1,90 @@
+<div class="upload-container fade-in">
+  <div class="header-section">
+    <h2>Upload New Blog</h2>
+    <p>Upload your PDF blogs to share with students.</p>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="blogForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Title Input -->
+      <div class="form-group">
+        <label for="title">Blog Title</label>
+        <input 
+          type="text" 
+          id="title" 
+          formControlName="title" 
+          placeholder="Enter blog title"
+          [class.error-border]="isFieldInvalid('title')"
+        >
+        <span class="error-msg" *ngIf="isFieldInvalid('title')">
+          Title is required.
+        </span>
+      </div>
+
+      <!-- Description Input (Optional) -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description" 
+          formControlName="description" 
+          rows="3" 
+          placeholder="Enter a short description..."
+        ></textarea>
+      </div>
+
+      <!-- File Upload Area -->
+      <div class="form-group">
+        <label>Blog PDF File</label>
+        <div 
+          class="file-upload-wrapper" 
+          (click)="fileInput.click()" 
+          (dragover)="onDragOver($event)" 
+          (dragleave)="onDragLeave($event)" 
+          (drop)="onDrop($event)"
+          [class.dragging]="isDragging()"
+        >
+          <input 
+            #fileInput 
+            type="file" 
+            hidden 
+            accept="application/pdf"
+            (change)="onFileSelected($event)"
+          >
+          <div class="upload-placeholder" *ngIf="!selectedFile()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Click to browse or drag PDF here</span>
+            <small>Supported format: .pdf</small>
+          </div>
+          
+          <div class="file-preview" *ngIf="selectedFile()">
+            <i class="fas fa-file-pdf"></i>
+            <div class="file-info">
+              <span class="filename">{{ selectedFile()?.name }}</span>
+              <span class="filesize">{{ getFileSize(selectedFile()?.size) }}</span>
+            </div>
+            <button type="button" class="remove-btn" (click)="removeFile($event)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <span class="error-msg" *ngIf="fileError()">{{ fileError() }}</span>
+      </div>
+
+      <!-- Submit Actions -->
+      <div class="form-actions">
+        <button type="submit" [disabled]="blogForm.invalid || !selectedFile() || isSubmitting()" class="btn-submit">
+          <span *ngIf="!isSubmitting()">Upload Blog</span>
+          <span *ngIf="isSubmitting()"><i class="fas fa-spinner fa-spin"></i> Uploading...</span>
+        </button>
+      </div>
+
+      <!-- Success/Error Message -->
+      <div *ngIf="uploadStatus()" class="status-message" [ngClass]="uploadStatus()?.type">
+        <i class="fas" [ngClass]="uploadStatus()?.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+        <span>{{ uploadStatus()?.message }}</span>
+      </div>
+
+    </form>
+  </div>
+</div>

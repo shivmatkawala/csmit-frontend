@@ -19,6 +19,7 @@ import { AttendExamComponent } from './attend-exam/attend-exam.component';
 import { ContactComponent } from './contact/contact.component';
 import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
 import { BlogComponent } from './blog/blog.component';
+import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -39,7 +40,8 @@ const routes: Routes = [
   {path:'attend-exam',component:AttendExamComponent},
   { path: 'contact', component: ContactComponent },
   {path:'create-success-story',component:CreateSuccessStoryComponent},
-  {path:'blog',component:BlogComponent}
+  {path:'blog',component:BlogComponent},
+  {path:'upload-blog',component:UploadBlogComponent}
 ];
 
 @NgModule({
