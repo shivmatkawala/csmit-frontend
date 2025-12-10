@@ -1,0 +1,51 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface Note {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  subject: string;
+  pdf_url: string;
+  uploaded_at: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ManageNotesService {
+  
+  private http = inject(HttpClient);
+  private baseUrl = 'http://127.0.0.1:8000/api/blog/notes'; // Backend URL
+
+  constructor() { }
+
+  // 1. Metadata Create karo aur Presigned URL lo
+  createNoteMetadata(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/upload/`, data);
+  }
+
+  // 2. File ko seedha AWS S3 par bhejo (No Headers for CORS safety)
+  uploadToS3(presignedUrl: string, file: File): Observable<any> {
+    return this.http.put(presignedUrl, file, {
+      reportProgress: true,
+      observe: 'events'
+    });
+  }
+
+  // 3. Notes Fetch karo (Subject ya Category ke filter ke saath)
+  getNotes(subject?: string, category?: string): Observable<Note[]> {
+    let params = new HttpParams();
+    if (subject) params = params.set('subject', subject);
+    if (category) params = params.set('category', category);
+
+    return this.http.get<Note[]>(`${this.baseUrl}/list/`, { params });
+  }
+
+  // 4. Download Link lo
+  getDownloadLink(id: number): Observable<{download_url: string}> {
+    return this.http.get<{download_url: string}>(`${this.baseUrl}/${id}/download/`);
+  }
+}

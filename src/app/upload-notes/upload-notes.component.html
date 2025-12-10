@@ -1,0 +1,57 @@
+<div class="upload-container">
+  <h2>Upload Study Material</h2>
+  
+  <form [formGroup]="noteForm" (ngSubmit)="onSubmit()" class="form-card">
+    
+    <!-- Title -->
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" formControlName="title" placeholder="Ex: Java Oops Concepts">
+    </div>
+
+    <!-- Subject & Category Row -->
+    <div class="form-row">
+      <div class="form-group half">
+        <label>Subject</label>
+        <select formControlName="subject">
+          <option *ngFor="let sub of subjects" [value]="sub">{{sub}}</option>
+        </select>
+      </div>
+
+      <div class="form-group half">
+        <label>Category</label>
+        <select formControlName="category">
+          <option *ngFor="let cat of categories" [value]="cat">{{cat}}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label>Description</label>
+      <textarea formControlName="description" rows="2"></textarea>
+    </div>
+
+    <!-- File Input -->
+    <div class="form-group">
+      <label>PDF File</label>
+      <input type="file" (change)="onFileSelected($event)" accept="application/pdf">
+      <div *ngIf="selectedFile()" class="file-info">Selected: {{ selectedFile()?.name }}</div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div *ngIf="uploadProgress() > 0" class="progress-bar">
+      <div class="fill" [style.width.%]="uploadProgress()"></div>
+    </div>
+
+    <button type="submit" [disabled]="isSubmitting()" class="btn-submit">
+      {{ isSubmitting() ? 'Uploading...' : 'Upload Note' }}
+    </button>
+
+    <!-- Status Message -->
+    <p *ngIf="uploadStatus()" [class]="uploadStatus()?.type" class="status-msg">
+      {{ uploadStatus()?.message }}
+    </p>
+
+  </form>
+</div>

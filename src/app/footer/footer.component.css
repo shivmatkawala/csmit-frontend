@@ -1,30 +1,29 @@
 /* Google Fonts Import */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
-/* Color Variables (Matching Header/Navbar theme but adapted for dark background) */
+/* Color Variables */
 :host {
-    --primary-red: #e03a3e; /* Strong Red Accent from Header */
+    --primary-red: #e03a3e;
     --primary-red-hover: #ff5559;
-    --dark-bg: #111827; /* Deep Black/Dark Blue Background */
+    --dark-bg: #111827;
     --text-white: #ffffff;
-    --text-light: #9ca3af; /* Light gray for body text */
+    --text-light: #9ca3af;
     --link-color: #f3f4f6;
     --divider-color: rgba(255, 255, 255, 0.1);
     
-    /* Social Media Colors */
     --whatsapp-color: #25D366;
     --instagram-color: #E1306C;
-    --twitter-color: #1DA1F2; /* Traditional Twitter Blue */
+    --twitter-color: #1DA1F2;
     --facebook-color: #1877F2;
     --youtube-color: #FF0000;
 }
 
-/* Base Footer Styling - Dark Theme */
+/* Base Footer Styling */
 .site-footer {
     font-family: 'Poppins', sans-serif;
     background-color: black;
     color: var(--text-light);
-    padding: 5rem 0 2rem 0; /* Top padding increased for space */
+    padding: 5rem 0 2rem 0;
 }
 
 .container {
@@ -34,7 +33,7 @@
     margin-right: auto;
 }
 
-/* --- Footer Top: Statement and CTA (Inspired by Ref Image) --- */
+/* Footer Top Section */
 .footer-top {
     display: flex;
     justify-content: space-between;
@@ -43,7 +42,7 @@
 }
 
 .footer-statement {
-    font-size: 2.5rem; /* Large and bold */
+    font-size: 2.5rem;
     font-weight: 800;
     line-height: 1.2;
     color: var(--text-white);
@@ -60,7 +59,7 @@
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* Red CTA Button (Matching Reference Image) */
+/* CTA Button */
 .cta-button {
     background-color: var(--primary-red);
     color: var(--text-white);
@@ -82,7 +81,7 @@
     box-shadow: 0 15px 40px rgba(224, 58, 62, 0.8);
 }
 
-/* --- Divider and Links Grid --- */
+/* Divider & Grid */
 .footer-divider {
     border: none;
     height: 1px;
@@ -92,12 +91,12 @@
 
 .footer-links-grid {
     display: grid;
-    grid-template-columns: 2fr repeat(3, 1fr); /* Logo section takes more space */
+    grid-template-columns: 2fr repeat(3, 1fr);
     gap: 2rem;
-    padding-bottom: 3rem; /* Reduced padding bottom to make space for social bar */
+    padding-bottom: 3rem;
 }
 
-/* Logo Section Styling (Matching Navbar Logo) */
+/* Logo Section */
 .footer-logo-section {
     display: flex;
     flex-direction: column;
@@ -106,81 +105,69 @@
 .footer-logo-section .logo-link {
     display: block;
     text-decoration: none;
-    font-size: 2rem; /* Logo size */
+    font-size: 2rem;
     font-weight: 900;
     color: var(--text-white);
     text-transform: uppercase;
     margin-bottom: 1rem;
 }
 .footer-logo-section .logo-accent {
-    color: var(--primary-red); /* Accent color */
+    color: var(--primary-red);
 }
 
-/* --- NEW: Jalebi-like Animated Circle Design --- */
+/* Animated Circle Design */
 .animated-circle-design {
     position: relative;
-    width: 100px; /* Base size */
+    width: 100px;
     height: 100px;
-    margin: 1.5rem 0 2rem 0; /* Add some space around it */
+    margin: 1.5rem 0 2rem 0;
 }
 
-/* The growing/pulsing "Ghera" (Spiral-like border effect) */
 .circle-border {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    border: 2px solid rgba(224, 58, 62, 0.4); /* Primary Red (E03A3E) with transparency */
-    border-radius: 50%; /* Start as a circle */
+    width: 100%; height: 100%;
+    border: 2px solid rgba(224, 58, 62, 0.4);
+    border-radius: 50%;
     animation: 
-        spiral-pulse 8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), /* Slow, smooth breathing */
-        jalebi-effect 4s linear infinite alternate; /* Alternating "jalebi" shape */
+        spiral-pulse 8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95),
+        jalebi-effect 4s linear infinite alternate;
 }
 
-/* Jalebi shape animation (mimics a winding path by distorting the circle) */
 @keyframes jalebi-effect {
     0% { border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%; }
     50% { border-radius: 60% 40% 30% 70% / 60% 40% 50% 50%; }
     100% { border-radius: 40% 60% 70% 30% / 50% 60% 40% 50%; }
 }
 
-/* Slow Pulse/Breathing effect for the main shape */
 @keyframes spiral-pulse {
     0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
     50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
 }
 
-/* The 'Bindu' (Dot) on the rotating path */
 .circle-dot {
     position: absolute;
-    top: 0;
-    left: 50%;
-    width: 12px;
-    height: 12px;
-    background-color: var(--text-white); /* Best color for visibility: White */
+    top: 0; left: 50%;
+    width: 12px; height: 12px;
+    background-color: var(--text-white);
     border-radius: 50%;
-    box-shadow: 0 0 15px var(--primary-red); /* Glowing effect */
-    transform-origin: 50% 50px; /* Center of rotation is 50px down (center of the 100x100 container) */
+    box-shadow: 0 0 15px var(--primary-red);
+    transform-origin: 50% 50px;
     animation: 
         dot-orbit 6s linear infinite,
         dot-color-pulse 2s infinite alternate;
 }
 
-/* Animation for the dot to orbit around the center */
 @keyframes dot-orbit {
     from { transform: rotate(0deg) translateX(-50%); }
     to { transform: rotate(360deg) translateX(-50%); }
 }
 
-/* Animation to change the dot color/glow slightly (Best Color Effect) */
 @keyframes dot-color-pulse {
     0% { background-color: var(--text-white); box-shadow: 0 0 10px 2px var(--primary-red); }
     100% { background-color: var(--primary-red-hover); box-shadow: 0 0 15px 5px var(--text-white); }
 }
-/* --- END NEW: Animated Circle --- */
-
 
 .tagline {
     font-size: 0.95rem;
@@ -205,7 +192,7 @@
     font-weight: 700;
     color: var(--text-white);
     margin-bottom: 1.5rem;
-    border-left: 3px solid var(--primary-red); /* Small accent border */
+    border-left: 3px solid var(--primary-red);
     padding-left: 10px;
 }
 .footer-link-group ul {
@@ -244,21 +231,19 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* --- Social Bar (New section for icons above the line) --- */
+/* Social Bar */
 .footer-social-bar {
-    padding-top: 1.5rem; /* Space from links above */
-    padding-bottom: 2rem; /* Space before the final line */
-    text-align: center; /* Center the social icons */
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    text-align: center;
 }
-
 .social-icons {
-    display: inline-block; /* Allows gap to work on the list */
+    display: inline-block;
 }
 
-/* --- Bottom Bar: Copyright and Social Media --- */
 .footer-bottom {
     display: flex;
-    justify-content: center; /* Center copyright since icons are moved */
+    justify-content: center;
     align-items: center;
     padding-top: 1rem;
     border-top: 1px solid var(--divider-color);
@@ -268,200 +253,254 @@
     margin: 0;
 }
 
-/* --- NEW: Social Icons Styling (Circular, Colorful, Animated) --- */
+/* Social Icons Styling */
 .social-icons-list {
     list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 15px; /* Space between icons */
+    padding: 0; margin: 0;
+    display: flex; gap: 15px;
 }
-
 .icon-link {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
+    display: flex; justify-content: center; align-items: center;
+    width: 40px; height: 40px;
     border-radius: 50%;
     color: var(--text-white);
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
+.icon-link svg { width: 20px; height: 20px; fill: currentColor; }
 
-.icon-link svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor; /* Use the current link color (white) */
-}
+.icon-link.whatsapp { background-color: var(--whatsapp-color); }
+.icon-link.whatsapp:hover { background-color: var(--text-white); color: var(--whatsapp-color); transform: translateY(-5px) scale(1.1); }
 
-/* 1. WhatsApp */
-.icon-link.whatsapp {
-    background-color: var(--whatsapp-color);
-}
-.icon-link.whatsapp:hover {
-    background-color: var(--text-white);
-    color: var(--whatsapp-color);
-    transform: translateY(-5px) scale(1.1);
-}
-
-/* 2. Instagram (Gradient-like effect on hover) */
 .icon-link.instagram {
-    background: var(--instagram-color); /* Fallback */
+    background: var(--instagram-color);
     background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-    box-shadow: 0 4px 10px rgba(225, 48, 108, 0.6);
 }
-.icon-link.instagram:hover {
-    background: var(--text-white);
-    color: var(--instagram-color);
-    transform: translateY(-5px) scale(1.1);
-}
+.icon-link.instagram:hover { background: var(--text-white); color: var(--instagram-color); transform: translateY(-5px) scale(1.1); }
 
-/* 3. Twitter */
-.icon-link.twitter {
-    background-color: var(--twitter-color);
-}
-.icon-link.twitter:hover {
-    background-color: var(--text-white);
-    color: var(--twitter-color);
-    transform: translateY(-5px) scale(1.1);
-}
+.icon-link.twitter { background-color: var(--twitter-color); }
+.icon-link.twitter:hover { background-color: var(--text-white); color: var(--twitter-color); transform: translateY(-5px) scale(1.1); }
 
-/* 4. Facebook */
-.icon-link.facebook {
-    background-color: var(--facebook-color);
-}
-.icon-link.facebook:hover {
-    background-color: var(--text-white);
-    color: var(--facebook-color);
-    transform: translateY(-5px) scale(1.1);
-}
+.icon-link.facebook { background-color: var(--facebook-color); }
+.icon-link.facebook:hover { background-color: var(--text-white); color: var(--facebook-color); transform: translateY(-5px) scale(1.1); }
 
-/* 5. YouTube */
-.icon-link.youtube {
-    background-color: var(--youtube-color);
-}
-.icon-link.youtube:hover {
-    background-color: var(--text-white);
-    color: var(--youtube-color);
-    transform: translateY(-5px) scale(1.1);
-}
+.icon-link.youtube { background-color: var(--youtube-color); }
+.icon-link.youtube:hover { background-color: var(--text-white); color: var(--youtube-color); transform: translateY(-5px) scale(1.1); }
 
-/* --- Scroll to Top Button (Visibility controlled by isScrolled) --- */
+/* =========================================
+   FLOATING ICONS: SCROLL TO TOP & CHATBOT
+   ========================================= */
+
+/* 1. Scroll to Top Button */
 .scroll-to-top {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background-color: var(--primary-red);
+    bottom: 25px;
+    right: 25px;
+    width: 55px; height: 55px;
+    background: linear-gradient(135deg, var(--primary-red), #ff6b6b);
     color: var(--text-white);
     border: none;
-    border-radius: 0.5rem; /* Slightly rounded rectangle */
-    box-shadow: 0 4px 15px rgba(224, 58, 62, 0.5);
+    border-radius: 50%;
+    box-shadow: 0 10px 25px rgba(224, 58, 62, 0.5);
     cursor: pointer;
-    opacity: 0; /* Default hidden using opacity for smooth transition */
-    pointer-events: none; /* Disable interaction when hidden */
-    justify-content: center;
-    align-items: center;
-    z-index: 9999; /* Ensure it is above all other floating elements (1000) */
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.scroll-to-top.visible {
-    opacity: 1;
-    pointer-events: auto; /* Enable interaction when visible */
-    display: flex; /* Ensure it is visible */
-}
-.scroll-to-top:hover {
-    background-color: var(--primary-red-hover);
-    transform: translateY(-5px); /* Stronger lift effect */
-    box-shadow: 0 8px 25px rgba(224, 58, 62, 0.8);
-}
-.scroll-to-top svg {
-    width: 24px;
-    height: 24px;
-}
-
-/* --- Responsive Adjustments --- */
-@media (max-width: 1024px) {
-    .footer-top {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2rem;
-    }
-    .footer-statement {
-        max-width: 100%;
-        font-size: 2.2rem;
-    }
-    .cta-button {
-        padding: 1rem 2rem;
-        font-size: 1rem;
-    }
-    .footer-links-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    pointer-events: none;
+    display: flex; justify-content: center; align-items: center;
     
-    .footer-bottom {
-        /* Removed flex-direction: column; and gap: 1.5rem; as icons are moved */
-        /* Center content on small screens (now only copyright) */
-        justify-content: center;
-        padding: 1rem 0 0 0;
-    }
+    /* Z-INDEX FIX: Keep it high but below chat popup */
+    z-index: 10500; 
+    
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-    /* Old style removed:
-    .social-icons {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-    }
-    */
-    .footer-social-bar {
-        padding-top: 2rem; /* Ensure good spacing */
-        padding-bottom: 2rem;
-    }
+.scroll-to-top.visible {
+    opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+}
+
+.scroll-to-top:hover {
+    background: linear-gradient(135deg, #ff5559, #ff8e8e);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(224, 58, 62, 0.7);
+}
+
+.scroll-to-top svg { width: 26px; height: 26px; transition: transform 0.3s ease; }
+.scroll-to-top:hover svg { transform: translateY(-3px); }
+
+/* 2. Chatbot Icon Trigger */
+.chat-bot-trigger {
+    position: fixed;
+    bottom: 25px; 
+    right: 25px;
+    width: 65px; height: 65px;
+    
+    /* Z-INDEX FIX: Must be higher than Header (10001) */
+    z-index: 11000; 
+    
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
+    display: flex; align-items: center; justify-content: center;
+    animation: bot-float 3s ease-in-out infinite;
+}
+
+.chat-bot-trigger.active { animation: none; transform: rotate(0deg); }
+
+.chat-bot-img, .close-icon { position: absolute; transition: all 0.3s ease; }
+
+.chat-bot-img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.25));
+    z-index: 2;
+}
+
+.close-icon {
+    font-size: 2rem; color: white;
+    background: var(--primary-red);
+    width: 55px; height: 55px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(224, 58, 62, 0.4);
+    z-index: 3;
+}
+
+.chat-bot-trigger::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    z-index: 1;
+    animation: ripple-pulse 2s infinite;
+}
+.chat-bot-trigger.active::before { display: none; }
+
+.chat-bot-trigger:hover .chat-bot-img { transform: scale(1.15) rotate(-5deg); }
+.chat-bot-trigger:hover .close-icon {
+    transform: scale(1.1) rotate(90deg);
+    background: var(--primary-red-hover);
+}
+
+.chat-bot-trigger.moved-up { bottom: 95px; }
+
+
+/* 3. CHAT POPUP WINDOW */
+.chat-popup-container {
+    position: fixed;
+    bottom: 100px;
+    right: 25px;
+    width: 350px;
+    height: 500px;
+    
+    /* MAX-HEIGHT FIX: Prevent overlapping with Header on laptops */
+    /* 80vh is too much if screen is small. 
+       calc(100vh - 120px) ensures space from top. */
+    max-height: calc(100vh - 140px);
+    
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    
+    /* Z-INDEX FIX: Must be higher than Header (10001) */
+    z-index: 10999;
+    
+    display: flex; flex-direction: column; overflow: hidden;
+    opacity: 0; visibility: hidden;
+    transform: scale(0) translateY(50px);
+    transform-origin: bottom right;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.chat-popup-container.open { opacity: 1; visibility: visible; transform: scale(1) translateY(0); }
+.chat-popup-container.moved-up { bottom: 170px; }
+
+.chat-popup-header {
+    background: linear-gradient(135deg, var(--primary-red), #ff6b6b);
+    padding: 15px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: white;
+    flex-shrink: 0; /* Header should not shrink */
+}
+
+.chat-header-info { display: flex; align-items: center; gap: 12px; }
+.header-bot-icon {
+    width: 40px; height: 40px;
+    background: white; border-radius: 50%; padding: 2px;
+    object-fit: contain;
+}
+.header-text { display: flex; flex-direction: column; }
+.bot-name { font-weight: 700; font-size: 1rem; }
+.bot-status {
+    font-size: 0.75rem; opacity: 0.9;
+    display: flex; align-items: center; gap: 5px;
+}
+.bot-status::before {
+    content: ''; display: block;
+    width: 6px; height: 6px;
+    background: #4ade80; border-radius: 50%;
+    box-shadow: 0 0 5px #4ade80;
+}
+
+.close-chat-btn {
+    background: none; border: none;
+    color: white; font-size: 2rem; line-height: 1;
+    cursor: pointer; opacity: 0.8; transition: opacity 0.2s;
+}
+.close-chat-btn:hover { opacity: 1; }
+
+.chat-content-area {
+    flex-grow: 1; display: flex; flex-direction: column;
+    background: #f8fafc; position: relative;
+    overflow: hidden; /* Important for inner scroll */
+}
+
+app-chatbot {
+    height: 100%; width: 100%;
+    display: flex; flex-direction: column;
+}
+
+/* Animations */
+@keyframes bot-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+@keyframes ripple-pulse {
+    0% { width: 100%; height: 100%; opacity: 0.5; }
+    100% { width: 160%; height: 160%; opacity: 0; }
+}
+.fadeIn { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .footer-top { flex-direction: column; align-items: flex-start; gap: 2rem; }
+    .footer-statement { max-width: 100%; font-size: 2.2rem; }
+    .cta-button { padding: 1rem 2rem; font-size: 1rem; }
+    .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-bottom { justify-content: center; padding: 1rem 0 0 0; }
+    .footer-social-bar { padding-top: 2rem; padding-bottom: 2rem; }
 }
 
 @media (max-width: 640px) {
-    .site-footer {
-        padding: 4rem 0 1.5rem 0;
-    }
-    .footer-statement {
-        font-size: 1.8rem;
-    }
-    .footer-links-grid {
-        grid-template-columns: 1fr; /* Stacked links on mobile */
-        gap: 3rem;
-    }
-    .footer-logo-section {
-        margin-bottom: 1rem;
-    }
+    .site-footer { padding: 4rem 0 1.5rem 0; }
+    .footer-statement { font-size: 1.8rem; }
+    .footer-links-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .footer-logo-section { margin-bottom: 1rem; }
+    .animated-circle-design { width: 80px; height: 80px; margin: 1rem 0 1.5rem 0; }
+    .circle-dot { width: 10px; height: 10px; transform-origin: 50% 40px; }
+    .social-icons-list { gap: 10px; }
+    .icon-link { width: 35px; height: 35px; }
+    .scroll-to-top { width: 48px; height: 48px; bottom: 20px; right: 20px; }
+    .chat-bot-trigger { width: 58px; height: 58px; bottom: 20px; right: 20px; }
+    .chat-bot-trigger.moved-up { bottom: 85px; }
     
-    /* Responsive adjustment for the animated design */
-    .animated-circle-design {
-        width: 80px;
-        height: 80px;
-        margin: 1rem 0 1.5rem 0;
+    .chat-popup-container {
+        width: 90vw; height: 60vh;
+        bottom: 90px; right: 5vw;
+        max-height: none; /* Mobile handles its own height */
     }
-    .circle-dot {
-        width: 10px;
-        height: 10px;
-        transform-origin: 50% 40px; /* Adjust transform-origin for new size (40px) */
-    }
-
-    /* Social icons spacing for very small screens */
-    .social-icons-list {
-        gap: 10px;
-    }
-    .icon-link {
-        width: 35px;
-        height: 35px;
-    }
-
-    /* Scroll to Top Button responsive fix */
-    .scroll-to-top {
-        width: 45px;
-        height: 45px;
-        bottom: 15px;
-        right: 15px;
-    }
+    .chat-popup-container.moved-up { bottom: 150px; }
 }

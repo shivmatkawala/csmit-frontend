@@ -1,0 +1,13 @@
+.upload-container { max-width: 600px; margin: 2rem auto; font-family: 'Poppins', sans-serif; }
+.form-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.form-group { margin-bottom: 1.2rem; }
+.form-row { display: flex; gap: 1rem; }
+.half { flex: 1; }
+label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; }
+input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
+.btn-submit { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.btn-submit:disabled { background: #93c5fd; }
+.status-msg { margin-top: 1rem; text-align: center; font-weight: 600; }
+.success { color: green; } .error { color: red; }
+.progress-bar { height: 6px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 1rem; }
+.fill { height: 100%; background: #2563eb; transition: width 0.3s; }

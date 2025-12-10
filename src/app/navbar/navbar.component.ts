@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { BatchDetail, Course, CreateBatchService } from '../services/create-batch.service';
-// Import new service
 import { SuccessStoriesService, SuccessStory } from '../services/success-stories.service';
+// Import new Notes Service
+import { ManageNotesService, Note } from '../services/manage-notes.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,78 +14,106 @@ export class NavbarComponent implements OnInit, OnDestroy {
   selectedFeature: 'batch' | 'notes' | 'success' = 'batch';
   isLoading = true;
   
+  // --- Batch State ---
   featuredBatchIndex = 0;
   featuredBatch: any = null;
   upcomingBatches: any[] = [];
-  
-  selectedSyllabus: string = 'Full Stack Development';
   private batchInterval: any;
 
-  // New Property for Real-Time Stories
+  // --- Success Stories State ---
   successStories: SuccessStory[] = [];
   isLoadingStories = false;
 
-  notesContentMap: any = {
-    'Full Stack Development': {
-      stats: [
-        { value: '25+', label: 'Modules', icon: '📦' },
-        { value: '100+', label: 'PDF Notes', icon: '📄' },
-        { value: '50+', label: 'Assignments', icon: '📝' }
-      ],
-      resources: [
-        { title: 'Java Oops Cheat Sheet', type: 'PDF', size: '2.5 MB', icon: '☕' },
-        { title: 'Angular Lifecycle Hooks', type: 'Guide', size: '1.2 MB', icon: '🅰️' },
-        { title: 'Spring Boot Microservices', type: 'E-Book', size: '5.8 MB', icon: '🍃' },
-        { title: 'SQL Interview Questions', type: 'PDF', size: '3.1 MB', icon: '💾' }
-      ]
-    },
-    'Data Science': {
-      stats: [
-        { value: '15+', label: 'Algorithms', icon: '🧮' },
-        { value: '40+', label: 'Datasets', icon: '📊' },
-        { value: '30+', label: 'Notebooks', icon: '📓' }
-      ],
-      resources: [
-        { title: 'Python Pandas Guide', type: 'PDF', size: '4.2 MB', icon: '🐼' },
-        { title: 'Machine Learning roadmap', type: 'Image', size: '1.5 MB', icon: '🤖' },
-        { title: 'Statistics for DS', type: 'E-Book', size: '8.1 MB', icon: '📈' },
-        { title: 'Tableau Visualization', type: 'Video', size: 'Link', icon: '📉' }
-      ]
-    }
-  };
-  syllabusOptions = Object.keys(this.notesContentMap);
+  // --- Real-Time Notes State (New) ---
+  selectedSyllabus: string = 'Full Stack Development';
+  // Static options since we removed the hardcoded map
+  syllabusOptions = ['Full Stack Development', 'Data Science', 'Python', 'Java', 'Machine Learning'];
+  
+  notesList: Note[] = [];
+  isLoadingNotes = false;
+  
+  // Stats Counters (Calculated from API data)
+  stats = { pdfs: 0, assignments: 0, manuals: 0 };
 
   constructor(
       private batchService: CreateBatchService,
-      private successService: SuccessStoriesService
+      private successService: SuccessStoriesService,
+      private notesService: ManageNotesService // Injected Notes Service
   ) {}
 
   ngOnInit() {
     this.fetchRealTimeBatches();
-    this.fetchSuccessStories(); // Call API on load
+    this.fetchSuccessStories();
   }
 
   ngOnDestroy() {
     this.stopBatchRotation();
   }
 
-  // --- Success Stories API ---
-  fetchSuccessStories() {
-      this.isLoadingStories = true;
-      this.successService.getStories().subscribe({
-          next: (data) => {
-              this.successStories = data;
-              this.isLoadingStories = false;
-          },
-          error: (err) => {
-              console.error('Failed to load stories', err);
-              this.isLoadingStories = false;
-              // Optional: Keep old dummy data as fallback if API fails
-          }
-      });
+  // --- UI Selection Change ---
+  selectFeature(feature: 'batch' | 'notes' | 'success') {
+    this.selectedFeature = feature;
+    
+    // Trigger Notes Fetch only when Notes tab is selected
+    if (feature === 'notes') {
+      // Fetch only if list is empty or strictly re-fetch every time
+      this.fetchNotesBySubject(this.selectedSyllabus);
+    }
   }
 
-  // --- Batch API (Existing) ---
+  onSyllabusChange(newSubject: string) {
+    this.selectedSyllabus = newSubject;
+    // Fetch new notes immediately if we are on the notes tab
+    if (this.selectedFeature === 'notes') {
+        this.fetchNotesBySubject(newSubject);
+    }
+  }
+
+  // ==========================================
+  //        REAL-TIME NOTES LOGIC
+  // ==========================================
+
+  fetchNotesBySubject(subject: string) {
+    this.isLoadingNotes = true;
+    this.notesList = []; // Clear old data to show loading state cleanly
+
+    this.notesService.getNotes(subject).subscribe({
+      next: (data) => {
+        this.notesList = data;
+        this.calculateStats(data);
+        this.isLoadingNotes = false;
+      },
+      error: (err) => {
+        console.error('Error fetching notes:', err);
+        this.isLoadingNotes = false;
+      }
+    });
+  }
+
+  calculateStats(notes: Note[]) {
+    // Dynamically calculate stats based on the fetched data
+    this.stats = {
+      pdfs: notes.filter(n => n.category === 'Lecture Note').length,
+      assignments: notes.filter(n => n.category === 'Assignment').length,
+      manuals: notes.filter(n => n.category === 'Lab Manual').length
+    };
+  }
+
+  downloadNote(note: Note) {
+    this.notesService.getDownloadLink(note.id).subscribe({
+      next: (res) => {
+        if (res.download_url) {
+          window.open(res.download_url, '_blank');
+        }
+      },
+      error: () => alert('Download failed')
+    });
+  }
+
+  // ==========================================
+  //        EXISTING BATCH LOGIC
+  // ==========================================
+
   fetchRealTimeBatches() {
     this.isLoading = true;
     this.batchService.getCourses().subscribe({
@@ -148,19 +177,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isLoading = false;
   }
 
-  // --- UI Logic ---
-  selectFeature(feature: 'batch' | 'notes' | 'success') {
-    this.selectedFeature = feature;
-  }
-
-  onSyllabusChange(val: string) {
-    this.selectedSyllabus = val;
-  }
-
-  get currentNotesData() {
-    return this.notesContentMap[this.selectedSyllabus];
-  }
-
   startBatchRotation() {
     this.stopBatchRotation();
     if (this.upcomingBatches.length > 1) {
@@ -175,5 +191,23 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (this.batchInterval) {
       clearInterval(this.batchInterval);
     }
+  }
+
+  // ==========================================
+  //        EXISTING SUCCESS STORIES LOGIC
+  // ==========================================
+
+  fetchSuccessStories() {
+      this.isLoadingStories = true;
+      this.successService.getStories().subscribe({
+          next: (data) => {
+              this.successStories = data;
+              this.isLoadingStories = false;
+          },
+          error: (err) => {
+              console.error('Failed to load stories', err);
+              this.isLoadingStories = false;
+          }
+      });
   }
 }

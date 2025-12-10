@@ -37,6 +37,7 @@ import { ContactComponent } from './contact/contact.component';
 import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
 import { BlogComponent } from './blog/blog.component';
 import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
+import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 
 @NgModule({
   declarations: [
@@ -77,7 +78,8 @@ import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.compo
     HttpClientModule,
     FormsModule,
     CommonModule, 
-    UploadBlogComponent
+    UploadBlogComponent,
+    UploadNotesComponent
     
   ],
   providers: [],

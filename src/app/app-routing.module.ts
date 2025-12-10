@@ -20,6 +20,7 @@ import { ContactComponent } from './contact/contact.component';
 import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
 import { BlogComponent } from './blog/blog.component';
 import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
+import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -41,7 +42,8 @@ const routes: Routes = [
   { path: 'contact', component: ContactComponent },
   {path:'create-success-story',component:CreateSuccessStoryComponent},
   {path:'blog',component:BlogComponent},
-  {path:'upload-blog',component:UploadBlogComponent}
+  {path:'upload-blog',component:UploadBlogComponent},
+  {path:'upload-notes',component:UploadNotesComponent}
 ];
 
 @NgModule({

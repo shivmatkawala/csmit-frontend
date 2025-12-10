@@ -83,37 +83,79 @@
         </div>
       </div>
 
-      <!-- VIEW B: Notes & Resources -->
+      <!-- VIEW B: Notes & Resources (UPDATED FOR REAL-TIME) -->
       <div *ngIf="selectedFeature === 'notes'" class="content-view notes-view fade-in">
+        
+        <!-- Header & Dropdown -->
         <div class="notes-header">
           <div class="header-text">
             <h3>Resource Library</h3>
-            <p>Premium study material for our students.</p>
+            <p>Select a subject to view real-time notes.</p>
           </div>
           <div class="course-selector-wrapper">
+            <!-- Updated to trigger API call on change -->
             <select [(ngModel)]="selectedSyllabus" (ngModelChange)="onSyllabusChange($event)" class="modern-select">
               <option *ngFor="let opt of syllabusOptions" [value]="opt">{{ opt }}</option>
             </select>
           </div>
         </div>
 
+        <!-- Dynamic Stats Row -->
         <div class="stats-row">
-          <div *ngFor="let stat of currentNotesData.stats" class="stat-box">
-            <div class="stat-icon">{{ stat.icon }}</div>
+          <div class="stat-box">
+            <div class="stat-icon">📄</div>
             <div class="stat-info">
-              <span class="stat-val">{{ stat.value }}</span>
-              <span class="stat-lbl">{{ stat.label }}</span>
+              <!-- Using dynamic stats object -->
+              <span class="stat-val">{{ stats.pdfs }}</span>
+              <span class="stat-lbl">Lecture Notes</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+              <span class="stat-val">{{ stats.assignments }}</span>
+              <span class="stat-lbl">Assignments</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🧪</div>
+            <div class="stat-info">
+              <span class="stat-val">{{ stats.manuals }}</span>
+              <span class="stat-lbl">Lab Manuals</span>
             </div>
           </div>
         </div>
 
-        <div class="resources-grid">
-          <div *ngFor="let res of currentNotesData.resources" class="resource-card">
-            <div class="res-icon-box">{{ res.icon }}</div>
-            <div class="res-details">
-              <h4>{{ res.title }}</h4>
-              <span class="res-meta">{{ res.type }} • {{ res.size }}</span>
+        <!-- Loading State for Notes -->
+        <div *ngIf="isLoadingNotes" class="loading-state">
+           <div class="spinner"></div>
+           <p>Fetching notes for {{ selectedSyllabus }}...</p>
+        </div>
+
+        <!-- Empty State for Notes -->
+        <div *ngIf="!isLoadingNotes && notesList.length === 0" class="empty-state">
+          <p>No notes uploaded for {{ selectedSyllabus }} yet.</p>
+        </div>
+
+        <!-- Real-Time Notes Grid -->
+        <div class="resources-grid" *ngIf="!isLoadingNotes && notesList.length > 0">
+          <div *ngFor="let note of notesList" class="resource-card" (click)="downloadNote(note)">
+            
+            <!-- Icon based on Category -->
+            <div class="res-icon-box">
+              <span *ngIf="note.category === 'Lecture Note'">📘</span>
+              <span *ngIf="note.category === 'Assignment'">📝</span>
+              <span *ngIf="note.category === 'Lab Manual'">🔬</span>
+              <span *ngIf="note.category === 'Question Paper'">❓</span>
             </div>
+
+            <div class="res-details">
+              <h4>{{ note.title }}</h4>
+              <span class="res-meta">{{ note.category }} • {{ note.uploaded_at | date:'mediumDate' }}</span>
+              <!-- Optional: Show description if needed -->
+              <!-- <p class="res-desc" *ngIf="note.description">{{ note.description }}</p> -->
+            </div>
+            
             <button class="download-btn" title="Download">⬇</button>
           </div>
         </div>
@@ -126,7 +168,12 @@
           <p>Inspiring stories from our alumni placed in top tech giants.</p>
         </div>
 
-        <div class="stories-grid-modern">
+        <!-- Loading State for Stories -->
+        <div *ngIf="isLoadingStories" class="loading-state">
+          <p>Loading success stories...</p>
+        </div>
+
+        <div *ngIf="!isLoadingStories" class="stories-grid-modern">
           <div *ngFor="let story of successStories" class="success-card">
             <div class="card-top">
               <img [src]="story.image" [alt]="story.name" class="candidate-img">
