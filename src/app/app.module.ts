@@ -38,7 +38,8 @@ import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/
 import { BlogComponent } from './blog/blog.component';
 import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
 import { UploadNotesComponent } from './upload-notes/upload-notes.component';
-
+import { CareersComponent } from './careers/careers.component';
+import { UploadCareerComponent } from './upload-careers/upload-careers.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -70,6 +71,8 @@ import { UploadNotesComponent } from './upload-notes/upload-notes.component';
     ContactComponent,
     CreateSuccessStoryComponent,
     BlogComponent,
+    CareersComponent,
+    UploadCareerComponent
   ],
   imports: [
     BrowserModule,

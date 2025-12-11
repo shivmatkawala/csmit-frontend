@@ -1,0 +1,332 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:host {
+  --primary: #e03a3e;
+  --primary-dark: #b91c1c;
+  --dark-bg: #0f172a;
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-light: #64748b;
+  font-family: 'Poppins', sans-serif;
+}
+
+.careers-page {
+  /* FIX 1: Increased Padding to 130px to ensure Header never overlaps content */
+  padding-top: 130px; 
+  min-height: 100vh;
+
+  /* Background kept same as Blog/Contact */
+  background-color: #f0f7ff; 
+  background-image: 
+    linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
+    radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.08) 0%, transparent 40%);
+}
+
+/* --- HERO SECTION --- */
+.career-hero {
+  position: relative;
+  /* FIX 2: REMOVED fixed height (60vh) so content never gets cut */
+  /* height: 60vh; */ 
+  
+  /* Use min-height instead so it looks big but can grow */
+  min-height: 500px; 
+  height: auto; 
+  
+  /* FIX 3: Added generous padding top/bottom inside the black box */
+  padding: 5rem 1.5rem; 
+
+  background: var(--dark-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  overflow: hidden;
+  
+  margin: 0 1.5rem 2rem 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
+}
+
+.hero-content {
+  z-index: 10;
+  max-width: 800px;
+  animation: slideUp 0.8s ease-out;
+  /* Ensure content block has no negative margins causing clipping */
+  margin: auto;
+}
+
+.badge-hiring {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.highlight {
+  color: var(--primary);
+  position: relative;
+  display: inline-block;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: #cbd5e1;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.explore-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  /* Ensure button has space */
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.explore-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(224, 58, 62, 0.3);
+}
+
+/* Abstract Shapes */
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+.shape-1 {
+  width: 300px; height: 300px;
+  background: var(--primary);
+  top: -50px; left: -50px;
+}
+.shape-2 {
+  width: 400px; height: 400px;
+  background: #3b82f6;
+  bottom: -100px; right: -100px;
+}
+
+/* --- JOBS SECTION --- */
+.jobs-section {
+  padding: 2rem 0 4rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3rem;
+  gap: 1.5rem;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.filter-tabs button {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 10px 20px;
+  border-radius: 50px;
+  color: var(--text-light);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-tabs button.active, .filter-tabs button:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Grid */
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 2rem;
+}
+
+.job-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.job-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: #e2e8f0;
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.job-dept {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: #fef2f2;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.job-type {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.job-title {
+  font-size: 1.5rem;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.job-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+}
+
+.job-desc {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex-grow: 1; /* Pushes footer down */
+}
+
+.job-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.skill-tag {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1rem;
+}
+
+.posted-date {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.apply-btn {
+  color: var(--primary);
+  background: none;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: padding 0.2s;
+}
+.apply-btn:hover {
+  padding-right: 5px;
+}
+
+/* Empty State */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-light);
+}
+
+/* Culture Section */
+.culture-section {
+  /* Updated to transparent to show the page gradient background */
+  background: transparent; 
+  padding: 5rem 0;
+}
+.culture-container {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+.culture-text { flex: 1; }
+.culture-text h2 { font-size: 2.5rem; margin-bottom: 1.5rem; color: var(--text-main); }
+.benefits-list { list-style: none; padding: 0; }
+.benefits-list li { margin-bottom: 1rem; font-size: 1.1rem; color: #475569; }
+.culture-image { flex: 1; }
+.culture-image img { width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
+/* Animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: slideUp 0.5s ease forwards; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .hero-content h1 { font-size: 2.5rem; }
+  .culture-container { flex-direction: column; }
+  
+  /* Adjust margin on mobile */
+  .career-hero { margin: 0 1rem 2rem 1rem; }
+}

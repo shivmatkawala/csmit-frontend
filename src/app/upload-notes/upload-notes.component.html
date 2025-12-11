@@ -1,41 +1,50 @@
 <div class="upload-container">
-  <h2>Upload Study Material</h2>
+  <h2>Upload Notes Manually</h2>
   
   <form [formGroup]="noteForm" (ngSubmit)="onSubmit()" class="form-card">
     
-    <!-- Title -->
+    <!-- Subject Input (Manual) -->
     <div class="form-group">
-      <label>Title</label>
-      <input type="text" formControlName="title" placeholder="Ex: Java Oops Concepts">
+      <label>Subject Name</label>
+      <input 
+        type="text" 
+        formControlName="subject" 
+        placeholder="Ex: Full Stack Development, Python, etc."
+        class="form-control"
+      >
+      <small class="hint">Type the exact subject name (New or Existing)</small>
     </div>
 
-    <!-- Subject & Category Row -->
+    <!-- Topic / Title Input -->
+    <div class="form-group">
+      <label>Topic / Title</label>
+      <input 
+        type="text" 
+        formControlName="title" 
+        placeholder="Ex: Introduction to Angular, Loops in Java"
+        class="form-control"
+      >
+    </div>
+
+    <!-- Category & Description -->
     <div class="form-row">
       <div class="form-group half">
-        <label>Subject</label>
-        <select formControlName="subject">
-          <option *ngFor="let sub of subjects" [value]="sub">{{sub}}</option>
-        </select>
-      </div>
-
-      <div class="form-group half">
         <label>Category</label>
-        <select formControlName="category">
+        <select formControlName="category" class="form-control">
           <option *ngFor="let cat of categories" [value]="cat">{{cat}}</option>
         </select>
       </div>
     </div>
 
-    <!-- Description -->
     <div class="form-group">
-      <label>Description</label>
-      <textarea formControlName="description" rows="2"></textarea>
+      <label>Description (Optional)</label>
+      <textarea formControlName="description" rows="2" class="form-control"></textarea>
     </div>
 
     <!-- File Input -->
     <div class="form-group">
       <label>PDF File</label>
-      <input type="file" (change)="onFileSelected($event)" accept="application/pdf">
+      <input type="file" (change)="onFileSelected($event)" accept="application/pdf" class="form-control-file">
       <div *ngIf="selectedFile()" class="file-info">Selected: {{ selectedFile()?.name }}</div>
     </div>
 
@@ -48,7 +57,6 @@
       {{ isSubmitting() ? 'Uploading...' : 'Upload Note' }}
     </button>
 
-    <!-- Status Message -->
     <p *ngIf="uploadStatus()" [class]="uploadStatus()?.type" class="status-msg">
       {{ uploadStatus()?.message }}
     </p>

@@ -1,15 +1,13 @@
 <footer class="site-footer">
   <div class="container footer-container">
 
-    <!-- Top Section: Bold Statement and CTA Button -->
+    <!-- Top Section: Statement ONLY (Button Removed) -->
     <div class="footer-top">
       <h2 class="footer-statement">
         <span class="statement-line-1">Your Tech Journey Begins Here.</span>
         <span class="statement-line-2">Ready to Transform? 🔥</span>
       </h2>
-      <a href="#" class="cta-button animated-cta">
-        Start Your Free Trial →
-      </a>
+      <!-- Free Trial Button Removed as requested -->
     </div>
 
     <!-- Divider Line -->
@@ -19,7 +17,7 @@
     <div class="footer-links-grid">
       <!-- 1. Logo and Description -->
       <div class="footer-logo-section">
-        <a href="#" class="logo-link">
+        <a href="javascript:void(0)" class="logo-link" (click)="scrollToTop()">
           <span>CSM</span><span class="logo-accent">IT</span>
         </a>
 
@@ -37,10 +35,15 @@
       <div class="footer-link-group">
         <h4 class="group-title">Quick Links</h4>
         <ul>
-          <li><a href="#">Courses</a></li>
-          <li><a href="#">Success Stories</a></li>
-          <li><a href="#">Admissions</a></li>
-          <li><a href="#">Privacy Policy</a></li>
+          <!-- Header ke Courses khulenge -->
+          <li><a href="javascript:void(0)" (click)="handleAction('open-courses')">Courses</a></li>
+          
+          <!-- Navbar ka Success Stories tab khulega -->
+          <li><a href="javascript:void(0)" (click)="handleAction('show-success')">Success Stories</a></li>
+          
+          <!-- Admissions Removed -->
+          
+          <li><a href="javascript:void(0)">Privacy Policy</a></li>
         </ul>
       </div>
 
@@ -48,10 +51,17 @@
       <div class="footer-link-group">
         <h4 class="group-title">Company</h4>
         <ul>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Careers <span class="badge">Hiring</span></a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Contact</a></li>
+          <!-- Section ka About Modal khulega -->
+          <li><a href="javascript:void(0)" (click)="handleAction('open-about')">About Us</a></li>
+          
+          <!-- Header ka Careers page -->
+          <li><a href="javascript:void(0)" (click)="handleAction('navigate-careers')">Careers <span class="badge">Hiring</span></a></li>
+          
+          <!-- Header ka Blog page -->
+          <li><a href="javascript:void(0)" (click)="handleAction('navigate-blog')">Blog</a></li>
+          
+          <!-- Header ka Contact page -->
+          <li><a href="javascript:void(0)" (click)="handleAction('navigate-contact')">Contact</a></li>
         </ul>
       </div>
 
@@ -59,15 +69,15 @@
       <div class="footer-link-group">
         <h4 class="group-title">Resources</h4>
         <ul>
-          <li><a href="#">Free Notes</a></li>
-          <li><a href="#">Mock Interviews</a></li>
-          <li><a href="#">Placement Cell</a></li>
-          <li><a href="#">Partners</a></li>
+          <!-- Navbar ka Notes tab khulega -->
+          <li><a href="javascript:void(0)" (click)="handleAction('show-notes')">Free Notes</a></li>
+          
+          <!-- Mock Interviews, Placement Cell, Partners REMOVED -->
         </ul>
       </div>
     </div>
     
-    <!-- Social Bar -->
+    <!-- Social Bar (Unchanged) -->
     <div class="footer-social-bar">
       <div class="social-icons">
         <ul class="social-icons-list">
@@ -113,25 +123,17 @@
   </div>
 </footer>
 
-<!-- 
-  ===========================================
-  FLOATING ACTIONS
-  ===========================================
--->
-
-<!-- 1. Scroll to Top Button (Hidden Initially) -->
+<!-- Floating Actions -->
 <button class="scroll-to-top" (click)="scrollToTop()" [class.visible]="isScrolled">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
 </button>
 
-<!-- 2. Chat Popup Window (New) -->
 <div class="chat-popup-container" 
      [class.open]="isChatOpen" 
      [class.moved-up]="isScrolled">
   
   <div class="chat-popup-header">
     <div class="chat-header-info">
-        <!-- Using the same bot image for brand consistency -->
         <img src="assets/chatbot.png" class="header-bot-icon" alt="Bot">
         <div class="header-text">
             <span class="bot-name">CSMIT Assistant</span>
@@ -141,21 +143,15 @@
     <button class="close-chat-btn" (click)="toggleChat()">×</button>
   </div>
 
-  <!-- The User's Chat Component loads here -->
   <div class="chat-content-area">
       <app-chatbot></app-chatbot>
   </div>
 </div>
 
-<!-- 3. Chatbot Trigger Icon -->
 <div class="chat-bot-trigger" 
      [class.moved-up]="isScrolled" 
      [class.active]="isChatOpen"
      (click)="toggleChat()">
-     
-    <!-- Show Bot Image when Closed -->
     <img *ngIf="!isChatOpen" src="assets/chatbot.png" alt="Chat" class="chat-bot-img fadeIn">
-    
-    <!-- Show Close 'X' when Open -->
     <span *ngIf="isChatOpen" class="close-icon fadeIn">✕</span>
 </div>

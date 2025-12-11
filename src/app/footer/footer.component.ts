@@ -1,4 +1,5 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
+import { UiStateService } from '../services/ui-state.service'; // Import Service
 
 @Component({
   selector: 'app-footer',
@@ -7,8 +8,11 @@ import { Component, HostListener } from '@angular/core';
 })
 export class FooterComponent {
   
+  // Inject Service
+  private uiService = inject(UiStateService);
+
   isScrolled = false;
-  isChatOpen = false; // Track Chat State
+  isChatOpen = false; 
 
   constructor() {}
 
@@ -21,8 +25,18 @@ export class FooterComponent {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Toggle Chat Window
   toggleChat() {
     this.isChatOpen = !this.isChatOpen;
+  }
+
+  // --- NEW: Handle Link Clicks ---
+  handleAction(action: string) {
+    // 1. Trigger action via service (Header/Navbar/Section will listen)
+    this.uiService.triggerAction(action);
+
+    // 2. Scroll to top if navigation related
+    if (action.startsWith('navigate') || action === 'open-courses') {
+      this.scrollToTop();
+    }
   }
 }

@@ -1,0 +1,83 @@
+<div class="upload-container">
+  <div class="form-header">
+    <h2><i class="fas fa-briefcase"></i> Post New Job Opening</h2>
+    <p>Fill in the details below to publish a new career opportunity.</p>
+  </div>
+
+  <form (ngSubmit)="submitJob()" #jobForm="ngForm" class="job-form">
+    
+    <div class="form-grid">
+      <!-- Title -->
+      <div class="form-group">
+        <label>Job Title</label>
+        <input type="text" [(ngModel)]="jobData.title" name="title" required placeholder="e.g. Senior Angular Developer">
+      </div>
+
+      <!-- Department (Editable + Suggestions) -->
+      <div class="form-group">
+        <label>Department (Select or Type New)</label>
+        <input 
+          type="text" 
+          list="dept-suggestions" 
+          [(ngModel)]="jobData.department" 
+          name="department" 
+          required 
+          placeholder="Type or select department..."
+        >
+        <datalist id="dept-suggestions">
+          <option *ngFor="let dept of suggestedDepartments" [value]="dept"></option>
+        </datalist>
+      </div>
+
+      <!-- Type (Editable + Suggestions) -->
+      <div class="form-group">
+        <label>Job Type (Select or Type New)</label>
+        <input 
+          type="text" 
+          list="type-suggestions" 
+          [(ngModel)]="jobData.type" 
+          name="type" 
+          required 
+          placeholder="Type or select job type..."
+        >
+        <datalist id="type-suggestions">
+          <option *ngFor="let type of suggestedJobTypes" [value]="type"></option>
+        </datalist>
+      </div>
+
+      <!-- Location -->
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" [(ngModel)]="jobData.location" name="location" required placeholder="e.g. Mumbai / Remote">
+      </div>
+
+      <!-- Experience -->
+      <div class="form-group">
+        <label>Experience Required</label>
+        <input type="text" [(ngModel)]="jobData.experience" name="experience" required placeholder="e.g. 2-4 Years">
+      </div>
+
+      <!-- Skills -->
+      <div class="form-group">
+        <label>Skills (Comma Separated)</label>
+        <input type="text" [(ngModel)]="jobData.skills" name="skills" required placeholder="e.g. Angular, TypeScript, Django">
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group full-width">
+      <label>Job Description</label>
+      <textarea [(ngModel)]="jobData.description" name="description" rows="6" required placeholder="Detailed job responsibilities..."></textarea>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="resetForm()">Reset</button>
+      <button type="submit" class="btn-submit" [disabled]="!jobForm.form.valid || isSubmitting">
+        <i class="fas fa-paper-plane"></i> 
+        {{ isSubmitting ? 'Publishing...' : 'Publish Job' }}
+      </button>
+    </div>
+
+  </form>
+</div>

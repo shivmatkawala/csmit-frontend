@@ -16,21 +16,19 @@ export class UploadNotesComponent {
   private fb = inject(FormBuilder);
   private notesService = inject(ManageNotesService);
   
-  // Signals for state management
   selectedFile = signal<File | null>(null);
   isSubmitting = signal(false);
   uploadStatus = signal<{type: 'success' | 'error', message: string} | null>(null);
   uploadProgress = signal<number>(0);
 
-  // Dropdown Options
-  subjects = ['Full Stack Development', 'Data Science', 'Python', 'Java', 'Machine Learning'];
+  // Category abhi bhi dropdown rakh sakte hain, ya text bhi. Main dropdown rakh raha hu for standard.
   categories = ['Lecture Note', 'Lab Manual', 'Assignment', 'Question Paper'];
 
   noteForm = this.fb.group({
-    title: ['', Validators.required],
-    description: [''],
-    subject: ['Full Stack Development', Validators.required],
-    category: ['Lecture Note', Validators.required]
+    subject: ['', Validators.required], // Ab ye Text Input hoga (Ex: "React JS")
+    title: ['', Validators.required],   // Ye Topic name hoga (Ex: "Hooks Intro")
+    category: ['Lecture Note', Validators.required],
+    description: ['']
   });
 
   onFileSelected(event: any) {
@@ -43,22 +41,24 @@ export class UploadNotesComponent {
   }
 
   onSubmit() {
-    if (this.noteForm.invalid || !this.selectedFile()) return;
+    if (this.noteForm.invalid || !this.selectedFile()) {
+        this.noteForm.markAllAsTouched();
+        return;
+    }
 
     this.isSubmitting.set(true);
     const file = this.selectedFile() as File;
+    // Data me subject manually type kiya hua jayega
     const formData = this.noteForm.value;
 
-    // Step 1: Create Metadata
     this.notesService.createNoteMetadata(formData).subscribe({
       next: (res: any) => {
         if (res.upload_url) {
-          // Step 2: Upload File to S3
           this.uploadFileToS3(res.upload_url, file);
         }
       },
       error: (err) => {
-        this.handleError('Metadata creation failed');
+        this.handleError('Metadata creation failed. Check Server.');
       }
     });
   }
@@ -71,7 +71,9 @@ export class UploadNotesComponent {
         } else if (event.type === HttpEventType.Response) {
           this.isSubmitting.set(false);
           this.uploadStatus.set({ type: 'success', message: 'Note Uploaded Successfully!' });
-          this.noteForm.reset({ subject: 'Full Stack Development', category: 'Lecture Note' });
+          
+          // Form Reset
+          this.noteForm.reset({ category: 'Lecture Note' });
           this.selectedFile.set(null);
           this.uploadProgress.set(0);
         }

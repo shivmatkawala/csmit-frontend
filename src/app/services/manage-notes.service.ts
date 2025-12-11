@@ -18,16 +18,16 @@ export interface Note {
 export class ManageNotesService {
   
   private http = inject(HttpClient);
-  private baseUrl = 'http://127.0.0.1:8000/api/blog/notes'; // Backend URL
+  private baseUrl = 'http://127.0.0.1:8000/api/notes';
 
   constructor() { }
 
-  // 1. Metadata Create karo aur Presigned URL lo
+  // 1. Metadata Create karo
   createNoteMetadata(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/upload/`, data);
   }
 
-  // 2. File ko seedha AWS S3 par bhejo (No Headers for CORS safety)
+  // 2. Upload File to S3
   uploadToS3(presignedUrl: string, file: File): Observable<any> {
     return this.http.put(presignedUrl, file, {
       reportProgress: true,
@@ -35,7 +35,7 @@ export class ManageNotesService {
     });
   }
 
-  // 3. Notes Fetch karo (Subject ya Category ke filter ke saath)
+  // 3. Notes Fetch karo
   getNotes(subject?: string, category?: string): Observable<Note[]> {
     let params = new HttpParams();
     if (subject) params = params.set('subject', subject);
@@ -44,8 +44,13 @@ export class ManageNotesService {
     return this.http.get<Note[]>(`${this.baseUrl}/list/`, { params });
   }
 
-  // 4. Download Link lo
+  // 4. Download Link
   getDownloadLink(id: number): Observable<{download_url: string}> {
     return this.http.get<{download_url: string}>(`${this.baseUrl}/${id}/download/`);
+  }
+
+  // 5. NEW: Saare Unique Subjects laao (Navbar Dropdown ke liye)
+  getAllSubjects(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/subjects/`);
   }
 }

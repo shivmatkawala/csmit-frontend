@@ -83,81 +83,88 @@
         </div>
       </div>
 
-      <!-- VIEW B: Notes & Resources (UPDATED FOR REAL-TIME) -->
+      <!-- VIEW B: Notes & Resources (REDESIGNED - Blog Style) -->
       <div *ngIf="selectedFeature === 'notes'" class="content-view notes-view fade-in">
         
-        <!-- Header & Dropdown -->
-        <div class="notes-header">
+        <!-- Header & Controls Row -->
+        <div class="notes-control-bar">
           <div class="header-text">
-            <h3>Resource Library</h3>
-            <p>Select a subject to view real-time notes.</p>
+            <h3>Study Material</h3>
+            <p>Select subject to load notes.</p>
           </div>
-          <div class="course-selector-wrapper">
-            <!-- Updated to trigger API call on change -->
-            <select [(ngModel)]="selectedSyllabus" (ngModelChange)="onSyllabusChange($event)" class="modern-select">
-              <option *ngFor="let opt of syllabusOptions" [value]="opt">{{ opt }}</option>
-            </select>
-          </div>
-        </div>
 
-        <!-- Dynamic Stats Row -->
-        <div class="stats-row">
-          <div class="stat-box">
-            <div class="stat-icon">📄</div>
-            <div class="stat-info">
-              <!-- Using dynamic stats object -->
-              <span class="stat-val">{{ stats.pdfs }}</span>
-              <span class="stat-lbl">Lecture Notes</span>
+          <div class="controls-group">
+            <!-- Subject Dropdown -->
+            <div class="control-item">
+              <select [(ngModel)]="selectedSyllabus" (ngModelChange)="onSyllabusChange($event)" class="modern-select">
+                <option *ngFor="let opt of syllabusOptions" [value]="opt">{{ opt }}</option>
+              </select>
             </div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon">📝</div>
-            <div class="stat-info">
-              <span class="stat-val">{{ stats.assignments }}</span>
-              <span class="stat-lbl">Assignments</span>
-            </div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon">🧪</div>
-            <div class="stat-info">
-              <span class="stat-val">{{ stats.manuals }}</span>
-              <span class="stat-lbl">Lab Manuals</span>
+
+            <!-- Search Bar -->
+            <div class="control-item search-container">
+              <span class="search-icon">🔍</span>
+              <input 
+                type="text" 
+                placeholder="Search topics..." 
+                class="search-input"
+                (input)="onNoteSearch($event)">
             </div>
           </div>
         </div>
 
-        <!-- Loading State for Notes -->
-        <div *ngIf="isLoadingNotes" class="loading-state">
-           <div class="spinner"></div>
-           <p>Fetching notes for {{ selectedSyllabus }}...</p>
-        </div>
+        <!-- SCROLLABLE NOTES CONTAINER (Ticker Style) -->
+        <div class="notes-ticker-container" 
+             #noteScrollContainer
+             (mouseenter)="pauseNoteScroll()" 
+             (mouseleave)="resumeNoteScroll()"
+             (touchstart)="pauseNoteScroll()"
+             (touchend)="resumeNoteScroll()">
 
-        <!-- Empty State for Notes -->
-        <div *ngIf="!isLoadingNotes && notesList.length === 0" class="empty-state">
-          <p>No notes uploaded for {{ selectedSyllabus }} yet.</p>
-        </div>
-
-        <!-- Real-Time Notes Grid -->
-        <div class="resources-grid" *ngIf="!isLoadingNotes && notesList.length > 0">
-          <div *ngFor="let note of notesList" class="resource-card" (click)="downloadNote(note)">
-            
-            <!-- Icon based on Category -->
-            <div class="res-icon-box">
-              <span *ngIf="note.category === 'Lecture Note'">📘</span>
-              <span *ngIf="note.category === 'Assignment'">📝</span>
-              <span *ngIf="note.category === 'Lab Manual'">🔬</span>
-              <span *ngIf="note.category === 'Question Paper'">❓</span>
-            </div>
-
-            <div class="res-details">
-              <h4>{{ note.title }}</h4>
-              <span class="res-meta">{{ note.category }} • {{ note.uploaded_at | date:'mediumDate' }}</span>
-              <!-- Optional: Show description if needed -->
-              <!-- <p class="res-desc" *ngIf="note.description">{{ note.description }}</p> -->
-            </div>
-            
-            <button class="download-btn" title="Download">⬇</button>
+          <!-- Loading State -->
+          <div *ngIf="isLoadingNotes" class="loading-state">
+             <div class="spinner"></div>
+             <p>Fetching notes for {{ selectedSyllabus }}...</p>
           </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!isLoadingNotes && notesList.length === 0" class="empty-state">
+            <p>No notes found for {{ selectedSyllabus }}.</p>
+          </div>
+
+          <!-- Notes List Items -->
+          <ng-container *ngIf="!isLoadingNotes && notesList.length > 0">
+            <div *ngFor="let note of notesList" class="note-list-item">
+              
+              <!-- Left: Icon & Info -->
+              <div class="note-info">
+                <div class="note-icon-box" [ngClass]="getCategoryClass(note.category)">
+                  <span *ngIf="note.category === 'Lecture Note'">📘</span>
+                  <span *ngIf="note.category === 'Assignment'">📝</span>
+                  <span *ngIf="note.category === 'Lab Manual'">🔬</span>
+                  <span *ngIf="note.category === 'Question Paper'">❓</span>
+                  <span *ngIf="!note.category">📄</span>
+                </div>
+                <div class="note-text">
+                  <h4 class="note-title">{{ note.title }}</h4>
+                  <div class="note-meta">
+                    <span class="category-tag">{{ note.category }}</span>
+                    <span class="date-tag">📅 {{ note.uploaded_at | date:'mediumDate' }}</span>
+                  </div>
+                  <p class="note-desc" *ngIf="note.description">{{ note.description }}</p>
+                </div>
+              </div>
+
+              <!-- Right: Actions -->
+              <div class="note-actions">
+                <button class="action-btn download-btn" (click)="downloadNote(note)" title="Download">
+                  Download ⬇
+                </button>
+              </div>
+
+            </div>
+          </ng-container>
+
         </div>
       </div>
 

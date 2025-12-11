@@ -40,14 +40,17 @@
           </div>
         </li>
 
-        <li class="nav-item"><a href="#" class="nav-link">Careers</a></li>
+        <!-- UPDATED: Careers Link now triggers 'careers' view -->
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('careers', $event)">Careers</a>
+        </li>
         
-        <!-- UPDATED: Blog Link now triggers 'blog' view -->
+        <!-- Blog Link triggers 'blog' view -->
         <li class="nav-item">
           <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('blog', $event)">Blog</a>
         </li>
         
-        <!-- FIXED: Contact triggers 'contact' view -->
+        <!-- Contact triggers 'contact' view -->
         <li class="nav-item">
           <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('contact', $event)">Contact</a>
         </li>
@@ -95,12 +98,13 @@
           </svg>
         </a>
 
-        <a href="#" class="mobile-item" (click)="toggleMenu()">Careers</a>
+        <!-- UPDATED: Mobile Careers Link -->
+        <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('careers', $event)">Careers</a>
         
-        <!-- UPDATED: Mobile Blog Link -->
+        <!-- Mobile Blog Link -->
         <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('blog', $event)">Blog</a>
         
-        <!-- FIXED: Mobile Contact -->
+        <!-- Mobile Contact Link -->
         <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('contact', $event)">Contact</a>
         
         <div class="mobile-divider"></div>

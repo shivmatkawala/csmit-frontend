@@ -10,7 +10,7 @@
             <div class="search-wrapper">
                 <input 
                     type="search" 
-                    [placeholder]="activeTab() === 'users' ? 'Search Users...' : activeTab() === 'courses' ? 'Search Courses...' : activeTab() === 'batches' ? 'Search Batches...' : 'Search...'"
+                    [placeholder]="activeTab() === 'users' ? 'Search Users...' : activeTab() === 'courses' ? 'Search Courses...' : 'Search...'"
                     [value]="headerSearchQuery()"
                     (input)="onHeaderSearch($event)"
                 />
@@ -69,7 +69,7 @@
                     class="card" 
                     [class]="card.colorClass" 
                     tabindex="0" 
-                    (click)="navigateTo(card.route, 'dashboard')">
+                    (click)="navigateTo(card.route, card.targetTab)">
                     
                     <div class="card-image-wrapper">
                         <img [src]="'assets/' + card.iconImage" [alt]="card.title">
@@ -82,23 +82,6 @@
                     <div class="card-action">
                         <button [ngClass]="'btn-' + card.colorClass">
                             {{ card.buttonText }}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card card-placeholder" 
-                     tabindex="0" 
-                     (click)="showMessageBox('Feature coming soon.', 'error')">
-                    <div class="card-image-wrapper placeholder-wrapper">
-                        <img src="https://placehold.co/600x400/BDC3C7/7F8C8D?text=Coming+Soon" alt="Coming Soon">
-                        <div class="card-overlay">
-                            <h2>More Features</h2>
-                            <p>Analytics, maintenance, and API management coming soon.</p>
-                        </div>
-                    </div>
-                    <div class="card-action">
-                        <button style="background: linear-gradient(135deg, #9ca3af, #6b7280); cursor: not-allowed;">
-                            Coming Soon
                         </button>
                     </div>
                 </div>
@@ -122,6 +105,12 @@
             *ngIf="activeTab() === 'batches'"
             [globalSearchQuery]="headerSearchQuery()"
         ></app-batch-management>
+
+        <!-- NEW: Upload Career Component -->
+        <!-- Make sure to declare this in your module -->
+        <app-upload-career 
+            *ngIf="activeTab() === 'upload-careers'"
+        ></app-upload-career>
         
     </main>
 

@@ -22,7 +22,7 @@
   </div>
 
   <!-- 
-    4. BLOG VIEW (NEW ADDITION)
+    4. BLOG VIEW
     Ye section ab 'blog' click karne par smoothly open hoga.
   -->
   <div *ngIf="currentView === 'blog'" class="fade-in-view">
@@ -30,7 +30,15 @@
   </div>
 
   <!-- 
-    5. FOOTER
+    5. CAREERS VIEW (NEW ADDITION)
+    Ab careers page bhi header se open hoga.
+  -->
+  <div *ngIf="currentView === 'careers'" class="fade-in-view">
+    <app-careers></app-careers>
+  </div>
+
+  <!-- 
+    6. FOOTER
     Footer hamesha content ke neeche rahega.
   -->
   <app-footer></app-footer>

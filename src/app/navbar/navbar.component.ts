@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { BatchDetail, Course, CreateBatchService } from '../services/create-batch.service';
 import { SuccessStoriesService, SuccessStory } from '../services/success-stories.service';
-// Import new Notes Service
 import { ManageNotesService, Note } from '../services/manage-notes.service';
+import { UiStateService } from '../services/ui-state.service'; // Import Service
 
 @Component({
   selector: 'app-navbar',
@@ -11,6 +11,12 @@ import { ManageNotesService, Note } from '../services/manage-notes.service';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  private batchService = inject(CreateBatchService);
+  private successService = inject(SuccessStoriesService);
+  private notesService = inject(ManageNotesService);
+  private uiService = inject(UiStateService); // Inject Service
+  private ngZone = inject(NgZone);
+
   selectedFeature: 'batch' | 'notes' | 'success' = 'batch';
   isLoading = true;
   
@@ -24,64 +30,89 @@ export class NavbarComponent implements OnInit, OnDestroy {
   successStories: SuccessStory[] = [];
   isLoadingStories = false;
 
-  // --- Real-Time Notes State (New) ---
-  selectedSyllabus: string = 'Full Stack Development';
-  // Static options since we removed the hardcoded map
-  syllabusOptions = ['Full Stack Development', 'Data Science', 'Python', 'Java', 'Machine Learning'];
+  // --- Real-Time Notes State ---
+  @ViewChild('noteScrollContainer') noteScrollContainer!: ElementRef;
   
-  notesList: Note[] = [];
+  selectedSyllabus: string = '';
+  syllabusOptions: string[] = [];
+  
+  allNotes: Note[] = [];   
+  notesList: Note[] = []; 
   isLoadingNotes = false;
   
-  // Stats Counters (Calculated from API data)
-  stats = { pdfs: 0, assignments: 0, manuals: 0 };
-
-  constructor(
-      private batchService: CreateBatchService,
-      private successService: SuccessStoriesService,
-      private notesService: ManageNotesService // Injected Notes Service
-  ) {}
+  private noteScrollInterval: any;
+  private isNoteScrollPaused = false;
 
   ngOnInit() {
     this.fetchRealTimeBatches();
     this.fetchSuccessStories();
+    this.loadSubjects();
+
+    // --- NEW: Listen to Footer Actions ---
+    this.uiService.action$.subscribe(payload => {
+      if (payload.action === 'show-notes') {
+        this.selectFeature('notes');
+        this.scrollToFeatures();
+      } else if (payload.action === 'show-success') {
+        this.selectFeature('success');
+        this.scrollToFeatures();
+      }
+    });
+  }
+
+  scrollToFeatures() {
+    const el = document.getElementById('features');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   ngOnDestroy() {
     this.stopBatchRotation();
+    this.stopNoteScroll();
   }
 
-  // --- UI Selection Change ---
+  loadSubjects() {
+    this.notesService.getAllSubjects().subscribe({
+      next: (subjects) => {
+        this.syllabusOptions = subjects;
+        if (this.syllabusOptions.length > 0) {
+           this.selectedSyllabus = this.syllabusOptions[0];
+        }
+      },
+      error: (err) => console.error('Failed to load subjects', err)
+    });
+  }
+
   selectFeature(feature: 'batch' | 'notes' | 'success') {
     this.selectedFeature = feature;
     
-    // Trigger Notes Fetch only when Notes tab is selected
     if (feature === 'notes') {
-      // Fetch only if list is empty or strictly re-fetch every time
-      this.fetchNotesBySubject(this.selectedSyllabus);
+      if (this.selectedSyllabus) {
+        this.fetchNotesBySubject(this.selectedSyllabus);
+      } else if (this.syllabusOptions.length > 0) {
+        this.selectedSyllabus = this.syllabusOptions[0];
+        this.fetchNotesBySubject(this.selectedSyllabus);
+      }
     }
   }
 
   onSyllabusChange(newSubject: string) {
     this.selectedSyllabus = newSubject;
-    // Fetch new notes immediately if we are on the notes tab
     if (this.selectedFeature === 'notes') {
         this.fetchNotesBySubject(newSubject);
     }
   }
 
-  // ==========================================
-  //        REAL-TIME NOTES LOGIC
-  // ==========================================
-
   fetchNotesBySubject(subject: string) {
     this.isLoadingNotes = true;
-    this.notesList = []; // Clear old data to show loading state cleanly
+    this.stopNoteScroll(); 
+    this.notesList = []; 
 
     this.notesService.getNotes(subject).subscribe({
       next: (data) => {
-        this.notesList = data;
-        this.calculateStats(data);
+        this.allNotes = data; 
+        this.notesList = data; 
         this.isLoadingNotes = false;
+        setTimeout(() => this.startNoteScroll(), 500);
       },
       error: (err) => {
         console.error('Error fetching notes:', err);
@@ -90,82 +121,96 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  calculateStats(notes: Note[]) {
-    // Dynamically calculate stats based on the fetched data
-    this.stats = {
-      pdfs: notes.filter(n => n.category === 'Lecture Note').length,
-      assignments: notes.filter(n => n.category === 'Assignment').length,
-      manuals: notes.filter(n => n.category === 'Lab Manual').length
-    };
+  onNoteSearch(event: any) {
+    const term = event.target.value.toLowerCase();
+    this.notesList = this.allNotes.filter(n => 
+      n.title.toLowerCase().includes(term) || 
+      (n.description && n.description.toLowerCase().includes(term))
+    );
+  }
+
+  getCategoryClass(category: string): string {
+    switch (category) {
+      case 'Lecture Note': return 'cat-lecture';
+      case 'Assignment': return 'cat-assignment';
+      case 'Lab Manual': return 'cat-lab';
+      case 'Question Paper': return 'cat-paper';
+      default: return '';
+    }
   }
 
   downloadNote(note: Note) {
     this.notesService.getDownloadLink(note.id).subscribe({
       next: (res) => {
         if (res.download_url) {
-          window.open(res.download_url, '_blank');
+           const link = document.createElement('a');
+           link.href = res.download_url;
+           link.target = '_blank';
+           link.download = `${note.title}.pdf`;
+           document.body.appendChild(link);
+           link.click();
+           document.body.removeChild(link);
         }
       },
       error: () => alert('Download failed')
     });
   }
 
-  // ==========================================
-  //        EXISTING BATCH LOGIC
-  // ==========================================
+  startNoteScroll() {
+    this.stopNoteScroll();
+    if (this.noteScrollContainer && 
+        this.noteScrollContainer.nativeElement.scrollHeight > this.noteScrollContainer.nativeElement.clientHeight) {
+      this.ngZone.runOutsideAngular(() => {
+        this.noteScrollInterval = setInterval(() => {
+          if (!this.isNoteScrollPaused && this.noteScrollContainer) {
+            const el = this.noteScrollContainer.nativeElement;
+            el.scrollTop += 1; 
+            if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
+              el.scrollTop = 0;
+            }
+          }
+        }, 50); 
+      });
+    }
+  }
+
+  stopNoteScroll() { if (this.noteScrollInterval) clearInterval(this.noteScrollInterval); }
+  pauseNoteScroll() { this.isNoteScrollPaused = true; }
+  resumeNoteScroll() { this.isNoteScrollPaused = false; }
 
   fetchRealTimeBatches() {
     this.isLoading = true;
     this.batchService.getCourses().subscribe({
       next: (courses: Course[]) => {
-        if (courses.length === 0) {
-          this.handleEmptyBatches();
-          return;
-        }
-        const batchRequests = courses.map(course => 
-          this.batchService.getBatchesByCourse(course.courseid)
-        );
+        if (courses.length === 0) { this.handleEmptyBatches(); return; }
+        const batchRequests = courses.map(course => this.batchService.getBatchesByCourse(course.courseid));
         forkJoin(batchRequests).subscribe({
           next: (responses: BatchDetail[][]) => {
-            const allActiveBatches = responses
-              .flat()
-              .filter(batch => batch.is_active === true);
+            const allActiveBatches = responses.flat().filter(batch => batch.is_active === true);
             this.mapToUIModel(allActiveBatches);
           },
-          error: (err) => {
-            console.error('Error fetching batches', err);
-            this.handleEmptyBatches();
-          }
+          error: () => this.handleEmptyBatches()
         });
       },
-      error: (err) => {
-        this.handleEmptyBatches();
-      }
+      error: () => this.handleEmptyBatches()
     });
   }
 
   mapToUIModel(backendBatches: BatchDetail[]) {
-    if (backendBatches.length === 0) {
-      this.handleEmptyBatches();
-      return;
-    }
-
+    if (backendBatches.length === 0) { this.handleEmptyBatches(); return; }
     const defaultImages = [
       'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80'
     ];
-
     this.upcomingBatches = backendBatches.map((batch, index) => ({
       courseName: batch.course ? batch.course.coursename : 'Advanced Course',
       startDate: 'Enrolling Now',
       time: 'Check Schedule',
       mode: 'Live Online',
-      description: `Join the active batch "${batch.batchName}". Comprehensive curriculum with live mentorship.`,
+      description: `Join the active batch "${batch.batchName}". Comprehensive curriculum.`,
       tags: ['Active', 'Placement Assist'],
       imageUrl: defaultImages[index % defaultImages.length]
     }));
-
     this.featuredBatch = this.upcomingBatches[0];
     this.isLoading = false;
     this.startBatchRotation();
@@ -187,27 +232,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  stopBatchRotation() {
-    if (this.batchInterval) {
-      clearInterval(this.batchInterval);
-    }
-  }
-
-  // ==========================================
-  //        EXISTING SUCCESS STORIES LOGIC
-  // ==========================================
+  stopBatchRotation() { if (this.batchInterval) clearInterval(this.batchInterval); }
 
   fetchSuccessStories() {
       this.isLoadingStories = true;
       this.successService.getStories().subscribe({
-          next: (data) => {
-              this.successStories = data;
-              this.isLoadingStories = false;
-          },
-          error: (err) => {
-              console.error('Failed to load stories', err);
-              this.isLoadingStories = false;
-          }
+          next: (data) => { this.successStories = data; this.isLoadingStories = false; },
+          error: () => this.isLoadingStories = false
       });
   }
 }

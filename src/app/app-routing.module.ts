@@ -21,6 +21,7 @@ import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/
 import { BlogComponent } from './blog/blog.component';
 import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
 import { UploadNotesComponent } from './upload-notes/upload-notes.component';
+import { CareersComponent } from './careers/careers.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -43,7 +44,9 @@ const routes: Routes = [
   {path:'create-success-story',component:CreateSuccessStoryComponent},
   {path:'blog',component:BlogComponent},
   {path:'upload-blog',component:UploadBlogComponent},
-  {path:'upload-notes',component:UploadNotesComponent}
+  {path:'upload-notes',component:UploadNotesComponent},
+  {path:'careers',component:CareersComponent},
+  
 ];
 
 @NgModule({
