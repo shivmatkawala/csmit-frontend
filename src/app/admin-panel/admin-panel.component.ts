@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router'; 
-import { UserManagementComponent } from './user-management/user-management.component';
-import { ManageCourseComponent } from './manage-course/manage-course.component';
+import { UserManagementComponent } from './user-management/user-management.component'; 
+import { ManageCourseComponent } from './manage-course/manage-course.component'; 
 import { BatchManagementComponent } from './batch-management/batch-management.component';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
-// Added 'upload-careers' to TabId type
+// Added 'upload-careers' to TabId type to handle the new view
 type TabId = 'dashboard' | 'users' | 'courses' | 'batches' | 'settings' | 'upload-careers'; 
 
 interface NavLink {
@@ -19,12 +19,11 @@ interface NavLink {
 interface AdminCard {
   title: string;
   subtitle: string;
-  iconImage: string;
+  iconImage: string; 
   buttonText: string;
   colorClass: string; 
   route: string;
-  // Optional property to override default dashboard tab behavior
-  targetTab?: TabId; 
+  targetTab?: TabId; // Optional: If present, clicking card switches to this tab instead of just routing
 }
 
 const ADMIN_CONFIG = {
@@ -71,15 +70,6 @@ const ADMIN_CONFIG = {
       route: '/create-course' 
     },
     { 
-      title: 'Upload Jobs / Careers', 
-      subtitle: 'Post new job openings for the careers page.', 
-      iconImage: 'upload-job.png', // Ensure you have this image
-      buttonText: 'Go to Upload Career', 
-      colorClass: 'red', 
-      route: '/upload-careers',
-      targetTab: 'upload-careers' // Special tag to switch view
-    },
-    { 
       title: 'Assign User to Batch', 
       subtitle: 'Map users (Student/Trainer) to specific batches and roles.', 
       iconImage: 'assign-user (1).png',
@@ -95,6 +85,30 @@ const ADMIN_CONFIG = {
       colorClass: 'amber', 
       route: '/create-exam' 
     },
+    
+    // --- 1. EXISTING UPLOAD JOBS CARD (Placement Drives) ---
+    // Iski functionality same rahegi (Route: /upload-job)
+    { 
+      title: 'Upload Jobs (Placement)', 
+      subtitle: 'Post and manage new job openings for ongoing placement drives.', 
+      iconImage: 'upload-job.png', 
+      buttonText: 'Go to Upload Jobs', 
+      colorClass: 'red', 
+      route: '/upload-job' 
+    },
+
+    // --- 2. NEW UPLOAD CAREERS CARD (Website) ---
+    // Isme 'targetTab' add kiya hai taaki ye naya component open kare
+    { 
+      title: 'Post Careers (Website)', 
+      subtitle: 'Post internal job openings for the main Careers website page.', 
+      iconImage: 'career_web.png', // Aap is naam ki image assets me daal sakte hain ya 'upload-job.png' use karein
+      buttonText: 'Manage Website Careers', 
+      colorClass: 'indigo', 
+      route: '/upload-careers',
+      targetTab: 'upload-careers' 
+    },
+
     { 
       title: 'Create Success Stories', 
       subtitle: 'Share student placement stories and achievements on the wall of fame.', 
@@ -165,21 +179,23 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
     this.searchTerms.next(term);
   }
 
-  // Updated navigateTo to handle cards that switch tabs
-  navigateTo(route: string, tabId: TabId | undefined): void { 
-    // If the card has a specific targetTab (like upload-careers), use it. Otherwise use the passed tabId (dashboard)
-    const target = tabId || 'dashboard';
-    this.activeTab.set(target);
+  // Updated navigateTo to accept optional tabId from card config
+  navigateTo(route: string, tabId?: TabId): void { 
+    // Agar card me 'targetTab' defined hai (jaise Careers ke liye), toh view switch karo
+    if (tabId) {
+        this.activeTab.set(tabId);
+    }
     
-    if (target !== this.activeTab() && this.headerSearchQuery() !== '') {
+    // Agar search query thi aur hum tab change kar rahe hain, toh clear karo
+    if (tabId && tabId !== 'dashboard' && this.headerSearchQuery() !== '') {
         this.headerSearchQuery.set('');
     }
     
-    // For internal component switching, we might not want to route, 
-    // but if you have routes set up, keep this:
+    // Routing logic (Purane cards ke liye zaroori hai)
     if (route) {
         this.router.navigate([route]).catch(err => {
-            console.log(`Route ${route} not found, but switching tab view internally.`);
+            // Agar route nahi mila, lekin humne tab switch kar liya hai, toh error ignore karein
+            if (!tabId) console.error(err);
         });
     }
   }

@@ -72,6 +72,7 @@
                     (click)="navigateTo(card.route, card.targetTab)">
                     
                     <div class="card-image-wrapper">
+                        <!-- Use the iconImage from config -->
                         <img [src]="'assets/' + card.iconImage" [alt]="card.title">
                         <div class="card-overlay">
                             <h2>{{ card.title }}</h2>
@@ -106,8 +107,7 @@
             [globalSearchQuery]="headerSearchQuery()"
         ></app-batch-management>
 
-        <!-- NEW: Upload Career Component -->
-        <!-- Make sure to declare this in your module -->
+        <!-- NEW: Upload Career Component (Only shows when new card is clicked) -->
         <app-upload-career 
             *ngIf="activeTab() === 'upload-careers'"
         ></app-upload-career>
