@@ -18,8 +18,8 @@ export interface SuccessStory {
   providedIn: 'root'
 })
 export class SuccessStoriesService {
-  // Aapke backend ka URL yaha update karein
-  private apiUrl = 'http://127.0.0.1:8000/api/success-stories/'; 
+  
+  private apiUrl = '/api/success-stories/'; 
 
   constructor(private http: HttpClient) { }
 
@@ -32,10 +32,12 @@ export class SuccessStoriesService {
   }
 
   updateStory(id: number, story: SuccessStory): Observable<SuccessStory> {
+    // URL: /api/success-stories/{id}/
     return this.http.put<SuccessStory>(`${this.apiUrl}${id}/`, story);
   }
 
   deleteStory(id: number): Observable<any> {
+    // URL: /api/success-stories/{id}/
     return this.http.delete(`${this.apiUrl}${id}/`);
   }
 }

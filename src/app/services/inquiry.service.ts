@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -13,18 +13,19 @@ export interface InquiryPayload {
   providedIn: 'root'
 })
 export class InquiryService {
-  // Postman working URL base: http://127.0.0.1:8000
-  private baseUrl = 'http://127.0.0.1:8000'; 
+  private baseUrl = '/api/inquiries'; 
+  
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) { }
+  constructor() { }
 
+  // 1. Create Inquiry
   createInquiry(data: InquiryPayload): Observable<any> {
-    // Exact URL from Postman: http://127.0.0.1:8000/api/inquiries/create/
-    return this.http.post(`${this.baseUrl}/api/inquiries/create/`, data);
+    return this.http.post(`${this.baseUrl}/create/`, data);
   }
 
+  // 2. List Inquiries
   getInquiries(): Observable<InquiryPayload[]> {
-    // Exact URL: http://127.0.0.1:8000/api/inquiries/list/
-    return this.http.get<InquiryPayload[]>(`${this.baseUrl}/api/inquiries/list/`);
+    return this.http.get<InquiryPayload[]>(`${this.baseUrl}/list/`);
   }
 }

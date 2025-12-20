@@ -18,16 +18,18 @@ export interface Note {
 export class ManageNotesService {
   
   private http = inject(HttpClient);
-  private baseUrl = 'http://127.0.0.1:8000/api/notes';
+  
+  private baseUrl = '/api/notes';
 
   constructor() { }
 
-  // 1. Metadata Create karo
+  // 1. Metadata Create karo (API Call)
   createNoteMetadata(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/upload/`, data);
   }
 
   // 2. Upload File to S3
+  // Note: presignedUrl direct S3 ka hota hai, isliye ise change nahi karna.
   uploadToS3(presignedUrl: string, file: File): Observable<any> {
     return this.http.put(presignedUrl, file, {
       reportProgress: true,
@@ -49,7 +51,7 @@ export class ManageNotesService {
     return this.http.get<{download_url: string}>(`${this.baseUrl}/${id}/download/`);
   }
 
-  // 5. NEW: Saare Unique Subjects laao (Navbar Dropdown ke liye)
+  // 5. Unique Subjects laao
   getAllSubjects(): Observable<string[]> {
     return this.http.get<string[]>(`${this.baseUrl}/subjects/`);
   }
