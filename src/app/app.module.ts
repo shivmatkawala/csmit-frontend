@@ -40,6 +40,7 @@ import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.compo
 import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 import { CareersComponent } from './careers/careers.component';
 import { UploadCareerComponent } from './upload-careers/upload-careers.component';
+import { JobApplicationComponent } from './job-application/job-application.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -71,8 +72,7 @@ import { UploadCareerComponent } from './upload-careers/upload-careers.component
     ContactComponent,
     CreateSuccessStoryComponent,
     BlogComponent,
-    CareersComponent,
-    UploadCareerComponent
+    UploadCareerComponent,
   ],
   imports: [
     BrowserModule,
@@ -82,7 +82,9 @@ import { UploadCareerComponent } from './upload-careers/upload-careers.component
     FormsModule,
     CommonModule, 
     UploadBlogComponent,
-    UploadNotesComponent
+    UploadNotesComponent,
+    CareersComponent,
+    JobApplicationComponent
     
   ],
   providers: [],

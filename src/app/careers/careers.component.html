@@ -1,92 +1,94 @@
-<div class="careers-page">
+<div class="page-wrapper">
   
-  <!-- Hero Section -->
-  <section class="career-hero">
-    <div class="hero-content">
-      <span class="badge-hiring">We are Hiring! 🚀</span>
-      <h1>Join the <span class="highlight">CSMIT</span> Revolution</h1>
-      <p>
-        Help us shape the future of tech education. Whether you are a coder, a mentor, or a visionary administrator, there is a place for you here.
-      </p>
-      <button class="explore-btn" (click)="scrollToJobs()">View Openings</button>
-    </div>
+  <!-- VIEW 1: CAREERS LISTING -->
+  <!-- This is only visible when no job is selected (User hasn't clicked apply yet) -->
+  <div class="careers-view" *ngIf="!selectedJob">
     
-    <!-- Abstract Background Shapes -->
-    <div class="bg-shape shape-1"></div>
-    <div class="bg-shape shape-2"></div>
-  </section>
-
-  <!-- Filter Section -->
-  <section class="jobs-section" id="openings">
-    <div class="container">
-      <div class="section-header">
-        <h2>Current Opportunities</h2>
-        <div class="filter-tabs">
-          <button 
-            *ngFor="let dept of departments" 
-            [class.active]="selectedDepartment === dept"
-            (click)="setDepartment(dept)">
-            {{ dept }}
-          </button>
-        </div>
+    <!-- Hero Section -->
+    <section class="career-hero">
+      <div class="hero-content">
+        <span class="badge-hiring">We are Hiring! 🚀</span>
+        <h1>Join the <span class="highlight">CSMIT</span> Revolution</h1>
+        <p>Help us shape the future of tech education. Whether you are a coder, a mentor, or a visionary administrator, there is a place for you here.</p>
+        <button class="explore-btn" (click)="scrollToJobs()">View Openings</button>
       </div>
+      <div class="bg-shape shape-1"></div>
+      <div class="bg-shape shape-2"></div>
+    </section>
 
-      <!-- Job Grid -->
-      <div class="jobs-grid">
-        <div *ngFor="let job of filteredJobs" class="job-card fade-in">
-          <div class="job-header">
-            <span class="job-dept">{{ job.department }}</span>
-            <span class="job-type">{{ job.type }}</span>
-          </div>
-          
-          <h3 class="job-title">{{ job.title }}</h3>
-          
-          <div class="job-meta">
-            <span>📍 {{ job.location }}</span>
-            <span>💼 {{ job.experience }}</span>
-          </div>
-
-          <p class="job-desc">{{ job.description }}</p>
-
-          <div class="job-skills">
-            <span *ngFor="let skill of job.skills" class="skill-tag">{{ skill }}</span>
-          </div>
-
-          <div class="card-footer">
-            <!-- Updated to match backend field 'posted_date' -->
-            <span class="posted-date">Posted: {{ job.posted_date | date:'mediumDate' }}</span>
-            <button class="apply-btn">Apply Now →</button>
+    <!-- Jobs List -->
+    <section class="jobs-section" id="openings">
+      <div class="container">
+        <div class="section-header">
+          <h2>Current Opportunities</h2>
+          <div class="filter-tabs">
+            <button 
+              *ngFor="let dept of departments" 
+              [class.active]="selectedDepartment === dept"
+              (click)="setDepartment(dept)">
+              {{ dept }}
+            </button>
           </div>
         </div>
 
-        <!-- Empty State -->
-        <div *ngIf="filteredJobs.length === 0" class="empty-state">
-          <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="No jobs" width="80">
-          <h3>No openings right now.</h3>
-          <p>Check back later or change the filter.</p>
+        <div class="jobs-grid">
+          <div *ngFor="let job of filteredJobs" class="job-card fade-in">
+            <div class="job-header">
+              <span class="job-dept">{{ job.department }}</span>
+              <span class="job-type">{{ job.type }}</span>
+            </div>
+            
+            <h3 class="job-title">{{ job.title }}</h3>
+            
+            <div class="job-meta">
+              <span>📍 {{ job.location }}</span>
+              <span>💼 {{ job.experience }}</span>
+            </div>
+
+            <p class="job-desc">{{ job.description }}</p>
+
+            <div class="job-skills">
+              <span *ngFor="let skill of job.skills" class="skill-tag">{{ skill }}</span>
+            </div>
+
+            <div class="card-footer">
+              <span class="posted-date">Posted: {{ job.posted_date | date:'mediumDate' }}</span>
+              <!-- Triggers the view swap -->
+              <button class="apply-btn" (click)="openApplication(job)">Apply Now →</button>
+            </div>
+          </div>
+
+          <div *ngIf="filteredJobs.length === 0" class="empty-state">
+             <h3>No openings found.</h3>
+          </div>
         </div>
       </div>
+    </section>
 
-    </div>
-  </section>
+    <!-- Culture Section -->
+    <section class="culture-section">
+      <div class="container culture-container">
+        <div class="culture-text">
+          <h2>Why Work With Us?</h2>
+          <ul class="benefits-list">
+            <li>✅ <strong>Impact:</strong> Shape careers of thousands of students.</li>
+            <li>✅ <strong>Growth:</strong> Continuous learning & development budget.</li>
+            <li>✅ <strong>Community:</strong> Be part of a passionate tech family.</li>
+          </ul>
+        </div>
+        <div class="culture-image">
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Team">
+        </div>
+      </div>
+    </section>
+  </div>
 
-  <!-- Culture Section -->
-  <section class="culture-section">
-    <div class="container culture-container">
-      <div class="culture-text">
-        <h2>Why Work With Us?</h2>
-        <ul class="benefits-list">
-          <li>✅ <strong>Impact:</strong> Shape careers of thousands of students.</li>
-          <li>✅ <strong>Growth:</strong> Continuous learning & development budget.</li>
-          <li>✅ <strong>Flexibility:</strong> Hybrid work options for select roles.</li>
-          <li>✅ <strong>Community:</strong> Be part of a passionate tech family.</li>
-        </ul>
-      </div>
-      <div class="culture-image">
-        <!-- Placeholder for team image -->
-        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Team">
-      </div>
-    </div>
-  </section>
+  <!-- VIEW 2: JOB APPLICATION (FULL PAGE) -->
+  <!-- This completely replaces the content above when selectedJob is true -->
+  <app-job-application 
+    *ngIf="selectedJob" 
+    [job]="selectedJob" 
+    (close)="closeApplication()">
+  </app-job-application>
 
 </div>

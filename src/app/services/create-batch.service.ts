@@ -1,22 +1,29 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Course {
-  courseid: number;
-  coursename: string;
-}
+import { Course } from './create-course.service';
 
 export interface BatchDetail {
-  batchId: number;
-  batchName: string;
-  course: Course;
+  batchId: number; 
+  batchName: string; 
+  course: Course; 
   is_active: boolean;
+  
+  // New Fields (Matches what Django sends in GET)
+  startDate?: string; 
+  timing?: string;     
+  mode?: string;       
 }
 
+/**
+ * Updated Payload to send new fields to Backend
+ */
 export interface CreateBatchPayload {
   batchName: string;
   courseId: number;
+  start_date: string;  // Backend expects 'start_date'
+  timing: string;
+  mode: string;
 }
 
 // ✅ FIXED: Hardcoded IP hata kar relative paths set kiye hain
@@ -58,3 +65,5 @@ export class CreateBatchService {
     return this.http.patch(apiUrl, {}); 
   }
 }
+
+export { Course };

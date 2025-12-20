@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, inject } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BatchDetail, Course, CreateBatchService } from '../services/create-batch.service';
 import { SuccessStoriesService, SuccessStory } from '../services/success-stories.service';
 import { ManageNotesService, Note } from '../services/manage-notes.service';
-import { UiStateService } from '../services/ui-state.service'; // Import Service
+import { UiStateService } from '../services/ui-state.service'; 
+import { InquiryService } from '../services/inquiry.service'; 
 
 @Component({
   selector: 'app-navbar',
@@ -14,8 +17,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private batchService = inject(CreateBatchService);
   private successService = inject(SuccessStoriesService);
   private notesService = inject(ManageNotesService);
-  private uiService = inject(UiStateService); // Inject Service
+  private uiService = inject(UiStateService);
+  private inquiryService = inject(InquiryService);
   private ngZone = inject(NgZone);
+  private fb = inject(FormBuilder);
 
   selectedFeature: 'batch' | 'notes' | 'success' = 'batch';
   isLoading = true;
@@ -26,9 +31,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   upcomingBatches: any[] = [];
   private batchInterval: any;
 
-  // --- Success Stories State ---
+  // --- Success Stories State (Updated) ---
   successStories: SuccessStory[] = [];
+  visibleStories: SuccessStory[] = []; // Stores the 3 currently visible stories
   isLoadingStories = false;
+  private storyInterval: any;
+  currentStoryIndex = 0; // Tracks the starting index for rotation
+
+  // --- Story Modal State (New) ---
+  selectedStory: SuccessStory | null = null;
+  isStoryModalOpen = false;
 
   // --- Real-Time Notes State ---
   @ViewChild('noteScrollContainer') noteScrollContainer!: ElementRef;
@@ -43,12 +55,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private noteScrollInterval: any;
   private isNoteScrollPaused = false;
 
+  // --- Inquiry Form State ---
+  showInquiryForm = false;
+  inquiryForm!: FormGroup;
+  isSubmitting = false;
+  submissionSuccess = false;
+
   ngOnInit() {
+    this.initForm();
     this.fetchRealTimeBatches();
-    this.fetchSuccessStories();
+    this.fetchSuccessStories(); 
     this.loadSubjects();
 
-    // --- NEW: Listen to Footer Actions ---
     this.uiService.action$.subscribe(payload => {
       if (payload.action === 'show-notes') {
         this.selectFeature('notes');
@@ -68,8 +86,56 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.stopBatchRotation();
     this.stopNoteScroll();
+    this.stopStoryRotation(); // Cleanup story interval
   }
 
+  // --- INQUIRY FORM LOGIC ---
+  initForm() {
+    this.inquiryForm = this.fb.group({
+      name: ['', Validators.required],
+      phone_number: ['', [Validators.required, Validators.pattern('^[0-9]{10,15}$')]],
+      email: ['', [Validators.email]], 
+      course_name: ['General', Validators.required]
+    });
+  }
+
+  openInquiryForm(courseName: string = 'General') {
+    this.submissionSuccess = false;
+    this.inquiryForm.patchValue({ course_name: courseName });
+    this.showInquiryForm = true;
+    // Disable body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeInquiryForm() {
+    this.showInquiryForm = false;
+    this.inquiryForm.reset();
+    this.submissionSuccess = false;
+    document.body.style.overflow = 'auto';
+  }
+
+  submitInquiry() {
+    if (this.inquiryForm.valid) {
+      this.isSubmitting = true;
+      const formData = this.inquiryForm.value;
+      
+      this.inquiryService.createInquiry(formData).subscribe({
+        next: (response) => {
+          this.isSubmitting = false;
+          this.submissionSuccess = true;
+        },
+        error: (error) => {
+          console.error('Inquiry submission failed', error);
+          this.isSubmitting = false;
+          alert('Something went wrong. Please try again later.');
+        }
+      });
+    } else {
+      this.inquiryForm.markAllAsTouched();
+    }
+  }
+
+  // --- Notes Logic ---
   loadSubjects() {
     this.notesService.getAllSubjects().subscribe({
       next: (subjects) => {
@@ -84,7 +150,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   selectFeature(feature: 'batch' | 'notes' | 'success') {
     this.selectedFeature = feature;
-    
     if (feature === 'notes') {
       if (this.selectedSyllabus) {
         this.fetchNotesBySubject(this.selectedSyllabus);
@@ -178,18 +243,52 @@ export class NavbarComponent implements OnInit, OnDestroy {
   pauseNoteScroll() { this.isNoteScrollPaused = true; }
   resumeNoteScroll() { this.isNoteScrollPaused = false; }
 
+
+  // --- BATCH LOGIC ---
+
   fetchRealTimeBatches() {
     this.isLoading = true;
     this.batchService.getCourses().subscribe({
       next: (courses: Course[]) => {
         if (courses.length === 0) { this.handleEmptyBatches(); return; }
-        const batchRequests = courses.map(course => this.batchService.getBatchesByCourse(course.courseid));
+        
+        const batchRequests = courses.map(course => 
+          this.batchService.getBatchesByCourse(course.courseid).pipe(
+            catchError(err => {
+              console.warn(`Could not fetch batches for course ${course.courseid}`, err);
+              return of([]); 
+            })
+          )
+        );
+        
         forkJoin(batchRequests).subscribe({
           next: (responses: BatchDetail[][]) => {
-            const allActiveBatches = responses.flat().filter(batch => batch.is_active === true);
+            let allActiveBatches: BatchDetail[] = [];
+
+            responses.forEach((batchList, index) => {
+              const currentCourse = courses[index];
+              const activeForCourse = batchList.filter(b => {
+                 const isActive = b.is_active as any;
+                 return isActive !== false && isActive != 0 && isActive !== '0';
+              });
+              
+              activeForCourse.forEach(b => {
+                if (!b.course) {
+                  b.course = currentCourse; 
+                } else if (!b.course.coursename) {
+                   b.course = currentCourse;
+                }
+              });
+
+              allActiveBatches = [...allActiveBatches, ...activeForCourse];
+            });
+
             this.mapToUIModel(allActiveBatches);
           },
-          error: () => this.handleEmptyBatches()
+          error: (err) => {
+            console.error('Global error in batch fetch', err);
+            this.handleEmptyBatches();
+          }
         });
       },
       error: () => this.handleEmptyBatches()
@@ -197,20 +296,67 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   mapToUIModel(backendBatches: BatchDetail[]) {
-    if (backendBatches.length === 0) { this.handleEmptyBatches(); return; }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+
+    const validBatches = backendBatches.filter(batch => {
+      const bAny = batch as any;
+      const rawDate = batch.startDate || bAny.start_date || bAny.startDate || bAny.StartDate;
+      if (!rawDate) return true; 
+      
+      if (typeof rawDate === 'string' && rawDate.indexOf('-') > -1) {
+        const parts = rawDate.split('-');
+        if (parts.length >= 3) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1; 
+          const d = parseInt(parts[2], 10);
+          const batchDate = new Date(y, m, d);
+          return batchDate >= today; 
+        }
+      }
+      const batchDate = new Date(rawDate);
+      if (isNaN(batchDate.getTime())) return true; 
+      return batchDate >= today;
+    });
+
+    if (validBatches.length === 0) { 
+        this.handleEmptyBatches(); 
+        return; 
+    }
+
+    validBatches.sort((a, b) => {
+      const aAny = a as any;
+      const bAny = b as any;
+      const dateAStr = a.startDate || aAny.start_date || aAny.startDate;
+      const dateBStr = b.startDate || bAny.start_date || bAny.startDate;
+      
+      const dateA = dateAStr ? new Date(dateAStr).getTime() : Infinity;
+      const dateB = dateBStr ? new Date(dateBStr).getTime() : Infinity;
+      return dateA - dateB;
+    });
+
     const defaultImages = [
       'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
     ];
-    this.upcomingBatches = backendBatches.map((batch, index) => ({
-      courseName: batch.course ? batch.course.coursename : 'Advanced Course',
-      startDate: 'Enrolling Now',
-      time: 'Check Schedule',
-      mode: 'Live Online',
-      description: `Join the active batch "${batch.batchName}". Comprehensive curriculum.`,
-      tags: ['Active', 'Placement Assist'],
-      imageUrl: defaultImages[index % defaultImages.length]
-    }));
+
+    this.upcomingBatches = validBatches.map((batch, index) => {
+      const bAny = batch as any;
+      const finalStartDate = batch.startDate || bAny.start_date || bAny.startDate || null;
+      const finalTiming = batch.timing || bAny.timing || 'Flexible';
+      const finalMode = batch.mode || bAny.mode || 'Online';
+
+      return {
+        courseName: batch.course?.coursename || batch.batchName || 'Advanced Course',
+        startDate: finalStartDate, 
+        time: finalTiming,
+        mode: finalMode, 
+        description: `Join the active batch "${batch.batchName}". Comprehensive curriculum with ${finalMode} sessions.`,
+        tags: ['Active', finalMode, 'Placement Assist'],
+        imageUrl: defaultImages[index % defaultImages.length]
+      };
+    });
+    
     this.featuredBatch = this.upcomingBatches[0];
     this.isLoading = false;
     this.startBatchRotation();
@@ -234,11 +380,66 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   stopBatchRotation() { if (this.batchInterval) clearInterval(this.batchInterval); }
 
+  // --- SUCCESS STORIES LOGIC (UPDATED) ---
+
   fetchSuccessStories() {
       this.isLoadingStories = true;
       this.successService.getStories().subscribe({
-          next: (data) => { this.successStories = data; this.isLoadingStories = false; },
-          error: () => this.isLoadingStories = false
+          next: (data) => { 
+            this.successStories = data; 
+            this.isLoadingStories = false; 
+            
+            // Start rotation logic if we have enough stories
+            if (this.successStories.length > 0) {
+               this.updateVisibleStories();
+               this.startStoryRotation();
+            }
+          },
+          error: (err) => {
+            console.error('Error fetching stories', err);
+            this.isLoadingStories = false;
+          }
       });
+  }
+
+  updateVisibleStories() {
+    if (this.successStories.length === 0) return;
+    
+    const count = 3; // Number of items to show
+    this.visibleStories = [];
+    
+    for (let i = 0; i < count; i++) {
+      const index = (this.currentStoryIndex + i) % this.successStories.length;
+      this.visibleStories.push(this.successStories[index]);
+    }
+  }
+
+  startStoryRotation() {
+    this.stopStoryRotation();
+    // Rotate every 5 seconds
+    this.storyInterval = setInterval(() => {
+      // Increment index to shift the window
+      this.currentStoryIndex = (this.currentStoryIndex + 1) % this.successStories.length;
+      this.updateVisibleStories();
+    }, 5000);
+  }
+
+  stopStoryRotation() {
+    if (this.storyInterval) clearInterval(this.storyInterval);
+  }
+
+  // --- Story Modal Methods ---
+  openStoryModal(story: SuccessStory) {
+    this.selectedStory = story;
+    this.isStoryModalOpen = true;
+    this.stopStoryRotation(); // Pause rotation while reading
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeStoryModal() {
+    this.isStoryModalOpen = false;
+    this.selectedStory = null;
+    this.startStoryRotation(); // Resume rotation
+    document.body.style.overflow = 'auto';
   }
 }

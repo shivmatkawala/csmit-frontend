@@ -1,8 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CareerService, Job } from '../services/careers.service';
+import { JobApplicationComponent } from '../job-application/job-application.component'; // Adjust path if needed
 
 @Component({
   selector: 'app-careers',
+  standalone: true,
+  imports: [CommonModule, JobApplicationComponent],
   templateUrl: './careers.component.html',
   styleUrls: ['./careers.component.css']
 })
@@ -12,6 +16,9 @@ export class CareersComponent implements OnInit {
   jobs: Job[] = [];
   filteredJobs: Job[] = [];
   selectedDepartment: string = 'All';
+
+  // State for the Application Modal
+  selectedJob: Job | null = null;
 
   // Dynamic departments list based on available jobs + defaults
   departments: string[] = ['All', 'Training', 'Administration', 'Marketing', 'Development'];
@@ -48,5 +55,18 @@ export class CareersComponent implements OnInit {
 
   scrollToJobs() {
     document.getElementById('openings')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // --- Modal Logic ---
+  openApplication(job: Job) {
+    this.selectedJob = job;
+    // Optional: Prevent background scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeApplication() {
+    this.selectedJob = null;
+    // Restore background scrolling
+    document.body.style.overflow = 'auto';
   }
 }

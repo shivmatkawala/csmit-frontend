@@ -23,6 +23,9 @@ export class HeaderComponent implements OnInit {
   // Desktop States
   isCoursesOpen = false;
   
+  // Active Page State (To highlight selected link)
+  activePage: string = 'home'; // Default to home
+  
   // Modal State
   isEnrollmentModalOpen = false;
   selectedCourse: string = '';
@@ -51,6 +54,12 @@ export class HeaderComponent implements OnInit {
   // --- NEW: Navigation Helper ---
   navigateTo(page: string, event?: Event) {
     if(event) event.preventDefault();
+    
+    // Set the active page to highlight it in blue
+    this.activePage = page;
+
+    // Close Courses Dropdown if it is open
+    this.isCoursesOpen = false;
     
     // Emit event to parent (Landing Page)
     this.pageChange.emit(page);

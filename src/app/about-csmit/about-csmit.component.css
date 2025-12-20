@@ -29,7 +29,10 @@
     display: flex;
     justify-content: center;
     align-items: center; /* CENTERED ALIGNMENT (Important for the request) */
-    z-index: 3000; /* Highest Z-index */
+    
+    /* FIX: Increased Z-Index to 20000 to be above Header (10001) and Mobile Menu (10100) */
+    z-index: 20000; 
+    
     opacity: 0;
     visibility: hidden; /* New: Use visibility for better transition control */
     transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
@@ -338,18 +341,27 @@
 }
 
 @media (max-width: 500px) {
+    /* FIX: Ensure modal takes full space and sits correctly on mobile */
     .about-modal-content {
         width: 100%;
         height: 100%;
         margin: 0;
         border-radius: 0;
         max-height: 100vh;
+        /* Ensure no extra spacing pushes it weirdly */
+        display: flex;
+        flex-direction: column;
     }
+    
     .about-content-inner {
         padding: 1.5rem;
         gap: 2rem;
-        max-height: 100vh;
+        max-height: none; /* Reset max-height to let flexbox handle it */
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-bottom: 80px; /* Add padding for scroll space at bottom */
     }
+    
     .about-title {
         font-size: 1.6rem;
     }

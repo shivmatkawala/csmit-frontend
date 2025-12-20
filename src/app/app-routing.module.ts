@@ -46,7 +46,6 @@ const routes: Routes = [
   {path:'upload-blog',component:UploadBlogComponent},
   {path:'upload-notes',component:UploadNotesComponent},
   {path:'careers',component:CareersComponent},
-  
 ];
 
 @NgModule({

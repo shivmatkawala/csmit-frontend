@@ -1,201 +1,216 @@
-<!-- 
-  MOBILE RESPONSIVE DASHBOARD
--->
 <section class="feature-dashboard-section" id="features">
-  <div class="container">
+<div class="container">
+
+<!-- 1. Sticky Tab Navigation -->
+<div class="dashboard-tabs-wrapper">
+  <div class="dashboard-tabs">
+    <button class="tab-btn" [class.active]="selectedFeature === 'batch'" (click)="selectFeature('batch')">
+      <span class="tab-icon">📅</span> <span class="tab-text">Upcoming Batches</span>
+    </button>
+    <button class="tab-btn" [class.active]="selectedFeature === 'notes'" (click)="selectFeature('notes')">
+      <span class="tab-icon">📚</span> <span class="tab-text">Study Notes</span>
+    </button>
+    <button class="tab-btn" [class.active]="selectedFeature === 'success'" (click)="selectFeature('success')">
+      <span class="tab-icon">🏆</span> <span class="tab-text">Success Stories</span>
+    </button>
+  </div>
+</div>
+
+<!-- 2. Content Display Area -->
+<div class="dashboard-content-area">
+
+  <!-- VIEW A: Upcoming Batches (Real Time) -->
+  <div *ngIf="selectedFeature === 'batch'" class="content-view batch-view fade-in">
     
-    <!-- 1. Sticky Tab Navigation -->
-    <div class="dashboard-tabs-wrapper">
-      <div class="dashboard-tabs">
-        <button 
-          class="tab-btn" 
-          [class.active]="selectedFeature === 'batch'" 
-          (click)="selectFeature('batch')">
-          <span class="tab-icon">📅</span> 
-          <span class="tab-text">Upcoming Batches</span>
-        </button>
-        
-        <button 
-          class="tab-btn" 
-          [class.active]="selectedFeature === 'notes'" 
-          (click)="selectFeature('notes')">
-          <span class="tab-icon">📚</span> 
-          <span class="tab-text">Study Notes</span>
-        </button>
-        
-        <button 
-          class="tab-btn" 
-          [class.active]="selectedFeature === 'success'" 
-          (click)="selectFeature('success')">
-          <span class="tab-icon">🏆</span> 
-          <span class="tab-text">Success Stories</span>
-        </button>
-      </div>
+    <div *ngIf="isLoading" class="loading-state"><p>Loading active batches...</p></div>
+
+    <div *ngIf="!isLoading && (!upcomingBatches || upcomingBatches.length === 0)" class="empty-state">
+      <h3>No Active Batches</h3>
+      <p>Please check back later for new course announcements.</p>
     </div>
 
-    <!-- 2. Content Display Area -->
-    <div class="dashboard-content-area">
-
-      <!-- VIEW A: Upcoming Batches (Real Time) -->
-      <div *ngIf="selectedFeature === 'batch'" class="content-view batch-view fade-in">
+    <div *ngIf="!isLoading && featuredBatch" class="batch-card-hero">
+      <div class="batch-image-side">
+        <img [src]="featuredBatch.imageUrl" alt="Batch Cover" class="batch-img">
+        <div class="live-badge"><span class="live-dot"></span> Enrolling Now</div>
+      </div>
+      <div class="batch-info-side">
+        <div class="tags-row">
+          <span *ngFor="let tag of featuredBatch.tags" class="tag">{{ tag }}</span>
+        </div>
+        <h2 class="batch-title">{{ featuredBatch.courseName }}</h2>
+        <p class="batch-desc">{{ featuredBatch.description }}</p>
         
-        <!-- Loading State -->
-        <div *ngIf="isLoading" class="loading-state">
-          <p>Loading active batches...</p>
-        </div>
-
-        <!-- No Batches State -->
-        <div *ngIf="!isLoading && (!upcomingBatches || upcomingBatches.length === 0)" class="empty-state">
-          <h3>No Active Batches</h3>
-          <p>Please check back later for new course announcements.</p>
-        </div>
-
-        <!-- Active Batch Card -->
-        <div *ngIf="!isLoading && featuredBatch" class="batch-card-hero">
-          <div class="batch-image-side">
-            <img [src]="featuredBatch.imageUrl" alt="Batch Cover" class="batch-img">
-            <div class="live-badge"><span class="live-dot"></span> Enrolling Now</div>
+        <div class="batch-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Start Date</span>
+            <span class="meta-val" *ngIf="featuredBatch.startDate">{{ featuredBatch.startDate | date:'mediumDate' }}</span>
+            <span class="meta-val" *ngIf="!featuredBatch.startDate">Coming Soon</span>
           </div>
-          <div class="batch-info-side">
-            <div class="tags-row">
-              <span *ngFor="let tag of featuredBatch.tags" class="tag">{{ tag }}</span>
-            </div>
-            <h2 class="batch-title">{{ featuredBatch.courseName }}</h2>
-            <p class="batch-desc">{{ featuredBatch.description }}</p>
-            
-            <div class="batch-meta-grid">
-              <div class="meta-item">
-                <span class="meta-label">Start Date</span>
-                <span class="meta-val">{{ featuredBatch.startDate }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Time</span>
-                <span class="meta-val">{{ featuredBatch.time }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Mode</span>
-                <span class="meta-val">{{ featuredBatch.mode }}</span>
-              </div>
-            </div>
-
-            <button class="action-btn-primary">Book Demo Seat →</button>
+          <div class="meta-item">
+            <span class="meta-label">Time</span>
+            <span class="meta-val">{{ featuredBatch.time }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Mode</span>
+            <span class="meta-val">{{ featuredBatch.mode }}</span>
           </div>
         </div>
+
+        <!-- BUTTON CLICK OPENS INQUIRY FORM -->
+        <button class="action-btn-primary" (click)="openInquiryForm(featuredBatch.courseName)">Book Demo Seat →</button>
       </div>
-
-      <!-- VIEW B: Notes & Resources (REDESIGNED - Blog Style) -->
-      <div *ngIf="selectedFeature === 'notes'" class="content-view notes-view fade-in">
-        
-        <!-- Header & Controls Row -->
-        <div class="notes-control-bar">
-          <div class="header-text">
-            <h3>Study Material</h3>
-            <p>Select subject to load notes.</p>
-          </div>
-
-          <div class="controls-group">
-            <!-- Subject Dropdown -->
-            <div class="control-item">
-              <select [(ngModel)]="selectedSyllabus" (ngModelChange)="onSyllabusChange($event)" class="modern-select">
-                <option *ngFor="let opt of syllabusOptions" [value]="opt">{{ opt }}</option>
-              </select>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="control-item search-container">
-              <span class="search-icon">🔍</span>
-              <input 
-                type="text" 
-                placeholder="Search topics..." 
-                class="search-input"
-                (input)="onNoteSearch($event)">
-            </div>
-          </div>
-        </div>
-
-        <!-- SCROLLABLE NOTES CONTAINER (Ticker Style) -->
-        <div class="notes-ticker-container" 
-             #noteScrollContainer
-             (mouseenter)="pauseNoteScroll()" 
-             (mouseleave)="resumeNoteScroll()"
-             (touchstart)="pauseNoteScroll()"
-             (touchend)="resumeNoteScroll()">
-
-          <!-- Loading State -->
-          <div *ngIf="isLoadingNotes" class="loading-state">
-             <div class="spinner"></div>
-             <p>Fetching notes for {{ selectedSyllabus }}...</p>
-          </div>
-
-          <!-- Empty State -->
-          <div *ngIf="!isLoadingNotes && notesList.length === 0" class="empty-state">
-            <p>No notes found for {{ selectedSyllabus }}.</p>
-          </div>
-
-          <!-- Notes List Items -->
-          <ng-container *ngIf="!isLoadingNotes && notesList.length > 0">
-            <div *ngFor="let note of notesList" class="note-list-item">
-              
-              <!-- Left: Icon & Info -->
-              <div class="note-info">
-                <div class="note-icon-box" [ngClass]="getCategoryClass(note.category)">
-                  <span *ngIf="note.category === 'Lecture Note'">📘</span>
-                  <span *ngIf="note.category === 'Assignment'">📝</span>
-                  <span *ngIf="note.category === 'Lab Manual'">🔬</span>
-                  <span *ngIf="note.category === 'Question Paper'">❓</span>
-                  <span *ngIf="!note.category">📄</span>
-                </div>
-                <div class="note-text">
-                  <h4 class="note-title">{{ note.title }}</h4>
-                  <div class="note-meta">
-                    <span class="category-tag">{{ note.category }}</span>
-                    <span class="date-tag">📅 {{ note.uploaded_at | date:'mediumDate' }}</span>
-                  </div>
-                  <p class="note-desc" *ngIf="note.description">{{ note.description }}</p>
-                </div>
-              </div>
-
-              <!-- Right: Actions -->
-              <div class="note-actions">
-                <button class="action-btn download-btn" (click)="downloadNote(note)" title="Download">
-                  Download ⬇
-                </button>
-              </div>
-
-            </div>
-          </ng-container>
-
-        </div>
-      </div>
-
-      <!-- VIEW C: Success Stories -->
-      <div *ngIf="selectedFeature === 'success'" class="content-view success-view fade-in">
-        <div class="section-title-center">
-          <h3>Our Wall of Fame</h3>
-          <p>Inspiring stories from our alumni placed in top tech giants.</p>
-        </div>
-
-        <!-- Loading State for Stories -->
-        <div *ngIf="isLoadingStories" class="loading-state">
-          <p>Loading success stories...</p>
-        </div>
-
-        <div *ngIf="!isLoadingStories" class="stories-grid-modern">
-          <div *ngFor="let story of successStories" class="success-card">
-            <div class="card-top">
-              <img [src]="story.image" [alt]="story.name" class="candidate-img">
-              <img [src]="story.logo" alt="Company" class="company-logo-small">
-            </div>
-            <div class="card-content">
-              <h4 class="candidate-name">{{ story.name }}</h4>
-              <p class="candidate-role">{{ story.role }} @ <strong>{{ story.company }}</strong></p>
-              <div class="package-badge">💰 {{ story.package }}</div>
-              <p class="candidate-quote">"{{ story.quote }}"</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
+
+  <!-- VIEW B: Notes -->
+  <div *ngIf="selectedFeature === 'notes'" class="content-view notes-view fade-in">
+     <div class="notes-control-bar">
+      <div class="header-text"><h3>Study Material</h3><p>Select subject to load notes.</p></div>
+      <div class="controls-group">
+        <div class="control-item">
+          <select [(ngModel)]="selectedSyllabus" (ngModelChange)="onSyllabusChange($event)" class="modern-select">
+            <option *ngFor="let opt of syllabusOptions" [value]="opt">{{ opt }}</option>
+          </select>
+        </div>
+        <div class="control-item search-container">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search topics..." class="search-input" (input)="onNoteSearch($event)">
+        </div>
+      </div>
+    </div>
+    <div class="notes-ticker-container" #noteScrollContainer (mouseenter)="pauseNoteScroll()" (mouseleave)="resumeNoteScroll()" (touchstart)="pauseNoteScroll()" (touchend)="resumeNoteScroll()">
+      <div *ngIf="isLoadingNotes" class="loading-state"><div class="spinner"></div><p>Fetching notes...</p></div>
+      <div *ngIf="!isLoadingNotes && notesList.length === 0" class="empty-state"><p>No notes found for {{ selectedSyllabus }}.</p></div>
+      <ng-container *ngIf="!isLoadingNotes && notesList.length > 0">
+        <div *ngFor="let note of notesList" class="note-list-item">
+          <div class="note-info">
+            <div class="note-icon-box" [ngClass]="getCategoryClass(note.category)"><span>📄</span></div>
+            <div class="note-text">
+              <h4 class="note-title">{{ note.title }}</h4>
+              <div class="note-meta"><span class="category-tag">{{ note.category }}</span><span class="date-tag">📅 {{ note.uploaded_at | date:'mediumDate' }}</span></div>
+            </div>
+          </div>
+          <div class="note-actions">
+            <button class="action-btn download-btn" (click)="downloadNote(note)">Download ⬇</button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- VIEW C: Success Stories (UPDATED: 3 visible + rotation) -->
+  <div *ngIf="selectedFeature === 'success'" class="content-view success-view fade-in">
+    <div class="section-title-center"><h3>Our Wall of Fame</h3><p>Inspiring stories from our alumni.</p></div>
+    <div *ngIf="isLoadingStories" class="loading-state"><p>Loading success stories...</p></div>
+    
+    <div *ngIf="!isLoadingStories" class="stories-grid-modern">
+      <!-- Iterate over visibleStories instead of all successStories -->
+      <div *ngFor="let story of visibleStories" class="success-card" (click)="openStoryModal(story)">
+        <div class="card-top">
+          <img [src]="story.image" [alt]="story.name" class="candidate-img">
+          <img [src]="story.logo" alt="Company" class="company-logo-small">
+        </div>
+        <div class="card-content">
+          <h4 class="candidate-name">{{ story.name }}</h4>
+          <p class="candidate-role">{{ story.role }} @ <strong>{{ story.company }}</strong></p>
+          <div class="package-badge">💰 {{ story.package }}</div>
+          <p class="candidate-quote">"{{ story.quote }}"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+</div>
 </section>
+
+<!-- =========================================
+INQUIRY FORM MODAL (FIXED Z-INDEX)
+========================================= -->
+
+<div class="modal-overlay" *ngIf="showInquiryForm" (click)="closeInquiryForm()">
+<div class="modal-content" (click)="$event.stopPropagation()">
+<button class="close-modal-btn" (click)="closeInquiryForm()">×</button>
+
+<div *ngIf="!submissionSuccess">
+  <div class="modal-header">
+    <h3>Book Your Demo Seat</h3>
+    <p>Fill out the form below to reserve your spot for <strong>{{ inquiryForm.get('course_name')?.value }}</strong>.</p>
+  </div>
+
+  <form [formGroup]="inquiryForm" (ngSubmit)="submitInquiry()">
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input type="text" formControlName="name" placeholder="Enter your full name" class="form-input">
+      <div *ngIf="inquiryForm.get('name')?.invalid && inquiryForm.get('name')?.touched" class="error-text">
+        Name is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Phone Number</label>
+      <input type="tel" formControlName="phone_number" placeholder="Enter mobile number" class="form-input">
+      <div *ngIf="inquiryForm.get('phone_number')?.invalid && inquiryForm.get('phone_number')?.touched" class="error-text">
+        Valid phone number is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email (Optional)</label>
+      <input type="email" formControlName="email" placeholder="example@email.com" class="form-input">
+      <div *ngIf="inquiryForm.get('email')?.invalid && inquiryForm.get('email')?.touched" class="error-text">
+        Please enter a valid email.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Selected Course</label>
+      <input type="text" formControlName="course_name" readonly class="form-input" style="background-color: #f1f5f9;">
+    </div>
+
+    <button type="submit" class="submit-btn" [disabled]="inquiryForm.invalid || isSubmitting">
+      {{ isSubmitting ? 'Booking Seat...' : 'Confirm Booking' }}
+    </button>
+  </form>
+</div>
+
+<div *ngIf="submissionSuccess" class="success-message">
+  <span class="success-icon">🎉</span>
+  <h4>Seat Booked Successfully!</h4>
+  <p>Thank you for your interest. Our team will contact you shortly to confirm your demo schedule.</p>
+  <button class="submit-btn" style="margin-top: 2rem;" (click)="closeInquiryForm()">Close</button>
+</div>
+
+
+</div>
+</div>
+
+<!-- =========================================
+NEW: SUCCESS STORY DETAIL MODAL (POPUP)
+========================================= -->
+
+<div class="story-modal-overlay" *ngIf="isStoryModalOpen && selectedStory" (click)="closeStoryModal()">
+<div class="story-modal-content" (click)="$event.stopPropagation()">
+
+<button class="close-modal-btn" (click)="closeStoryModal()">×</button>
+
+<div class="story-modal-header">
+  <img [src]="selectedStory.image" [alt]="selectedStory.name" class="story-img-large">
+  <h3 class="story-name-large">{{ selectedStory.name }}</h3>
+  <p class="story-role-large">{{ selectedStory.role }} @ <strong>{{ selectedStory.company }}</strong></p>
+  <div class="story-badge">Package: {{ selectedStory.package }}</div>
+</div>
+
+<div class="story-modal-body">
+  <span class="quote-icon-large">“</span>
+  <div class="story-full-text">
+    {{ selectedStory.quote }}
+  </div>
+</div>
+
+
+</div>
+</div>

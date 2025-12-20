@@ -1,20 +1,15 @@
-<!-- Main Container -->
 <div class="main-container">
-  <div class="form-card" style="max-width: 550px; position: relative; overflow: hidden;">
+  <div class="form-card" style="max-width: 750px; position: relative; overflow: hidden;">
 
-    <!-- Header (Hamburger Menu Button removed) -->
     <div class="form-header">
-      <h1 class="form-header-title">
-        Create New Batch
-      </h1>
-      <!-- Hamburger Menu Icon removed -->
+      <h1 class="form-header-title">Create New Batch</h1>
     </div>
     
     <p class="form-header-subtitle">
-      Enter the batch name and select a course to link the batch to.
+      Define the schedule, mode, and start date for the new batch.
     </p>
 
-    <!-- Error/Success Messages -->
+    <!-- Messages -->
     <div *ngIf="errorMessage" class="submission-success-message" style="background-color: #fcebeb; border-color: #e74c3c; color: #c0392b; margin-bottom: 20px;">
         <p class="message-title">Error!</p>
         <p class="message-content">{{ errorMessage }}</p>
@@ -25,72 +20,55 @@
         <p class="message-content">{{ successMessage }}</p>
     </div>
 
-    <!-- Form Area - Template Driven Form (TDF) -->
     <form #batchForm="ngForm" (ngSubmit)="onSubmit(batchForm)" class="batch-form">
 
-      <!-- Section 1: Batch Details (Single Column) -->
-      <div class="form-section-group single-col">
-        
-        <!-- Batch Name -->
+      <!-- Row 1: Name & Course -->
+      <div class="form-section-group">
         <div class="form-group">
           <label for="batchName" class="input-label">Batch Name</label>
-          <input
-            id="batchName"
-            name="batchName"
-            type="text"
-            required
-            minlength="5"
-            [(ngModel)]="batchData.batchName"
-            #batchName="ngModel"
-            class="input-field"
-            placeholder="e.g. Batch B - 2025"
-          />
-          <div *ngIf="batchName.invalid && (batchName.dirty || batchName.touched)" class="error-message">
-            <div *ngIf="batchName.errors?.['required']">Batch Name is required.</div>
-            <div *ngIf="batchName.errors?.['minlength']">Name must be at least 5 characters long.</div>
-          </div>
+          <input id="batchName" name="batchName" type="text" required minlength="5" [(ngModel)]="batchData.batchName" #batchName="ngModel" class="input-field" placeholder="e.g. Batch B - 2025"/>
+          <div *ngIf="batchName.invalid && (batchName.dirty || batchName.touched)" class="error-message">Name must be at least 5 chars.</div>
         </div>
 
-        <!-- Course Selection (Course ID) -->
         <div class="form-group">
           <label for="courseId" class="input-label">Select Course</label>
-          <select
-            id="courseId"
-            name="courseId"
-            required
-            [(ngModel)]="batchData.courseId"
-            #courseId="ngModel"
-            class="input-field select-field"
-          >
-            <!-- Check if courses are loaded, otherwise show loading message -->
-            <option [ngValue]="null" disabled>
-                {{ courses.length === 0 ? 'Courses loading...' : '-- Select a Course --' }}
-            </option>
-            
-            <!-- Loop through fetched courses and display both ID and Name, but bind only the ID as the value -->
-            <option *ngFor="let c of courses" [ngValue]="c.courseid">
-                ID {{ c.courseid }}: {{ c.coursename }} 
-            </option>
+          <select id="courseId" name="courseId" required [(ngModel)]="batchData.courseId" #courseId="ngModel" class="input-field select-field">
+            <option [ngValue]="null" disabled>{{ courses.length === 0 ? 'Courses loading...' : '-- Select a Course --' }}</option>
+            <option *ngFor="let c of courses" [ngValue]="c.courseid">{{ c.coursename }}</option>
           </select>
-          <div *ngIf="courseId.invalid && (courseId.dirty || courseId.touched)" class="error-message">
-            Course selection is required.
-          </div>
+          <div *ngIf="courseId.invalid && (courseId.dirty || courseId.touched)" class="error-message">Required.</div>
         </div>
       </div>
 
-      <!-- Submit Button -->
+      <!-- Row 2: Date, Time, Mode (3 Columns) -->
+      <div class="form-section-group three-cols" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        
+        <div class="form-group">
+          <label for="startDate" class="input-label">Start Date</label>
+          <input id="startDate" name="startDate" type="date" required [(ngModel)]="batchData.startDate" #startDate="ngModel" class="input-field"/>
+          <div *ngIf="startDate.invalid && (startDate.dirty || startDate.touched)" class="error-message">Required.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="timing" class="input-label">Time Schedule</label>
+          <input id="timing" name="timing" type="text" required [(ngModel)]="batchData.timing" #timing="ngModel" class="input-field" placeholder="e.g. 10AM - 12PM"/>
+           <div *ngIf="timing.invalid && (timing.dirty || timing.touched)" class="error-message">Required.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="mode" class="input-label">Mode</label>
+          <select id="mode" name="mode" required [(ngModel)]="batchData.mode" #mode="ngModel" class="input-field select-field">
+            <option *ngFor="let m of modeOptions" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+
+      </div>
+
       <div class="submit-button-container">
-        <button
-          type="submit"
-          [disabled]="batchForm.invalid || isSubmitting"
-          class="submit-button"
-          [class.enabled]="batchForm.valid && !isSubmitting"
-          [class.disabled]="batchForm.invalid || isSubmitting"
-        >
+        <button type="submit" [disabled]="batchForm.invalid || isSubmitting" class="submit-button" [class.enabled]="batchForm.valid && !isSubmitting" [class.disabled]="batchForm.invalid || isSubmitting">
           {{ isSubmitting ? 'Submitting...' : 'Create Batch' }}
         </button>
       </div>
     </form>
-
   </div>
 </div>

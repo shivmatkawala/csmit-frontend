@@ -42,17 +42,32 @@
 
         <!-- UPDATED: Careers Link now triggers 'careers' view -->
         <li class="nav-item">
-          <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('careers', $event)">Careers</a>
+          <a href="javascript:void(0)" 
+             class="nav-link" 
+             [class.active]="activePage === 'careers'"
+             (click)="navigateTo('careers', $event)">
+             Careers
+          </a>
         </li>
         
         <!-- Blog Link triggers 'blog' view -->
         <li class="nav-item">
-          <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('blog', $event)">Blog</a>
+          <a href="javascript:void(0)" 
+             class="nav-link" 
+             [class.active]="activePage === 'blog'"
+             (click)="navigateTo('blog', $event)">
+             Blog
+          </a>
         </li>
         
         <!-- Contact triggers 'contact' view -->
         <li class="nav-item">
-          <a href="javascript:void(0)" class="nav-link" (click)="navigateTo('contact', $event)">Contact</a>
+          <a href="javascript:void(0)" 
+             class="nav-link" 
+             [class.active]="activePage === 'contact'"
+             (click)="navigateTo('contact', $event)">
+             Contact
+          </a>
         </li>
       </ul>
     </nav>
@@ -99,13 +114,25 @@
         </a>
 
         <!-- UPDATED: Mobile Careers Link -->
-        <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('careers', $event)">Careers</a>
+        <a href="javascript:void(0)" class="mobile-item" 
+           [class.active]="activePage === 'careers'"
+           (click)="navigateTo('careers', $event)">
+           Careers
+        </a>
         
         <!-- Mobile Blog Link -->
-        <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('blog', $event)">Blog</a>
+        <a href="javascript:void(0)" class="mobile-item" 
+           [class.active]="activePage === 'blog'"
+           (click)="navigateTo('blog', $event)">
+           Blog
+        </a>
         
         <!-- Mobile Contact Link -->
-        <a href="javascript:void(0)" class="mobile-item" (click)="navigateTo('contact', $event)">Contact</a>
+        <a href="javascript:void(0)" class="mobile-item" 
+           [class.active]="activePage === 'contact'"
+           (click)="navigateTo('contact', $event)">
+           Contact
+        </a>
         
         <div class="mobile-divider"></div>
         
