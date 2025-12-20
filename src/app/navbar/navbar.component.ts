@@ -253,9 +253,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
         if (courses.length === 0) { this.handleEmptyBatches(); return; }
         
         const batchRequests = courses.map(course => 
-          this.batchService.getBatchesByCourse(course.courseid).pipe(
+          this.batchService.getBatchesByCourse(course.courseId).pipe(
             catchError(err => {
-              console.warn(`Could not fetch batches for course ${course.courseid}`, err);
+              console.warn(`Could not fetch batches for course ${course.courseId}`, err);
               return of([]); 
             })
           )
@@ -275,7 +275,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
               activeForCourse.forEach(b => {
                 if (!b.course) {
                   b.course = currentCourse; 
-                } else if (!b.course.coursename) {
+                } else if (!b.course.courseName) {
                    b.course = currentCourse;
                 }
               });
@@ -347,7 +347,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       const finalMode = batch.mode || bAny.mode || 'Online';
 
       return {
-        courseName: batch.course?.coursename || batch.batchName || 'Advanced Course',
+        courseName: batch.course?.courseName || batch.batchName || 'Advanced Course',
         startDate: finalStartDate, 
         time: finalTiming,
         mode: finalMode, 

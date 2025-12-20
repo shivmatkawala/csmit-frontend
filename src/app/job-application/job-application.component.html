@@ -1,0 +1,305 @@
+<div class="application-wrapper">
+  
+  <!-- LEFT PANEL: MNC Vibe & Inspiration -->
+  <aside class="side-panel">
+    <div class="panel-overlay"></div>
+    <div class="panel-content">
+      <div class="brand-area">
+        <!-- Logo Text - Professional & Clean -->
+        <div class="logo-text">CSMIT <span class="thin">Careers</span></div>
+      </div>
+      
+      <div class="quote-area">
+        <h1>Shape the<br>Future.</h1>
+        <div class="quote-box">
+          <p>"Do not go where the path may lead, go instead where there is no path and leave a trail."</p>
+          <span class="author">— Ralph Waldo Emerson</span>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <div class="trust-badges">
+          <span>🚀 Top Workplace '24</span>
+          <span>🌍 Global Innovator</span>
+        </div>
+        <p>&copy; 2024 CSMIT Group. All rights reserved.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT PANEL: The Form -->
+  <main class="form-panel">
+    
+    <!-- Header -->
+    <div class="form-header">
+      <div class="header-info">
+        <span class="sub-label">Applying For Position</span>
+        <h2>{{ job?.title || 'Senior Position' }}</h2>
+      </div>
+      <button class="close-btn" (click)="closeModal()">
+        <span>Close</span> ✕
+      </button>
+    </div>
+
+    <!-- Stepper Progress -->
+    <div class="stepper-container" *ngIf="!isSuccess && !isSubmitting">
+      <div class="stepper-wrapper">
+        <!-- Step 1 -->
+        <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+          <div class="step-circle"><span *ngIf="currentStep <= 1">1</span><span *ngIf="currentStep > 1">✓</span></div>
+          <span class="step-label">Personal</span>
+        </div>
+        <div class="step-line"></div>
+        <!-- Step 2 -->
+        <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+          <div class="step-circle"><span *ngIf="currentStep <= 2">2</span><span *ngIf="currentStep > 2">✓</span></div>
+          <span class="step-label">Experience</span>
+        </div>
+        <div class="step-line"></div>
+        <!-- Step 3 -->
+        <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Review</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Content Area -->
+    <div class="form-body custom-scrollbar">
+      <div class="form-content-width">
+        
+        <form [formGroup]="applyForm" *ngIf="!isSuccess && !isSubmitting">
+          
+          <!-- STEP 1: Personal Details -->
+          <div *ngIf="currentStep === 1" class="step-section fade-in">
+            <h3 class="section-title">Personal Information</h3>
+            <p class="section-subtitle">Let's get your profile started.</p>
+            
+            <div class="input-grid">
+              <div class="form-group span-2">
+                <label>Full Name <span class="req">*</span></label>
+                <input type="text" formControlName="fullName" placeholder="Enter your full name">
+                <div class="error-msg" *ngIf="isFieldInvalid('fullName')">Name is required</div>
+              </div>
+
+              <div class="form-group">
+                <label>Email Address <span class="req">*</span></label>
+                <input type="email" formControlName="email" placeholder="name@example.com">
+                <div class="error-msg" *ngIf="isFieldInvalid('email')">Valid email required</div>
+              </div>
+
+              <div class="form-group">
+                <label>Phone Number <span class="req">*</span></label>
+                <input type="tel" formControlName="phone" placeholder="+91 98765 43210">
+                <div class="error-msg" *ngIf="isFieldInvalid('phone')">Valid phone required</div>
+              </div>
+
+              <div class="form-group">
+                <label>Date of Birth <span class="req">*</span></label>
+                <input type="date" formControlName="dob">
+                <div class="error-msg" *ngIf="isFieldInvalid('dob')">Date of birth is required</div>
+              </div>
+
+              <div class="form-group">
+                <label>Gender <span class="req">*</span></label>
+                <select formControlName="gender">
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div class="error-msg" *ngIf="isFieldInvalid('gender')">Selection required</div>
+              </div>
+
+              <div class="form-group span-2">
+                <label>Current Address <span class="req">*</span></label>
+                <input type="text" formControlName="location" placeholder="City, State, Country">
+                <div class="error-msg" *ngIf="isFieldInvalid('location')">Location is required</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Professional Background -->
+          <div *ngIf="currentStep === 2" class="step-section fade-in">
+            <h3 class="section-title">Experience & Education</h3>
+            <p class="section-subtitle">Your professional journey matters to us.</p>
+            
+            <div class="input-grid">
+              
+              <!-- Experience Type Selector -->
+              <div class="form-group span-2">
+                <label>Work Status <span class="req">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-card" [class.selected]="applyForm.get('workStatus')?.value === 'Fresher'">
+                    <input type="radio" formControlName="workStatus" value="Fresher">
+                    <span>🎓 I am a Fresher</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="applyForm.get('workStatus')?.value === 'Experienced'">
+                    <input type="radio" formControlName="workStatus" value="Experienced">
+                    <span>💼 I am Experienced</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- DYNAMIC EXPERIENCE FIELDS -->
+              <ng-container *ngIf="applyForm.get('workStatus')?.value === 'Experienced'">
+                <div class="divider span-2"><span>Work History</span></div>
+                
+                <div class="form-group span-2 fade-in">
+                  <label>Current Company <span class="req">*</span></label>
+                  <input type="text" formControlName="currentCompany" placeholder="Company Name">
+                  <div class="error-msg" *ngIf="isFieldInvalid('currentCompany')">Company name required</div>
+                </div>
+
+                <div class="form-group fade-in">
+                  <label>Designation <span class="req">*</span></label>
+                  <input type="text" formControlName="jobTitle" placeholder="e.g. Senior Developer">
+                  <div class="error-msg" *ngIf="isFieldInvalid('jobTitle')">Job title required</div>
+                </div>
+
+                <div class="form-group fade-in">
+                  <label>Experience (Years) <span class="req">*</span></label>
+                  <input type="number" formControlName="experienceYears" placeholder="e.g. 3.5">
+                  <div class="error-msg" *ngIf="isFieldInvalid('experienceYears')">Experience required</div>
+                </div>
+
+                <div class="form-group fade-in">
+                  <label>Current CTC <span class="req">*</span></label>
+                  <input type="text" formControlName="currentCTC" placeholder="e.g. 8.5 LPA">
+                  <div class="error-msg" *ngIf="isFieldInvalid('currentCTC')">Current CTC required</div>
+                </div>
+
+                <div class="form-group fade-in">
+                  <label>Expected CTC <span class="req">*</span></label>
+                  <input type="text" formControlName="expectedCTC" placeholder="e.g. 12 LPA">
+                  <div class="error-msg" *ngIf="isFieldInvalid('expectedCTC')">Expected CTC required</div>
+                </div>
+
+                <div class="form-group fade-in">
+                  <label>Notice Period <span class="req">*</span></label>
+                  <select formControlName="noticePeriod">
+                    <option value="" disabled selected>Select</option>
+                    <option value="Immediate">Immediate</option>
+                    <option value="15 Days">15 Days</option>
+                    <option value="30 Days">30 Days</option>
+                    <option value="60 Days">60 Days</option>
+                    <option value="90 Days">90 Days</option>
+                  </select>
+                  <div class="error-msg" *ngIf="isFieldInvalid('noticePeriod')">Notice period required</div>
+                </div>
+              </ng-container>
+
+              <!-- Education Header -->
+              <div class="divider span-2"><span>Education</span></div>
+
+              <div class="form-group">
+                <label>Highest Degree <span class="req">*</span></label>
+                <select formControlName="degree">
+                  <option value="" disabled selected>Select Degree</option>
+                  <option value="B.Tech">B.Tech / B.E.</option>
+                  <option value="M.Tech">M.Tech / M.E.</option>
+                  <option value="MBA">MBA / PGDM</option>
+                  <option value="MCA">MCA</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div class="error-msg" *ngIf="isFieldInvalid('degree')">Degree is required</div>
+              </div>
+
+              <div class="form-group">
+                <label>Passing Year <span class="req">*</span></label>
+                <input type="number" formControlName="gradYear" placeholder="YYYY">
+                <div class="error-msg" *ngIf="isFieldInvalid('gradYear')">Year is required</div>
+              </div>
+
+              <div class="form-group span-2">
+                <label>University / Institute <span class="req">*</span></label>
+                <input type="text" formControlName="university" placeholder="Institute Name">
+                <div class="error-msg" *ngIf="isFieldInvalid('university')">University is required</div>
+              </div>
+
+              <div class="form-group">
+                <label>CGPA / Percentage <span class="req">*</span></label>
+                <input type="text" formControlName="cgpa" placeholder="e.g. 8.5 or 85%">
+                <div class="error-msg" *ngIf="isFieldInvalid('cgpa')">CGPA is required</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Resume & Links -->
+          <div *ngIf="currentStep === 3" class="step-section fade-in">
+            <h3 class="section-title">Documents & Links</h3>
+            <p class="section-subtitle">Showcase your portfolio and resume.</p>
+            
+            <div class="input-grid">
+              <div class="form-group span-2">
+                <label>LinkedIn Profile</label>
+                <input type="url" formControlName="linkedin" placeholder="https://linkedin.com/in/...">
+              </div>
+
+              <div class="form-group span-2">
+                <label>Portfolio / Github Link</label>
+                <input type="url" formControlName="portfolio" placeholder="https://...">
+              </div>
+
+              <div class="form-group span-2">
+                <label>Upload Resume / CV <span class="req">*</span></label>
+                <div class="upload-area" [class.has-file]="selectedFileName" [class.error-border]="fileError">
+                  <input type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" id="resumeFile" hidden>
+                  <label for="resumeFile">
+                    <div class="icon-cloud">📂</div>
+                    <div class="upload-text" *ngIf="!selectedFileName">
+                      Click to <span class="highlight">Upload Resume</span>
+                    </div>
+                    <div class="upload-text" *ngIf="selectedFileName" style="color: #059669; font-weight:700;">
+                      {{ selectedFileName }}
+                    </div>
+                    <span class="upload-hint">Supported: PDF, DOCX (Max 5MB)</span>
+                  </label>
+                </div>
+                <div class="error-msg" *ngIf="fileError">Resume file is required</div>
+              </div>
+
+              <div class="info-box span-2">
+                <span class="info-icon">ℹ️</span>
+                <p>We value your privacy. Your data is secure and will only be used for recruitment purposes in accordance with our global privacy policy.</p>
+              </div>
+            </div>
+          </div>
+
+        </form>
+
+        <!-- Loading State -->
+        <div *ngIf="isSubmitting" class="full-screen-msg">
+          <div class="spinner"></div>
+          <h2>Processing Application</h2>
+          <p>Please wait while we securely transmit your details.</p>
+        </div>
+
+        <!-- Success State -->
+        <div *ngIf="isSuccess" class="full-screen-msg">
+          <div class="icon-lg">✨</div>
+          <h2>Application Received</h2>
+          <p>Thank you for applying to <strong>CSMIT Careers</strong>. A confirmation email has been sent to you.</p>
+          <button class="btn btn-primary" (click)="closeModal()">Return to Jobs</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="form-footer" *ngIf="!isSuccess && !isSubmitting">
+      <button class="btn btn-secondary" (click)="prevStep()" [disabled]="currentStep === 1">
+        Back
+      </button>
+      
+      <button class="btn btn-primary" (click)="nextStep()" *ngIf="currentStep < totalSteps">
+        Next Step <span class="arrow">→</span>
+      </button>
+      
+      <button class="btn btn-submit" (click)="submitApplication()" *ngIf="currentStep === totalSteps">
+        Submit Application
+      </button>
+    </div>
+
+  </main>
+</div>
