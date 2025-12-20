@@ -1,8 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Course } from './create-course.service';
 
+/**
+ * Defines the structure of course data fetched from the API.
+ */
+export interface Course {
+  courseid: number; 
+  coursename: string; 
+}
+
+/**
+ * Updated BatchDetail to include real fields from Backend
+ */
 export interface BatchDetail {
   batchId: number; 
   batchName: string; 
@@ -26,14 +36,13 @@ export interface CreateBatchPayload {
   mode: string;
 }
 
-// ✅ FIXED: Hardcoded IP hata kar relative paths set kiye hain
-const BATCHES_BASE = '/api/batches/';
-const COURSE_LIST_API = '/api/courses/course-list/';
-
-const BATCH_CREATE_API = BATCHES_BASE + 'batch-create/';
-const BATCHES_BY_COURSE_API = BATCHES_BASE + 'batches-by-course/'; 
-const DEACTIVATE_BATCH_API = BATCHES_BASE + 'deactivate-batch/'; 
-const REACTIVATE_BATCH_API = BATCHES_BASE + 'reactivate-batch/'; 
+// API Endpoints
+const BASE_URL = 'http://127.0.0.1:8000/api/batches/';
+const COURSE_LIST_API = 'http://127.0.0.1:8000/api/courses/course-list/';
+const BATCH_CREATE_API = BASE_URL + 'batch-create/';
+const BATCHES_BY_COURSE_API = BASE_URL + 'batches-by-course/'; 
+const DEACTIVATE_BATCH_API = BASE_URL + 'deactivate-batch/'; 
+const REACTIVATE_BATCH_API = BASE_URL + 'reactivate-batch/'; 
 
 @Injectable({
   providedIn: 'root'
@@ -65,5 +74,3 @@ export class CreateBatchService {
     return this.http.patch(apiUrl, {}); 
   }
 }
-
-export { Course };
