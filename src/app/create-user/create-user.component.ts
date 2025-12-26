@@ -21,8 +21,6 @@ export class CreateUserComponent implements OnInit {
   message: string = '';
   isError: boolean = false;
 
-  // यूज़र मैनेजमेंट पैनल और मॉडल से संबंधित सभी प्रॉपर्टीज़ यहाँ से हटा दी गई हैं।
-
 
   constructor(
     private userService: UserService, 
@@ -30,10 +28,10 @@ export class CreateUserComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Component initialization logic
+    
   }
 
-  // --- यूज़र क्रिएशन लॉजिक ---
+  
   
   createUser(): void {
     if (!this.username || !this.password || !this.roleid) {
@@ -54,7 +52,7 @@ export class CreateUserComponent implements OnInit {
         this.username = '';
         this.password = ''; 
         this.roleid = 1;
-        // यूज़र लिस्ट को फ़ेच करने का लॉजिक हटा दिया गया है
+        
       },
       error: (err) => {
         let errorMessage = 'An unknown error occurred during registration.';
@@ -80,7 +78,7 @@ export class CreateUserComponent implements OnInit {
 
   goBack(): void {
     // यूज़र बनाने के बाद एडमिन डैशबोर्ड पर वापस जाएँ
-    this.router.navigate(['/']); 
+    this.router.navigate(['/admin-panel']); 
   }
 
   // यूज़र मैनेजमेंट से संबंधित सभी सहायक फ़ंक्शन (togglePanel, fetchUsers, filterUsers, showConfirmation, आदि) हटा दिए गए हैं।

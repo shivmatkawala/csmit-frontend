@@ -1,56 +1,53 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<div class="container">
+<div class="container" [class.dark-mode]="darkModeActive()">
     <!-- Header -->
-    <header>
+    <header class="seamless-header">
         <div class="logo-search">
             <div class="logo">
-                <img src="assets/logo.jpg" alt="institute Logo" class="institute-logo" title="institute logo">
+                <!-- Ensure you have a logo.png in assets or change src -->
+                <img src="assets/logo.jpg" alt="Institute Logo" class="institute-logo" title="Institute Logo">
             </div>
-            <div class="search-wrapper">
+            <div class="search-wrapper modern-search">
+                <i class="fas fa-search search-icon"></i>
                 <input 
                     type="search" 
                     [placeholder]="activeTab() === 'users' ? 'Search Users...' : activeTab() === 'courses' ? 'Search Courses...' : 'Search...'"
                     [value]="headerSearchQuery()"
                     (input)="onHeaderSearch($event)"
                 />
-                <i class="fas fa-search"></i>
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-header-action" (click)="showMessageBox('Reports generated successfully!')">
-                <i [class]="config.HEADER_BUTTON.icon"></i>
-                <span>{{ config.HEADER_BUTTON.label }}</span>
-            </button>
-            <div class="user-avatar" title="{{ config.ADMIN_DETAILS.name }}">
-                <img [src]="config.ADMIN_DETAILS.profileUrl" alt="Admin" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            <div class="user-profile-pill" title="{{ config.ADMIN_DETAILS.name }}">
+                <div class="user-avatar">
+                    <img [src]="config.ADMIN_DETAILS.profileUrl" alt="Admin">
+                </div>
+                <span class="user-name">{{ config.ADMIN_DETAILS.name }}</span>
             </div>
         </div>
     </header>
 
     <!-- Sidebar -->
-    <aside class="sidebar">
-        <div>
-            <nav class="sidebar-nav">
-                <a *ngFor="let link of config.SIDEBAR_LINKS"
-                   [class.active]="activeTab() === link.id" 
-                   (click)="navigateTo(link.route, link.id)" 
-                   [title]="link.label">
+    <aside class="sidebar seamless-sidebar">
+        <nav class="sidebar-nav">
+            <a *ngFor="let link of config.SIDEBAR_LINKS"
+               class="nav-item"
+               [class.active]="activeTab() === link.id" 
+               (click)="navigateTo(link.route, link.id)" 
+               [title]="link.label">
+                <div class="icon-box">
                     <i [class]="link.icon"></i>
-                    <span>{{ link.label }}</span>
-                </a>
-            </nav>
-        </div>
-        <div class="sidebar-bottom">
-            <div class="toggle-switch" 
-                 [class.active]="darkModeActive()" 
-                 (click)="darkModeActive.set(!darkModeActive())" 
-                 title="Dark Mode">
-                <span></span>
-            </div>
-            <a title="Logout" (click)="logoutUser()">
-                <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <span class="nav-label">{{ link.label }}</span>
             </a>
+        </nav>
+        
+        <div class="sidebar-bottom">
+            <button class="logout-btn-icon" (click)="logoutUser()" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="nav-label">Logout</span>
+            </button>
         </div>
     </aside>
 
@@ -58,22 +55,22 @@
     <main class="main-content">
         
         <!-- Dashboard View -->
-        <div *ngIf="activeTab() === 'dashboard'">
+        <div *ngIf="activeTab() === 'dashboard'" class="fade-in">
             <div class="main-content-header">
-                <h1>Admin Dashboard</h1>
-                <p>Quick access to core administrative functions</p>
+                <h1>Dashboard Overview</h1>
+                <p>Welcome back, {{ config.ADMIN_DETAILS.name }}</p>
             </div>
             
             <div class="card-grid">
                 <div *ngFor="let card of config.ADMIN_CARDS" 
                     class="card" 
-                    [class]="card.colorClass" 
                     tabindex="0" 
                     (click)="navigateTo(card.route, card.targetTab)">
                     
                     <div class="card-image-wrapper">
-                        <!-- Use the iconImage from config -->
-                        <img [src]="'assets/' + card.iconImage" [alt]="card.title">
+                        <!-- Use dummy images if assets missing, or keep original src -->
+                        <img [src]="'assets/' + card.iconImage" [alt]="card.title" 
+                             onerror="this.src='https://placehold.co/600x400/eef2f6/94a3b8?text=Image'">
                         <div class="card-overlay">
                             <h2>{{ card.title }}</h2>
                             <p>{{ card.subtitle }}</p>
@@ -107,7 +104,7 @@
             [globalSearchQuery]="headerSearchQuery()"
         ></app-batch-management>
 
-        <!-- NEW: Upload Career Component (Only shows when new card is clicked) -->
+        <!-- Upload Career Component -->
         <app-upload-career 
             *ngIf="activeTab() === 'upload-careers'"
         ></app-upload-career>

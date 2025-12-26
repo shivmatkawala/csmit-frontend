@@ -23,7 +23,7 @@ interface AdminCard {
   buttonText: string;
   colorClass: string; 
   route: string;
-  targetTab?: TabId; // Optional: If present, clicking card switches to this tab instead of just routing
+  targetTab?: TabId; 
 }
 
 const ADMIN_CONFIG = {
@@ -35,10 +35,10 @@ const ADMIN_CONFIG = {
   ADMIN_DETAILS: {
     name: 'Admin Head',
     role: 'System Administrator',
-    profileUrl: 'https://placehold.co/80x80/2C3E50/ffffff?text=AD' 
+    profileUrl: 'https://placehold.co/80x80/4f46e5/ffffff?text=AD' 
   },
   SIDEBAR_LINKS: [
-    { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-th-large', route: '/admin-panel' }, 
+    { id: 'dashboard', label: 'Home', icon: 'fas fa-home', route: '/admin-panel' }, 
     { id: 'users', label: 'Users', icon: 'fas fa-users', route: '/users' }, 
     { id: 'courses', label: 'Courses', icon: 'fas fa-book-open', route: '/courses' }, 
     { id: 'batches', label: 'Batches', icon: 'fas fa-graduation-cap', route: '/batches' }, 
@@ -49,31 +49,31 @@ const ADMIN_CONFIG = {
       title: 'Create New User', 
       subtitle: 'Register new users (Admin, Trainer, Student) and assign roles.', 
       iconImage: 'new_user.png',
-      buttonText: 'Go to Create User', 
+      buttonText: 'Create User', 
       colorClass: 'indigo', 
       route: '/create-user' 
     },
     { 
-      title: 'Update New Batch', 
+      title: 'New Batch', 
       subtitle: 'Manage batch start dates, capacity, and student allocations.', 
       iconImage: 'batch.png',
-      buttonText: 'Go to Create New Batch', 
+      buttonText: 'Create Batch', 
       colorClass: 'violet', 
       route: '/create-batch' 
     },
     { 
-      title: 'Create New Course', 
+      title: 'New Course', 
       subtitle: 'Define new course structure, duration, and assign a dedicated trainer.', 
       iconImage: 'course.png',
-      buttonText: 'Go to Create Course', 
+      buttonText: 'Create Course', 
       colorClass: 'violet', 
       route: '/create-course' 
     },
     { 
-      title: 'Assign User to Batch', 
+      title: 'Assign to Batch', 
       subtitle: 'Map users (Student/Trainer) to specific batches and roles.', 
       iconImage: 'assign-user (1).png',
-      buttonText: 'Assign User to Batch', 
+      buttonText: 'Assign Users', 
       colorClass: 'teal', 
       route: '/assign-user-to-batch' 
     },
@@ -81,39 +81,32 @@ const ADMIN_CONFIG = {
       title: 'Create Exam', 
       subtitle: 'Design, configure, and schedule new tests and assessments.', 
       iconImage: 'exam.png',
-      buttonText: 'Go to Create Exam', 
+      buttonText: 'Create Exam', 
       colorClass: 'amber', 
       route: '/create-exam' 
     },
-    
-    // --- 1. EXISTING UPLOAD JOBS CARD (Placement Drives) ---
-    // Iski functionality same rahegi (Route: /upload-job)
     { 
-      title: 'Upload Jobs (Placement)', 
+      title: 'Upload Jobs', 
       subtitle: 'Post and manage new job openings for ongoing placement drives.', 
       iconImage: 'upload-job.png', 
-      buttonText: 'Go to Upload Jobs', 
+      buttonText: 'Manage Jobs', 
       colorClass: 'red', 
       route: '/upload-job' 
     },
-
-    // --- 2. NEW UPLOAD CAREERS CARD (Website) ---
-    // Isme 'targetTab' add kiya hai taaki ye naya component open kare
     { 
-      title: 'Post Careers (Website)', 
+      title: 'Post Careers', 
       subtitle: 'Post internal job openings for the main Careers website page.', 
-      iconImage: 'career_web.png', // Aap is naam ki image assets me daal sakte hain ya 'upload-job.png' use karein
-      buttonText: 'Manage Website Careers', 
+      iconImage: 'career_web.png', 
+      buttonText: 'Website Careers', 
       colorClass: 'indigo', 
       route: '/upload-careers',
       targetTab: 'upload-careers' 
     },
-
     { 
-      title: 'Create Success Stories', 
+      title: 'Success Stories', 
       subtitle: 'Share student placement stories and achievements on the wall of fame.', 
       iconImage: 'success-story.png',
-      buttonText: 'Add Success Story', 
+      buttonText: 'Add Story', 
       colorClass: 'teal', 
       route: '/create-success-story' 
     },
@@ -121,7 +114,7 @@ const ADMIN_CONFIG = {
       title: 'Upload Blog', 
       subtitle: 'Upload and manage PDF blogs to share with students.', 
       iconImage: 'blog.png', 
-      buttonText: 'Go to Upload Blog', 
+      buttonText: 'Manage Blog', 
       colorClass: 'red', 
       route: '/upload-blog' 
     },
@@ -179,29 +172,24 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
     this.searchTerms.next(term);
   }
 
-  // Updated navigateTo to accept optional tabId from card config
   navigateTo(route: string, tabId?: TabId): void { 
-    // Agar card me 'targetTab' defined hai (jaise Careers ke liye), toh view switch karo
     if (tabId) {
         this.activeTab.set(tabId);
     }
     
-    // Agar search query thi aur hum tab change kar rahe hain, toh clear karo
     if (tabId && tabId !== 'dashboard' && this.headerSearchQuery() !== '') {
         this.headerSearchQuery.set('');
     }
     
-    // Routing logic (Purane cards ke liye zaroori hai)
     if (route) {
         this.router.navigate([route]).catch(err => {
-            // Agar route nahi mila, lekin humne tab switch kar liya hai, toh error ignore karein
             if (!tabId) console.error(err);
         });
     }
   }
 
   logoutUser(): void {
-    this.showMessageBox('Logged out successfully. Redirecting to login page...');
+    this.showMessageBox('Logged out successfully. Redirecting...', 'success');
     setTimeout(() => {
         console.log('Redirecting to /login page...');
     }, 1500); 
@@ -220,9 +208,10 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
             box.classList.add('error');
         }
         
-        setTimeout(() => {
+        // Use requestAnimationFrame for smoother transition entry
+        requestAnimationFrame(() => {
             box.classList.add('active');
-        }, 50);
+        });
 
         setTimeout(() => {
             box.classList.remove('active');

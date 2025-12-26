@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CreateStudentComponent } from './create-student/create-student.component';
+import { CreateStudentComponent } from './setup-profile/setup-profile.component';
 // import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component'; // NOTE: Commented out if already imported globally
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LandingPageComponent } from './landing-page/landing-page.component';
@@ -50,7 +50,6 @@ import { JobApplicationComponent } from './job-application/job-application.compo
     NavbarComponent,
     SectionComponent,
     LoginFormComponent,
-    AdminPanelComponent,
     FooterComponent,
     ChatbotComponent,
     ProfileSettingComponent,
@@ -73,6 +72,7 @@ import { JobApplicationComponent } from './job-application/job-application.compo
     CreateSuccessStoryComponent,
     BlogComponent,
     UploadCareerComponent,
+    AdminPanelComponent
   ],
   imports: [
     BrowserModule,
@@ -84,7 +84,7 @@ import { JobApplicationComponent } from './job-application/job-application.compo
     UploadBlogComponent,
     UploadNotesComponent,
     CareersComponent,
-    JobApplicationComponent
+    JobApplicationComponent,
     
   ],
   providers: [],

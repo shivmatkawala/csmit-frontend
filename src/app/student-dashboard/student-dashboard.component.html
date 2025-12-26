@@ -37,12 +37,9 @@
           <a [class.active]="activePage === 'shorts'" (click)="setActivePage('shorts')" style="color: #ec4899;">
               <i class="fas fa-play-circle" style="font-size: 26px;"></i> <span>Shorts</span>
           </a>
-          <a [class.active]="activePage === 'assignments'" (click)="setActivePage('assignments')">
-              <i class="fas fa-tasks"></i> <span>Tasks</span>
-          </a>
-          <a [class.active]="activePage === 'profile-setting'" (click)="setActivePage('profile-setting')">
-              <i class="fas fa-user"></i> <span>Profile</span>
-          </a>
+          <!-- REMOVED: Tasks (Assignments) Link -->
+          <!-- REMOVED: Profile Link -->
+          
           <a [class.active]="activePage === 'generate-resume'" (click)="goToResumeView()">
               <i class="fas fa-file-alt"></i> <span>Resume</span>
           </a>
@@ -133,18 +130,21 @@
             </div>
         </ng-container>
 
-        <!-- OTHER PAGES -->
-        <ng-container *ngIf="activePage === 'profile-setting'">
-          <div class="profile-setting-wrapper">
-            <app-profile-setting [profileData]="studentProfileData" (goBack)="setActivePage('dashboard')"></app-profile-setting>
-          </div>
+        <!-- SETUP PROFILE PAGE (NEW) -->
+        <ng-container *ngIf="activePage === 'setup-profile'">
+            <div class="setup-profile-wrapper">
+                <app-create-student></app-create-student>
+            </div>
         </ng-container>
+
+        <!-- REMOVED: Profile Setting Container -->
         
         <ng-container *ngIf="activePage === 'generate-resume'">
             <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
         </ng-container>
 
-        <ng-container *ngIf="['assignments', 'career'].includes(activePage)">
+        <!-- Placeholder for other pages -->
+        <ng-container *ngIf="['career'].includes(activePage)">
             <div class="other-page-content">
                 <i class="fas fa-tools" style="font-size: 48px; color: #cbd5e1; margin-bottom: 20px;"></i>
                 <h1>{{ activePage | titlecase }}</h1>

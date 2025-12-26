@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { ApiService, LoginResponse } from '../services/api.service'; // Assuming ApiService exists
-import { ResumeService } from '../services/create-resume.service'; // Assuming ResumeService exists
+import { ApiService, LoginResponse } from '../services/api.service';
+import { ResumeService } from '../services/create-resume.service';
+import { HttpClient } from '@angular/common/http'; // Added HttpClient for real-time calls
 import { catchError, map, tap } from 'rxjs/operators';
 import { of, interval, Subscription } from 'rxjs';
 
@@ -36,35 +37,19 @@ interface TrainerDetails {
 
 // --- CONFIGURATION INTERFACES ---
 interface NavLink {
-  id: 'dashboard' | 'attendance' | 'performance' | 'assignments' | 'resume';
-  label: string;
-  icon: string;
-}
-
-interface ActionButton {
+  id: 'dashboard' | 'resume';
   label: string;
   icon: string;
 }
 
 // --- STATIC UI CONFIG ---
 const UI_CONFIG = {
-  SEARCH_PLACEHOLDER: "Search Batches, Students, Tasks...",
-  // Removed 'Attendance' and 'Performance' from Sidebar Links
+  SEARCH_PLACEHOLDER: "Search Batches, Students...",
+  // Removed 'assignments' and 'profile-setting' as requested
   SIDEBAR_LINKS: [
     { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-line' },
-    { id: 'assignments', label: 'Assignments', icon: 'fas fa-tasks' }
-  ] as NavLink[],
-  // Restored Quick Actions
-  QUICK_ACTIONS: [
-    { label: 'Attendance', icon: 'fas fa-user-check' },
-    { label: 'Upload Video', icon: 'fas fa-upload' },
-    { label: 'New Task', icon: 'fas fa-edit' },
-    { label: 'Announce', icon: 'fas fa-bullhorn' },
-    { label: 'Performance', icon: 'fas fa-chart-bar' },
-    { label: 'Schedule', icon: 'fas fa-calendar-alt' },
-    { label: 'Labs', icon: 'fas fa-clipboard-list' },
-    { label: 'Chat', icon: 'fas fa-comments' },
-  ] as ActionButton[]
+    { id: 'resume', label: 'Resume', icon: 'fas fa-file-alt' }
+  ] as NavLink[]
 };
 
 @Component({
@@ -81,7 +66,7 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
 
   // --- State Signals ---
   darkModeActive = signal(false);
-  activeTab = signal<'dashboard' | 'attendance' | 'performance' | 'assignments' | 'resume'>('dashboard');
+  activeTab = signal<'dashboard' | 'resume'>('dashboard');
   
   // Realtime Data Signals
   currentTime = signal('');
@@ -98,11 +83,10 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   
   // Profile Completion State
   isProfileComplete: boolean = false;
-  showProfileCompletionModal: boolean = false;
   userId: string | null = null;
 
   // --- Dynamic Dashboard Data ---
-  myBatches: BatchInfo[] = [];
+  myBatches = signal<BatchInfo[]>([]);
   
   // --- Calendar & Schedule State ---
   today = signal(new Date());
@@ -128,7 +112,8 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private apiService: ApiService,
-    private resumeService: ResumeService
+    private resumeService: ResumeService,
+    private http: HttpClient 
   ) {}
 
   ngOnInit(): void {
@@ -161,10 +146,17 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
 
     if (this.userId) {
         let fullName = loginData?.info?.full_name || loginData?.username || 'Trainer';
-        const storedData = localStorage.getItem('TRAINER_DATA') || sessionStorage.getItem('TRAINER_DATA');
         
-        if (storedData) {
-             const parsed = JSON.parse(storedData);
+        // CHECKBOTH: Try to get data from TRAINER_DATA first, then fallback to STUDENT_DATA (as Setup Profile saves there)
+        const trainerData = localStorage.getItem('TRAINER_DATA') || sessionStorage.getItem('TRAINER_DATA');
+        const studentData = localStorage.getItem('STUDENT_DATA') || sessionStorage.getItem('STUDENT_DATA');
+        
+        // Prioritize updated data from Setup Profile (which saves to STUDENT_DATA logic in current setup)
+        if (studentData) {
+             const parsed = JSON.parse(studentData);
+             if (parsed.info && parsed.info.full_name) fullName = parsed.info.full_name;
+        } else if (trainerData) {
+             const parsed = JSON.parse(trainerData);
              if (parsed.info && parsed.info.full_name) fullName = parsed.info.full_name;
         }
 
@@ -173,7 +165,7 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
             role: 'Senior Trainer',
             profileUrl: '' 
         };
-        
+
         this.checkProfileCompletion();
         this.fetchDashboardStats();
 
@@ -186,10 +178,13 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   private checkProfileCompletion(): void {
       if (!this.userId) return;
 
-      const isCompleteOnce = (localStorage.getItem('trainer_profile_complete') === 'true');
+      // Check if profile was completed via the Setup Profile flow (which sets cshub_profile_complete_once)
+      const isStudentComplete = (localStorage.getItem('cshub_profile_complete_once') === 'true');
+      const isTrainerComplete = (localStorage.getItem('trainer_profile_complete') === 'true');
 
-      if (isCompleteOnce) {
+      if (isStudentComplete || isTrainerComplete) {
           this.isProfileComplete = true;
+          // Logic to update name if stored in local storage is already handled in fetchTrainerDataFromStorage
           return;
       }
 
@@ -219,18 +214,47 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   }
 
   private fetchDashboardStats(): void {
-      setTimeout(() => {
-          // 1. Batches Data (Only this remains)
-          this.myBatches = [
-              { name: 'Full-Stack Batch A', strength: 42, timing: '10:00 AM', countdown: 'Live Now' }
-          ];
-          
-          // 5. Schedule
-          this.initializeScheduleData();
-
+      if (!this.userId) {
           this.isLoading.set(false);
-          this.cdr.detectChanges();
-      }, 1000); 
+          return;
+      }
+
+      // --- 1. Real-time Batches Fetch ---
+      this.http.get<any[]>(`/api/trainer/${this.userId}/batches`).pipe(
+          catchError(err => {
+              console.warn('Real-time Batches API failed (using fallback/empty):', err);
+              return of([]); // Return empty array on error
+          })
+      ).subscribe(batches => {
+          const mappedBatches: BatchInfo[] = batches.map(b => ({
+              name: b.batch_name || 'Unknown Batch',
+              strength: b.student_count || 0,
+              timing: b.timing || 'N/A',
+              countdown: b.status || 'Active'
+          }));
+          this.myBatches.set(mappedBatches);
+      });
+
+      // --- 2. Real-time Schedule Fetch ---
+      this.http.get<any[]>(`/api/trainer/${this.userId}/schedule`).pipe(
+           catchError(err => {
+              console.warn('Real-time Schedule API failed (using fallback/empty):', err);
+              return of([]);
+           })
+      ).subscribe(schedule => {
+           const mappedSchedule: ScheduleItem[] = schedule.map(s => ({
+               date: s.date, // Expecting YYYY-MM-DD
+               desc: s.description,
+               type: s.type || 'class',
+               dayOfWeekShort: new Date(s.date).toLocaleString('en-US', {weekday:'short'}).toUpperCase(),
+               dayOfMonth: new Date(s.date).getDate().toString(),
+               joinButton: s.has_link
+           }));
+           this.fullScheduleDetails.set(mappedSchedule);
+           this.updateDisplayedScheduleDetails();
+           this.isLoading.set(false);
+           this.cdr.detectChanges();
+      });
   }
 
   // =========================================================================
@@ -252,7 +276,7 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================================
-  // PROFILE & ACTIONS
+  // ACTIONS
   // =========================================================================
 
   triggerProfileUpload(): void {
@@ -271,25 +295,22 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   }
 
   goToProfileSetupForm(): void {
-    window.location.href = 'create-trainer'; 
+    window.location.href = 'setup-profile'; 
   }
 
   goToResumeView(): void {
       this.activeTab.set('resume');
   }
 
+  logout(): void {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = 'login';
+  }
+
   // =========================================================================
   // CALENDAR & SCHEDULE LOGIC
   // =========================================================================
-
-  private initializeScheduleData(): void {
-    const now = new Date();
-    const dummyData: ScheduleItem[] = [
-        { date: now.toISOString().slice(0, 10), desc: 'Live Class: Advanced Angular', type: 'class', dayOfWeekShort: 'TODAY', dayOfMonth: now.getDate().toString(), joinButton: true }
-    ];
-    this.fullScheduleDetails.set(dummyData);
-    this.updateDisplayedScheduleDetails();
-  }
 
   populateCalendar(startDate: Date): void {
     const year = startDate.getFullYear();
@@ -379,6 +400,8 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
 
   submitLeave(): void {
     if (!this.leaveStartDate() || !this.leaveReason()) return;
+    // Here you would add a real API call to submit leave
+    console.log('Submitting Leave:', this.leaveStartDate(), this.leaveEndDate(), this.leaveReason());
     this.closeLeaveForm();
   }
 }

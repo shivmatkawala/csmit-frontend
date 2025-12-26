@@ -7,8 +7,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-create-student',
-  templateUrl: './create-student.component.html',
-  styleUrls: ['./create-student.component.css']
+  templateUrl: './setup-profile.component.html',
+  styleUrls: ['./setup-profile.component.css']
 })
 export class CreateStudentComponent implements OnInit, OnDestroy {
 

@@ -27,20 +27,16 @@
       <!-- 1. LEFT SIDEBAR -->
       <aside class="sidebar">
         <nav class="sidebar-nav">
-          <!-- Sidebar Links (Attendance/Performance removed via Config in TS) -->
+          <!-- Sidebar Links: Only Dashboard and Resume now -->
           <a *ngFor="let link of config.SIDEBAR_LINKS"
              [class.active]="activeTab() === link.id" 
              (click)="activeTab.set(link.id)" 
              [title]="link.label">
             <i [class]="link.icon"></i> <span>{{ link.label }}</span>
           </a>
-          
-          <a [class.active]="activeTab() === 'resume'" (click)="goToResumeView()" title="Resume">
-            <i class="fas fa-file-alt"></i> <span>Resume</span>
-          </a>
 
            <!-- Logout -->
-           <a style="color: #ef4444; margin-top: 10px; border-top: 1px solid #f3f4f6;">
+           <a style="color: #ef4444; margin-top: 10px; border-top: 1px solid #f3f4f6; cursor: pointer;" (click)="logout()">
               <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
           </a>
         </nav>
@@ -58,7 +54,7 @@
         <!-- DASHBOARD VIEW -->
         <ng-container *ngIf="activeTab() === 'dashboard'">
           
-          <!-- Trainer Info Card -->
+          <!-- Trainer Info Card (Displays name from Setup Profile data) -->
           <section class="trainer-info-card attractive-greeting-card">
               <div class="profile-upload-container" (click)="triggerProfileUpload()">
                   <div class="attractive-profile-circle" 
@@ -80,23 +76,15 @@
               </div>
 
               <div class="batch-info-badge" style="margin-top: 15px;">
-                  <p *ngIf="myBatches.length > 0">{{ myBatches[0].name }}</p>
-                  <span *ngIf="myBatches.length > 0">{{ myBatches[0].strength }} Students &bull; {{ myBatches[0].countdown }}</span>
-                  <p *ngIf="myBatches.length === 0">No Active Batches</p>
+                  <ng-container *ngIf="myBatches().length > 0">
+                      <p>{{ myBatches()[0].name }}</p>
+                      <span>{{ myBatches()[0].strength }} Students &bull; {{ myBatches()[0].countdown }}</span>
+                  </ng-container>
+                  <p *ngIf="myBatches().length === 0">No Active Batches</p>
               </div>
           </section>
 
-          <!-- Quick Actions (Restored) -->
-          <section class="quick-actions-card">
-              <div class="section-header">Quick Actions</div>
-              <div class="actions-grid">
-                  <div *ngFor="let action of config.QUICK_ACTIONS" class="action-button">
-                      <i [class]="action.icon"></i>
-                      <span>{{ action.label }}</span>
-                  </div>
-              </div>
-          </section>
-
+          <!-- Quick Actions Removed -->
         </ng-container>
 
         <!-- RESUME VIEW -->
@@ -104,12 +92,13 @@
             <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
         </ng-container>
 
-        <!-- Placeholder for other tabs -->
+        <!-- Removed Profile Setting View from sidebar, accessible only via Setup Profile logic if needed -->
+
+        <!-- Placeholder for unknown tabs -->
         <ng-container *ngIf="activeTab() !== 'dashboard' && activeTab() !== 'resume'">
             <div class="panel-card" style="height: 100%; justify-content: center; align-items: center; text-align: center; color: #9ca3af; display: flex; flex-direction: column; background: white; border-radius: 20px;">
                 <i class="fas fa-tools" style="font-size: 48px; margin-bottom: 20px;"></i>
-                <h2>{{ activeTab() | titlecase }} Section</h2>
-                <p>Content for this section is under development.</p>
+                <h2>Section Under Development</h2>
                 <button class="btn-request" (click)="activeTab.set('dashboard')" style="margin-top: 20px;">Back to Dashboard</button>
             </div>
         </ng-container>

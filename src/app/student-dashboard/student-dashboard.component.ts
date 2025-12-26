@@ -139,15 +139,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   selectedBatchDetails: BatchDetailsModal[] = []; 
 
   // --- Feature Cards ---
+  // REMOVED "Assignments" card as requested
   quickAccessCards: FeatureCard[] = [
     { 
       label: 'Batches Status', 
       title: 'My Batches', 
-      value: 'View Details', // Updated
+      value: 'View Details', 
       icon: 'fas fa-users', 
       color: '#4338CA', 
       info: 'Loading Batch Status...', 
-      subText: 'Click to view', // Updated
+      subText: 'Click to view', 
       colorClass: 'stat-blue', 
       route: 'batches' 
     },
@@ -161,17 +162,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       subText: 'Next Exam: Loading...', 
       colorClass: 'stat-yellow', 
       route: 'exams' 
-    },
-    { 
-      label: 'Assignment Submissions', 
-      title: 'Assignments', 
-      value: 'View Tasks', 
-      icon: 'fas fa-tasks', 
-      color: '#10B981', 
-      info: 'Loading Assignments...', 
-      subText: 'Loading Assignments...', 
-      colorClass: 'stat-green', 
-      route: 'assignments' 
     },
     { 
       label: 'Fee Status', 
@@ -289,7 +279,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       sessionStorage.clear();
       this.showMessage('Logging out securely...', 'success');
       setTimeout(() => {
-          window.location.href = 'student-login'; 
+          window.location.href = 'login'; 
       }, 1000);
   }
 
@@ -556,7 +546,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
   
   setActivePage(page: string): void {
-    const validPages = ['dashboard', 'courses', 'batches', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts'];
+    const validPages = ['dashboard', 'courses', 'batches', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts', 'setup-profile'];
     if (validPages.includes(page)) {
       this.activePage = page;
       this.clearMessage();
@@ -589,7 +579,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   goToProfileSetupForm(): void {
     this.dismissProfileCompletionModal(); 
     this.showMessage('Redirecting to Profile Setup...', 'success');
-    window.location.href = 'create-student'; 
+    window.location.href = 'setup-profile'; 
   }
 
   goToResumeView(): void {

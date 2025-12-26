@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { LoginFormComponent } from './login-form/login-form.component';
 import { AdminPanelComponent } from './admin-panel/admin-panel.component';
-import { CreateStudentComponent } from './create-student/create-student.component';
+import { CreateStudentComponent } from './setup-profile/setup-profile.component';
 import { TrainerFormComponent } from './trainer-form/trainer-form.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
@@ -27,7 +27,7 @@ const routes: Routes = [
   {path:'landing-page',component:LandingPageComponent},
   {path:'login',component:LoginFormComponent},
   {path:'admin-panel',component:AdminPanelComponent},
-  {path:'create-student', component:CreateStudentComponent},
+  {path:'setup-profile', component:CreateStudentComponent},
   {path:'trainer-form',component:TrainerFormComponent},
   {path:'chatbot',component:ChatbotComponent},
   {path:'student-dashboard',component:StudentDashboardComponent},
