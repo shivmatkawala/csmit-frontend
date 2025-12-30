@@ -30,22 +30,23 @@
           <a [class.active]="activePage === 'dashboard'" (click)="setActivePage('dashboard')">
               <i class="fas fa-home"></i> <span>Home</span>
           </a>
-          <!-- UPDATED: Renamed to My Batches -->
           <a [class.active]="activePage === 'batches'" (click)="setActivePage('batches')">
               <i class="fas fa-book-reader"></i> <span>My Batches</span>
           </a>
           <a [class.active]="activePage === 'shorts'" (click)="setActivePage('shorts')" style="color: #ec4899;">
               <i class="fas fa-play-circle" style="font-size: 26px;"></i> <span>Shorts</span>
           </a>
-          <!-- REMOVED: Tasks (Assignments) Link -->
-          <!-- REMOVED: Profile Link -->
           
           <a [class.active]="activePage === 'generate-resume'" (click)="goToResumeView()">
               <i class="fas fa-file-alt"></i> <span>Resume</span>
           </a>
+          
+          <a [class.active]="activePage === 'syntaxshare'" (click)="setActivePage('syntaxshare')">
+              <i class="fas fa-comments"></i> <span>Doubt Hub</span>
+          </a>
 
-          <!-- Logout Button -->
-          <a (click)="logout()" style="color: #ef4444; margin-top: 10px; border-top: 1px solid #f3f4f6;">
+          <!-- Logout Button (Kept in nav for mobile access too) -->
+          <a (click)="logout()" style="color: #ef4444;">
               <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
           </a>
         </nav>
@@ -60,50 +61,62 @@
       <!-- 2. CENTER CONTENT -->
       <main class="main-content">
         
-        <!-- DASHBOARD HOME -->
+        <!-- dynamic pages load here -->
         <ng-container *ngIf="activePage === 'dashboard'">
-          <section class="trainer-info-card attractive-greeting-card">
-              <div class="profile-upload-container" (click)="triggerProfileUpload()">
-                  <div class="attractive-profile-circle" 
-                       [style.backgroundColor]="uploadedProfileImage ? 'transparent' : '#4338CA'">
-                      <img *ngIf="uploadedProfileImage" [src]="uploadedProfileImage" alt="Profile" class="uploaded-profile-img">
-                      <span *ngIf="!uploadedProfileImage" class="profile-initial-text">{{ profileInitial }}</span>
-                      <div class="camera-icon-overlay">
-                          <i class="fas fa-camera"></i>
-                      </div>
-                  </div>
-                  <input type="file" #fileInput (change)="onProfileImageSelected($event)" accept="image/*" style="display: none;">
+          
+          <!-- REDESIGNED PREMIUM PROFILE CARD -->
+          <section class="premium-profile-card">
+              <!-- Decorative background elements -->
+              <div class="card-bg-decoration">
+                  <div class="circle circle-1"></div>
+                  <div class="circle circle-2"></div>
               </div>
 
-              <h2>{{ studentName }}</h2> 
-              <p class="role attractive-greeting-text">{{ greeting }}</p>
-              <div class="batch-details">
-                  <p>{{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</p>
+              <div class="profile-content-wrapper">
+                <div class="profile-upload-container" (click)="triggerProfileUpload()">
+                    <div class="premium-profile-ring">
+                        <div class="attractive-profile-circle" 
+                             [style.backgroundColor]="uploadedProfileImage ? 'transparent' : '#ffffff20'">
+                            <img *ngIf="uploadedProfileImage" [src]="uploadedProfileImage" alt="Profile" class="uploaded-profile-img">
+                            <span *ngIf="!uploadedProfileImage" class="profile-initial-text">{{ profileInitial }}</span>
+                            <div class="camera-icon-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" #fileInput (change)="onProfileImageSelected($event)" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="profile-text-content">
+                    <span class="status-badge"><i class="fas fa-star"></i> Student Pro</span>
+                    <h2 class="student-name-text">{{ studentName }}</h2> 
+                    <p class="greeting-message">{{ greeting }}</p>
+                    <div class="date-badge">
+                        <i class="far fa-calendar-alt"></i>
+                        <span>{{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</span>
+                    </div>
+                </div>
               </div>
           </section>
 
-          <!-- Quick Access Cards -->
           <section class="stats-cards-container">
               <div *ngFor="let card of quickAccessCards; let i = index" 
                   class="stat-card" 
                   [ngClass]="card.colorClass"
                   (click)="handleQuickCardClick(card.route)">
                 <p class="title">{{ card.title }}</p>
-                <!-- Display Batch Name specially -->
                 <p class="value" *ngIf="card.route === 'batches'">{{ studentAssignedBatches.length > 0 ? studentAssignedBatches[0].batch_name : 'No Batch' }}</p>
                 <p class="value" *ngIf="card.route !== 'batches'">{{ card.value }}</p>
                 
                 <div class="footer-info">
                   <span>{{ card.subText }}</span>
-                  <i [class]="card.icon" [ngStyle]="{'color': i === 0 ? '#4338CA' : i === 1 ? '#F59E0B' : i === 2 ? '#10B981' : '#F43F5E'}"></i>
+                  <i [class]="card.icon" [ngStyle]="{'color': i === 0 ? '#4338CA' : i === 1 ? '#F59E0B' : i === 2 ? '#F43F5E' : '#8B5CF6'}"></i>
                 </div>
               </div>
           </section>
         </ng-container>
 
-        <!-- NEW: BATCH MANAGEMENT COMPONENT -->
         <ng-container *ngIf="activePage === 'batches'">
-          <!-- We pass studentId and the initial batches loaded -->
           <app-course-batch-management 
             [studentId]="studentProfileData.student_id" 
             [initialBatches]="studentAssignedBatches"
@@ -111,7 +124,6 @@
           </app-course-batch-management>
         </ng-container>
 
-        <!-- SHORTS PAGE -->
         <ng-container *ngIf="activePage === 'shorts'">
             <div class="shorts-wrapper">
                 <div class="shorts-container">
@@ -130,20 +142,20 @@
             </div>
         </ng-container>
 
-        <!-- SETUP PROFILE PAGE (NEW) -->
         <ng-container *ngIf="activePage === 'setup-profile'">
             <div class="setup-profile-wrapper">
                 <app-create-student></app-create-student>
             </div>
         </ng-container>
-
-        <!-- REMOVED: Profile Setting Container -->
         
         <ng-container *ngIf="activePage === 'generate-resume'">
             <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
         </ng-container>
 
-        <!-- Placeholder for other pages -->
+        <ng-container *ngIf="activePage === 'syntaxshare'">
+            <app-syntaxshare></app-syntaxshare>
+        </ng-container>
+
         <ng-container *ngIf="['career'].includes(activePage)">
             <div class="other-page-content">
                 <i class="fas fa-tools" style="font-size: 48px; color: #cbd5e1; margin-bottom: 20px;"></i>
@@ -154,8 +166,8 @@
         </ng-container>
       </main>
 
-      <!-- 3. RIGHT SIDEBAR (Schedule) -->
-      <section class="right-schedule-card" *ngIf="activePage === 'dashboard'">
+      <!-- 3. RIGHT SIDEBAR (Always Visible now) -->
+      <section class="right-schedule-card">
         <div class="current-time-display">
           <p class="current-time-text">Current Time: {{ currentTime }}</p>
         </div>
@@ -198,39 +210,88 @@
 
     </div>
 
-    <!-- FULL SCREEN EXAM CONTAINER -->
-    <div class="exam-fullscreen-container" *ngIf="activePage === 'attend-exam' && examToAttend">
-         <app-attend-exam 
-            [examId]="examToAttend.examId" 
-            [examName]="examToAttend.examName" 
-            [durationMinutes]="examToAttend.durationMinutes" 
+    <!-- ATTEND EXAM COMPONENT (Visible only when exam starts) -->
+    <ng-container *ngIf="activePage === 'attend-exam'">
+        <app-attend-exam 
+            [examId]="examToAttend?.examId || null" 
+            [durationMinutes]="examToAttend?.durationMinutes || 60"
+            [examName]="examToAttend?.examName || 'Assessment'"
             (examFinished)="onExamFinished($event)">
         </app-attend-exam>
-    </div>
+    </ng-container>
 
-    <!-- Modals -->
-    <div *ngIf="showExamModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Exams</h3>
-                <button class="close-button" (click)="closeExamModal()">&times;</button>
+   <!-- PREMIUM EXAM MODAL (Screen Overlay) -->
+<div *ngIf="showExamModal" class="modal-overlay exam-lobby-overlay">
+    <div class="modal-content premium-exam-modal">
+        <!-- Close Button -->
+        <button class="modal-close-btn" (click)="closeExamModal()">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="exam-modal-header">
+            <div class="header-icon">
+                <i class="fas fa-file-signature"></i>
             </div>
-            <div class="modal-body">
-                <p *ngIf="upcomingExams.length === 0">No upcoming exams.</p>
-                <div *ngFor="let exam of upcomingExams" class="exam-list-item">
-                    <div class="exam-info">
-                        <strong>{{ exam.examName }}</strong>
-                        <span class="exam-meta">{{ exam.durationMinutes }} Mins | {{ exam.totalQuestions }} Qs</span>
+            <div class="header-titles">
+                <h3>Assessment Center</h3>
+                <p>Select an active examination to begin your assessment.</p>
+            </div>
+        </div>
+
+        <div class="modal-body exam-list-container">
+            <!-- Loading State -->
+            <div *ngIf="isLoadingExams" class="exam-loading-spinner">
+                <div class="spinner-dot"></div>
+                <p>Syncing examinations...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!isLoadingExams && upcomingExams.length === 0" class="no-exams-placeholder">
+                <div class="placeholder-art">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <h4>No Scheduled Exams</h4>
+                <p>You have no pending examinations at this moment. Excellent work!</p>
+            </div>
+
+            <!-- Exam List -->
+            <div *ngIf="!isLoadingExams && upcomingExams.length > 0" class="exam-grid">
+                <div *ngFor="let exam of upcomingExams" 
+                     class="exam-entry-card" 
+                     [class.selected]="selectedExamId === exam.examId"
+                     (click)="selectedExamId = exam.examId">
+                    
+                    <div class="exam-status-dot active"></div>
+                    
+                    <div class="exam-main-info">
+                        <span class="exam-subject-tag">{{ exam.subject.subjectname }}</span>
+                        <h4>{{ exam.examName }}</h4>
+                        <div class="exam-meta-row">
+                            <!-- Dynamic data: not hardcoded -->
+                            <span><i class="far fa-clock"></i> {{ exam.durationMinutes }} Minutes</span>
+                            <span class="dot"></span>
+                            <span><i class="fas fa-list-ol"></i> {{ exam.totalQuestions }} Questions</span>
+                        </div>
                     </div>
-                    <button class="btn-submit" (click)="selectedExamId = exam.examId; startExam()">Start</button>
+                    
+                    <div class="exam-selection-indicator">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer"><button class="btn-cancel" (click)="closeExamModal()">Close</button></div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-footer exam-modal-footer">
+            <button class="btn-secondary-outline" (click)="closeExamModal()">Maybe Later</button>
+            <button class="btn-primary-gradient" 
+                    [disabled]="!selectedExamId" 
+                    (click)="startExam()">
+                <span>Confirm & Start Exam</span>
+                <i class="fas fa-play-circle"></i>
+            </button>
         </div>
     </div>
+</div>
 
-    <div *ngIf="message" [class]="'message-box ' + messageType">
-      {{ message }}
-    </div>
-  </div>
-</body>
+<div *ngIf="message" [class]="'message-box ' + messageType">{{ message }}</div>

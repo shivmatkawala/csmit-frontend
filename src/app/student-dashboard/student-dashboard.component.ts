@@ -174,6 +174,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       colorClass: 'stat-red', 
       route: 'payments' 
     },
+    // NEW CARD ADDED FOR SYNTAX SHARE
+    { 
+      label: 'Doubt Support', 
+      title: 'Syntax Share', 
+      value: 'Ask Doubts', 
+      icon: 'fas fa-comments', // or fa-share-alt
+      color: '#8B5CF6', 
+      info: 'Community Support', 
+      subText: 'Share code & errors', 
+      colorClass: 'stat-purple', 
+      route: 'syntaxshare' 
+    },
   ];
 
   courses: Course[] = []; 
@@ -546,7 +558,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // =========================================================================
   
   setActivePage(page: string): void {
-    const validPages = ['dashboard', 'courses', 'batches', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts', 'setup-profile'];
+    const validPages = ['dashboard', 'courses', 'batches', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts', 'setup-profile', 'syntaxshare'];
     if (validPages.includes(page)) {
       this.activePage = page;
       this.clearMessage();
@@ -569,6 +581,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               break;
           case 'payments':
               this.showMessage('Navigating to Payment Details page...', 'warning');
+              break;
+          case 'syntaxshare':
+              this.setActivePage('syntaxshare');
               break;
           default:
               this.showMessage(`Feature route "${route}" is not yet implemented.`, 'warning');
@@ -863,7 +878,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  applyExamFilter(): void {
+  // applyExamFilter method ko update kiya gaya hai dynamic text ke liye
+applyExamFilter(): void {
     this.updateFilterOptions();
 
     const courseId = this.selectedCourseId;
@@ -892,9 +908,26 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             this.expiredExams.push(exam);
         }
     });
+
+    // --- Dynamic Card Text Update ---
+    const examCard = this.quickAccessCards.find(c => c.route === 'exams');
+    if (examCard) {
+        if (this.upcomingExams.length > 0) {
+            // Sort by earliest start time
+            const nextExam = this.upcomingExams.sort((a, b) => 
+                new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime()
+            )[0];
+            examCard.subText = `Next: ${nextExam.examName}`;
+            examCard.info = `Duration: ${nextExam.durationMinutes} Mins`;
+        } else {
+            examCard.subText = 'No exam for now';
+            examCard.info = 'Stay tuned for updates';
+        }
+    }
+
     this.isLoadingExams = false;
     this.cdr.detectChanges(); 
-  }
+}
 
   updateFilterOptions(): void {
     if (this.studentAssignedBatches.length > 0) {

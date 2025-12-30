@@ -86,12 +86,12 @@ const ADMIN_CONFIG = {
       route: '/create-exam' 
     },
     { 
-      title: 'Upload Jobs', 
+      title: 'create Jobs', 
       subtitle: 'Post and manage new job openings for ongoing placement drives.', 
       iconImage: 'upload-job.png', 
       buttonText: 'Manage Jobs', 
       colorClass: 'red', 
-      route: '/upload-job' 
+      route: '/create-job' 
     },
     { 
       title: 'Post Careers', 
@@ -189,9 +189,15 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   }
 
   logoutUser(): void {
+    // Show success message
     this.showMessageBox('Logged out successfully. Redirecting...', 'success');
+    
     setTimeout(() => {
-        console.log('Redirecting to /login page...');
+        // Optional: Clear any auth tokens if stored
+        // localStorage.removeItem('token'); 
+        
+        // Redirect to Login Page
+        this.router.navigate(['/login']); 
     }, 1500); 
   }
 

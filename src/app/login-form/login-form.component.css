@@ -93,8 +93,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    /* User's logo.png image URL used here with reduced opacity */
-    /* IMPORTANT: Replace with the actual URL/path for 'logo.png' in your assets */
     background-image: url('/assets/logo.jpg'); 
     background-size: 80%; /* Adjusted size to be slightly smaller */
     background-repeat: no-repeat;

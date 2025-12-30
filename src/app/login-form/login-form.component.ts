@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApiService, LoginResponse } from '../services/api.service'; // LoginResponse ko import karein
-
+import { ApiService, LoginResponse } from '../services/api.service';
+import { UserService } from '../services/user.service'; // ✅ Import UserService
 
 @Component({
   selector: 'app-login-form',
@@ -9,58 +9,108 @@ import { ApiService, LoginResponse } from '../services/api.service'; // LoginRes
   styleUrls: ['./login-form.component.css']
 })
 export class LoginFormComponent {
+  // Login Models
   username: string = '';
   password: string = '';
-  errorMessage: string = ''; // Error message display karne ke liye
+  
+  // Reset Password Models
+  resetUserId: string = '';
+  resetNewPassword: string = '';
+  
+  // UI States
+  errorMessage: string = '';
+  successMessage: string = '';
+  hidePassword: boolean = true;
+  hideResetPassword: boolean = true;
+  isForgotPasswordMode: boolean = false; // ✅ Toggle State
 
-  constructor(private api: ApiService, private router: Router) {}
+  constructor(
+    private api: ApiService, 
+    private userService: UserService, // ✅ Inject UserService
+    private router: Router
+  ) {}
 
+  // Toggle Password Visibility
+  togglePasswordVisibility() {
+    this.hidePassword = !this.hidePassword;
+  }
+  
+  toggleResetPasswordVisibility() {
+    this.hideResetPassword = !this.hideResetPassword;
+  }
+
+  // Switch between Login and Forgot Password Forms
+  toggleView() {
+    this.isForgotPasswordMode = !this.isForgotPasswordMode;
+    this.errorMessage = '';
+    this.successMessage = '';
+    // Reset fields
+    this.username = '';
+    this.password = '';
+    this.resetUserId = '';
+    this.resetNewPassword = '';
+  }
+
+  // LOGIN FUNCTIONALITY
   login() {
-    this.errorMessage = ''; // Har baar login attempt par error clear karein
+    this.errorMessage = '';
+    this.successMessage = '';
     
-    // API ko sirf username aur password bhejte hain
     this.api.login(this.username, this.password).subscribe(
       (res: LoginResponse) => {
-        
-        // FIX: Server se aaya hua role string (e.g., "Admin", "Trainer", "Student") use karenge.
-        // Hum .toUpperCase() use kar rahe hain taaki case-sensitivity ka issue na ho
         const authenticatedRole = res.role ? res.role.toUpperCase() : null; 
 
         if (!authenticatedRole) {
-             // Agar server role nahi bhejta hai (API Contract fail), to error message dikhayenge
-             this.errorMessage = 'Login failed. Role information (string) missing from server response.';
+             this.errorMessage = 'Login failed. Role information missing.';
              return; 
         }
         
-        console.log('Login successful. ApiService stored user data for role:', authenticatedRole);
+        console.log('Login successful:', authenticatedRole);
         
-        // Navigation logic based STRICTLY on the authenticated role string from the server
         if (authenticatedRole === 'ADMIN') { 
           this.router.navigate(['/admin-panel']);
         } 
-        // FIX HERE: 'TRAINER' ke sath-sath 'ITRAINER' ko bhi check kiya
         else if (authenticatedRole === 'TRAINER' || authenticatedRole === 'ITRAINER') { 
           this.router.navigate(['/trainer-dashboard']);
         } 
         else if (authenticatedRole === 'STUDENT') { 
           this.router.navigate(['/student-dashboard']);
         } else {
-          // Agar role match nahi hua to error dikhayega
-          this.errorMessage = `Login successful, but role '${res.role}' is unrecognized. Contact support.`;
+          this.errorMessage = `Role '${res.role}' is unrecognized.`;
         }
-
       },
       (error) => {
-        // Handle error: Server ने invalid credentials या अन्य error भेजा है
-        this.errorMessage = error.message || 'Login failed. Invalid credentials or API error.';
-        console.error('Login Failed:', error);
+        this.errorMessage = error.error?.error || 'Login failed. Invalid credentials.';
       } 
     );
   }
 
-  // New functionality: To go back to the previous page
+  // ✅ FORGOT PASSWORD FUNCTIONALITY
+  performPasswordReset() {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (!this.resetUserId || !this.resetNewPassword) {
+      this.errorMessage = 'Please provide both User ID and New Password.';
+      return;
+    }
+
+    this.userService.updatePassword(this.resetUserId, this.resetNewPassword).subscribe(
+      (res) => {
+        this.successMessage = 'Password updated successfully! Please login.';
+        // Auto switch back to login after 2 seconds
+        setTimeout(() => {
+          this.toggleView();
+        }, 2000);
+      },
+      (error) => {
+        console.error('Reset Failed:', error);
+        this.errorMessage = error.error?.error || 'Failed to update password. Check User ID.';
+      }
+    );
+  }
+
   goBack() {
-    // Assuming '/' is the landing page path
     this.router.navigate(['/landing-page']); 
   }
 }

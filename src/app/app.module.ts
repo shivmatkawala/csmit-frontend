@@ -41,6 +41,7 @@ import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 import { CareersComponent } from './careers/careers.component';
 import { UploadCareerComponent } from './upload-careers/upload-careers.component';
 import { JobApplicationComponent } from './job-application/job-application.component';
+import { SyntaxshareComponent } from './syntaxshare/syntaxshare.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -72,19 +73,20 @@ import { JobApplicationComponent } from './job-application/job-application.compo
     CreateSuccessStoryComponent,
     BlogComponent,
     UploadCareerComponent,
-    AdminPanelComponent
+    AdminPanelComponent,
+    SyntaxshareComponent,
+
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    ReactiveFormsModule, // <-- FIX 1: Fixes [formControl] and FormGroup errors
+    ReactiveFormsModule,
     HttpClientModule,
     FormsModule,
-    CommonModule, 
+    CommonModule,
     UploadBlogComponent,
     UploadNotesComponent,
     CareersComponent,
-    JobApplicationComponent,
     
   ],
   providers: [],

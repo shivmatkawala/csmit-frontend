@@ -22,6 +22,7 @@ import { BlogComponent } from './blog/blog.component';
 import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.component';
 import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 import { CareersComponent } from './careers/careers.component';
+import { SyntaxshareComponent } from './syntaxshare/syntaxshare.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -37,7 +38,7 @@ const routes: Routes = [
   {path:'trainer-dashboard',component:TrainerDashboardComponent},
   {path:'create-user',component:CreateUserComponent},
   {path:'assign-user-to-batch',component:AssignUserToBatchComponent},
-  {path:'upload-job',component:CreateJobComponent},
+  {path:'create-job',component:CreateJobComponent},
   {path:'create-exam',component:CreateExamComponent},
   {path:'attend-exam',component:AttendExamComponent},
   { path: 'contact', component: ContactComponent },
@@ -46,6 +47,7 @@ const routes: Routes = [
   {path:'upload-blog',component:UploadBlogComponent},
   {path:'upload-notes',component:UploadNotesComponent},
   {path:'careers',component:CareersComponent},
+  {path:'syntaxshare',component:SyntaxshareComponent}
 ];
 
 @NgModule({

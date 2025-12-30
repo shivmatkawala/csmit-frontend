@@ -1,373 +1,348 @@
-:root {
-    /* Action Colors */
-    --update-orange: #f39c12;
-    --update-hover: #e67e22;
-    --delete-red: #e74c3c;
-    --delete-hover: #c0392b;
-    --primary-green: #1a4d2e; 
-    --primary-color: #4338CA;
-    --secondary-text: #64748B;
-    --light-border: #E2E8F0;
-    --text-dark: #334155;
-    --card-bg: #E8F8F5; /* Light green/teal background for course cards */
-    --card-border: #1abc9c;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :host {
     display: block;
-    padding: 0;
-    /* This component is designed to fit inside the main-content of the admin panel */
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    --border: #e2e8f0;
+    --bg-surface: #ffffff;
+    --bg-hover: #f8fafc;
+    
+    /* Card Accent Colors */
+    --card-accent: #8b5cf6; /* Violet */
+    --tag-bg: #f3f4f6;
+    --tag-text: #475569;
+
+    font-family: 'Inter', sans-serif;
 }
 
-/* Header Area Replication */
-.main-content-header {
-    margin-bottom: 30px;
-    border-bottom: 1px solid var(--light-border);
-    padding-bottom: 15px;
+/* --- HEADER SECTION --- */
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
 }
-.main-content-header h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-dark);
+
+.title-group h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 4px 0;
+    letter-spacing: -0.025em;
+}
+
+.title-group p {
+    color: var(--text-sub);
+    font-size: 0.95rem;
     margin: 0;
 }
-.main-content-header p {
-    font-size: 1rem;
-    color: var(--secondary-text);
-    margin: 5px 0 0 0;
-}
 
-
-/* -------------------------------------- */
-/* Filter Controls */
-/* -------------------------------------- */
-.filter-controls-wrapper {
-    margin-bottom: 25px;
+/* --- CONTROLS ROW --- */
+.controls-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
 }
 
-.filter-controls {
+.search-placeholder {
+    /* Kept for spacing if search logic moves here later */
+    flex: 1; 
+}
+
+.action-group-right {
     display: flex;
     gap: 12px;
-    overflow-x: auto; 
-    padding-bottom: 5px;
     align-items: center;
 }
 
-/* action-buttons-group के लिए नई स्टाइलिंग */
-.action-buttons-group {
+.btn-create {
     display: flex;
-    gap: 12px; /* बटन के बीच स्पेसिंग */
     align-items: center;
-}
-
-.create-course-button {
-    flex-shrink: 0;
+    gap: 8px;
+    background: var(--primary);
+    color: white;
     padding: 10px 18px;
-    border: none;
-    border-radius: 8px; 
-    background-color: var(--primary-color);
-    /* color: white; */
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    border-radius: 8px;
     font-weight: 600;
-    box-shadow: 0 2px 5px rgba(86, 204, 135, 0.3);
-}
-.create-course-button:hover {
-    background-color: #5f5b99;
-    transform: translateY(-1px);
-}
-
-.refresh-button {
-    background: none;
+    font-size: 0.9rem;
     border: none;
-    color: var(--primary-color);
-    font-size: 18px;
     cursor: pointer;
-    transition: color 0.2s;
-    /* margin-left: 10px;  - इसे action-buttons-group के gap से बदल दिया गया है */
-}
-.refresh-button:hover {
-    color: #3730a3;
-}
-.refresh-button .rotate {
-    animation: spin 1s linear infinite;
-}
-@keyframes spin {
-    to { transform: rotate(360deg); }
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
 }
 
-/* -------------------------------------- */
-/* Course List Grid - Scrolling Container */
-/* -------------------------------------- */
-.card-scroll-container {
-    max-height: 70vh; /* Set a max height relative to viewport height */
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding-right: 15px; /* Space for scrollbar */
+.btn-create:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
 }
 
-/* Course List Grid (using same responsive grid as users) */
-.card-grid {
+.btn-refresh {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #eef2ff;
+}
+
+/* --- COURSE GRID --- */
+.course-grid {
     display: grid;
-    /* Default: 4 columns suitable for content cards */
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 20px; 
-    padding-bottom: 5px; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
 }
 
-/* Responsive Grid Adjustments */
-@media (max-width: 1400px) { /* Small Desktop: 3 columns */
-    .card-grid {
-        grid-template-columns: repeat(3, 1fr); 
-    }
-}
-
-@media (max-width: 1100px) { /* Tablet/smaller desktop: 2 columns */
-    .card-grid {
-        grid-template-columns: repeat(2, 1fr); 
-    }
-}
-
-@media (max-width: 600px) { /* Mobile: 1 column */
-    .card-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-.loading-indicator, .no-courses-found {
-    grid-column: 1 / -1; 
-    text-align: center;
-    color: var(--secondary-text);
-    padding: 30px;
-    font-size: 1.1rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-.loading-indicator i { margin-right: 10px; color: var(--primary-color); }
-.no-courses-found i { margin-right: 10px; color: #94A3B8; }
-
-
-/* -------------------------------------- */
-/* Course Card Styling */
-/* -------------------------------------- */
+/* --- COURSE CARD --- */
 .course-card {
-    background-color: #ffffff;
-    border-radius: 10px; 
-    padding: 20px; 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
-    transition: all 0.3s ease;
-    border: 1px solid var(--light-border);
-    border-top: 5px solid var(--card-border); /* Distinct top border */
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 200px; 
-    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
+
 .course-card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); 
-    transform: translateY(-3px); 
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
 }
 
-.course-card-header {
-    margin-bottom: 10px; 
+/* Color Stripe Top */
+.card-stripe {
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    width: 100%;
 }
 
-.course-title {
+.card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.course-info h3 {
+    font-size: 1.15rem;
     font-weight: 700;
-    font-size: 1.2rem; 
-    color: var(--text-dark);
-    line-height: 1.2;
-    margin-bottom: 5px;
+    color: var(--text-main);
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.course-id-badge {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    background: var(--bg-hover);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-family: monospace;
+}
+
+.icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: #f5f3ff;
+    color: #7c3aed;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Course Details */
+.course-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.meta-item {
+    font-size: 0.9rem;
+    color: var(--text-sub);
+}
+
+.meta-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
+    color: #94a3b8;
+}
+
+.meta-value {
+    color: var(--text-main);
+    line-height: 1.5;
     word-break: break-all;
 }
 
-.course-id {
-    font-size: 0.8rem; 
+.url-link {
+    color: var(--primary);
+    text-decoration: none;
     font-weight: 500;
-    color: var(--secondary-text); 
+}
+.url-link:hover { text-decoration: underline; }
+
+.subject-tags {
+    font-weight: 500;
+    color: var(--text-main);
 }
 
-.course-card-body {
-    flex-grow: 1; 
-    margin-bottom: 15px;
-    padding-top: 10px;
-    border-top: 1px dashed #e0e0e0;
-}
-.course-card-body p {
-    font-size: 0.9rem; 
-    color: var(--secondary-text);
-    margin: 4px 0; 
-    line-height: 1.4;
-}
-.course-card-body strong {
-    color: var(--text-dark);
-}
-.course-card-body i {
-    font-size: 12px; 
-    margin-right: 6px;
-    color: var(--card-border); 
-    width: 18px;
-    text-align: center;
-}
-
-
-.course-card-actions {
+/* Card Actions */
+.card-actions {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
     display: flex;
-    gap: 10px; 
-    padding-top: 10px; 
+    gap: 12px;
+    background: #fcfcfc;
 }
 
-.action-button {
-    padding: 8px 10px; 
-    border: none;
-    border-radius: 6px; 
-    font-size: 0.9rem; 
+.btn-action {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
-    flex-grow: 1;
-    text-transform: uppercase;
-    /* color: white; */
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-/* Action Button Colors */
-.update-button { 
-    background-color: rgb(176, 207, 128); 
+.btn-edit {
+    background: white;
+    border-color: var(--border);
+    color: var(--text-main);
 }
-.update-button:hover { 
-    background-color: var(--update-hover); 
-    transform: translateY(-1px); 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
-}
-
-.delete-button { 
-    background-color: rgb(194, 98, 98); 
-}
-.delete-button:hover { 
-    background-color: var(--delete-hover); 
-    transform: translateY(-1px); 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+.btn-edit:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #eef2ff;
 }
 
-/* Dynamic Message Box (same as user management) */
-.course-message-box {
-    padding: 12px 20px;
+.btn-delete {
+    background: white;
+    border-color: var(--border);
+    color: #ef4444;
+}
+.btn-delete:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+/* States */
+.state-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    color: var(--text-sub);
+}
+.state-container i { font-size: 2rem; margin-bottom: 16px; color: #cbd5e1; }
+.state-container p { font-size: 1rem; }
+
+/* Message Box */
+.toast-msg {
+    margin-bottom: 24px;
+    padding: 12px 16px;
     border-radius: 8px;
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 0.95rem;
     font-weight: 500;
-    border: 1px solid transparent;
 }
-.course-message-box p { margin: 0; }
+.toast-msg.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.toast-msg.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
-.course-message-box.success {
-    background-color: #e8f8f5;
-    color: var(--primary-green); 
-    border-color: var(--primary-green);
-}
-
-.course-message-box.error {
-    background-color: #fdedec;
-    color: #cc0000;
-    border-color: #ffaaaa;
-}
-
-
+/* --- MODAL --- */
 .custom-modal-backdrop {
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999; 
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
 }
 
 .custom-modal-content {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
     width: 90%;
     max-width: 400px;
-    transform: scale(1);
-    transition: transform 0.3s ease-out;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #E0E7FF; 
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: scaleUp 0.2s ease-out;
 }
 
 .modal-header h4 {
-    margin: 0;
-    color: var(--primary-color); 
-    font-weight: 700;
+    margin: 0 0 16px 0;
+    font-size: 1.25rem;
+    color: var(--text-main);
 }
 
-.close-modal-button {
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    color: var(--secondary-text); 
-    padding: 0;
-    transition: color 0.2s;
-}
-.close-modal-button:hover {
-    color: var(--delete-red);
-}
-
-.modal-body p {
-    font-size: 1rem;
-    color: var(--text-dark); 
-    margin-bottom: 25px;
-    line-height: 1.4;
-}
+.modal-body p { color: var(--text-sub); line-height: 1.5; margin-bottom: 24px; }
 
 .modal-buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 12px;
 }
 
-.btn-cancel,
-.btn-confirm-delete {
-    padding: 10px 15px;
-    border: none;
+.btn-modal {
+    padding: 10px 20px;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    border: none;
+    font-size: 0.9rem;
 }
+.btn-cancel { background: #f1f5f9; color: var(--text-main); }
+.btn-confirm-delete { background: #dc2626; color: white; }
 
-.btn-cancel {
-    background-color: #ecf0f1;
-    color: var(--text-dark);
-}
-.btn-cancel:hover {
-    background-color: #bdc3c7;
-}
-
-.btn-confirm-delete {
-    background-color: var(--delete-red);
-    color: white;
-}
-.btn-confirm-delete:hover {
-    background-color: var(--delete-hover);
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }

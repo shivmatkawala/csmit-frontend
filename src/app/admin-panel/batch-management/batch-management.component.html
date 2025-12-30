@@ -1,137 +1,146 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Main Batch Management View -->
 <div class="batch-management-view">
     
-    <div class="main-content-header">
-        <h1>Batch Management</h1>
-        <p>View all created batches, filter by course, and manage their active status.</p>
+    <!-- Header -->
+    <div class="header-section">
+        <div class="title-group">
+            <h2>Batch Directory</h2>
+            <p>Manage training cohorts, schedules, and active enrollments.</p>
+        </div>
     </div>
 
-    <!-- Filter/Action Controls -->
-    <div class="filter-controls-wrapper">
-        <div class="filter-controls">
-            <!-- Course Filter Dropdown -->
+    <!-- Controls Row -->
+    <div class="controls-row">
+        <!-- Filter Dropdown -->
+        <div class="filter-group">
             <select
                 (change)="filterBatches($event)"
-                class="filter-dropdown"
+                class="custom-select"
                 [ngModel]="currentFilter()"
                 title="Filter Batches by Course"
             >
-                <option [ngValue]="'all'">All Courses</option>
+                <option [ngValue]="'all'">View All Courses</option>
                 <option *ngFor="let course of allCourses" [ngValue]="course.courseid">
-                    {{ course.coursename }} (ID: {{ course.courseid }})
+                    {{ course.coursename }}
                 </option>
             </select>
+            <i class="fas fa-chevron-down select-arrow"></i>
         </div>
         
-        <div class="action-buttons-group">
-            <!-- Action Button: Navigate to Create Batch form -->
-            <button class="create-batch-button" (click)="navigateToCreateBatch()">
-                <i class="fas fa-plus"></i> Create New Batch
+        <div class="action-group-right">
+            <button class="btn-create" (click)="navigateToCreateBatch()">
+                <i class="fas fa-plus"></i>
+                Create New Batch
             </button>
             
-            <button class="refresh-button" (click)="fetchCourses()" title="Refresh Batches">
-                <i class="fas fa-sync-alt" [class.rotate]="isLoadingBatches()"></i>
+            <button class="btn-refresh" (click)="fetchCourses()" title="Sync Batches">
+                <i class="fas fa-sync-alt" [class.fa-spin]="isLoadingBatches()"></i>
             </button>
         </div>
     </div>
 
-    <!-- Dynamic Message Box -->
-    <div *ngIf="batchMessage()" class="batch-message-box" [class.success]="!batchMessage()?.isError" [class.error]="batchMessage()?.isError">
-        <p><strong>{{ batchMessage()?.isError ? 'Error!' : 'Success!' }}</strong> {{ batchMessage()?.text }}</p>
+    <!-- Feedback Message -->
+    <div *ngIf="batchMessage()" class="toast-msg" [class.success]="!batchMessage()?.isError" [class.error]="batchMessage()?.isError">
+        <i class="fas" [class.fa-check-circle]="!batchMessage()?.isError" [class.fa-exclamation-triangle]="batchMessage()?.isError"></i>
+        <span>{{ batchMessage()?.text }}</span>
     </div>
     
-    <!-- Batch List Cards - Scrollable Container -->
-    <div class="card-scroll-container">
-        <div class="card-grid">
-            <div *ngIf="isLoadingBatches()" class="loading-indicator">
-                <i class="fas fa-spinner fa-spin"></i> Fetching batches...
-            </div>
-            
-            <div *ngIf="!isLoadingBatches() && filteredBatches.length === 0" class="no-batches-found">
-                <i class="fas fa-info-circle"></i> No batches found matching the current criteria.
-            </div>
+    <!-- Batch Grid -->
+    <div class="batch-grid">
+        
+        <!-- Loading State -->
+        <div *ngIf="isLoadingBatches()" class="state-container">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <p>Loading batch data...</p>
+        </div>
+        
+        <!-- Empty State -->
+        <div *ngIf="!isLoadingBatches() && filteredBatches.length === 0" class="state-container">
+            <i class="far fa-folder-open"></i>
+            <p>No batches found for the selected criteria.</p>
+        </div>
 
-            <ng-container *ngIf="!isLoadingBatches() && filteredBatches.length > 0">
-                <div *ngFor="let batch of filteredBatches" class="batch-card" [class.inactive]="!batch.is_active">
-                    <div class="batch-card-header">
-                        <!-- Use {{ batch.batchName }} as the main title -->
-                        <div class="batch-title">{{ batch.batchName }}</div> 
-                        <div class="batch-id">ID: {{ batch.batchId }}</div>
+        <!-- Batch Cards -->
+        <ng-container *ngIf="!isLoadingBatches() && filteredBatches.length > 0">
+            <div *ngFor="let batch of filteredBatches" class="batch-card" [class.inactive]="!batch.is_active">
+                <div class="card-stripe"></div>
+                
+                <div class="card-content">
+                    <div class="batch-header">
+                        <div class="batch-info">
+                            <h3>{{ batch.batchName }}</h3>
+                            <span class="batch-id-badge">ID: {{ batch.batchId }}</span>
+                        </div>
+                        <div class="icon-wrapper">
+                            <i class="fas fa-users-rectangle"></i>
+                        </div>
                     </div>
                     
-                    <div class="batch-card-body">
-                        <!-- Display Course Name (Adding null check for course object) -->
-                        <p class="batch-course">
-                            <i class="fas fa-book-open" [style.color]="batch.is_active ? '#9b59b6' : '#e74c3c'"></i> 
-                            <strong>Course:</strong> 
-                            <ng-container *ngIf="batch.course?.coursename; else missingCourse">
-                                {{ batch.course.coursename }} (ID: {{ batch.course.courseid }})
-                            </ng-container>
-                            <ng-template #missingCourse>
-                                N/A (Course data missing)
-                            </ng-template>
-                        </p>
-                        <!-- Display Status clearly -->
-                        <p class="batch-status">
-                            <i class="fas fa-circle" [style.color]="batch.is_active ? '#2ecc71' : '#e74c3c'"></i> 
-                            <strong>Status:</strong> 
-                            <span [style.color]="batch.is_active ? '#2ecc71' : '#e74c3c'">
-                                {{ batch.is_active ? 'Active' : 'Deactivated' }}
-                            </span>
-                        </p>
-                    </div>
-
-                    <div class="batch-card-actions">
-                        <!-- ACTION BUTTONS: Activate/Deactivate -->
-                        
-                        <!-- Deactivate Button (Visible when Active) -->
-                        <button 
-                            *ngIf="batch.is_active"
-                            (click)="showConfirmation(batch, 'Deactivate')" 
-                            class="action-button deactivate-button"
-                            title="Deactivate Batch"
-                        >
-                            Deactivate
-                        </button>
-                        
-                        <!-- Activate Button (Visible when Inactive) -->
-                        <button
-                            *ngIf="!batch.is_active"
-                            (click)="showConfirmation(batch, 'Activate')" 
-                            class="action-button activate-button"
-                            title="Activate Batch"
-                        >
-                            Activate
-                        </button>
-
-                        <!-- Removed Update button as per request, keeping one action button for status -->
+                    <div class="batch-meta">
+                        <!-- Course Info -->
+                        <div class="meta-item">
+                            <div class="meta-icon"><i class="fas fa-book"></i></div>
+                            <div class="meta-text">
+                                <span class="label">Assigned Course</span>
+                                <ng-container *ngIf="batch.course?.coursename; else missingCourse">
+                                    {{ batch.course.coursename }}
+                                </ng-container>
+                                <ng-template #missingCourse>
+                                    <span style="color:var(--text-sub)">Unassigned</span>
+                                </ng-template>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </ng-container>
-        </div>
+
+                <div class="card-footer">
+                    <!-- Status Pill -->
+                    <div class="status-pill" [ngClass]="batch.is_active ? 'status-active' : 'status-inactive'">
+                        <span class="status-dot"></span>
+                        {{ batch.is_active ? 'Active' : 'Inactive' }}
+                    </div>
+
+                    <!-- Action Button -->
+                    <button 
+                        *ngIf="batch.is_active"
+                        (click)="showConfirmation(batch, 'Deactivate')" 
+                        class="btn-toggle-status btn-deactivate"
+                        title="Deactivate Batch"
+                    >
+                        Deactivate
+                    </button>
+                    
+                    <button
+                        *ngIf="!batch.is_active"
+                        (click)="showConfirmation(batch, 'Activate')" 
+                        class="btn-toggle-status btn-activate"
+                        title="Activate Batch"
+                    >
+                        Activate
+                    </button>
+                </div>
+            </div>
+        </ng-container>
     </div>
 </div>
         
-<!-- Custom Confirmation Modal for Activation/Deactivation -->
+<!-- Modern Modal -->
 <div *ngIf="isModalOpen()" class="custom-modal-backdrop" (click)="closeModal()">
     <div class="custom-modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h4>Confirm {{ modalData()?.action }}</h4>
-            <button (click)="closeModal()" class="close-modal-button">&times;</button>
         </div>
         <div class="modal-body">
             <p>{{ modalData()?.message }}</p>
             <div class="modal-buttons">
-                <button (click)="closeModal()" class="btn-cancel">Cancel</button>
+                <button (click)="closeModal()" class="btn-modal btn-cancel">Cancel</button>
                 <button 
                     (click)="confirmAction()" 
-                    class="btn-confirm" 
-                    [class.btn-confirm-delete]="modalData()?.action === 'Deactivate'"
-                    [class.btn-confirm-activate]="modalData()?.action === 'Activate'"
+                    class="btn-modal btn-confirm-action"
+                    [style.background]="modalData()?.action === 'Deactivate' ? '#dc2626' : '#166534'"
                 >
-                    Confirm {{ modalData()?.action }}
+                    Confirm
                 </button>
             </div>
         </div>

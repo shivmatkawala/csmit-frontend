@@ -19,13 +19,16 @@ export interface User {
   providedIn: 'root'
 })
 export class UserService {
-  // ✅ Hardcoded IP hatakar relative path set kiya hai
+  // ✅ Relative path for proxy setup
   private apiUrl = '/api/users';
+  
   private registerEndpoint = `${this.apiUrl}/register/`; 
   private allUsersEndpoint = `${this.apiUrl}/all/`;
   private deactivateEndpoint = `${this.apiUrl}/deactivate-user/`;
   private reactivateEndpoint = `${this.apiUrl}/reactivate-user/`; 
   private deleteEndpoint = `${this.apiUrl}/delete-user/`;
+  // ✅ Added Update Password Endpoint
+  private updatePasswordEndpoint = `${this.apiUrl}/update-password/`;
 
   constructor(private http: HttpClient) { }
 
@@ -47,5 +50,10 @@ export class UserService {
 
   deleteUser(userId: string): Observable<any> {
     return this.http.post<any>(this.deleteEndpoint, { userId });
+  }
+
+  // ✅ New Method for Forgot Password functionality
+  updatePassword(userId: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(this.updatePasswordEndpoint, { userId, newPassword });
   }
 }

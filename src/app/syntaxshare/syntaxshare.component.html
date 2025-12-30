@@ -1,0 +1,154 @@
+<div class="community-wrapper">
+  
+  <!-- PREMIUM HEADER WITH REFRESH -->
+  <div class="community-header">
+    <div class="header-content">
+      <div>
+        <h2>Syntax Share</h2>
+        <p class="subtitle">Live Developer Feed</p>
+      </div>
+    </div>
+    <div class="header-actions">
+        <button class="refresh-pill" (click)="loadData(false)" [disabled]="refreshing">
+            <i class="fas fa-sync-alt" [class.fa-spin]="refreshing"></i>
+            <span>{{ refreshing ? 'Syncing...' : 'Refresh' }}</span>
+        </button>
+        <div class="topic-count">
+            <strong>{{ doubts.length }}</strong>
+            <span>Active</span>
+        </div>
+    </div>
+  </div>
+
+  <!-- MODERN ASK SECTION (Social Media Style) -->
+  <div class="ask-container-card">
+    <div class="ask-header">
+       <div class="current-user-info">
+          <div class="avatar-glow">
+             <div class="avatar-circle-sm">{{ getInitials(currentUserName) }}</div>
+          </div>
+          <span class="user-greeting">What's on your mind, <strong>{{ currentUserName }}</strong>?</span>
+       </div>
+    </div>
+    
+    <div class="ask-body">
+      <div class="input-field-group">
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedSubjectId" class="topic-dropdown">
+            <option [ngValue]="null" disabled>Select Topic</option>
+            <option *ngFor="let sub of subjects" [value]="sub.id">{{ sub.name }}</option>
+          </select>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        
+        <div class="text-input-wrapper">
+            <input type="text" [(ngModel)]="newDoubtText" 
+                   placeholder="Post a bug, logic or question..." 
+                   (keyup.enter)="postDoubt()">
+        </div>
+      </div>
+      
+      <div class="ask-footer">
+          <div class="helper-tips">
+              <i class="far fa-lightbulb"></i>
+              <span>Tip: Don't forget to select a topic</span>
+          </div>
+          <button class="btn-post-gradient" (click)="postDoubt()" [disabled]="!newDoubtText.trim() || !selectedSubjectId">
+            <span>Post Doubt</span>
+            <i class="fas fa-paper-plane"></i>
+          </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="modern-loader">
+    <div class="loader-ring"></div>
+    <p>Loading community feed...</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && doubts.length === 0" class="empty-feed">
+      <div class="empty-icon"><i class="fas fa-comment-slash"></i></div>
+      <h3>Feed is empty</h3>
+      <p>Be the first one to start a conversation!</p>
+  </div>
+
+  <!-- QUESTIONS FEED (INFINITE STYLE) -->
+  <div *ngIf="!loading" class="questions-feed">
+    
+    <div *ngFor="let doubt of doubts; trackBy: trackByDoubt; let i = index" class="post-card" [style.animation-delay]="i * 100 + 'ms'">
+      <!-- Post Top -->
+      <div class="post-top">
+        <div class="post-user-meta">
+          <div class="avatar-frame">
+             <div class="avatar-circle">
+                {{ getInitials(doubt.userid?.username || '') }}
+             </div>
+          </div>
+          <div class="user-details">
+            <span class="poster-name">{{ doubt.userid?.username || 'Student' }}</span>
+            <span class="post-time"><i class="far fa-clock"></i> {{ doubt.created_at | date:'medium' }}</span>
+          </div>
+        </div>
+        <div class="post-tag-container">
+            <span class="topic-tag">#{{ doubt.subjectid?.subjectname || 'General' }}</span>
+        </div>
+      </div>
+
+      <!-- Post Content -->
+      <div class="post-content">
+        <h3 class="doubt-text">{{ doubt.doubttext }}</h3>
+      </div>
+
+      <!-- Solutions Area -->
+      <div class="comments-section" *ngIf="doubt.solutions && doubt.solutions.length > 0">
+          <div class="comments-header">
+              <span><i class="far fa-comments"></i> {{ doubt.solutions.length }} Answers</span>
+          </div>
+          
+          <div class="comment-thread">
+              <div *ngFor="let sol of doubt.solutions" class="comment-item">
+                  <div class="comment-avatar">
+                      {{ getInitials(sol.userid?.username || '') }}
+                  </div>
+                  <div class="comment-body">
+                      <div class="comment-meta">
+                          <span class="commenter-name">{{ sol.userid?.username || 'Expert' }}</span>
+                          <span class="comment-date">{{ sol.created_at | date:'shortTime' }}</span>
+                      </div>
+                      <p class="comment-text">{{ sol.solution }}</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Post Actions -->
+      <div class="post-actions">
+        <button class="action-btn-pill" (click)="toggleReply(doubt)" [class.active]="doubt.showReply">
+          <i class="far fa-edit"></i> 
+          <span>{{ doubt.showReply ? 'Discard' : 'Write a Solution' }}</span>
+        </button>
+      </div>
+
+      <!-- Reply Box -->
+      <div *ngIf="doubt.showReply" class="premium-reply-box slide-up">
+        <div class="reply-input-wrapper">
+            <textarea [(ngModel)]="doubt.tempReply" 
+                      placeholder="Type your solution here..." 
+                      (keydown.control.enter)="postSolution(doubt)"
+                      autofocus></textarea>
+            <button class="send-reply-btn" (click)="postSolution(doubt)">
+                <i class="fas fa-location-arrow"></i>
+            </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  
+  <div class="feed-footer" *ngIf="!loading && doubts.length > 0">
+      <p><i class="fas fa-check-circle"></i> You're all caught up!</p>
+  </div>
+</div>
