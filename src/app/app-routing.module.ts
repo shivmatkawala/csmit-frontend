@@ -23,6 +23,7 @@ import { UploadBlogComponent } from './admin-panel/upload-blog/upload-blog.compo
 import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 import { CareersComponent } from './careers/careers.component';
 import { SyntaxshareComponent } from './syntaxshare/syntaxshare.component';
+import { JobApplicationComponent } from './job-application/job-application.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -43,6 +44,7 @@ const routes: Routes = [
   {path:'attend-exam',component:AttendExamComponent},
   { path: 'contact', component: ContactComponent },
   {path:'create-success-story',component:CreateSuccessStoryComponent},
+  {path:'job-application',component:JobApplicationComponent},
   {path:'blog',component:BlogComponent},
   {path:'upload-blog',component:UploadBlogComponent},
   {path:'upload-notes',component:UploadNotesComponent},

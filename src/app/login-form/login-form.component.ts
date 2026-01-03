@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService, LoginResponse } from '../services/api.service';
-import { UserService } from '../services/user.service'; // ✅ Import UserService
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-login-form',
@@ -22,15 +22,14 @@ export class LoginFormComponent {
   successMessage: string = '';
   hidePassword: boolean = true;
   hideResetPassword: boolean = true;
-  isForgotPasswordMode: boolean = false; // ✅ Toggle State
+  isForgotPasswordMode: boolean = false;
 
   constructor(
     private api: ApiService, 
-    private userService: UserService, // ✅ Inject UserService
+    private userService: UserService,
     private router: Router
   ) {}
 
-  // Toggle Password Visibility
   togglePasswordVisibility() {
     this.hidePassword = !this.hidePassword;
   }
@@ -39,25 +38,32 @@ export class LoginFormComponent {
     this.hideResetPassword = !this.hideResetPassword;
   }
 
-  // Switch between Login and Forgot Password Forms
   toggleView() {
     this.isForgotPasswordMode = !this.isForgotPasswordMode;
     this.errorMessage = '';
     this.successMessage = '';
-    // Reset fields
     this.username = '';
     this.password = '';
     this.resetUserId = '';
     this.resetNewPassword = '';
   }
 
-  // LOGIN FUNCTIONALITY
+  // ✅ UPDATED LOGIN FUNCTION
   login() {
     this.errorMessage = '';
     this.successMessage = '';
     
     this.api.login(this.username, this.password).subscribe(
-      (res: LoginResponse) => {
+      (res: any) => { // Type 'any' use kiya hai temporarily taaki access token read ho sake
+        
+        // 1. TOKENS SAVE KAREIN
+        if (res.access) {
+            localStorage.setItem('access_token', res.access);
+        }
+        if (res.refresh) {
+            localStorage.setItem('refresh_token', res.refresh);
+        }
+
         const authenticatedRole = res.role ? res.role.toUpperCase() : null; 
 
         if (!authenticatedRole) {
@@ -85,7 +91,6 @@ export class LoginFormComponent {
     );
   }
 
-  // ✅ FORGOT PASSWORD FUNCTIONALITY
   performPasswordReset() {
     this.errorMessage = '';
     this.successMessage = '';
@@ -98,7 +103,6 @@ export class LoginFormComponent {
     this.userService.updatePassword(this.resetUserId, this.resetNewPassword).subscribe(
       (res) => {
         this.successMessage = 'Password updated successfully! Please login.';
-        // Auto switch back to login after 2 seconds
         setTimeout(() => {
           this.toggleView();
         }, 2000);

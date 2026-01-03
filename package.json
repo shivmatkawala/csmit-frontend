@@ -19,6 +19,8 @@
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
     "html2pdf.js": "^0.12.1",
+    "monaco-editor": "^0.55.1",
+    "ngx-monaco-editor-v2": "^16.0.1",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.26.3",
     "tslib": "^2.3.0",

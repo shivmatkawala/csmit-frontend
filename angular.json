@@ -22,7 +22,12 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor/min",
+                "output": "assets/monaco-editor/monaco/min"
+              }
             ],
             "styles": [
               "src/styles.css"
@@ -92,7 +97,12 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor/min",
+                "output": "assets/monaco-editor/monaco/min"
+              }
             ],
             "styles": [
               "src/styles.css"
