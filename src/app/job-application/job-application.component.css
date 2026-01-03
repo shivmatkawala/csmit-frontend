@@ -468,8 +468,6 @@
   /* Stack the layout vertically */
   .application-wrapper { 
     flex-direction: column; 
-    /* Remove overflow-hidden on wrapper if we want to rely on internal scroll, 
-       but keep it here to maintain 'app' feel */
   }
 
   /* Hide Side Panel to save space */
