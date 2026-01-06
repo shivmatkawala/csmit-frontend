@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* --- Colors & Variables --- */
+:host {
+    --primary-green: #554451;
+    --accent-color: #e09f3e;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --input-background: #ffffff;
+    --card-background: #ffffff;
+    --border-light: #e0e0e0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7f9;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- Form Container (Card) --- */
+.form-card {
+    width: 100%;
+    max-width: 600px; /* Slightly wider for this form */
+    background-color: var(--card-background);
+    padding: 40px 30px 30px 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative; 
+    z-index: 1;
+}
+
+.form-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Back Button --- */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.back-button:hover {
+    color: white;
+    background-color: var(--primary-green);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(85, 68, 81, 0.2);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5; 
+    fill: currentColor; 
+    stroke: none;
+}
+
+/* --- Header --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 10px;
+}
+
+.header-section h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    margin-bottom: 5px;
+    border-bottom: 3px solid var(--accent-color); 
+    display: inline-block; 
+    padding-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.header-section p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    margin-top: 8px;
+}
+
+/* --- Form Groups & Inputs --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background-color: var(--input-background);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box; 
+    font-family: 'Roboto', sans-serif;
+    
+    /* Custom Dropdown Arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4);
+}
+
+.form-control:disabled {
+    background-color: #f9f9f9;
+    color: #999;
+    cursor: not-allowed;
+    border-color: #eee;
+}
+
+.form-control.is-invalid {
+    border-color: #cc0000;
+}
+
+/* --- Error & Info Messages --- */
+.error-message {
+    color: #cc0000;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.info-message {
+    color: var(--accent-color);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* --- User Details Card --- */
+.user-details-card {
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--primary-green);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.user-details-card h3 {
+    margin-top: 0;
+    color: var(--primary-green);
+    font-size: 1.1rem;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.user-details-card p {
+    margin: 6px 0;
+    color: var(--text-dark);
+}
+
+.user-details-card strong {
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+/* --- Submit Button --- */
+.form-action {
+    margin-top: 30px;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--primary-green);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(85, 68, 81, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover:not([disabled]) {
+    background-color: #3e313b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(85, 68, 81, 0.5);
+}
+
+.btn-submit:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+}
+
+/* --- Loading Spinner --- */
+.loading-spinner {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--primary-green);
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(85, 68, 81, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--accent-color);
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .form-card {
+        padding: 30px 20px;
+    }
+    .back-button {
+        top: 15px;
+        left: 15px;
+    }
+    .header-section h2 {
+        font-size: 1.6rem;
+    }
+}

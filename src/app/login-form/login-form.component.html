@@ -4,7 +4,7 @@
     <div class="login-card">
 
         <!-- Back Button (Naya) -->
-        <button class="back-button" (click)="goBack()" title="Pichle page par jaaiye">
+        <button class="back-button" (click)="goBack()" title="Go back">
             <!-- Back Arrow Icon (SVG) -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                 <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
@@ -17,11 +17,10 @@
             <div class="welcome-text">Welcome to</div>
 
             <!-- Main Heading (CSMTTI) -->
-            <h1 class="main-heading">CSMTTI</h1>
+            <h1 class="main-heading">MUSE</h1>
         </div>
         
         <!-- Error Message Display Area -->
-        <!-- Error message tab dikhega jab errorMessage string empty nahi hogi -->
         <div *ngIf="errorMessage" class="error-message-box">
             {{ errorMessage }}
         </div>
@@ -32,16 +31,48 @@
             <!-- Email Input Group -->
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" class="text-input" placeholder="your.email@example.com" [(ngModel)]="username" name="username" required>
+                <div class="input-wrapper">
+                    <!-- Mail Icon (SVG) -->
+                    <span class="input-icon left-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+                            <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                        </svg>
+                    </span>
+                    <!-- Email Input -->
+                    <input type="email" id="email" class="text-input with-left-icon" placeholder="your.email@example.com" [(ngModel)]="username" name="username" required>
+                </div>
             </div>
 
             <!-- Password Input Group -->
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" class="text-input" placeholder="Enter your password" [(ngModel)]="password" name="password" required>
+                <div class="input-wrapper">
+                    <!-- Lock Icon (SVG) -->
+                    <span class="input-icon left-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    
+                    <!-- Password Input (Type changes dynamically based on hidePassword) -->
+                    <input [type]="hidePassword ? 'password' : 'text'" id="password" class="text-input with-left-icon with-right-icon" placeholder="Enter your password" [(ngModel)]="password" name="password" required>
+                    
+                    <!-- Eye Icon (Toggle Visibility) -->
+                    <span class="input-icon right-icon clickable" (click)="togglePasswordVisibility()">
+                        <!-- Eye Slash (Hidden) -->
+                        <svg *ngIf="hidePassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM22.676 12.553a11.249 11.249 0 0 1-2.631 4.31l-3.099-3.099a5.25 5.25 0 0 0-6.71-6.71L7.759 4.577a11.217 11.217 0 0 1 4.242-.827c4.97 0 9.185 3.223 10.675 7.69.105.316.105.656 0 .971Z" />
+                        </svg>
+                        <!-- Eye Open (Visible) -->
+                        <svg *ngIf="!hidePassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </div>
             </div>
 
-            <!-- FIX: 'Select Role' ड्रॉपडाउन हटा दिया गया है। -->
 
             <!-- Login Button -->
             <button type="submit" class="login-button">

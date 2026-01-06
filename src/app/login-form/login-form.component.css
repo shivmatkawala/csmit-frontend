@@ -9,7 +9,7 @@
 /* --- Colors & Variables (Matching the image theme) --- */
 :host {
     /* Primary color is a deep, strong green */
-    --primary-green: #1a4d2e;
+    --primary-green: #554451;
     /* Secondary/Accent color is a light gold/orange for Ayurveda logo type elements */
     --accent-color: #e09f3e;
     --text-dark: #333333;
@@ -69,7 +69,7 @@
 
     cursor: pointer;
     padding: 0; /* Remove unnecessary padding */
-    color: var(--primary-green); /* Use primary green for the icon color */
+    color: rgb(83, 65, 100); /* Use primary green for the icon color */
     transition: all 0.3s ease;
     z-index: 10;
 }
@@ -165,22 +165,88 @@ label {
     margin-bottom: 6px;
     font-weight: 500;
 }
+
+/* --- NEW: Input Wrapper for Icon Positioning --- */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .text-input {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid var(--border-light);
     border-radius: 8px;
     font-size: 1rem;
-    background-color: var(--input-background); /* FIX: Now uses white background variable */
+    background-color: var(--input-background);
     color: var(--text-dark);
     transition: border-color 0.3s, box-shadow 0.3s;
 }
+
+/* CRITICAL FIX: Hide default browser password reveal icons (Edge/IE) to prevent overlap */
+.text-input::-ms-reveal,
+.text-input::-ms-clear {
+    display: none;
+}
+
+/* Left Icon Padding */
+.text-input.with-left-icon {
+    padding-left: 42px; /* Extra padding to make room for the icon */
+}
+
+/* Right Icon Padding (for password) */
+.text-input.with-right-icon {
+    padding-right: 42px; /* Extra padding for the eye icon */
+}
+
 .text-input:focus {
     outline: none;
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4); /* Stronger focus ring */
     background-color: var(--card-background);
 }
+
+/* --- NEW: Input Icons Styling --- */
+.input-icon {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%; /* Explicitly set height */
+    width: 40px; /* Fixed width to center icon precisely in the padding area */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light); /* Grey color for icons */
+    z-index: 20; /* High Z-index to ensure visibility */
+}
+
+.input-icon svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0; /* Prevent SVG from squishing */
+}
+
+/* Position Left Icon */
+.left-icon {
+    left: 0;
+    pointer-events: none; /* Icon shouldn't block clicks on input */
+}
+
+/* Position Right Icon (Eye) */
+.right-icon {
+    right: 5px; /* Pull slightly inside to avoid any edge clipping */
+}
+
+/* Hover effect for clickable icons (Eye) */
+.clickable {
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.clickable:hover {
+    color: var(--primary-green); /* Change color on hover */
+}
+
 
 /* --- Improved Select Role Styling (New Style) --- */
 

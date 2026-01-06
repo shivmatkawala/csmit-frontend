@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertService } from 'src/app/services/alert.service';
 import { SuccessStoriesService, SuccessStory } from 'src/app/services/success-stories.service';
-
 @Component({
   selector: 'app-create-success-story',
   templateUrl: './create-success-story.component.html',
@@ -19,31 +19,35 @@ export class CreateSuccessStoryComponent {
   };
 
   isSubmitting = false;
-  message: { text: string, type: 'success' | 'error' } | null = null;
 
   constructor(
     private successService: SuccessStoriesService, 
-    private router: Router
+    private router: Router,
+    private alertService: AlertService // Inject AlertService
   ) {}
 
   onSubmit() {
-    if (this.isValid()) {
-      this.isSubmitting = true;
-      this.successService.createStory(this.story).subscribe({
-        next: (res) => {
-          this.message = { text: 'Success Story Added! It is now live on the Navbar.', type: 'success' };
-          this.isSubmitting = false;
-          this.resetForm();
-          // Optional: Redirect back to dashboard after delay
-          setTimeout(() => this.router.navigate(['/admin-panel']), 2000);
-        },
-        error: (err) => {
-          this.message = { text: 'Failed to save story. Please try again.', type: 'error' };
-          this.isSubmitting = false;
-          console.error(err);
-        }
-      });
+    if (!this.isValid()) {
+      this.alertService.warning('Please fill in all required fields (Name, Role, Company).', 'Missing Information');
+      return;
     }
+
+    this.isSubmitting = true;
+    this.successService.createStory(this.story).subscribe({
+      next: (res) => {
+        this.isSubmitting = false;
+        this.alertService.success('Success Story Added! It is now live on the Navbar.', 'Published');
+        
+        this.resetForm();
+        // Optional: Redirect back to dashboard after delay
+        // setTimeout(() => this.router.navigate(['/admin-panel']), 2000);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.alertService.error('Failed to save story. Please try again.', 'Error');
+        console.error(err);
+      }
+    });
   }
 
   isValid(): boolean {

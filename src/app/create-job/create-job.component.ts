@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CreateJobService, Job, JobCreatePayload } from '../services/create-job.service';
+import { AlertService } from '../services/alert.service'; // Import AlertService
+
 @Component({
   selector: 'app-create-job',
   templateUrl: './create-job.component.html',
-  styleUrls: ['../create-user/create-user.component.css'] // Reusing existing styles
+  styleUrls: ['./create-job.component.css'] // Using the new dedicated CSS file
 })
 export class CreateJobComponent implements OnInit {
   // Form Model
@@ -27,26 +29,21 @@ export class CreateJobComponent implements OnInit {
   jobTypes = ['Full-Time', 'Part-Time', 'Contract', 'Internship'];
 
   // UI State
-  message: string = '';
-  isError: boolean = false;
+  // Removed local message/isError as we use AlertService now
   
   // Job List Panel properties
   isPanelOpen: boolean = false;
   allJobs: Job[] = [];
-  filteredJobs: Job[] = []; // Currently not used for filtering, but kept for future expansion
+  filteredJobs: Job[] = []; 
   isLoadingJobs: boolean = false;
   
-  // Custom Modal Properties (Not used for Job Delete/Deactivate, but included for completeness if needed later)
-  // isModalOpen: boolean = false;
-  // modalData: any | null = null; 
-
   constructor(
     private jobService: CreateJobService, 
-    private router: Router
+    private router: Router,
+    private alertService: AlertService // Inject AlertService
   ) {}
 
   ngOnInit(): void {
-    // Initial data setup if needed
   }
   
   // Utility to generate a default future date string (YYYY-MM-DD)
@@ -65,9 +62,11 @@ export class CreateJobComponent implements OnInit {
 
     this.jobService.createJob(this.jobData).subscribe({
       next: (response) => {
-        this.showMessage(`Job "${this.jobData.jobtitle}" for ${this.jobData.company} successfully posted.`, false);
-        // Clear form after successful submission (or reset to default)
+        this.alertService.success(`Job "${this.jobData.jobtitle}" for ${this.jobData.company} successfully posted.`);
+        
+        // Clear form after successful submission
         this.resetForm();
+        
         // If the job panel is open, refresh the list
         if (this.isPanelOpen) {
           this.fetchJobs();
@@ -77,11 +76,10 @@ export class CreateJobComponent implements OnInit {
         let errorMessage = 'An unknown error occurred during job posting.';
         
         if (err.status === 400 && err.error) {
-            // Attempt to extract a specific error message from common fields or detail field
             errorMessage = err.error.jobtitle?.[0] || err.error.detail || 'Invalid data sent. Check console.';
         }
         
-        this.showMessage(`Posting Failed: ${errorMessage}`, true);
+        this.alertService.error(`Posting Failed: ${errorMessage}`);
         console.error('Job Posting Error:', err);
       }
     });
@@ -89,12 +87,12 @@ export class CreateJobComponent implements OnInit {
 
   validateFormData(): boolean {
     if (!this.jobData.jobtitle || !this.jobData.company || !this.jobData.job_description) {
-      this.showMessage('Error: Please fill in all required fields.', true);
+      this.alertService.warning('Please fill in all required fields (Title, Company, Description).');
       return false;
     }
     // Simple year validation
     if (this.jobData.from_passed_out_year > this.jobData.to_passed_out_year) {
-        this.showMessage('Error: "From Passed Out Year" cannot be after "To Passed Out Year".', true);
+        this.alertService.warning('"From Passed Out Year" cannot be after "To Passed Out Year".');
         return false;
     }
     return true;
@@ -117,20 +115,9 @@ export class CreateJobComponent implements OnInit {
     };
   }
 
-  showMessage(text: string, error: boolean): void {
-    this.message = text;
-    this.isError = error;
-    
-    setTimeout(() => {
-      this.message = '';
-    }, 5000);
-  }
-
   goBack(): void {
-    // Navigate back or to a main dashboard
     this.router.navigate(['/admin-panel']);
   }
-
 
   // --- Job List Panel Logic (Hamburger Menu) ---
 
@@ -139,8 +126,9 @@ export class CreateJobComponent implements OnInit {
     if (this.isPanelOpen) {
       this.fetchJobs();
     } else {
-      this.allJobs = [];
-      this.filteredJobs = [];
+      // Optional: clear list on close if you want to force refresh on open
+      // this.allJobs = [];
+      // this.filteredJobs = [];
     }
   }
 
@@ -149,11 +137,16 @@ export class CreateJobComponent implements OnInit {
     this.jobService.listJobs().subscribe({
       next: (data) => {
         this.allJobs = data; 
-        this.filteredJobs = data; // Assign all fetched jobs to filtered list
+        this.filteredJobs = data; 
         this.isLoadingJobs = false;
+        
+        if (data.length === 0) {
+            // Optional: minimal feedback if list is empty
+            // this.alertService.info('No active jobs found.');
+        }
       },
       error: (err) => {
-        this.showMessage('Failed to fetch job list. Check API connection.', true);
+        this.alertService.error('Failed to fetch job list. Check API connection.');
         this.isLoadingJobs = false;
         console.error('Fetch Jobs Error:', err);
       }

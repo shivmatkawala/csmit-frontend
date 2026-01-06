@@ -1,130 +1,104 @@
+<!-- Using a wrapper to center properly if needed by :host -->
+<div class="form-card">
 
-<!-- Main Container -->
-<div class="main-container">
-  <div class="form-card" style="max-width: 550px; position: relative; overflow: hidden;">
+    <!-- Back Button -->
+    <button (click)="goBack()" class="back-button" title="Go Back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+        </svg>
+    </button>
 
-    <!-- Header (Hamburger Menu Button removed) -->
-    <div class="form-header" style="display: flex; justify-content: space-between; align-items: center;">
-      <h1 class="form-header-title">
-        {{ isEditMode ? 'Update Course' : 'Create New Course' }}
-      </h1>
-      <!-- Hamburger Menu Icon was here, removed as per user request -->
-    </div>
-    
-    <p class="form-header-subtitle">
-      {{ isEditMode ? 'Edit the fields below and save your changes.' : 'Enter the course name, content URL, and list of subjects.' }}
-    </p>
-
-    <!-- Form Submission Status/Messages -->
-    <div *ngIf="errorMessage" class="submission-success-message" style="background-color: #fcebeb; border-color: #e74c3c; color: #c0392b; margin-bottom: 20px;">
-        <p class="message-title">Error!</p>
-        <p class="message-content">{{ errorMessage }}</p>
+    <!-- Header -->
+    <div class="header-section">
+        <h2>{{ isEditMode ? 'Update Course' : 'Create New Course' }}</h2>
+        <p>{{ isEditMode ? 'Edit the fields below and save your changes.' : 'Enter details to create a new learning track.' }}</p>
     </div>
 
-    <div *ngIf="successMessage" class="submission-success-message" style="margin-bottom: 20px;">
-        <p class="message-title">Success!</p>
-        <p class="message-content">{{ successMessage }}</p>
-    </div>
+    <!-- Form Area -->
+    <form #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)">
 
-    <!-- Form Area - Template Driven Form (TDF) -->
-    <!-- Bind the form with #courseForm reference -->
-    <form #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)" class="batch-form">
-
-      <!-- Section 1: Course Details (Single Column) -->
-      <div class="form-section-group single-col">
-        
         <!-- Course Name -->
         <div class="form-group">
-          <label for="courseName" class="input-label">Course Name</label>
-          <input
-            id="courseName"
-            name="courseName"
-            type="text"
-            required
-            minlength="5"
-            [(ngModel)]="courseData.courseName"
-            #courseName="ngModel"
-            class="input-field"
-            placeholder="Example: Robotics with ROS"
-          />
-          <div *ngIf="courseName.invalid && (courseName.dirty || courseName.touched)" class="error-message">
-            <div *ngIf="courseName.errors?.['required']">Course Name is required.</div>
-            <div *ngIf="courseName.errors?.['minlength']">Name must be at least 5 characters long.</div>
-          </div>
+            <label for="courseName" class="input-label">Course Name</label>
+            <input
+                id="courseName"
+                name="courseName"
+                type="text"
+                required
+                minlength="2" 
+                [(ngModel)]="courseData.courseName"
+                #courseName="ngModel"
+                class="input-field"
+                placeholder="e.g. Java, Robotics with ROS"
+            />
+            <div *ngIf="courseName.invalid && (courseName.dirty || courseName.touched)" class="error-message">
+                <span *ngIf="courseName.errors?.['required']">Course Name is required.</span>
+                <span *ngIf="courseName.errors?.['minlength']">Name must be at least 2 characters long.</span>
+            </div>
         </div>
 
         <!-- Content URL -->
         <div class="form-group">
-          <label for="contentUrl" class="input-label">Content URL</label>
-          <input
-            id="contentUrl"
-            name="contentUrl"
-            type="url"
-            required
-            pattern="https?://.+"
-            [(ngModel)]="courseData.contentUrl"
-            #contentUrl="ngModel"
-            class="input-field"
-            placeholder="Example: https://example.com/course-materials"
-          />
-          <div *ngIf="contentUrl.invalid && (contentUrl.dirty || contentUrl.touched)" class="error-message">
-            <div *ngIf="contentUrl.errors?.['required']">Content URL is required.</div>
-            <div *ngIf="contentUrl.errors?.['pattern']">Please enter a valid URL.</div>
-          </div>
+            <label for="contentUrl" class="input-label">Content URL</label>
+            <input
+                id="contentUrl"
+                name="contentUrl"
+                type="url"
+                required
+                pattern="https?://.+"
+                [(ngModel)]="courseData.contentUrl"
+                #contentUrl="ngModel"
+                class="input-field"
+                placeholder="e.g. https://example.com/materials"
+            />
+            <div *ngIf="contentUrl.invalid && (contentUrl.dirty || contentUrl.touched)" class="error-message">
+                <span *ngIf="contentUrl.errors?.['required']">Content URL is required.</span>
+                <span *ngIf="contentUrl.errors?.['pattern']">Please enter a valid URL (https://...).</span>
+            </div>
         </div>
 
-        <!-- Subjects (Comma-separated input) -->
+        <!-- Subjects -->
         <div class="form-group">
-          <label for="subjectsInput" class="input-label">Subjects (Comma-separated)</label>
-          <textarea
-            id="subjectsInput"
-            name="subjectsInput"
-            rows="3"
-            required
-            [(ngModel)]="courseData.subjectsInput"
-            #subjectsInput="ngModel"
-            class="input-field textarea-field"
-            placeholder="Example: Golang, Python, ROS, AI/ML"
-          ></textarea>
-          <p class="form-header-subtitle" style="margin-top: 5px; font-size: 0.8rem;">
-            Please separate each subject with a comma (,).
-          </p>
-          <div *ngIf="subjectsInput.invalid && (subjectsInput.dirty || subjectsInput.touched)" class="error-message">
-            Subject list is required.
-          </div>
+            <label for="subjectsInput" class="input-label">Subjects</label>
+            <textarea
+                id="subjectsInput"
+                name="subjectsInput"
+                rows="3"
+                required
+                [(ngModel)]="courseData.subjectsInput"
+                #subjectsInput="ngModel"
+                class="input-field textarea-field"
+                placeholder="e.g. Golang, Python; AI/ML"
+            ></textarea>
+            <span class="helper-text">Separate subjects with a comma (,) or semicolon (;).</span>
+            <div *ngIf="subjectsInput.invalid && (subjectsInput.dirty || subjectsInput.touched)" class="error-message">
+                Subject list is required.
+            </div>
         </div>
 
-      </div>
+        <!-- Action Buttons -->
+        <div class="submit-button-container">
+            <!-- Cancel Button (Only in Edit Mode) -->
+            <button
+                *ngIf="isEditMode"
+                type="button"
+                (click)="resetFormState(courseForm)"
+                class="submit-button secondary"
+                [disabled]="isSubmitting"
+            >
+                Cancel
+            </button>
 
-      <!-- Submit Button -->
-      <div class="submit-button-container">
-        <!-- Reset/Cancel Button (Visible in Edit Mode) -->
-        <button
-          *ngIf="isEditMode"
-          type="button"
-          (click)="resetFormState(courseForm)"
-          class="submit-button"
-          style="background-color: #95a5a6; color: white; margin-right: 15px;"
-        >
-          Cancel / Create New
-        </button>
+            <!-- Main Submit Button -->
+            <button
+                type="submit"
+                [disabled]="courseForm.invalid || isSubmitting"
+                class="submit-button"
+            >
+                <span *ngIf="isSubmitting" class="spinner"></span>
+                <span>{{ isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Course' : 'Create Course') }}</span>
+            </button>
+        </div>
 
-        <!-- Main Action Button -->
-        <button
-          type="submit"
-          [disabled]="courseForm.invalid || isSubmitting"
-          class="submit-button"
-          [class.enabled]="courseForm.valid && !isSubmitting"
-          [class.disabled]="courseForm.invalid || isSubmitting"
-        >
-          {{ isSubmitting ? (isEditMode ? 'Updating Course...' : 'Creating Course...') : (isEditMode ? 'Update Course' : 'Create Course') }}
-        </button>
-      </div>
     </form>
-
-  </div>
 </div>
-
-
-<!-- Side Panel for Course List (Removed as per user request to move listing to manage-course view) -->
-<!-- Panel Overlay for better UX (Removed) -->

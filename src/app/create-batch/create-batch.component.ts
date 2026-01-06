@@ -1,8 +1,9 @@
-
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Course, CreateBatchPayload, CreateBatchService } from '../services/create-batch.service';
+import { Router } from '@angular/router'; // Import Router
+import { AlertService } from '../services/alert.service'; // Import AlertService
 
 interface Batch {
   batchName: string;
@@ -20,10 +21,6 @@ interface Batch {
 export class CreateBatchComponent implements OnInit {
 
   isSubmitting: boolean = false;
-  formSubmitted: boolean = false; 
-  errorMessage: string | null = null;
-  successMessage: string | null = null;
-
   courses: Course[] = []; 
   
   // Default Data
@@ -37,49 +34,51 @@ export class CreateBatchComponent implements OnInit {
 
   modeOptions = ['Online', 'Offline', 'Hybrid'];
 
-  constructor(private batchService: CreateBatchService) { } 
+  constructor(
+    private batchService: CreateBatchService,
+    private router: Router,
+    private alertService: AlertService
+  ) { } 
 
   ngOnInit(): void {
     this.fetchCourseList();
   }
   
-  fetchCourseList(): void {
-    this.errorMessage = null; 
-    this.successMessage = null; 
+  // Go Back Method
+  goBack(): void {
+    this.router.navigate(['/admin-panel']); 
+  }
 
+  fetchCourseList(): void {
     this.batchService.getCourses().subscribe({
       next: (data: Course[]) => {
         this.courses = data;
         if (this.courses.length === 0) {
-          this.errorMessage = 'No courses found. Please create a course first.';
+          this.alertService.warning('No courses found. Please create a course first.', 'Warning');
         } 
       },
       error: (error: HttpErrorResponse) => {
         console.error('Error fetching course list:', error);
-        this.errorMessage = 'Error loading course list. Server might be down.';
+        this.alertService.error('Error loading course list. Server might be down.', 'System Error');
       }
     });
   }
 
   onSubmit(form: NgForm): void {
-    this.errorMessage = null; 
-    this.successMessage = null;
-    this.formSubmitted = false; 
-    
-    // Validation
+    // Validation Check
     if (form.invalid || this.batchData.courseId === null) {
-      this.errorMessage = 'Form is invalid. Please fill all required fields.';
+      form.control.markAllAsTouched();
+      this.alertService.warning('Please fill all required fields correctly.', 'Validation Error');
       return;
     }
 
     this.isSubmitting = true;
 
-    // ✅ FINAL PAYLOAD CONSTRUCTION
-    // Ye keys ab aapke Django Serializer se 100% match karengi.
+    // Construct Payload
     const payload: CreateBatchPayload = {
       batchName: this.batchData.batchName,
       courseId: this.batchData.courseId,
-      start_date: this.batchData.startDate, // Backend 'start_date' maangta hai
+      start_date: this.batchData.startDate, 
       timing: this.batchData.timing,
       mode: this.batchData.mode
     };
@@ -87,8 +86,7 @@ export class CreateBatchComponent implements OnInit {
     this.batchService.createBatch(payload).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        this.successMessage = `Batch "${payload.batchName}" created successfully!`;
-        this.formSubmitted = true; 
+        this.alertService.success(`Batch "${payload.batchName}" created successfully!`, 'Success');
         
         // Reset Form
         form.resetForm({
@@ -96,7 +94,7 @@ export class CreateBatchComponent implements OnInit {
           mode: 'Online' 
         });
         
-        // Reset Model
+        // Reset Model to default state
         this.batchData = {
             batchName: '',
             courseId: null,
@@ -109,15 +107,16 @@ export class CreateBatchComponent implements OnInit {
         console.error('Batch creation API error:', error);
         this.isSubmitting = false;
         
+        let errorMsg = 'Error creating batch. Could not contact the server.';
+        
         if (error.status === 400 && error.error) {
-            // Server validation errors dikhane ke liye
             const errorDetails = typeof error.error === 'string' 
                                 ? error.error 
-                                : JSON.stringify(error.error);
-            this.errorMessage = `Batch creation failed: ${errorDetails}`;
-        } else {
-            this.errorMessage = 'Error creating batch. Could not contact the server.';
+                                : (error.error.detail || JSON.stringify(error.error));
+            errorMsg = `Creation failed: ${errorDetails}`;
         }
+        
+        this.alertService.error(errorMsg, 'Creation Failed');
       }
     });
   }

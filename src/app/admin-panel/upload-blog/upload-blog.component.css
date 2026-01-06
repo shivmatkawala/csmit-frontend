@@ -1,198 +1,319 @@
-/* Using variables from global styles mostly */
-.upload-container {
-  max-width: 800px;
-  margin: 0 auto;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* --- Colors & Variables (Consistent Theme) --- */
+:host {
+    --primary-green: #554451;
+    --accent-color: #e09f3e;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --input-background: #ffffff;
+    --card-background: #ffffff;
+    --border-light: #e0e0e0;
+    --bg-color: #f4f7f9;
+    --delete-red: #e74c3c;
+    --primary-indigo: #554451; /* Mapped to primary green for consistency */
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    font-family: 'Roboto', sans-serif;
+    padding: 40px 20px;
+    box-sizing: border-box;
 }
 
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
+/* --- Form Container (Card) --- */
+.form-card {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--card-background);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    position: relative; 
+    z-index: 1;
+    margin-top: 10px;
+    transition: all 0.3s ease;
 }
 
+.form-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Back Button --- */
+.back-button {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.back-button:hover {
+    color: white;
+    background-color: var(--primary-green);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(85, 68, 81, 0.2);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5; 
+    fill: currentColor; 
+    stroke: none;
+}
+
+/* --- Header --- */
 .header-section {
-  margin-bottom: 24px;
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 10px;
 }
 
 .header-section h2 {
-  font-size: 1.5rem;
-  color: var(--gray-800, #1f2937);
-  margin-bottom: 8px;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    margin-bottom: 5px;
+    border-bottom: 3px solid var(--accent-color); 
+    display: inline-block; 
+    padding-bottom: 4px;
+    letter-spacing: 1px;
 }
 
 .header-section p {
-  color: var(--gray-500, #6b7280);
+    font-size: 0.95rem;
+    color: var(--text-light);
+    margin-top: 8px;
 }
 
-.form-card {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--gray-200, #e5e7eb);
-}
-
+/* --- Form Groups --- */
 .form-group {
-  margin-bottom: 24px;
+    margin-bottom: 24px;
 }
 
 .form-group label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--gray-700, #374151);
-  margin-bottom: 8px;
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 8px;
 }
 
-input[type="text"], textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid var(--gray-200, #e5e7eb);
-  border-radius: 8px;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-  outline: none;
-  box-sizing: border-box;
+/* --- Inputs --- */
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background-color: var(--input-background);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
 }
 
-input[type="text"]:focus, textarea:focus {
-  border-color: var(--primary-indigo, #6366f1);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+.input-field:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4);
 }
 
 .error-border {
-  border-color: var(--error, #ef4444) !important;
+    border-color: var(--delete-red) !important;
 }
 
 .error-msg {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--error, #ef4444);
-  margin-top: 4px;
+    display: block;
+    font-size: 0.8rem;
+    color: var(--delete-red);
+    margin-top: 5px;
 }
 
-/* File Upload Styles */
+/* --- File Upload Area --- */
 .file-upload-wrapper {
-  border: 2px dashed var(--gray-300, #d1d5db);
-  border-radius: 12px;
-  padding: 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--gray-50, #f9fafb);
-  position: relative;
+    border: 2px dashed var(--border-light);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f9f9f9;
+    position: relative;
 }
 
 .file-upload-wrapper:hover, .file-upload-wrapper.dragging {
-  border-color: var(--primary-indigo, #6366f1);
-  background: #eef2ff;
+    border-color: var(--accent-color);
+    background: #fff8e1; /* Light accent background */
 }
 
 .upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: var(--gray-500, #6b7280);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
 }
 
-.upload-placeholder i {
-  font-size: 32px;
-  color: var(--primary-indigo, #6366f1);
+.upload-placeholder svg {
+    width: 40px;
+    height: 40px;
+    color: var(--primary-green);
+    margin-bottom: 5px;
 }
 
+/* --- File Preview --- */
 .file-preview {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: white;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--gray-200, #e5e7eb);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.file-preview i {
-  font-size: 24px;
-  color: var(--error, #ef4444); /* PDF color */
+.file-icon {
+    width: 30px;
+    height: 30px;
+    color: var(--delete-red); /* PDF color */
 }
 
 .file-info {
-  flex: 1;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 .filename {
-  font-weight: 500;
-  color: var(--gray-800, #1f2937);
+    font-weight: 500;
+    color: var(--text-dark);
+    word-break: break-all;
 }
 
 .filesize {
-  font-size: 0.8rem;
-  color: var(--gray-500, #6b7280);
+    font-size: 0.8rem;
+    color: var(--text-light);
 }
 
 .remove-btn {
-  background: none;
-  border: none;
-  color: var(--gray-400, #9ca3af);
-  cursor: pointer;
-  padding: 4px;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
 }
 
 .remove-btn:hover {
-  color: var(--error, #ef4444);
+    background-color: #ffebee;
+    color: var(--delete-red);
 }
 
-/* Button Styles */
-.btn-submit {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--primary-indigo, #6366f1), var(--primary-purple, #8b5cf6));
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+.remove-btn svg {
+    width: 20px;
+    height: 20px;
 }
 
-.btn-submit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+/* --- Submit Button --- */
+.submit-button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--primary-green);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(85, 68, 81, 0.4);
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
-.btn-submit:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
+.submit-button:hover:not(:disabled) {
+    background-color: #3e313b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(85, 68, 81, 0.5);
 }
 
-/* Status Message */
-.status-message {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 500;
+.submit-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #bdc3c7;
+    box-shadow: none;
 }
 
-.status-message.success {
-  background-color: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #10b981;
+/* --- Spinner --- */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
 }
 
-.status-message.error {
-  background-color: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #ef4444;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* --- Progress Bar --- */
+.progress-container {
+    margin-top: 15px;
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: right;
+    margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+    .form-card {
+        padding: 30px 20px;
+    }
+    .back-button {
+        top: 15px;
+        left: 15px;
+    }
+    .header-section h2 {
+        font-size: 1.6rem;
+    }
 }

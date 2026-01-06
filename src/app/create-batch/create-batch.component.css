@@ -1,236 +1,239 @@
-/*
- * Custom styles for the Create Batch Angular Component.
- * Adopting a clean, professional, light-themed aesthetic similar to trainer-form.
- * This ensures better readability and prevents input overlap.
- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
 
-/* 1. Base Styles & Container */
-.main-container {
-    min-height: 100vh;
-    background-color: #f4f7f9; /* Light background */
+/* --- Colors & Variables (Consistent Theme) --- */
+:host {
+    --primary-green: #554451;
+    --accent-color: #e09f3e;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --input-background: #ffffff;
+    --card-background: #ffffff;
+    --border-light: #e0e0e0;
+    --bg-color: #f4f7f9;
+    --delete-red: #e74c3c;
+
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    font-family: 'Roboto', sans-serif;
     padding: 40px 20px;
-    font-family: 'Inter', sans-serif;
     box-sizing: border-box;
 }
 
+/* --- Form Container (Card) --- */
 .form-card {
     width: 100%;
-    max-width: 750px; 
-    background-color: #ffffff; 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Clean, modern shadow */
-    border-radius: 16px; 
-    padding: 30px; 
-    border: 1px solid #ecf0f1;
-    overflow-y: auto;
+    max-width: 750px;
+    background-color: var(--card-background);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    position: relative; 
+    z-index: 1;
+    margin-top: 10px;
+    transition: all 0.3s ease;
 }
 
-/* 2. Header Styles */
-.form-header {
-    margin-bottom: 25px;
-    border-bottom: 2px solid #ecf0f1;
-    padding-bottom: 15px;
+.form-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-.form-header-title {
-    font-size: 2rem; 
-    font-weight: 700; 
-    color: #34495e; 
-    margin: 0; 
+/* --- Back Button --- */
+.back-button {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
-.form-header-subtitle {
-    color: #7f8c8d; 
-    margin-top: 5px; 
-    margin-bottom: 0;
-    font-size: 1rem;
+.back-button:hover {
+    color: white;
+    background-color: var(--primary-green);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(85, 68, 81, 0.2);
 }
 
-/* 3. Form Layout & Sections */
+.back-button svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5; 
+    fill: currentColor; 
+    stroke: none;
+}
+
+/* --- Header --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 10px;
+}
+
+.header-section h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    margin-bottom: 5px;
+    border-bottom: 3px solid var(--accent-color); 
+    display: inline-block; 
+    padding-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.header-section p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    margin-top: 8px;
+}
+
+/* --- Form Layout & Groups --- */
 .batch-form {
     display: flex;
     flex-direction: column;
-    gap: 25px; /* Increased gap for better spacing and to prevent overlap */
+    gap: 20px;
 }
 
-.form-section-group {
+.form-row {
     display: grid;
-    grid-template-columns: 1fr; /* Default to single column for mobile */
-    gap: 20px; /* Gap between form groups */
+    grid-template-columns: 1fr;
+    gap: 20px;
 }
 
-/* Tablet/Desktop Styles (md: equivalent) */
-@media (min-width: 768px) {
-    .form-section-group {
-        grid-template-columns: repeat(2, 1fr); /* Two columns on larger screens */
+@media (min-width: 600px) {
+    .form-row.two-cols {
+        grid-template-columns: 1fr 1fr;
     }
-    .form-section-group.three-cols {
-        grid-template-columns: repeat(3, 1fr); /* Three columns for timing/capacity */
+    .form-row.three-cols {
+        grid-template-columns: 1fr 1fr 1fr;
     }
 }
 
-.form-section-group.single-col {
-    grid-template-columns: 1fr; /* Force single column for description */
-}
-
-/* 4. Input Elements */
 .form-group {
     display: flex;
     flex-direction: column;
 }
 
-.input-label {
-    display: block;
-    font-size: 0.95rem; 
-    font-weight: 600; 
-    color: #34495e; 
-    margin-bottom: 5px; 
+.form-group label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 8px;
 }
 
+.required {
+    color: var(--delete-red);
+    font-weight: bold;
+}
+
+/* --- Inputs --- */
 .input-field {
-    padding: 12px;
-    border: 2px solid #ecf0f1;
-    border-radius: 8px; /* Rounded corners */
-    font-size: 1rem;
-    color: #2c3e50;
-    transition: border-color 0.3s, box-shadow 0.3s;
     width: 100%;
-    box-sizing: border-box; /* Crucial for responsiveness */
-    background-color: #ffffff;
+    padding: 12px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background-color: var(--input-background);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
 }
 
 .input-field:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); 
-    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4);
 }
 
-.textarea-field {
-    resize: vertical; 
-    min-height: 100px; 
-}
-
-/* Custom styling for select dropdown */
 .select-field {
-    -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%237f8c8d'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1.2em 1.2em;
-    padding-right: 2.5rem;
+    background-position: right 15px center;
+    background-size: 16px;
 }
 
-/* Error Messages */
+/* --- Error Messages --- */
 .error-message {
-    color: #e74c3c; 
-    font-size: 0.85rem; 
-    margin-top: 4px; 
+    color: var(--delete-red);
+    font-size: 0.85rem;
+    margin-top: 5px;
     font-weight: 500;
 }
 
-
-/* 6. Submission Message (Used for both Success and Error states) */
-.submission-success-message {
-    background-color: #e6ffee; 
-    padding: 15px; 
-    border-radius: 8px; 
-    border: 1px solid #2ecc71; 
-    color: #27ae60; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); 
-    margin-top: 20px;
-}
-
-.message-title {
-    font-weight: 700; 
-}
-
-.message-content {
-    font-size: 0.9rem; 
-}
-
-/* 7. Submit Button */
-.submit-button-container {
-    display: flex;
-    justify-content: flex-end; 
-    padding-top: 15px; 
-    margin-top: 20px;
-    border-top: 1px solid #ecf0f1;
-}
-
+/* --- Submit Button --- */
 .submit-button {
-    padding: 12px 25px; 
-    font-size: 1rem; 
-    font-weight: 600; 
-    border-radius: 8px; 
-    transition: all 0.2s; 
+    width: 100%;
+    padding: 14px;
     border: none;
+    border-radius: 10px;
+    background-color: var(--primary-green);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
-    text-align: center;
-    outline: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(85, 68, 81, 0.4);
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
-.submit-button.enabled {
-    background-color: #3498db; /* Blue color */
-    color: #ffffff; 
+.submit-button:hover:not(:disabled) {
+    background-color: #3e313b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(85, 68, 81, 0.5);
 }
 
-.submit-button.enabled:hover {
-    background-color: #2980b9; 
-    transform: translateY(-1px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.submit-button.disabled,
-.submit-button[disabled] {
-    background-color: #bdc3c7; 
-    color: #7f8c8d; 
-    cursor: not-allowed; 
+.submit-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #bdc3c7;
     box-shadow: none;
 }
 
-/* 8. Side Panel Styles (Copied from create-course for consistency) */
-
-.course-list-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 100%;
-    max-width: 400px;
-    height: 100vh; /* Full viewport height */
-    background-color: #f4f7f9;
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
-    transform: translateX(100%); /* Start hidden off-screen */
-    transition: transform 0.3s ease-in-out;
-    z-index: 1000;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto;
+/* --- Spinner --- */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
 }
 
-.course-list-panel.open {
-    transform: translateX(0%); /* Slide in when open */
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-/* Panel Overlay Styles */
-.course-list-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-}
-
-.course-list-overlay.open {
-    opacity: 1;
-    visibility: visible;
+@media (max-width: 480px) {
+    .form-card {
+        padding: 30px 20px;
+    }
+    .back-button {
+        top: 15px;
+        left: 15px;
+    }
+    .header-section h2 {
+        font-size: 1.6rem;
+    }
+    .form-row.two-cols, .form-row.three-cols {
+        grid-template-columns: 1fr;
+    }
 }

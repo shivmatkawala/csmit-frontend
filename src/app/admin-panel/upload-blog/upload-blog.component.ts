@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ManageBlogService } from 'src/app/services/manage-blog.service';
 import { HttpEventType } from '@angular/common/http';
-
+import { Router } from '@angular/router'; // Import Router
+import { AlertService } from 'src/app/services/alert.service';
 @Component({
   selector: 'app-upload-blog',
   standalone: true,
@@ -15,20 +16,21 @@ import { HttpEventType } from '@angular/common/http';
 export class UploadBlogComponent {
   private fb = inject(FormBuilder);
   private blogService = inject(ManageBlogService);
+  private router = inject(Router); // Inject Router
+  private alertService = inject(AlertService); // Inject AlertService
   
   selectedFile = signal<File | null>(null);
   isDragging = signal(false);
   fileError = signal<string>('');
   isSubmitting = signal(false);
-  uploadStatus = signal<{type: 'success' | 'error', message: string} | null>(null);
-  uploadProgress = signal<number>(0); // Progress bar ke liye
+  uploadProgress = signal<number>(0); 
 
   blogForm = this.fb.group({
     title: ['', Validators.required],
     description: ['']
   });
 
-  // --- File Handling (Same as before) ---
+  // --- File Handling ---
   onDragOver(event: DragEvent) { event.preventDefault(); this.isDragging.set(true); }
   onDragLeave(event: DragEvent) { event.preventDefault(); this.isDragging.set(false); }
   onDrop(event: DragEvent) {
@@ -44,6 +46,7 @@ export class UploadBlogComponent {
     if (file.type !== 'application/pdf') {
       this.fileError.set('Only PDF files are allowed.');
       this.selectedFile.set(null);
+      this.alertService.warning('Only PDF files are allowed.', 'Invalid File');
       return;
     }
     this.fileError.set('');
@@ -65,23 +68,31 @@ export class UploadBlogComponent {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  // --- NEW SUBMIT LOGIC (2-Step Upload) ---
+  // --- Go Back ---
+  goBack() {
+    this.router.navigate(['/admin-panel']);
+  }
+
+  // --- Submit Logic ---
   onSubmit() {
     if (this.blogForm.invalid || !this.selectedFile()) {
       this.blogForm.markAllAsTouched();
-      if (!this.selectedFile()) this.fileError.set('Please select a PDF file.');
+      if (!this.selectedFile()) {
+          this.fileError.set('Please select a PDF file.');
+          this.alertService.warning('Please select a PDF file to upload.');
+      } else {
+          this.alertService.warning('Please provide a Blog Title.');
+      }
       return;
     }
 
     this.isSubmitting.set(true);
-    this.uploadStatus.set(null);
     this.uploadProgress.set(0);
 
     const file = this.selectedFile() as File;
     const blogData = {
       title: this.blogForm.get('title')?.value,
       description: this.blogForm.get('description')?.value
-      // Note: Hum file yahan nahi bhej rahe, sirf data
     };
 
     // Step 1: Register Blog in DB & Get Presigned URL
@@ -114,7 +125,7 @@ export class UploadBlogComponent {
         else if (event.type === HttpEventType.Response) {
           // Success!
           this.isSubmitting.set(false);
-          this.uploadStatus.set({ type: 'success', message: 'Blog uploaded successfully!' });
+          this.alertService.success('Blog uploaded successfully!', 'Upload Complete');
           this.resetForm();
         }
       },
@@ -127,13 +138,12 @@ export class UploadBlogComponent {
   handleError(msg: string) {
     console.error(msg);
     this.isSubmitting.set(false);
-    this.uploadStatus.set({ type: 'error', message: msg });
+    this.alertService.error(msg);
   }
 
   resetForm() {
     this.blogForm.reset();
     this.selectedFile.set(null);
     this.uploadProgress.set(0);
-    setTimeout(() => this.uploadStatus.set(null), 3000);
   }
 }

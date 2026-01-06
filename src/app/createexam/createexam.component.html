@@ -1,27 +1,35 @@
-<div class="create-exam-container">
-  <h2>Create Exam</h2>
+<div class="form-card">
+  
+  <!-- Back Button -->
+  <button (click)="goBack()" class="back-button" title="Go Back">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+      </svg>
+  </button>
 
-  <!-- Custom Message Box -->
-  <div *ngIf="message" class="info-box" [ngClass]="{'error-box': message.type === 'error', 'success-box': message.type === 'success'}">
-    <p>{{ message.text }}</p>
+  <div class="header-section">
+      <h2>Create New Exam</h2>
+      <p>Configure exam details and add questions.</p>
   </div>
+
+  <!-- Messages Removed (Using AlertService) -->
   
-  <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="info-box loading-box">
-    <p>Loading data, please wait...</p>
+    <p>Processing... please wait.</p>
   </div>
   
-  <!-- STEP 1: Exam Metadata Form -->
+  <!-- STEP 1: Metadata -->
   <ng-container *ngIf="step === 1">
-    <h3>Step 1: Exam Details</h3>
+    <div class="step-title">Step 1: Exam Details</div>
+    
     <form #metadataForm="ngForm" (ngSubmit)="onProceed(metadataForm)">
       
-      <!-- Exam Name -->
       <div class="form-group">
         <label for="examName">Exam Name</label>
         <input
           id="examName"
           type="text"
+          class="input-field"
           name="examName"
           [(ngModel)]="examMetadata.examName"
           required
@@ -29,11 +37,11 @@
         />
       </div>
 
-      <!-- Course ID -->
       <div class="form-group">
         <label for="courseId">Course</label>
         <select
           id="courseId"
+          class="input-field"
           name="courseid"
           [(ngModel)]="examMetadata.courseid" 
           (change)="onCourseSelect()"
@@ -44,71 +52,70 @@
             {{ course.coursename }} (ID: {{ course.courseid }})
           </option>
         </select>
-        <div *ngIf="courses.length === 0 && !isLoading" class="info-box" style="margin-top: 5px; border-left-color: #f1c40f;">
-            <p>Courses not loaded. Check API or add data.</p>
+        <div *ngIf="courses.length === 0 && !isLoading" class="info-box error-box" style="margin-top: 10px;">
+            <p>Courses not loaded.</p>
         </div>
       </div>
 
-      <!-- Batch ID -->
       <div class="form-group">
         <label for="batchId">Batch</label>
         <select
           id="batchId"
+          class="input-field"
           name="batchId"
           [(ngModel)]="examMetadata.batchId"
           required
           [disabled]="!examMetadata.courseid || batches.length === 0" 
         >
           <option [ngValue]="null" disabled>Select Batch</option>
-          <!-- Batch Name dikhana -->
+          <!-- Displaying Batch Name AND ID -->
           <option *ngFor="let batch of batches" [ngValue]="batch.batchId">
-            {{ batch.name }} (ID: {{ batch.batchId }})
+            {{ batch.batchName }} (ID: {{ batch.batchId }})
           </option>
         </select>
-        <div *ngIf="examMetadata.courseid && batches.length === 0 && !isLoading" class="info-box" style="margin-top: 5px;">
-            <p>No batches found for the selected course.</p>
+        <div *ngIf="examMetadata.courseid && batches.length === 0 && !isLoading" class="info-box error-box" style="margin-top: 10px;">
+            <p>No batches found for this course.</p>
         </div>
       </div>
       
-      <!-- Subject ID -->
       <div class="form-group">
         <label for="subjectId">Subject</label>
         <select
           id="subjectId"
+          class="input-field"
           name="subjectId"
           [(ngModel)]="examMetadata.subjectId"
           required
           [disabled]="!examMetadata.courseid || subjects.length === 0" 
         >
           <option [ngValue]="null" disabled>Select Subject</option>
-          <!-- FIX: subject.subjectName ko subject.subjectname se badla, aur subjectId को subject.subjectid से बांधा -->
           <option *ngFor="let subject of subjects" [ngValue]="subject.subjectid">
             {{ subject.subjectname }} (ID: {{ subject.subjectid }})
           </option>
         </select>
-        <div *ngIf="examMetadata.courseid && subjects.length === 0 && !isLoading" class="info-box" style="margin-top: 5px;">
-            <p>No subjects found for the selected course.</p>
+        <div *ngIf="examMetadata.courseid && subjects.length === 0 && !isLoading" class="info-box error-box" style="margin-top: 10px;">
+            <p>No subjects found for this course.</p>
         </div>
       </div>
 
-      <!-- Start Date/Time -->
       <div class="form-group">
         <label for="start">Start Time</label>
         <input
           id="start"
           type="datetime-local"
+          class="input-field"
           name="start"
           [(ngModel)]="examMetadata.start"
           required
         />
       </div>
       
-      <!-- End Date/Time -->
       <div class="form-group">
         <label for="end">End Time</label>
         <input
           id="end"
           type="datetime-local"
+          class="input-field"
           name="end"
           [(ngModel)]="examMetadata.end"
           required
@@ -117,106 +124,98 @@
 
       <div class="btn-group">
         <button type="submit" class="primary-btn" [disabled]="metadataForm.invalid || isLoading">
-          Proceed to Questions
+          Proceed to Questions &rarr;
         </button>
       </div>
     </form>
   </ng-container>
 
-  <!-- STEP 2: Questions Form -->
+  <!-- STEP 2: Questions -->
   <ng-container *ngIf="step === 2">
-    <h3>Step 2: Define Questions (Exam: {{ examMetadata.examName }})</h3>
+    <div class="step-title">Step 2: Add Questions</div>
+    
     <form #examForm="ngForm" (ngSubmit)="onSubmit(examForm)">
       
       <div *ngFor="let q of questions; let i = index; trackBy: trackByIndex" class="question-card">
         <h3>Question {{ i + 1 }}</h3>
 
-        <!-- Question text -->
         <div class="form-group">
-          <label>Question</label>
+          <label>Question Text</label>
           <textarea
+            class="input-field"
             name="questionText_{{i}}"
             [(ngModel)]="q.questionText"
             required
-            placeholder="Enter question text..."
+            placeholder="Type your question here..."
           ></textarea>
         </div>
 
-        <!-- Question type -->
         <div class="form-group">
-          <label>Question Type</label>
+          <label>Type</label>
           <select
+            class="input-field"
             name="questionType_{{i}}"
             [(ngModel)]="q.questionType"
             required
           >
-            <option value="">Select Type</option>
             <option *ngFor="let type of questionTypes" [value]="type">
               {{ type | titlecase }}
             </option>
           </select>
         </div>
 
-        <!-- MCQ options -->
-        <div *ngIf="q.questionType === 'mcq'" class="form-group mcq-section">
-          <h4>Options</h4>
+        <!-- MCQ Options -->
+        <div *ngIf="q.questionType === 'mcq'" class="mcq-section">
           <div *ngFor="let opt of q.options; let j = index; trackBy: trackByIndex" class="option-row">
             <label>Option {{ j + 1 }}</label>
             <input
               type="text"
+              class="input-field"
               name="option_{{i}}_{{j}}"
               [(ngModel)]="q.options[j]"
               required
-              placeholder="Enter option {{ j + 1 }}"
+              placeholder="Option text..."
             />
           </div>
 
-          <div class="form-group">
-            <label>Correct Option</label>
+          <div class="form-group" style="margin-top: 15px;">
+            <label>Correct Answer</label>
             <select
+              class="input-field"
               name="correctOption_{{i}}"
               [(ngModel)]="q.correctOption"
               required
             >
               <option [ngValue]="null" disabled>Select Correct Option</option>
-              <!-- FIX: value को option text के बजाय index (number) पर सेट करें -->
               <option *ngFor="let opt of q.options; let j = index; trackBy: trackByIndex" [ngValue]="j">
-                Option {{ j + 1 }} ({{ opt }})
+                Option {{ j + 1 }}
               </option>
             </select>
           </div>
         </div>
 
-        <!-- Descriptive -->
-        <div *ngIf="q.questionType === 'discriptive'" class="info-box">
-          <p>Descriptive questions do not require options.</p>
+        <!-- Info for other types -->
+        <div *ngIf="q.questionType !== 'mcq'" class="info-box success-box">
+          <p>No options required for {{ q.questionType }} questions.</p>
         </div>
 
-        <!-- Coding -->
-        <div *ngIf="q.questionType === 'coding'" class="info-box">
-          <p>Coding questions do not require options.</p>
-        </div>
-
-        <!-- Points -->
         <div class="form-group">
           <label>Points</label>
           <input
             type="number"
+            class="input-field"
             name="points_{{i}}"
             [(ngModel)]="q.points"
             required
             min="1"
-            placeholder="Enter points"
           />
         </div>
-
-        <hr *ngIf="i < questions.length - 1" />
       </div>
 
       <div class="btn-group">
-        <button type="button" (click)="onBack()" class="secondary-btn">← Back to Details</button>
-        <button type="button" (click)="addMore()" class="secondary-btn">+ Add More Question</button>
-        <button type="submit" [disabled]="!examForm.valid || isLoading" class="primary-btn">💾 Create Exam</button>
+        <button type="button" (click)="onBack()" class="secondary-btn">Back</button>
+        <button type="button" (click)="addMore()" class="secondary-btn">+ Add Question</button>
+        <button type="submit" [disabled]="!examForm.valid || isLoading" class="primary-btn">Create Exam</button>
       </div>
     </form>
   </ng-container>

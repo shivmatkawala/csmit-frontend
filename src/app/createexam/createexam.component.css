@@ -1,178 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
 
-.create-exam-container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 25px 30px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
-  font-family: 'Poppins', sans-serif;
+/* --- Colors & Variables --- */
+:host {
+    --primary-green: #554451;
+    --accent-color: #e09f3e;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --input-background: #ffffff;
+    --card-background: #ffffff;
+    --border-light: #e0e0e0;
+    --bg-color: #f4f7f9;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align top for long forms */
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    font-family: 'Roboto', sans-serif;
+    padding: 40px 20px;
+    box-sizing: border-box;
 }
 
-h2 {
-  text-align: center;
-  color: #2c3e50;
-  margin-bottom: 25px;
-  font-weight: 600;
+/* --- Form Container (Card) --- */
+.form-card {
+    width: 100%;
+    max-width: 800px; /* Wider for Exam form */
+    background-color: var(--card-background);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    position: relative; 
+    z-index: 1;
+    margin-top: 10px;
 }
 
-h3 {
-  color: #357ab7;
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e9eef6;
-  padding-bottom: 10px;
+/* --- Back Button --- */
+.back-button {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
+.back-button:hover {
+    color: white;
+    background-color: var(--primary-green);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(85, 68, 81, 0.2);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5; 
+    fill: currentColor; 
+    stroke: none;
+}
+
+/* --- Header --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 10px;
+}
+
+.header-section h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    margin-bottom: 5px;
+    border-bottom: 3px solid var(--accent-color); 
+    display: inline-block; 
+    padding-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.step-title {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-green);
+    padding-left: 10px;
+    text-transform: uppercase;
+}
+
+/* --- Form Groups & Inputs --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background-color: var(--input-background);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box; 
+    font-family: 'Roboto', sans-serif;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4);
+}
+
+textarea.input-field {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* --- Question Card (Step 2) --- */
 .question-card {
-  background: #f8fafc;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e5eaf0;
-  margin-bottom: 20px;
-  transition: 0.2s;
-}
-.question-card:hover {
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    position: relative;
 }
 
 .question-card h3 {
-  color: #357ab7;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  border-bottom: none;
-  padding-bottom: 0;
+    margin-top: 0;
+    color: var(--primary-green);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
-}
-
-label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #34495e;
-}
-
-textarea,
-input:not([type="checkbox"]):not([type="radio"]),
-select {
-  padding: 10px 12px;
-  border: 1.5px solid #dcdcdc;
-  border-radius: 8px;
-  font-size: 15px;
-  background-color: #fafafa;
-  transition: all 0.2s ease;
-}
-
-textarea {
-  min-height: 70px;
-  resize: vertical;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: #4a90e2;
-  background-color: #fff;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-  outline: none;
-}
-
-/* MCQ Section */
 .mcq-section {
-  background: #f0f6ff;
-  padding: 15px 20px;
-  border-radius: 10px;
-  border: 1px solid #d6e4ff;
+    background-color: #fff;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
 }
 
 .option-row {
-  margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
-/* Info box (for messages and non-mcq info) */
+/* --- Info/Message Boxes --- */
 .info-box {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 15px;
-  color: #555;
-  margin-bottom: 20px;
-  border-left: 4px solid #4a90e2; /* Default info box style */
-  background: #f9f9f9;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
-.info-box p {
-    margin: 0;
-}
+.info-box p { margin: 0; }
 
 .success-box {
-  background-color: #e6ffed;
-  border: 1px solid #7ed997;
-  border-left: 4px solid #38c172;
-  color: #1a5e37;
+    background-color: #e8f8f5;
+    color: var(--primary-green);
+    border: 1px solid var(--primary-green);
 }
 
 .error-box {
-  background-color: #ffebe6;
-  border: 1px solid #d9977e;
-  border-left: 4px solid #e3342f;
-  color: #5e1a1a;
+    background-color: #fdedec;
+    color: #cc0000;
+    border: 1px solid #ffaaaa;
 }
 
 .loading-box {
-    background-color: #fffbe6;
-    border: 1px solid #d9d07e;
-    border-left: 4px solid #f9c74f;
-    color: #5e541a;
+    background-color: #fff8e1;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    text-align: center;
 }
 
-/* Buttons */
+/* --- Buttons --- */
 .btn-group {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  margin-top: 25px;
-}
-
-.primary-btn,
-.secondary-btn {
-  flex: 1;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.25s ease;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+    border-top: 1px solid var(--border-light);
+    padding-top: 20px;
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, #4a90e2, #357ab7);
-  color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-green);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(85, 68, 81, 0.3);
+    transition: all 0.3s ease;
 }
-.primary-btn:hover {
-  background: linear-gradient(135deg, #357ab7, #2d5f9a);
+
+.primary-btn:hover:not(:disabled) {
+    background-color: #3e313b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(85, 68, 81, 0.4);
 }
 
 .secondary-btn {
-  background: #e9eef6;
-  color: #2c3e50;
+    padding: 12px 25px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background-color: #fff;
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
+
 .secondary-btn:hover {
-  background: #dbe3ef;
+    background-color: #f1f1f1;
+    border-color: #ccc;
 }
 
 button:disabled {
-  background: #cccccc !important;
-  cursor: not-allowed;
-  color: #999;
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
+/* Responsive */
 @media (max-width: 600px) {
-  .btn-group {
-    flex-direction: column;
-  }
+    .btn-group {
+        flex-direction: column-reverse;
+    }
+    .primary-btn, .secondary-btn {
+        width: 100%;
+        text-align: center;
+    }
+    .form-card {
+        padding: 25px 15px;
+    }
+    .back-button {
+        top: 15px;
+        left: 15px;
+    }
 }

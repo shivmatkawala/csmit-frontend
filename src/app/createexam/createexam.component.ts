@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-// NOTE: I am assuming you have a createexam.service.ts file with examAPi 
-// which has fetchSubjects and fetchBatches methods.
 import { examAPi } from '../services/createexam.service';
+import { Router } from '@angular/router'; 
+import { AlertService } from '../services/alert.service'; // Import AlertService
 
-// --- Interfaces for API Data ---
+// Interfaces
 interface Course {
   courseid: number; 
   coursename: string; 
@@ -14,34 +14,28 @@ interface Course {
 
 interface Batch {
   batchId: number;
-  name: string;
+  batchName: string; // Updated to batchName for consistency
 }
 
-// FIX: Subject interface properties changed to match API response (lowercase 'subjectid', 'subjectname')
 interface Subject {
   subjectid: number;
   subjectname: string;
 }
 
-// FIX: New interface to handle the nested API response for subjects.
 interface SubjectAPIResponse {
   course_id: number;
   course_name: string;
-  subjects: Subject[]; // The array we need is nested here
+  subjects: Subject[]; 
 }
 
-// --- Question Interface ---
 interface Question {
   questionText: string;
   questionType: string;
   options: string[];
-  // FIX: correctOption अब string के बजाय number (option index) को स्टोर करेगा 
-  // ताकि हम इसे API को भेज सकें।
   correctOption?: number; 
   points: number;
 }
 
-// --- Exam Metadata Interface ---
 interface ExamMetadata {
   examName: string;
   courseid: number | null; 
@@ -69,27 +63,33 @@ export class CreateExamComponent implements OnInit {
     batchId: null,
     subjectId: null,
     start: this.formatDate(new Date()),
-    end: this.formatDate(new Date(Date.now() + 60 * 60 * 1000)) // 1 hour later default
+    end: this.formatDate(new Date(Date.now() + 60 * 60 * 1000))
   };
 
   // Step 2 State
   questionTypes = ['mcq', 'discriptive', 'coding'];
   questions: Question[] = [
-    // FIX: correctOption को number (index) पर सेट किया गया है
     { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: 0, points: 1 } 
   ];
 
   // UI State
   isLoading = false;
-  message: { type: 'success' | 'error'; text: string } | null = null;
   
-  constructor(private examService: examAPi) {}
+  constructor(
+    private examService: examAPi,
+    private router: Router,
+    private alertService: AlertService // Inject AlertService
+  ) {}
 
   ngOnInit(): void {
     this.fetchCourses();
   }
 
-  // --- Helper to format date for datetime-local input (YYYY-MM-DDTHH:mm) ---
+  // Go Back to Admin Panel
+  goBack(): void {
+    this.router.navigate(['/admin-panel']); 
+  }
+
   private formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -99,7 +99,6 @@ export class CreateExamComponent implements OnInit {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
-  // --- API Fetching Methods ---
   fetchCourses(): void {
     this.isLoading = true;
     this.examService.fetchCourses().subscribe({
@@ -113,11 +112,11 @@ export class CreateExamComponent implements OnInit {
           }
           this.onCourseSelect(); 
         } else if (this.courses.length === 0) {
-             this.showMessage('error', 'No courses found. Please ensure data is available on the API.');
+             this.alertService.warning('No courses found. Please ensure data is available on the API.');
         }
       },
       error: err => {
-        this.showMessage('error', 'Failed to load courses. Check API server.');
+        this.alertService.error('Failed to load courses. Check API server.');
         this.isLoading = false;
         console.error('Error fetching courses:', err);
       }
@@ -135,7 +134,6 @@ export class CreateExamComponent implements OnInit {
       return;
     }
     
-    // Reset dependent fields
     this.batches = [];
     this.subjects = [];
     this.examMetadata.batchId = null;
@@ -145,46 +143,47 @@ export class CreateExamComponent implements OnInit {
     this.isLoading = true;
     this.examService.fetchBatches(courseId).pipe(
       catchError(err => {
-        // Clear loading state on error
         this.isLoading = false;
-        this.showMessage('error', `Failed to load batches for course ID: ${courseId}.`);
+        this.alertService.error(`Failed to load batches for course ID: ${courseId}.`);
         console.error('Error fetching batches:', err);
         return of([]);
       })
-    ).subscribe((res: Batch[]) => {
-      this.batches = res;
+    ).subscribe((res: any[]) => { // Using any[] to map safely
+      // Map response to ensure we have batchName even if API sends 'name'
+      this.batches = res.map(b => ({
+          batchId: b.batchId,
+          batchName: b.batchName || b.name || 'Unknown Batch' // Fallback to 'name'
+      }));
+
       if (this.batches.length > 0) {
         this.examMetadata.batchId = this.batches[0].batchId;
+      } else {
+        this.alertService.info('No batches available for this course.');
       }
-      // NOTE: isLoading is managed after the final fetchSubjects call.
     });
 
-    // Fetch Subjects - Subject ID fetch karne ka logic yahan hai
+    // Fetch Subjects
     this.isLoading = true;
     this.examService.fetchSubjects(courseId).pipe(
       catchError(err => {
-        // Clear loading state on error
         this.isLoading = false;
-        this.showMessage('error', `Failed to load subjects for course ID: ${courseId}.`);
+        this.alertService.error(`Failed to load subjects for course ID: ${courseId}.`);
         console.error('Error fetching subjects:', err);
         return of([]);
       })
-    ).subscribe((res: SubjectAPIResponse) => { // Use SubjectAPIResponse interface
-      this.subjects = res.subjects; // Assign the nested array property 'subjects'
+    ).subscribe((res: SubjectAPIResponse) => {
+      this.subjects = res.subjects; 
       
       if (this.subjects && this.subjects.length > 0) {
-        // FIX: Use 'subjectid' for metadata assignment
         this.examMetadata.subjectId = this.subjects[0].subjectid;
       }
-      this.isLoading = false; // Set loading state to false after the final API call
+      this.isLoading = false; 
     });
   }
   
-  // --- Step 1 Navigation ---
   onProceed(form: NgForm): void {
-    this.message = null;
     if (form.invalid) {
-      this.showMessage('error', 'Please fill in all exam details (Step 1).');
+      this.alertService.warning('Please fill in all exam details (Step 1).');
       return;
     }
     this.step = 2;
@@ -192,10 +191,8 @@ export class CreateExamComponent implements OnInit {
   
   onBack(): void {
     this.step = 1;
-    this.message = null;
   }
 
-  // --- Question Management ---
   trackByIndex(index: number): number {
     return index;
   }
@@ -205,17 +202,14 @@ export class CreateExamComponent implements OnInit {
       questionText: '',
       questionType: 'mcq',
       options: ['', '', '', ''],
-      // FIX: correctOption को index 0 पर सेट किया गया है
       correctOption: 0, 
       points: 1
     });
   }
   
-  // --- Submission (Step 2) ---
   onSubmit(form: NgForm): void {
-    this.message = null;
     if (!form.valid) {
-      this.showMessage('error', 'Please complete all questions before submitting.');
+      this.alertService.warning('Please complete all questions before submitting.');
       return;
     }
 
@@ -233,13 +227,10 @@ export class CreateExamComponent implements OnInit {
       };
 
       if (q.questionType === 'mcq' && q.correctOption !== undefined) {
-        // MCQ के लिए: options array को map करें
         return {
           ...base,
-          // options को map करें, और सही विकल्प के लिए is_correct: true सेट करें
           options: q.options.filter(opt => opt).map((opt, index) => ({ 
             option_text: opt,
-            // FIX: q.correctOption (index) की तुलना index से करें
             is_correct: index === q.correctOption 
           }))
         };
@@ -249,12 +240,11 @@ export class CreateExamComponent implements OnInit {
     
     const { examName, courseid, batchId, subjectId, start, end } = this.examMetadata;
     
-    // Final Payload
     const payload = {
       examName,
       courseId: courseid!, 
       batchId: batchId!,
-      subjectId: subjectId!, // Subject ID yahan payload me ja raha hai
+      subjectId: subjectId!, 
       start,
       end,
       questions: formattedQuestions
@@ -263,36 +253,23 @@ export class CreateExamComponent implements OnInit {
     this.isLoading = true;
     this.examService.createExam(payload).subscribe({
       next: res => {
-        this.showMessage('success', 'Exam created successfully! Moving back to Step 1.');
+        this.alertService.success('Exam created successfully! Moving back to Step 1.');
         this.resetFormState(form);
       },
       error: err => {
-        this.showMessage('error', 'Failed to create exam. Please check your inputs or server logs.');
+        this.alertService.error('Failed to create exam. Please check your inputs or server logs.');
         console.error('Error creating exam:', err);
         this.isLoading = false;
       }
     });
   }
   
-  // --- UI/Message Methods ---
-  showMessage(type: 'success' | 'error', text: string): void {
-    this.message = { type, text };
-    setTimeout(() => {
-      this.message = null;
-    }, 5000);
-  }
-  
-  // Resets all state and returns to step 1
   resetFormState(form: NgForm): void {
     this.isLoading = false;
-    // NOTE: Do not reset form to ensure Angular is aware of the change
-    // form.resetForm(); 
     
     this.questions = [
-      // FIX: correctOption को index 0 पर सेट किया गया है
       { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: 0, points: 1 }
     ];
-    // Reset examMetadata with default values
     this.examMetadata = {
       examName: '',
       courseid: null,
@@ -305,6 +282,6 @@ export class CreateExamComponent implements OnInit {
     this.batches = [];
     this.subjects = [];
     this.step = 1;
-    this.fetchCourses(); // Re-fetch data for step 1
+    this.fetchCourses();
   }
 }
