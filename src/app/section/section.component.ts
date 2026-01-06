@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { UiStateService } from '../services/ui-state.service'; // Import Service
+import { UiStateService } from '../services/ui-state.service';
 
 @Component({
   selector: 'app-section',
@@ -92,7 +92,6 @@ export class SectionComponent implements OnInit {
     this.scrollerVideos1 = [...videos1, ...videos1, ...videos1, ...videos1]; 
     this.scrollerVideos2 = [...videos2, ...videos2, ...videos2, ...videos2]; 
 
-    // --- NEW: Listen to Footer Actions ---
     this.uiService.action$.subscribe(payload => {
       if (payload.action === 'open-about') {
         this.openAboutModal();

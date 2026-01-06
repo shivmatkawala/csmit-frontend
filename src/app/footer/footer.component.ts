@@ -1,5 +1,5 @@
 import { Component, HostListener, inject } from '@angular/core';
-import { UiStateService } from '../services/ui-state.service'; // Import Service
+import { UiStateService } from '../services/ui-state.service';
 
 @Component({
   selector: 'app-footer',
@@ -8,7 +8,6 @@ import { UiStateService } from '../services/ui-state.service'; // Import Service
 })
 export class FooterComponent {
   
-  // Inject Service
   private uiService = inject(UiStateService);
 
   isScrolled = false;
@@ -29,12 +28,9 @@ export class FooterComponent {
     this.isChatOpen = !this.isChatOpen;
   }
 
-  // --- NEW: Handle Link Clicks ---
   handleAction(action: string) {
-    // 1. Trigger action via service (Header/Navbar/Section will listen)
     this.uiService.triggerAction(action);
 
-    // 2. Scroll to top if navigation related
     if (action.startsWith('navigate') || action === 'open-courses') {
       this.scrollToTop();
     }

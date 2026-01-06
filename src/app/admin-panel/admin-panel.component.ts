@@ -86,7 +86,7 @@ const ADMIN_CONFIG = {
       route: '/create-exam' 
     },
     { 
-      title: 'create Jobs', 
+      title: 'Create Jobs', 
       subtitle: 'Post and manage new job openings for ongoing placement drives.', 
       iconImage: 'upload-job.png', 
       buttonText: 'Manage Jobs', 
@@ -118,6 +118,14 @@ const ADMIN_CONFIG = {
       colorClass: 'red', 
       route: '/upload-blog' 
     },
+    { 
+      title: 'Upload Notes', 
+      subtitle: 'Upload lecture notes, assignments, and study materials.', 
+      iconImage: 'notes.png', 
+      buttonText: 'Upload Notes', 
+      colorClass: 'violet', // Consistent color class
+      route: '/upload-notes' 
+    }
   ] as AdminCard[]
 };
 
@@ -189,14 +197,9 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   }
 
   logoutUser(): void {
-    // Show success message
     this.showMessageBox('Logged out successfully. Redirecting...', 'success');
     
     setTimeout(() => {
-        // Optional: Clear any auth tokens if stored
-        // localStorage.removeItem('token'); 
-        
-        // Redirect to Login Page
         this.router.navigate(['/login']); 
     }, 1500); 
   }
@@ -214,7 +217,6 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
             box.classList.add('error');
         }
         
-        // Use requestAnimationFrame for smoother transition entry
         requestAnimationFrame(() => {
             box.classList.add('active');
         });

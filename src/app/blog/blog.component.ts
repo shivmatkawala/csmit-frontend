@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, NgZone, inject } from '@angular/core';
 import { ManageBlogService } from 'src/app/services/manage-blog.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface PdfDocument {
   id: number;
@@ -7,7 +8,6 @@ interface PdfDocument {
   description: string;
   uploadDate: string;
   fileName: string;
-  // fileUrl hum ab on-demand fetch karenge API se
 }
 
 @Component({
@@ -18,17 +18,22 @@ interface PdfDocument {
 export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
   
   private blogService = inject(ManageBlogService);
+  private sanitizer = inject(DomSanitizer);
   
-  // Container ko access karne ke liye ViewChild
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
   searchTerm: string = '';
   private scrollInterval: any;
   private isPaused = false;
-  isLoading = true; // Loading state flag
+  isLoading = true;
 
   allDocuments: PdfDocument[] = [];
   filteredDocuments: PdfDocument[] = [];
+
+  // --- Preview Modal State ---
+  isPreviewOpen = false;
+  previewUrl: SafeResourceUrl | null = null;
+  previewTitle = '';
 
   constructor(private ngZone: NgZone) { }
 
@@ -40,7 +45,6 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.blogService.getBlogs().subscribe({
       next: (data) => {
-        // API response ko frontend interface me map kar rahe hain
         this.allDocuments = data.map((item: any) => ({
           id: item.id,
           title: item.title,
@@ -52,7 +56,6 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filteredDocuments = this.allDocuments;
         this.isLoading = false;
 
-        // Data aane ke thodi der baad scroll start karein
         setTimeout(() => {
           this.startAutoScroll();
         }, 500);
@@ -70,9 +73,7 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  ngAfterViewInit() {
-    // Scroll start ab data load hone ke baad hoga
-  }
+  ngAfterViewInit() { }
 
   ngOnDestroy() {
     this.stopAutoScroll();
@@ -80,19 +81,14 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // --- Auto Scroll Logic ---
   startAutoScroll() {
-    this.stopAutoScroll(); // Clear existing if any
+    this.stopAutoScroll();
     
-    // Only start if content exists and is scrollable
     if (this.scrollContainer && this.scrollContainer.nativeElement.scrollHeight > this.scrollContainer.nativeElement.clientHeight) {
         this.ngZone.runOutsideAngular(() => {
         this.scrollInterval = setInterval(() => {
             if (!this.isPaused && this.scrollContainer) {
             const el = this.scrollContainer.nativeElement;
-            
-            // 1px niche scroll karo
             el.scrollTop += 1;
-
-            // Agar bottom par pahunch gaye, toh wapas top par jao (Loop)
             if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
                 el.scrollTop = 0;
             }
@@ -124,13 +120,16 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  // --- View Functionality ---
+  // --- View Functionality (Opens Modal) ---
   viewPdf(doc: PdfDocument) {
-    // Pehle download URL fetch karo, fir new tab me open karo
     this.blogService.getDownloadLink(doc.id).subscribe({
       next: (res) => {
         if (res.download_url) {
-           window.open(res.download_url, '_blank');
+           this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(res.download_url);
+           this.previewTitle = doc.title;
+           this.isPreviewOpen = true;
+           this.stopAutoScroll(); 
+           document.body.style.overflow = 'hidden'; 
         } else {
            alert('Error: File URL not found.');
         }
@@ -142,19 +141,38 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // --- Download Functionality ---
+  closePreviewModal() {
+    this.isPreviewOpen = false;
+    this.previewUrl = null;
+    this.startAutoScroll();
+    document.body.style.overflow = 'auto';
+  }
+
+  // --- Download Functionality (Force Download) ---
   downloadPdf(doc: PdfDocument) {
     this.blogService.getDownloadLink(doc.id).subscribe({
       next: (res) => {
         if (res.download_url) {
-           // Create a hidden link and click it to trigger download/view
-           const link = document.createElement('a');
-           link.href = res.download_url;
-           link.target = '_blank';
-           link.download = doc.fileName; // Try to force filename
-           document.body.appendChild(link);
-           link.click();
-           document.body.removeChild(link);
+          // Fetch as blob to force download instead of opening in tab
+          fetch(res.download_url)
+            .then(response => response.blob())
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = doc.fileName; // Forces the browser to download
+              document.body.appendChild(link);
+              link.click();
+              
+              // Cleanup
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+              console.error('Download failed, falling back to open:', err);
+              // Fallback if fetch fails (e.g. CORS issues)
+              window.open(res.download_url, '_blank');
+            });
         } else {
            alert('Error: Download URL not found.');
         }

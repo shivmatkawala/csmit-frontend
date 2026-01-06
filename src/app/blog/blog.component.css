@@ -270,6 +270,84 @@
   100% { transform: rotate(360deg); }
 }
 
+/* =========================================
+   PDF PREVIEW MODAL STYLES (NEW)
+   ========================================= */
+.pdf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 13000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s;
+}
+
+.pdf-modal-content {
+  background: white;
+  width: 90%;
+  height: 90%;
+  max-width: 1200px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUpModal 0.3s;
+}
+
+.pdf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pdf-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.close-pdf-btn {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  transition: color 0.2s;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-pdf-btn:hover { color: #ef4444; }
+
+.pdf-body {
+  flex: 1;
+  background: #e2e8f0;
+  position: relative;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUpModal { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+
 /* ============================
    MOBILE RESPONSIVE DESIGN
    ============================ */
@@ -301,4 +379,8 @@
     justify-content: center;
     padding: 10px;
   }
+
+  /* Modal on Mobile */
+  .pdf-modal-content { width: 95%; height: 80vh; }
+  .pdf-header { padding: 0.8rem 1rem; }
 }

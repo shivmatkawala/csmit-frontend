@@ -91,21 +91,21 @@
               <div class="note-meta"><span class="category-tag">{{ note.category }}</span><span class="date-tag">📅 {{ note.uploaded_at | date:'mediumDate' }}</span></div>
             </div>
           </div>
+          <!-- CHANGED: Replaced Download with Preview -->
           <div class="note-actions">
-            <button class="action-btn download-btn" (click)="downloadNote(note)">Download ⬇</button>
+            <button class="action-btn download-btn" (click)="openPreviewModal(note)">Preview 👁️</button>
           </div>
         </div>
       </ng-container>
     </div>
   </div>
 
-  <!-- VIEW C: Success Stories (UPDATED: 3 visible + rotation) -->
+  <!-- VIEW C: Success Stories -->
   <div *ngIf="selectedFeature === 'success'" class="content-view success-view fade-in">
     <div class="section-title-center"><h3>Our Wall of Fame</h3><p>Inspiring stories from our alumni.</p></div>
     <div *ngIf="isLoadingStories" class="loading-state"><p>Loading success stories...</p></div>
     
     <div *ngIf="!isLoadingStories" class="stories-grid-modern">
-      <!-- Iterate over visibleStories instead of all successStories -->
       <div *ngFor="let story of visibleStories" class="success-card" (click)="openStoryModal(story)">
         <div class="card-top">
           <img [src]="story.image" [alt]="story.name" class="candidate-img">
@@ -123,14 +123,10 @@
 
 </div>
 
-
 </div>
 </section>
 
-<!-- =========================================
-INQUIRY FORM MODAL (FIXED Z-INDEX)
-========================================= -->
-
+<!-- INQUIRY FORM MODAL -->
 <div class="modal-overlay" *ngIf="showInquiryForm" (click)="closeInquiryForm()">
 <div class="modal-content" (click)="$event.stopPropagation()">
 <button class="close-modal-btn" (click)="closeInquiryForm()">×</button>
@@ -184,14 +180,10 @@ INQUIRY FORM MODAL (FIXED Z-INDEX)
   <button class="submit-btn" style="margin-top: 2rem;" (click)="closeInquiryForm()">Close</button>
 </div>
 
-
 </div>
 </div>
 
-<!-- =========================================
-NEW: SUCCESS STORY DETAIL MODAL (POPUP)
-========================================= -->
-
+<!-- SUCCESS STORY DETAIL MODAL -->
 <div class="story-modal-overlay" *ngIf="isStoryModalOpen && selectedStory" (click)="closeStoryModal()">
 <div class="story-modal-content" (click)="$event.stopPropagation()">
 
@@ -211,6 +203,18 @@ NEW: SUCCESS STORY DETAIL MODAL (POPUP)
   </div>
 </div>
 
-
 </div>
+</div>
+
+<!-- NEW: PDF PREVIEW MODAL -->
+<div class="pdf-modal-overlay" *ngIf="isPreviewOpen" (click)="closePreviewModal()">
+  <div class="pdf-modal-content" (click)="$event.stopPropagation()">
+    <div class="pdf-header">
+      <h3>{{ previewTitle }}</h3>
+      <button class="close-pdf-btn" (click)="closePreviewModal()">×</button>
+    </div>
+    <div class="pdf-body">
+      <iframe [src]="previewUrl" class="pdf-frame" frameborder="0"></iframe>
+    </div>
+  </div>
 </div>

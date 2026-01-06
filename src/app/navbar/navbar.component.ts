@@ -7,6 +7,7 @@ import { SuccessStoriesService, SuccessStory } from '../services/success-stories
 import { ManageNotesService, Note } from '../services/manage-notes.service';
 import { UiStateService } from '../services/ui-state.service'; 
 import { InquiryService } from '../services/inquiry.service'; 
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; // Import Sanctifier
 
 @Component({
   selector: 'app-navbar',
@@ -21,6 +22,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private inquiryService = inject(InquiryService);
   private ngZone = inject(NgZone);
   private fb = inject(FormBuilder);
+  private sanitizer = inject(DomSanitizer); // Inject Sanitizer
 
   selectedFeature: 'batch' | 'notes' | 'success' = 'batch';
   isLoading = true;
@@ -31,14 +33,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   upcomingBatches: any[] = [];
   private batchInterval: any;
 
-  // --- Success Stories State (Updated) ---
+  // --- Success Stories State ---
   successStories: SuccessStory[] = [];
-  visibleStories: SuccessStory[] = []; // Stores the 3 currently visible stories
+  visibleStories: SuccessStory[] = []; 
   isLoadingStories = false;
   private storyInterval: any;
-  currentStoryIndex = 0; // Tracks the starting index for rotation
+  currentStoryIndex = 0; 
 
-  // --- Story Modal State (New) ---
+  // --- Story Modal State ---
   selectedStory: SuccessStory | null = null;
   isStoryModalOpen = false;
 
@@ -60,6 +62,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   inquiryForm!: FormGroup;
   isSubmitting = false;
   submissionSuccess = false;
+
+  // --- PDF Preview State ---
+  isPreviewOpen = false;
+  previewUrl: SafeResourceUrl | null = null;
+  previewTitle = '';
 
   ngOnInit() {
     this.initForm();
@@ -86,7 +93,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.stopBatchRotation();
     this.stopNoteScroll();
-    this.stopStoryRotation(); // Cleanup story interval
+    this.stopStoryRotation(); 
   }
 
   // --- INQUIRY FORM LOGIC ---
@@ -103,7 +110,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.submissionSuccess = false;
     this.inquiryForm.patchValue({ course_name: courseName });
     this.showInquiryForm = true;
-    // Disable body scroll when modal is open
     document.body.style.overflow = 'hidden';
   }
 
@@ -204,21 +210,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  downloadNote(note: Note) {
+  // --- NEW: Preview Modal Logic ---
+  openPreviewModal(note: Note) {
     this.notesService.getDownloadLink(note.id).subscribe({
       next: (res) => {
         if (res.download_url) {
-           const link = document.createElement('a');
-           link.href = res.download_url;
-           link.target = '_blank';
-           link.download = `${note.title}.pdf`;
-           document.body.appendChild(link);
-           link.click();
-           document.body.removeChild(link);
+           this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(res.download_url);
+           this.previewTitle = note.title;
+           this.isPreviewOpen = true;
+           document.body.style.overflow = 'hidden';
         }
       },
-      error: () => alert('Download failed')
+      error: () => alert('Could not load preview.')
     });
+  }
+
+  closePreviewModal() {
+    this.isPreviewOpen = false;
+    this.previewUrl = null;
+    document.body.style.overflow = 'auto';
   }
 
   startNoteScroll() {
@@ -380,7 +390,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   stopBatchRotation() { if (this.batchInterval) clearInterval(this.batchInterval); }
 
-  // --- SUCCESS STORIES LOGIC (UPDATED) ---
+  // --- SUCCESS STORIES LOGIC ---
 
   fetchSuccessStories() {
       this.isLoadingStories = true;
@@ -389,7 +399,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
             this.successStories = data; 
             this.isLoadingStories = false; 
             
-            // Start rotation logic if we have enough stories
             if (this.successStories.length > 0) {
                this.updateVisibleStories();
                this.startStoryRotation();
@@ -405,7 +414,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   updateVisibleStories() {
     if (this.successStories.length === 0) return;
     
-    const count = 3; // Number of items to show
+    const count = 3; 
     this.visibleStories = [];
     
     for (let i = 0; i < count; i++) {
@@ -416,9 +425,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   startStoryRotation() {
     this.stopStoryRotation();
-    // Rotate every 5 seconds
     this.storyInterval = setInterval(() => {
-      // Increment index to shift the window
       this.currentStoryIndex = (this.currentStoryIndex + 1) % this.successStories.length;
       this.updateVisibleStories();
     }, 5000);
@@ -428,18 +435,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (this.storyInterval) clearInterval(this.storyInterval);
   }
 
-  // --- Story Modal Methods ---
   openStoryModal(story: SuccessStory) {
     this.selectedStory = story;
     this.isStoryModalOpen = true;
-    this.stopStoryRotation(); // Pause rotation while reading
+    this.stopStoryRotation(); 
     document.body.style.overflow = 'hidden';
   }
 
   closeStoryModal() {
     this.isStoryModalOpen = false;
     this.selectedStory = null;
-    this.startStoryRotation(); // Resume rotation
+    this.startStoryRotation(); 
     document.body.style.overflow = 'auto';
   }
 }

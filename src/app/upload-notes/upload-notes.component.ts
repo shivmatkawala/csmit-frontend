@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ManageNotesService } from 'src/app/services/manage-notes.service';
 import { HttpEventType } from '@angular/common/http';
+import { Router } from '@angular/router'; // Import Router
+import { AlertService } from '../services/alert.service'; // Import AlertService
 
 @Component({
   selector: 'app-upload-notes',
@@ -15,18 +17,18 @@ import { HttpEventType } from '@angular/common/http';
 export class UploadNotesComponent {
   private fb = inject(FormBuilder);
   private notesService = inject(ManageNotesService);
+  private router = inject(Router);
+  private alertService = inject(AlertService);
   
   selectedFile = signal<File | null>(null);
   isSubmitting = signal(false);
-  uploadStatus = signal<{type: 'success' | 'error', message: string} | null>(null);
   uploadProgress = signal<number>(0);
 
-  // Category abhi bhi dropdown rakh sakte hain, ya text bhi. Main dropdown rakh raha hu for standard.
-  categories = ['Lecture Note', 'Lab Manual', 'Assignment', 'Question Paper'];
+  categories = ['Lecture Note','Assignment', 'Question Paper'];
 
   noteForm = this.fb.group({
-    subject: ['', Validators.required], // Ab ye Text Input hoga (Ex: "React JS")
-    title: ['', Validators.required],   // Ye Topic name hoga (Ex: "Hooks Intro")
+    subject: ['', Validators.required], 
+    title: ['', Validators.required],   
     category: ['Lecture Note', Validators.required],
     description: ['']
   });
@@ -36,25 +38,32 @@ export class UploadNotesComponent {
     if (file && file.type === 'application/pdf') {
       this.selectedFile.set(file);
     } else {
-      alert('Only PDF files allowed');
+      this.alertService.warning('Only PDF files are allowed.', 'Invalid File');
+      this.selectedFile.set(null);
     }
   }
 
   onSubmit() {
     if (this.noteForm.invalid || !this.selectedFile()) {
         this.noteForm.markAllAsTouched();
+        if (!this.selectedFile()) {
+            this.alertService.warning('Please select a PDF file.');
+        } else {
+            this.alertService.warning('Please fill in all required fields.');
+        }
         return;
     }
 
     this.isSubmitting.set(true);
     const file = this.selectedFile() as File;
-    // Data me subject manually type kiya hua jayega
     const formData = this.noteForm.value;
 
     this.notesService.createNoteMetadata(formData).subscribe({
       next: (res: any) => {
         if (res.upload_url) {
           this.uploadFileToS3(res.upload_url, file);
+        } else {
+           this.handleError('Server did not provide an upload URL.');
         }
       },
       error: (err) => {
@@ -70,7 +79,7 @@ export class UploadNotesComponent {
           this.uploadProgress.set(Math.round((100 * event.loaded) / event.total));
         } else if (event.type === HttpEventType.Response) {
           this.isSubmitting.set(false);
-          this.uploadStatus.set({ type: 'success', message: 'Note Uploaded Successfully!' });
+          this.alertService.success('Note Uploaded Successfully!', 'Success');
           
           // Form Reset
           this.noteForm.reset({ category: 'Lecture Note' });
@@ -84,6 +93,10 @@ export class UploadNotesComponent {
 
   handleError(msg: string) {
     this.isSubmitting.set(false);
-    this.uploadStatus.set({ type: 'error', message: msg });
+    this.alertService.error(msg, 'Error');
+  }
+
+  goBack() {
+    this.router.navigate(['/admin-panel']);
   }
 }

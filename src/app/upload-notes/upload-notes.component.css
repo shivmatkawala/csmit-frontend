@@ -1,13 +1,243 @@
-.upload-container { max-width: 600px; margin: 2rem auto; font-family: 'Poppins', sans-serif; }
-.form-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-.form-group { margin-bottom: 1.2rem; }
-.form-row { display: flex; gap: 1rem; }
-.half { flex: 1; }
-label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; }
-input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
-.btn-submit { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-.btn-submit:disabled { background: #93c5fd; }
-.status-msg { margin-top: 1rem; text-align: center; font-weight: 600; }
-.success { color: green; } .error { color: red; }
-.progress-bar { height: 6px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 1rem; }
-.fill { height: 100%; background: #2563eb; transition: width 0.3s; }
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* --- Colors & Variables (Consistent Theme) --- */
+:host {
+    --primary-green: #554451;
+    --accent-color: #e09f3e;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --input-background: #ffffff;
+    --card-background: #ffffff;
+    --border-light: #e0e0e0;
+    --bg-color: #f4f7f9;
+    --delete-red: #e74c3c;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    font-family: 'Roboto', sans-serif;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+/* --- Form Container (Card) --- */
+.form-card {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--card-background);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    position: relative; 
+    z-index: 1;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.form-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Back Button --- */
+.back-button {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.back-button:hover {
+    color: white;
+    background-color: var(--primary-green);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(85, 68, 81, 0.2);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5; 
+    fill: currentColor; 
+    stroke: none;
+}
+
+/* --- Header --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 10px;
+}
+
+.header-section h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    margin-bottom: 5px;
+    border-bottom: 3px solid var(--accent-color); 
+    display: inline-block; 
+    padding-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.header-section p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    margin-top: 8px;
+}
+
+/* --- Form Groups --- */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.half {
+    flex: 1;
+}
+
+/* --- Inputs --- */
+.form-control, .form-control-file {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background-color: var(--input-background);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4);
+}
+
+.form-control-file {
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 4px;
+    display: block;
+}
+
+.file-info {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--primary-green);
+    font-weight: 500;
+}
+
+/* --- Submit Button --- */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--primary-green);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(85, 68, 81, 0.4);
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background-color: #3e313b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(85, 68, 81, 0.5);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #bdc3c7;
+    box-shadow: none;
+}
+
+/* --- Progress Bar --- */
+.progress-bar {
+    margin-top: 15px;
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+/* --- Spinner --- */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+    .form-card {
+        padding: 30px 20px;
+    }
+    .back-button {
+        top: 15px;
+        left: 15px;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}

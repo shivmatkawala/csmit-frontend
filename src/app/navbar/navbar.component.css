@@ -354,12 +354,11 @@
 @keyframes pulse-dot { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 
 /* =========================================
-   INQUIRY MODAL (UPDATED - Z-INDEX FIX)
+   INQUIRY MODAL
    ========================================= */
 .modal-overlay {
   position: fixed;
   inset: 0; 
-  /* FIX: Increased Z-Index to 12000 to exceed header (10001) */
   z-index: 12000; 
   background-color: rgba(15, 23, 42, 0.75); 
   backdrop-filter: blur(8px);
@@ -454,7 +453,7 @@
 .error-text { color: #ef4444; font-size: 0.8rem; margin-top: 0.3rem; }
 
 /* =========================================
-   STORY DETAIL MODAL (NEW)
+   STORY DETAIL MODAL
    ========================================= */
 .story-modal-overlay {
   position: fixed;
@@ -536,8 +535,80 @@
 
 
 /* =========================================
-   MOBILE RESPONSIVE FIXES (UPDATED)
+   NEW: PDF PREVIEW MODAL STYLES
    ========================================= */
+.pdf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 13000; /* Highest z-index */
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s;
+}
+
+.pdf-modal-content {
+  background: white;
+  width: 90%;
+  height: 90%;
+  max-width: 1200px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUpModal 0.3s;
+}
+
+.pdf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pdf-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.close-pdf-btn {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  transition: color 0.2s;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-pdf-btn:hover { color: #ef4444; }
+
+.pdf-body {
+  flex: 1;
+  background: #e2e8f0;
+  position: relative;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* --- MOBILE RESPONSIVE FIXES --- */
 
 @media (max-width: 1024px) {
   .stories-grid-modern { grid-template-columns: repeat(2, 1fr); }
@@ -584,9 +655,13 @@
   .success-card { margin-top: 40px; padding: 3rem 1.5rem 2rem 1.5rem; }
   
   /* Modal Mobile */
-  .modal-content, .story-modal-content { padding: 1.5rem; width: 95%; max-height: 85vh; }
+  .modal-content, .story-modal-content, .pdf-modal-content { padding: 1.5rem; width: 95%; max-height: 85vh; }
   .close-modal-btn { top: 0.8rem; right: 0.8rem; width: 32px; height: 32px; }
   
   .story-img-large { width: 80px; height: 80px; }
   .story-name-large { font-size: 1.3rem; }
+  
+  /* PDF Modal Mobile Specific */
+  .pdf-modal-content { height: 80vh; padding: 0; }
+  .pdf-header { padding: 0.8rem 1rem; }
 }

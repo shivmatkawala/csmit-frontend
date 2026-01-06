@@ -1,5 +1,5 @@
 <main>
-  <!-- Hero Section (Unchanged) -->
+  <!-- Hero Section -->
   <section class="hero-section">
     <div class="container hero-container">
       <div class="hero-content-left">
@@ -26,9 +26,7 @@
     </div>
   </section>
 
-  <!-- =============================== -->
-  <!-- REDESIGNED VIDEO SECTION STARTS -->
-  <!-- =============================== -->
+  <!-- Video Section -->
   <section class="demo-classes-section">
     <div class="container">
       <div class="section-heading">
@@ -39,15 +37,11 @@
       </div>
     </div>
 
-    <!-- 
-       Scroller 1: Moves Left 
-    -->
+    <!-- Scroller 1 -->
     <div class="video-scroller" data-direction="left">
       <div class="scroller-inner">
-        <!-- Loop demo cards -->
         <div class="demo-card" *ngFor="let video of scrollerVideos1" (click)="openModal(video.youtubeVideoId)">
           <div class="thumbnail-container">
-            <!-- UPDATED: Fixed onerror to use a reliable online placeholder and prevent infinite loops -->
             <img [src]="video.thumbnailUrl" [alt]="video.title" class="thumbnail-image" 
                  onerror="this.src='https://placehold.co/640x360/1e293b/FFF?text=Video+Thumbnail'; this.onerror=null;">
             <div class="thumbnail-overlay">
@@ -67,14 +61,11 @@
       </div>
     </div>
 
-    <!-- 
-       Scroller 2: Moves Right 
-    -->
+    <!-- Scroller 2 -->
     <div class="video-scroller" data-direction="right" style="margin-top: 20px;">
       <div class="scroller-inner">
         <div class="demo-card" *ngFor="let video of scrollerVideos2" (click)="openModal(video.youtubeVideoId)">
           <div class="thumbnail-container">
-            <!-- UPDATED: Fixed onerror to use a reliable online placeholder -->
             <img [src]="video.thumbnailUrl" [alt]="video.title" class="thumbnail-image" 
                  onerror="this.src='https://placehold.co/640x360/1e293b/FFF?text=Video+Thumbnail'; this.onerror=null;">
              <div class="thumbnail-overlay">
@@ -95,14 +86,17 @@
     </div>
   </section>
 
-  <!-- Video Player Modal -->
+  <!-- Video Modal -->
   <div class="video-modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="video-modal-content" (click)="$event.stopPropagation()">
-      <button class="close-modal-btn" (click)="closeModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      <div class="modal-header-actions">
+        <button class="back-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back
+        </button>
+      </div>
       <div class="video-wrapper">
         <iframe [src]="selectedVideoUrl"
                 frameborder="0"
@@ -114,7 +108,7 @@
   </div>
 </main>
 
-<!-- About CSMIT Modal -->
+<!-- About Modal -->
 <app-about-csmit 
   *ngIf="isAboutModalOpen" 
   [isVisible]="isAboutModalOpen" 

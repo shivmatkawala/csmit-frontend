@@ -1,18 +1,29 @@
-<div class="upload-container">
-  <h2>Upload Notes Manually</h2>
+<div class="form-card">
+
+  <!-- Back Button -->
+  <button (click)="goBack()" class="back-button" title="Go Back">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+      </svg>
+  </button>
+
+  <div class="header-section">
+    <h2>Upload Notes</h2>
+    <p>Manually upload subject notes, lab manuals, and assignments.</p>
+  </div>
   
-  <form [formGroup]="noteForm" (ngSubmit)="onSubmit()" class="form-card">
+  <form [formGroup]="noteForm" (ngSubmit)="onSubmit()">
     
-    <!-- Subject Input (Manual) -->
+    <!-- Subject Input -->
     <div class="form-group">
       <label>Subject Name</label>
       <input 
         type="text" 
         formControlName="subject" 
-        placeholder="Ex: Full Stack Development, Python, etc."
+        placeholder="e.g. Full Stack Development"
         class="form-control"
       >
-      <small class="hint">Type the exact subject name (New or Existing)</small>
+      <small class="hint">Type the exact subject name.</small>
     </div>
 
     <!-- Topic / Title Input -->
@@ -21,7 +32,7 @@
       <input 
         type="text" 
         formControlName="title" 
-        placeholder="Ex: Introduction to Angular, Loops in Java"
+        placeholder="e.g. Introduction to Angular"
         class="form-control"
       >
     </div>
@@ -38,7 +49,7 @@
 
     <div class="form-group">
       <label>Description (Optional)</label>
-      <textarea formControlName="description" rows="2" class="form-control"></textarea>
+      <textarea formControlName="description" rows="3" class="form-control" placeholder="Brief details about the document..."></textarea>
     </div>
 
     <!-- File Input -->
@@ -49,17 +60,17 @@
     </div>
 
     <!-- Progress Bar -->
-    <div *ngIf="uploadProgress() > 0" class="progress-bar">
+    <div *ngIf="uploadProgress() > 0 && uploadProgress() < 100" class="progress-bar">
       <div class="fill" [style.width.%]="uploadProgress()"></div>
     </div>
 
-    <button type="submit" [disabled]="isSubmitting()" class="btn-submit">
-      {{ isSubmitting() ? 'Uploading...' : 'Upload Note' }}
-    </button>
-
-    <p *ngIf="uploadStatus()" [class]="uploadStatus()?.type" class="status-msg">
-      {{ uploadStatus()?.message }}
-    </p>
+    <!-- Submit Button -->
+    <div>
+      <button type="submit" [disabled]="isSubmitting()" class="btn-submit">
+        <span *ngIf="isSubmitting()" class="spinner"></span>
+        <span>{{ isSubmitting() ? 'Uploading...' : 'Upload Note' }}</span>
+      </button>
+    </div>
 
   </form>
 </div>

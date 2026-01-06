@@ -1,7 +1,5 @@
-/* Google Fonts Import */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
-/* Color Variables */
 :host {
     --primary-red: #e03a3e;
     --primary-red-hover: #ff5559;
@@ -18,7 +16,6 @@
     --youtube-color: #FF0000;
 }
 
-/* Base Footer Styling */
 .site-footer {
     font-family: 'Poppins', sans-serif;
     background-color: black;
@@ -33,7 +30,6 @@
     margin-right: auto;
 }
 
-/* Footer Top Section */
 .footer-top {
     display: flex;
     justify-content: space-between;
@@ -59,29 +55,6 @@
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* CTA Button */
-.cta-button {
-    background-color: var(--primary-red);
-    color: var(--text-white);
-    padding: 1.2rem 2.5rem;
-    border-radius: 0.5rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 8px 25px rgba(224, 58, 62, 0.5);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.cta-button:hover {
-    background-color: var(--primary-red-hover);
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(224, 58, 62, 0.8);
-}
-
-/* Divider & Grid */
 .footer-divider {
     border: none;
     height: 1px;
@@ -96,7 +69,6 @@
     padding-bottom: 3rem;
 }
 
-/* Logo Section */
 .footer-logo-section {
     display: flex;
     flex-direction: column;
@@ -115,7 +87,6 @@
     color: var(--primary-red);
 }
 
-/* Animated Circle Design */
 .animated-circle-design {
     position: relative;
     width: 100px;
@@ -186,7 +157,6 @@
     color: var(--primary-red);
 }
 
-/* Link Groups */
 .group-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -231,7 +201,6 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Social Bar */
 .footer-social-bar {
     padding-top: 1.5rem;
     padding-bottom: 2rem;
@@ -253,7 +222,6 @@
     margin: 0;
 }
 
-/* Social Icons Styling */
 .social-icons-list {
     list-style: none;
     padding: 0; margin: 0;
@@ -266,17 +234,24 @@
     color: var(--text-white);
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    overflow: hidden; 
 }
 .icon-link svg { width: 20px; height: 20px; fill: currentColor; }
 
+.social-img-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .icon-link.whatsapp { background-color: var(--whatsapp-color); }
-.icon-link.whatsapp:hover { background-color: var(--text-white); color: var(--whatsapp-color); transform: translateY(-5px) scale(1.1); }
+.icon-link.whatsapp:hover { transform: translateY(-5px) scale(1.1); }
 
 .icon-link.instagram {
     background: var(--instagram-color);
     background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
 }
-.icon-link.instagram:hover { background: var(--text-white); color: var(--instagram-color); transform: translateY(-5px) scale(1.1); }
+.icon-link.instagram:hover { transform: translateY(-5px) scale(1.1); }
 
 .icon-link.twitter { background-color: var(--twitter-color); }
 .icon-link.twitter:hover { background-color: var(--text-white); color: var(--twitter-color); transform: translateY(-5px) scale(1.1); }
@@ -287,11 +262,6 @@
 .icon-link.youtube { background-color: var(--youtube-color); }
 .icon-link.youtube:hover { background-color: var(--text-white); color: var(--youtube-color); transform: translateY(-5px) scale(1.1); }
 
-/* =========================================
-   FLOATING ICONS: SCROLL TO TOP & CHATBOT
-   ========================================= */
-
-/* 1. Scroll to Top Button */
 .scroll-to-top {
     position: fixed;
     bottom: 25px;
@@ -307,10 +277,7 @@
     transform: translateY(30px) scale(0.8);
     pointer-events: none;
     display: flex; justify-content: center; align-items: center;
-    
-    /* Z-INDEX FIX: Keep it high but below chat popup */
     z-index: 10500; 
-    
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -327,16 +294,12 @@
 .scroll-to-top svg { width: 26px; height: 26px; transition: transform 0.3s ease; }
 .scroll-to-top:hover svg { transform: translateY(-3px); }
 
-/* 2. Chatbot Icon Trigger */
 .chat-bot-trigger {
     position: fixed;
     bottom: 25px; 
     right: 25px;
     width: 65px; height: 65px;
-    
-    /* Z-INDEX FIX: Must be higher than Header (10001) */
     z-index: 11000; 
-    
     cursor: pointer;
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
     display: flex; align-items: center; justify-content: center;
@@ -383,27 +346,17 @@
 
 .chat-bot-trigger.moved-up { bottom: 95px; }
 
-
-/* 3. CHAT POPUP WINDOW */
 .chat-popup-container {
     position: fixed;
     bottom: 100px;
     right: 25px;
     width: 350px;
     height: 500px;
-    
-    /* MAX-HEIGHT FIX: Prevent overlapping with Header on laptops */
-    /* 80vh is too much if screen is small. 
-       calc(100vh - 120px) ensures space from top. */
     max-height: calc(100vh - 140px);
-    
     background-color: white;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    
-    /* Z-INDEX FIX: Must be higher than Header (10001) */
     z-index: 10999;
-    
     display: flex; flex-direction: column; overflow: hidden;
     opacity: 0; visibility: hidden;
     transform: scale(0) translateY(50px);
@@ -419,7 +372,7 @@
     padding: 15px;
     display: flex; align-items: center; justify-content: space-between;
     color: white;
-    flex-shrink: 0; /* Header should not shrink */
+    flex-shrink: 0;
 }
 
 .chat-header-info { display: flex; align-items: center; gap: 12px; }
@@ -451,7 +404,7 @@
 .chat-content-area {
     flex-grow: 1; display: flex; flex-direction: column;
     background: #f8fafc; position: relative;
-    overflow: hidden; /* Important for inner scroll */
+    overflow: hidden;
 }
 
 app-chatbot {
@@ -459,7 +412,6 @@ app-chatbot {
     display: flex; flex-direction: column;
 }
 
-/* Animations */
 @keyframes bot-float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
@@ -474,11 +426,9 @@ app-chatbot {
     to { opacity: 1; transform: scale(1); }
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
     .footer-top { flex-direction: column; align-items: flex-start; gap: 2rem; }
     .footer-statement { max-width: 100%; font-size: 2.2rem; }
-    .cta-button { padding: 1rem 2rem; font-size: 1rem; }
     .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
     .footer-bottom { justify-content: center; padding: 1rem 0 0 0; }
     .footer-social-bar { padding-top: 2rem; padding-bottom: 2rem; }
@@ -500,7 +450,7 @@ app-chatbot {
     .chat-popup-container {
         width: 90vw; height: 60vh;
         bottom: 90px; right: 5vw;
-        max-height: none; /* Mobile handles its own height */
+        max-height: none;
     }
     .chat-popup-container.moved-up { bottom: 150px; }
 }

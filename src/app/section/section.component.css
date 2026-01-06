@@ -1,11 +1,9 @@
-/* FIX: Ensure component spans full width like the header */
 :host {
   display: block;
   width: 100%;
-  overflow-x: hidden; /* Prevent horizontal scrollbars if any */
+  overflow-x: hidden;
 }
 
-/* General container styles */
 .container {
   width: 90%;
   max-width: 1200px;
@@ -13,14 +11,14 @@
   margin-right: auto;
 }
 
-/* --- Redesigned Hero Section (Kept as is/Matched) --- */
+/* Hero Section */
 .hero-section {
   padding: 7.5rem 0 6rem 0; 
   position: relative;
   overflow: hidden;
   color: #111827; 
   z-index: 10;
-  width: 100%; /* Ensure section takes full width */
+  width: 100%;
   background-color: #f0f7ff;
   background-image: 
     linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 100%),
@@ -82,7 +80,7 @@
   box-shadow: 0 8px 15px rgba(224, 58, 62, 0.3);
 }
 
-/* --- HERO GRAPHICS --- */
+/* Hero Graphics */
 .hero-graphics-right {
     position: relative;
     width: 35%;
@@ -159,6 +157,7 @@
     animation: floatData 10s infinite reverse ease-in-out;
 }
 
+/* Animations */
 @keyframes rotateAround {
     from { transform: rotateY(0deg) rotateX(0deg); }
     to { transform: rotateY(360deg) rotateX(360deg); }
@@ -188,22 +187,16 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-
-/* =========================================
-   BEST DESIGN: VIDEO SECTION (REDUX)
-   ========================================= */
-
+/* Video Section */
 .demo-classes-section {
   padding: 6rem 0;
   position: relative;
-  width: 100%; /* Ensure section takes full width */
-  /* Dark Modern Gradient for Contrast & Premium Feel */
+  width: 100%;
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   color: #fff;
   overflow: hidden;
 }
 
-/* Background Decoration */
 .demo-classes-section::before {
     content: '';
     position: absolute;
@@ -247,14 +240,13 @@
   margin: 0 auto;
 }
 
-/* --- SCROLLER CONTAINER --- */
+/* Scroller */
 .video-scroller {
   position: relative;
   z-index: 5;
   width: 100%;
   padding: 1rem 0;
   margin-bottom: 2rem;
-  /* Soft fade on edges */
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
@@ -263,11 +255,9 @@
   display: flex;
   gap: 2rem;
   width: max-content;
-  /* Default Animation for Desktop */
   animation: scroll 40s linear infinite;
 }
 
-/* Pause on hover for better UX */
 .scroller-inner:hover {
     animation-play-state: paused;
 }
@@ -280,12 +270,12 @@
   to { transform: translate(calc(-50% - 1rem)); }
 }
 
-/* --- CARD DESIGN (GLASS & GLOW) --- */
+/* Video Card */
 .demo-card {
   width: 320px;
   flex-shrink: 0;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05); /* Glass effect */
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
@@ -302,7 +292,6 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 123, 255, 0.2);
 }
 
-/* Thumbnail */
 .thumbnail-container {
   position: relative;
   width: 100%;
@@ -321,7 +310,6 @@
   transform: scale(1.1);
 }
 
-/* Overlay & Play Button */
 .thumbnail-overlay {
   position: absolute;
   inset: 0;
@@ -329,7 +317,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 1; /* Always visible slightly to show play icon */
+  opacity: 1;
   transition: background 0.3s;
 }
 
@@ -337,7 +325,6 @@
   background: rgba(0, 0, 0, 0.5);
 }
 
-/* New Glowing Play Icon */
 .play-icon {
   width: 60px;
   height: 60px;
@@ -354,7 +341,7 @@
 }
 
 .demo-card:hover .play-icon {
-    background: #e03a3e; /* Brand Color */
+    background: #e03a3e;
     border-color: #e03a3e;
     transform: scale(1.1);
     box-shadow: 0 0 20px rgba(224, 58, 62, 0.6);
@@ -365,7 +352,7 @@
   width: 24px;
   height: 24px;
   fill: currentColor;
-  transform: translateX(2px); /* Optical alignment */
+  transform: translateX(2px);
 }
 
 @keyframes pulse {
@@ -387,7 +374,6 @@
   backdrop-filter: blur(4px);
 }
 
-/* Content */
 .video-info {
   padding: 1.25rem;
 }
@@ -421,7 +407,7 @@
     background-color: #e03a3e;
 }
 
-/* --- MODAL --- */
+/* Modal - FIX: Increased Z-Index to stay on top of header */
 .video-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -430,7 +416,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  /* CHANGED: 2000 -> 20000 to be higher than header's 10001 */
+  z-index: 20000; 
   animation: fadeIn 0.3s ease;
 }
 
@@ -438,28 +425,40 @@
   position: relative;
   width: 90%;
   max-width: 1000px;
-  animation: scaleUp 0.3s ease;
+  /* Slide Up Animation */
+  animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
 }
 
-.close-modal-btn {
-  position: absolute;
-  top: -50px;
-  right: 0;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+.modal-header-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  padding: 8px 16px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   cursor: pointer;
+  font-weight: 600;
   transition: all 0.2s;
 }
-.close-modal-btn:hover {
-    background: #e03a3e;
-    border-color: #e03a3e;
+
+.back-btn:hover {
+  background: #e03a3e;
+  border-color: #e03a3e;
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .video-wrapper {
@@ -472,20 +471,23 @@
   box-shadow: 0 0 50px rgba(0,0,0,0.5);
   border: 1px solid rgba(255,255,255,0.1);
 }
+
 .video-wrapper iframe {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
 }
 
-@keyframes scaleUp {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+@keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-/* --- RESPONSIVE OPTIMIZATION --- */
-
-/* Tablet & Mobile */
+/* Responsive */
 @media (max-width: 1024px) {
   .hero-section {
       padding-top: 5rem;
@@ -508,20 +510,18 @@
   }
 }
 
-/* SMART MOBILE LAYOUT for Videos */
 @media (max-width: 768px) {
   .section-title {
       font-size: 2rem;
   }
   
-  /* FIX: Reduce Hero Title size to fit 'Transformation' on small screens */
   .hero-title {
-      font-size: 2.2rem; /* Reduced from 3.5rem */
+      font-size: 2.2rem;
       word-wrap: break-word;
   }
 
   .demo-card {
-      width: 280px; /* Slightly smaller cards */
+      width: 280px;
   }
   
   .play-icon {
@@ -531,7 +531,6 @@
 }
 
 @media (max-width: 640px) {
-    /* FIX: Further reduce for very small devices */
     .hero-title {
         font-size: 1.8rem;
     }
