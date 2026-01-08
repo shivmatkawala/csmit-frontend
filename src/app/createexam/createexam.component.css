@@ -134,6 +134,14 @@ textarea.input-field {
     resize: vertical;
 }
 
+/* --- ERROR HIGHLIGHTING (NEW) --- */
+/* Ye class tab apply hogi jab user field ko touch kare aur wo invalid ho */
+.input-field.ng-invalid.ng-touched {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
 /* --- Question Card (Step 2) --- */
 .question-card {
     background-color: #f8f9fa;

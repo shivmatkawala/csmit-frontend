@@ -1,33 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-/**
- * Defines the structure of course data fetched from the API.
- */
 export interface Course {
   courseid: number; 
   coursename: string; 
 }
-
-/**
- * Updated BatchDetail to include real fields from Backend
- */
 export interface BatchDetail {
   batchId: number; 
   batchName: string; 
   course: Course; 
   is_active: boolean;
-  
-  // New Fields (Matches what Django sends in GET)
   startDate?: string; 
   timing?: string;     
   mode?: string;       
 }
-
-/**
- * Updated Payload to send new fields to Backend
- */
 export interface CreateBatchPayload {
   batchName: string;
   courseId: number;
