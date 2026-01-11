@@ -125,7 +125,24 @@ export class CreateCourseComponent implements OnInit {
         error: (error: HttpErrorResponse) => {
             console.error('API Error:', error);
             this.isSubmitting = false;
-            this.alertService.error(`Error during course ${action.replace('ed', 'ion')}: Could not contact the server.`);
+
+            // --- IMPROVED ERROR HANDLING ---
+            // Backend se aayi hui specific detail message ko pakadna
+            let errorMessage = `Error during course ${action.replace('ed', 'ion')}.`;
+
+            if (error.error && error.error.detail) {
+                // Agar backend { "detail": "..." } bhej raha hai
+                errorMessage = error.error.detail;
+            } else if (error.error && typeof error.error === 'string') {
+                // Agar backend plain string bhej raha hai
+                errorMessage = error.error;
+            } else if (error.message) {
+                 // Fallback to generic HTTP status text
+                 errorMessage = error.message;
+            }
+
+            // User ko saaf error dikhana
+            this.alertService.error(errorMessage);
         }
     });
   }
@@ -154,7 +171,13 @@ export class CreateCourseComponent implements OnInit {
         error: (error: HttpErrorResponse) => {
             console.error('Delete API Error:', error);
             this.isSubmitting = false;
-            this.alertService.error(`Error deleting Course ID ${courseId}.`);
+            
+            // Similar robust error handling for delete
+            let errorMessage = `Error deleting Course ID ${courseId}.`;
+            if (error.error && error.error.detail) {
+                errorMessage = error.error.detail;
+            }
+            this.alertService.error(errorMessage);
         }
     });
   }

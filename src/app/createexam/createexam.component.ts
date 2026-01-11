@@ -57,13 +57,16 @@ export class CreateExamComponent implements OnInit {
   batches: Batch[] = [];
   subjects: Subject[] = [];
   
+  // Property to hold the minimum allowed date (current datetime)
+  minDate: string = '';
+  
   examMetadata: ExamMetadata = {
     examName: '',
     courseid: null,
     batchId: null,
     subjectId: null,
-    start: this.formatDate(new Date()),
-    end: this.formatDate(new Date(Date.now() + 60 * 60 * 1000))
+    start: '',
+    end: ''
   };
 
   // Step 2 State
@@ -82,6 +85,13 @@ export class CreateExamComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Set minDate to current time so past dates are disabled
+    this.minDate = this.formatDate(new Date());
+
+    // Initialize start time to now and end time to 1 hour later
+    this.examMetadata.start = this.minDate;
+    this.examMetadata.end = this.formatDate(new Date(Date.now() + 60 * 60 * 1000));
+
     this.fetchCourses();
   }
 
@@ -186,6 +196,26 @@ export class CreateExamComponent implements OnInit {
       this.alertService.warning('Please fill in all exam details (Step 1).');
       return;
     }
+
+    // --- DATE VALIDATION LOGIC START ---
+    const now = new Date();
+    const startDate = new Date(this.examMetadata.start);
+    const endDate = new Date(this.examMetadata.end);
+
+    // Check if start date is in the past (allowing a small buffer for "now")
+    // Note: We compare timestamps to be precise.
+    if (startDate.getTime() < now.getTime() - 60000) { // 1 minute buffer
+       this.alertService.warning('Start time cannot be in the past. Please choose a correct time.');
+       return;
+    }
+
+    // Check if end date is before start date
+    if (endDate <= startDate) {
+      this.alertService.warning('End time must be after the Start time.');
+      return;
+    }
+    // --- DATE VALIDATION LOGIC END ---
+
     this.step = 2;
   }
   
@@ -270,12 +300,15 @@ export class CreateExamComponent implements OnInit {
     this.questions = [
       { questionText: '', questionType: 'mcq', options: ['', '', '', ''], correctOption: 0, points: 1 }
     ];
+    
+    // Reset dates to current time
+    this.minDate = this.formatDate(new Date());
     this.examMetadata = {
       examName: '',
       courseid: null,
       batchId: null,
       subjectId: null,
-      start: this.formatDate(new Date()),
+      start: this.minDate,
       end: this.formatDate(new Date(Date.now() + 60 * 60 * 1000))
     };
     

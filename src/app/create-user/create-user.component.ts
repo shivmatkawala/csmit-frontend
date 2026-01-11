@@ -19,8 +19,6 @@ export class CreateUserComponent implements OnInit {
     { id: 3, name: 'Student' }
   ];
   
-  // Removed local message variables as we are using AlertService
-  
   // Flags for loading state and password visibility
   isLoading: boolean = false;
   showPassword: boolean = false;
@@ -50,10 +48,21 @@ export class CreateUserComponent implements OnInit {
       return;
     }
 
-    // Validation: Username should not contain only numbers
-    if (/^\d+$/.test(this.username)) {
-      this.alertService.warning('Username cannot consist only of numbers.', 'Validation Error');
+    // ✅ NEW: Strict Gmail Validation Regex
+    // 1. Checks for standard email characters before @
+    // 2. Strictly requires @gmail.com at the end
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    if (!gmailRegex.test(this.username)) {
+      this.alertService.warning('Invalid Email! Please enter a valid Gmail address (e.g. user@gmail.com).', 'Validation Error');
       return;
+    }
+
+    // ✅ OPTIONAL: Check if the part before @ is just numbers (agar aapko '12345@gmail.com' block karna hai)
+    const localPart = this.username.split('@')[0];
+    if (/^\d+$/.test(localPart)) {
+        this.alertService.warning('Username cannot consist only of numbers before @gmail.com.', 'Validation Error');
+        return;
     }
 
     const payload = {
@@ -101,6 +110,7 @@ export class CreateUserComponent implements OnInit {
             errorMessage = 'Password is incorrect';
         }
         else if (err.status === 400 && err.error) {
+            // Display specific validation errors from backend
             errorMessage = err.error.username?.[0] || err.error.password?.[0] || err.error.roleid?.[0] || err.error.detail || `Invalid data sent.`;
         }
         

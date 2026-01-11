@@ -13,7 +13,7 @@
 
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Align top for long forms */
+    align-items: flex-start; 
     min-height: 100vh;
     background-color: var(--bg-color);
     font-family: 'Roboto', sans-serif;
@@ -134,8 +134,7 @@ textarea.input-field {
     resize: vertical;
 }
 
-/* --- ERROR HIGHLIGHTING (NEW) --- */
-/* Ye class tab apply hogi jab user field ko touch kare aur wo invalid ho */
+/* --- ERROR HIGHLIGHTING we are using for error imput handling  --- */
 .input-field.ng-invalid.ng-touched {
     border-color: #dc3545 !important;
     background-color: #fff8f8;

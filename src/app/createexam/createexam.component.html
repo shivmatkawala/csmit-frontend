@@ -98,6 +98,7 @@
         </div>
       </div>
 
+      <!-- Modified Start Time Input: Added [min] attribute -->
       <div class="form-group">
         <label for="start">Start Time</label>
         <input
@@ -106,10 +107,13 @@
           class="input-field"
           name="start"
           [(ngModel)]="examMetadata.start"
+          [min]="minDate"
           required
         />
+        <small style="color: #666; font-size: 0.85em;">Select a future date and time.</small>
       </div>
       
+      <!-- Modified End Time Input: Added [min] attribute bound to Start Time -->
       <div class="form-group">
         <label for="end">End Time</label>
         <input
@@ -118,8 +122,10 @@
           class="input-field"
           name="end"
           [(ngModel)]="examMetadata.end"
+          [min]="examMetadata.start || minDate"
           required
         />
+        <small style="color: #666; font-size: 0.85em;">Must be after Start Time.</small>
       </div>
 
       <div class="btn-group">
