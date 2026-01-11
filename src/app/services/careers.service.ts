@@ -1,13 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, switchMap, map } from 'rxjs';
+const API_BASE_URL = '/api'; 
 
-// TODO: Production ke liye is variable ko environment.ts me move karein
-// import { environment } from 'src/environments/environment';
-// const API_BASE_URL = environment.apiUrl; 
-const API_BASE_URL = 'http://localhost:8000/api'; 
-
-// Interface matching Django API response
 export interface Job {
   id?: number; 
   title: string;
@@ -26,26 +21,19 @@ export interface Job {
 export class CareerService {
   private http = inject(HttpClient);
   
-  // Dynamic API URLs (Centralized)
+  // Dynamic API URLs
   private jobsUrl = `${API_BASE_URL}/careers/jobs/`; 
   private applyUrl = `${API_BASE_URL}/job-applications/submit/`;
 
-  // BehaviorSubject to hold the current state of jobs
   private jobsSubject = new BehaviorSubject<Job[]>([]);
   public jobs$ = this.jobsSubject.asObservable();
-
-  constructor() { }
 
   // --- EXISTING FUNCTIONALITY (Jobs List) ---
 
   loadJobs() {
     this.http.get<Job[]>(this.jobsUrl).subscribe({
-      next: (data) => {
-        this.jobsSubject.next(data);
-      },
-      error: (error) => {
-        console.error('Error fetching jobs:', error);
-      }
+      next: (data) => this.jobsSubject.next(data),
+      error: (error) => console.error('Error fetching jobs:', error)
     });
   }
 
@@ -80,15 +68,11 @@ export class CareerService {
         }
 
         // Step 2: Upload File directly to S3
-        // Note: We deliberately remove Authorization header for S3 request if interceptors exist
-        // headers: new HttpHeaders({ 'Content-Type': 'application/pdf', 'Skip-Interceptor': 'true' })
-        
         return this.http.put(uploadUrl, resumeFile, {
           headers: new HttpHeaders({ 
             'Content-Type': resumeFile.type || 'application/pdf' 
           })
         }).pipe(
-          // Return the original success response (contains application_id)
           map(() => response)
         );
       })

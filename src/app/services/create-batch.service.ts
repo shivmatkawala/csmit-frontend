@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 export interface Course {
   courseid: number; 
   coursename: string; 
 }
+
 export interface BatchDetail {
   batchId: number; 
   batchName: string; 
@@ -14,49 +16,59 @@ export interface BatchDetail {
   timing?: string;     
   mode?: string;       
 }
+
 export interface CreateBatchPayload {
   batchName: string;
   courseId: number;
-  start_date: string;  // Backend expects 'start_date'
+  start_date: string;
   timing: string;
   mode: string;
 }
-
-// API Endpoints
-const BASE_URL = 'http://127.0.0.1:8000/api/batches/';
-const COURSE_LIST_API = 'http://127.0.0.1:8000/api/courses/course-list/';
-const BATCH_CREATE_API = BASE_URL + 'batch-create/';
-const BATCHES_BY_COURSE_API = BASE_URL + 'batches-by-course/'; 
-const DEACTIVATE_BATCH_API = BASE_URL + 'deactivate-batch/'; 
-const REACTIVATE_BATCH_API = BASE_URL + 'reactivate-batch/'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class CreateBatchService {
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) { }
+  // ✅ FIXED: Hardcoded IP hata kar relative paths use kiye hain
+  private readonly BATCH_BASE = '/api/batches';
+  private readonly COURSE_BASE = '/api/courses';
 
+  constructor() { }
+
+  /**
+   * URL: /api/courses/course-list/
+   */
   getCourses(): Observable<Course[]> {
-    return this.http.get<Course[]>(COURSE_LIST_API);
+    return this.http.get<Course[]>(`${this.COURSE_BASE}/course-list/`);
   }
 
+  /**
+   * URL: /api/batches/batches-by-course/{id}/
+   */
   getBatchesByCourse(courseId: number): Observable<BatchDetail[]> {
-    const apiUrl = `${BATCHES_BY_COURSE_API}${courseId}/`;
-    return this.http.get<BatchDetail[]>(apiUrl);
+    return this.http.get<BatchDetail[]>(`${this.BATCH_BASE}/batches-by-course/${courseId}/`);
   }
 
+  /**
+   * URL: /api/batches/batch-create/
+   */
   createBatch(payload: CreateBatchPayload): Observable<any> {
-    return this.http.post(BATCH_CREATE_API, payload);
+    return this.http.post(`${this.BATCH_BASE}/batch-create/`, payload);
   }
   
+  /**
+   * URL: /api/batches/deactivate-batch/{id}/
+   */
   deactivateBatch(batchId: number): Observable<any> {
-    const apiUrl = `${DEACTIVATE_BATCH_API}${batchId}/`;
-    return this.http.patch(apiUrl, {}); 
+    return this.http.patch(`${this.BATCH_BASE}/deactivate-batch/${batchId}/`, {}); 
   }
 
+  /**
+   * URL: /api/batches/reactivate-batch/{id}/
+   */
   reactivateBatch(batchId: number): Observable<any> {
-    const apiUrl = `${REACTIVATE_BATCH_API}${batchId}/`;
-    return this.http.patch(apiUrl, {}); 
+    return this.http.patch(`${this.BATCH_BASE}/reactivate-batch/${batchId}/`, {}); 
   }
 }
