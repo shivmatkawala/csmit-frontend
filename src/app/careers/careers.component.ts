@@ -17,7 +17,7 @@ export class CareersComponent implements OnInit {
   filteredJobs: Job[] = [];
   selectedDepartment: string = 'All';
 
-  // State for the Application Modal
+
   selectedJob: Job | null = null;
 
   // Dynamic departments list based on available jobs + defaults

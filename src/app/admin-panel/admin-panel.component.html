@@ -5,7 +5,6 @@
     <header class="seamless-header">
         <div class="logo-search">
             <div class="logo">
-                <!-- Ensure you have a logo.png in assets or change src -->
                 <img src="assets/logo.jpg" alt="Institute Logo" class="institute-logo" title="Institute Logo">
             </div>
             <div class="search-wrapper modern-search">
@@ -68,7 +67,6 @@
                     (click)="navigateTo(card.route, card.targetTab)">
                     
                     <div class="card-image-wrapper">
-                        <!-- Use dummy images if assets missing, or keep original src -->
                         <img [src]="'assets/' + card.iconImage" [alt]="card.title" 
                              onerror="this.src='https://placehold.co/600x400/eef2f6/94a3b8?text=Image'">
                         <div class="card-overlay">
@@ -83,6 +81,55 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- NEW: Applicants View -->
+        <div *ngIf="activeTab() === 'applicants'" class="fade-in">
+            <div class="main-content-header">
+                <h1>Job Applicants</h1>
+                <p>View and manage all received applications.</p>
+            </div>
+
+            <div class="applicants-container" style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eef2f6;">
+                <div *ngIf="isLoadingApplicants()" style="text-align: center; padding: 20px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #4f46e5;"></i>
+                    <p>Loading applicants...</p>
+                </div>
+
+                <table *ngIf="!isLoadingApplicants()" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #eef2f6;">
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Name</th>
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Job ID</th>
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Email</th>
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Phone</th>
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Experience</th>
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Applied Date</th>
+                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Resume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let app of applicantsList()" style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px; font-weight: 500;">{{ app.full_name }}</td>
+                            <td style="padding: 12px;"><span style="background: #eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">#{{ app.job_id }}</span></td>
+                            <td style="padding: 12px; color: #475569;">{{ app.email }}</td>
+                            <td style="padding: 12px; color: #475569;">{{ app.phone }}</td>
+                            <td style="padding: 12px;">{{ app.work_status }} <span *ngIf="app.work_status === 'Experienced'">({{ app.experience_years }} Yrs)</span></td>
+                            <td style="padding: 12px; color: #64748b; font-size: 0.9rem;">{{ app.applied_at | date:'mediumDate' }}</td>
+                            <td style="padding: 12px;">
+                                <a [href]="app.resume_url" target="_blank" style="text-decoration: none; color: #dc2626; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-file-pdf"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        <tr *ngIf="applicantsList().length === 0">
+                            <td colspan="7" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                No applications received yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 

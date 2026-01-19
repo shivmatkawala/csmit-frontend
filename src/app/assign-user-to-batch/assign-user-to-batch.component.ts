@@ -210,14 +210,15 @@ export class AssignUserToBatchComponent implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.loading = false;
         
+        // --- CHECK FOR DUPLICATES (409 Conflict) ---
         if (
              error.status === 409 || 
              (error.error && error.error.detail && error.error.detail.toLowerCase().includes('already')) ||
              (error.message && error.message.toLowerCase().includes('already'))
            ) {
-            const roleTitle = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
-            this.alertService.error(
-                `This Batch is already assigned to the ${roleTitle}.`, 
+            // SHOW WARNING POPUP
+            this.alertService.warning(
+                `User is already assigned to this batch.`, 
                 'Duplicate Assignment'
             );
             return;

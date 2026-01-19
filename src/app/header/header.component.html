@@ -5,7 +5,7 @@
 
   <div class="container header-container">
 
-    <!-- LEFT: Logo (Clicking sends to 'home') -->
+    <!-- LEFT: Logo -->
     <div class="logo-container">
       <a href="javascript:void(0)" class="logo-link" (click)="zoomLogo()">
         <img src="assets/logo.jpg" alt="CSMIT Logo" class="logo-img" [class.zoomed]="isLogoZoomed">
@@ -40,7 +40,7 @@
           </div>
         </li>
 
-        <!-- UPDATED: Careers Link now triggers 'careers' view -->
+        <!-- Careers -->
         <li class="nav-item">
           <a href="javascript:void(0)" 
              class="nav-link" 
@@ -50,7 +50,7 @@
           </a>
         </li>
         
-        <!-- Blog Link triggers 'blog' view -->
+        <!-- Blog -->
         <li class="nav-item">
           <a href="javascript:void(0)" 
              class="nav-link" 
@@ -60,7 +60,7 @@
           </a>
         </li>
         
-        <!-- Contact triggers 'contact' view -->
+        <!-- Contact -->
         <li class="nav-item">
           <a href="javascript:void(0)" 
              class="nav-link" 
@@ -113,21 +113,17 @@
           </svg>
         </a>
 
-        <!-- UPDATED: Mobile Careers Link -->
+        <!-- Mobile Links -->
         <a href="javascript:void(0)" class="mobile-item" 
            [class.active]="activePage === 'careers'"
            (click)="navigateTo('careers', $event)">
            Careers
         </a>
-        
-        <!-- Mobile Blog Link -->
         <a href="javascript:void(0)" class="mobile-item" 
            [class.active]="activePage === 'blog'"
            (click)="navigateTo('blog', $event)">
            Blog
         </a>
-        
-        <!-- Mobile Contact Link -->
         <a href="javascript:void(0)" class="mobile-item" 
            [class.active]="activePage === 'contact'"
            (click)="navigateTo('contact', $event)">
@@ -165,12 +161,11 @@
         </span>
       </div>
     </div>
-
   </nav>
 
 </header>
 
-<!-- Enrollment Popup (UNCHANGED) -->
+<!-- Enrollment Popup -->
 <div class="modal-backdrop" *ngIf="isEnrollmentModalOpen" (click)="closeEnrollmentModal()">
   <div class="enrollment-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -193,10 +188,20 @@
           <label for="email">Email Address</label>
           <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required [(ngModel)]="enrollmentForm.email">
         </div>
+
+        <!-- UPDATED: Phone Number Group with Country Code -->
         <div class="form-group">
           <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98765 43210" required [(ngModel)]="enrollmentForm.phone">
+          <div class="phone-input-group">
+            <select class="form-control country-select" name="countryCode" [(ngModel)]="enrollmentForm.countryCode">
+              <option *ngFor="let c of countryCodes" [value]="c.code">
+                {{ c.code }} ({{ c.country }})
+              </option>
+            </select>
+            <input type="tel" id="phone" name="phone" class="form-control phone-input" placeholder="98765 43210" required [(ngModel)]="enrollmentForm.phone">
+          </div>
         </div>
+
         <button type="submit" class="submit-btn" [disabled]="isSubmitting">
           {{ isSubmitting ? 'Submitting...' : 'Request Callback' }}
         </button>

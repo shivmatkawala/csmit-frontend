@@ -14,8 +14,8 @@ export class AlertService {
       text: message,
       icon: 'success',
       confirmButtonText: 'OK',
-      timer: timer,         // Timer in milliseconds
-      timerProgressBar: true // Optional: show a progress bar
+      timer: timer,
+      timerProgressBar: true
     });
   }
 
@@ -48,6 +48,19 @@ export class AlertService {
       icon: 'info',
       confirmButtonText: 'OK',
       timer: timer,
+      timerProgressBar: true
+    });
+  }
+
+  // --- NEW: Dedicated Validation Alert ---
+  validation(message: string, title: string = 'Invalid Input') {
+    Swal.fire({
+      title,
+      text: message,
+      icon: 'warning',
+      confirmButtonColor: '#f39c12', // distinct orange color for validation
+      confirmButtonText: 'Got it',
+      timer: 3000,
       timerProgressBar: true
     });
   }

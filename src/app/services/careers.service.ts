@@ -24,6 +24,7 @@ export class CareerService {
   // Dynamic API URLs
   private jobsUrl = `${API_BASE_URL}/careers/jobs/`; 
   private applyUrl = `${API_BASE_URL}/job-applications/submit/`;
+  private applicantsUrl = `${API_BASE_URL}/job-applications/list/`; // New URL
 
   private jobsSubject = new BehaviorSubject<Job[]>([]);
   public jobs$ = this.jobsSubject.asObservable();
@@ -55,7 +56,7 @@ export class CareerService {
     );
   }
 
-  // --- NEW FUNCTIONALITY (Real-time Application) ---
+  // --- APPLICATION FUNCTIONALITY ---
 
   submitApplication(formData: any, resumeFile: File): Observable<any> {
     // Step 1: Send Form Data to Backend to get S3 Presigned URL
@@ -77,5 +78,8 @@ export class CareerService {
         );
       })
     );
+  }
+  getApplicants(): Observable<any[]> {
+    return this.http.get<any[]>(this.applicantsUrl);
   }
 }

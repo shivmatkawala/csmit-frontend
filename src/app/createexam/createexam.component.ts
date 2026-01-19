@@ -14,7 +14,7 @@ interface Course {
 
 interface Batch {
   batchId: number;
-  batchName: string; // Updated to batchName for consistency
+  batchName: string; 
 }
 
 interface Subject {
@@ -116,12 +116,8 @@ export class CreateExamComponent implements OnInit {
         this.courses = res;
         this.isLoading = false;
         
-        if (this.courses.length > 0) {
-          if (this.examMetadata.courseid === null) {
-            this.examMetadata.courseid = this.courses[0].courseid;
-          }
-          this.onCourseSelect(); 
-        } else if (this.courses.length === 0) {
+        // --- UPDATED: Removed auto-selection of the first course ---
+        if (this.courses.length === 0) {
              this.alertService.warning('No courses found. Please ensure data is available on the API.');
         }
       },
@@ -136,18 +132,15 @@ export class CreateExamComponent implements OnInit {
   onCourseSelect(): void {
     const courseId = this.examMetadata.courseid;
     
-    if (!courseId) {
-      this.batches = [];
-      this.subjects = [];
-      this.examMetadata.batchId = null;
-      this.examMetadata.subjectId = null;
-      return;
-    }
-    
+    // Reset arrays and selections immediately when course changes
     this.batches = [];
     this.subjects = [];
     this.examMetadata.batchId = null;
     this.examMetadata.subjectId = null;
+
+    if (!courseId) {
+      return;
+    }
     
     // Fetch Batches
     this.isLoading = true;
@@ -165,9 +158,8 @@ export class CreateExamComponent implements OnInit {
           batchName: b.batchName || b.name || 'Unknown Batch' // Fallback to 'name'
       }));
 
-      if (this.batches.length > 0) {
-        this.examMetadata.batchId = this.batches[0].batchId;
-      } else {
+      // --- UPDATED: Removed auto-selection of the first batch ---
+      if (this.batches.length === 0) {
         this.alertService.info('No batches available for this course.');
       }
     });
@@ -184,9 +176,7 @@ export class CreateExamComponent implements OnInit {
     ).subscribe((res: SubjectAPIResponse) => {
       this.subjects = res.subjects; 
       
-      if (this.subjects && this.subjects.length > 0) {
-        this.examMetadata.subjectId = this.subjects[0].subjectid;
-      }
+      // --- UPDATED: Removed auto-selection of the first subject ---
       this.isLoading = false; 
     });
   }
@@ -203,7 +193,6 @@ export class CreateExamComponent implements OnInit {
     const endDate = new Date(this.examMetadata.end);
 
     // Check if start date is in the past (allowing a small buffer for "now")
-    // Note: We compare timestamps to be precise.
     if (startDate.getTime() < now.getTime() - 60000) { // 1 minute buffer
        this.alertService.warning('Start time cannot be in the past. Please choose a correct time.');
        return;

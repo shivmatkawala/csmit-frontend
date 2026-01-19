@@ -9,7 +9,6 @@ import { AlertService } from '../services/alert.service';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
-  // --- NEW: Output Event Emitter for Navigation ---
   @Output() pageChange = new EventEmitter<string>();
 
   // UI States
@@ -22,18 +21,31 @@ export class HeaderComponent implements OnInit {
 
   // Desktop States
   isCoursesOpen = false;
-  
-  // Active Page State (To highlight selected link)
-  activePage: string = 'home'; // Default to home
+  activePage: string = 'home'; 
   
   // Modal State
   isEnrollmentModalOpen = false;
   selectedCourse: string = '';
 
+  // --- NEW: Country Codes List ---
+  countryCodes = [
+    { code: '+91', country: 'India' },
+    { code: '+1', country: 'USA' },
+    { code: '+44', country: 'UK' },
+    { code: '+61', country: 'Australia' },
+    { code: '+971', country: 'UAE' },
+    { code: '+81', country: 'Japan' },
+    { code: '+49', country: 'Germany' },
+    { code: '+33', country: 'France' },
+    { code: '+86', country: 'China' },
+    { code: '+65', country: 'Singapore' }
+  ];
+
   // Form Data Models
   enrollmentForm = {
     name: '',
     email: '',
+    countryCode: '+91', // Default to India
     phone: ''
   };
 
@@ -51,20 +63,11 @@ export class HeaderComponent implements OnInit {
     this.fetchCourses();
   }
 
-  // --- NEW: Navigation Helper ---
   navigateTo(page: string, event?: Event) {
     if(event) event.preventDefault();
-    
-    // Set the active page to highlight it in blue
     this.activePage = page;
-
-    // Close Courses Dropdown if it is open
     this.isCoursesOpen = false;
-    
-    // Emit event to parent (Landing Page)
     this.pageChange.emit(page);
-    
-    // Close menus if open
     this.isMenuOpen = false;
     this.showMobileCourses = false;
   }
@@ -110,7 +113,6 @@ export class HeaderComponent implements OnInit {
   zoomLogo() {
     this.isLogoZoomed = !this.isLogoZoomed;
     if (this.isLogoZoomed) setTimeout(() => this.isLogoZoomed = false, 1000);
-    // Navigate Home on Logo Click
     this.navigateTo('home');
   }
 
@@ -128,9 +130,11 @@ export class HeaderComponent implements OnInit {
     this.showMobileCourses = false;
     document.body.style.overflow = 'hidden';
     
+    // Reset form
     this.enrollmentForm = {
       name: '',
       email: '',
+      countryCode: '+91',
       phone: ''
     };
   }
@@ -140,9 +144,37 @@ export class HeaderComponent implements OnInit {
     document.body.style.overflow = 'auto';
   }
 
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
+  private isValidPhone(phone: string): boolean {
+    const phoneRegex = /^\d+$/; 
+    return phoneRegex.test(phone);
+  }
+
   submitEnrollment() {
     if (!this.enrollmentForm.name || !this.enrollmentForm.email || !this.enrollmentForm.phone) {
-      this.alertService.warning('Please fill in all fields.', 'Missing Information');
+      this.alertService.validation('Please fill in all fields.', 'Missing Information');
+      return;
+    }
+
+    const email = this.enrollmentForm.email.trim();
+    if (!this.isValidEmail(email)) {
+      this.alertService.validation(
+        'Please enter a valid email address (e.g., user@example.com).', 
+        'Invalid Email'
+      );
+      return;
+    }
+
+    const phone = this.enrollmentForm.phone.trim();
+    if (!this.isValidPhone(phone)) {
+      this.alertService.validation(
+        'Please enter a valid phone number containing only digits (0-9). No spaces or special characters allowed.',
+        'Invalid Phone Number'
+      );
       return;
     }
 
@@ -150,20 +182,24 @@ export class HeaderComponent implements OnInit {
 
     this.isSubmitting = true;
 
+    // --- Combine Country Code and Phone Number ---
+    const fullPhoneNumber = `${this.enrollmentForm.countryCode} ${phone}`;
+
     const payload: InquiryPayload = {
       name: this.enrollmentForm.name,
-      phone_number: this.enrollmentForm.phone,
-      email: this.enrollmentForm.email,
+      phone_number: fullPhoneNumber, // Send the combined string
+      email: email,
       course_name: this.selectedCourse
     };
 
     this.inquiryService.createInquiry(payload).subscribe({
       next: (response) => {
+        this.closeEnrollmentModal(); 
+        
         this.alertService.success(
           `We have received your query for ${this.selectedCourse}. We will contact you shortly.`, 
           'Submitted Successfully!'
         );
-        this.closeEnrollmentModal();
         this.isSubmitting = false;
       },
       error: (error) => {

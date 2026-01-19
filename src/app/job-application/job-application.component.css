@@ -121,6 +121,7 @@
   background: white;
   position: relative;
   min-width: 0; /* Important for flex child to shrink properly */
+  height: 100%; /* Ensure full height */
 }
 
 /* Header */
@@ -243,9 +244,11 @@
 
 /* Form Body (Scrollable Area) */
 .form-body {
-  flex: 1;
+  flex: 1; /* Takes available space */
   overflow-y: auto;
   padding: 2rem;
+  /* Added significant padding to ensure last element is visible above footer/keyboard */
+  padding-bottom: 8rem; 
   display: flex;
   justify-content: center;
   -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
@@ -254,6 +257,8 @@
 .form-content-width {
   width: 100%;
   max-width: 700px;
+  /* Added padding specifically to content box to ensure last item floats above */
+  padding-bottom: 50px; 
 }
 
 /* Scrollbar Styling */
@@ -308,6 +313,50 @@
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(224, 58, 62, 0.1);
 }
+
+/* Phone Input Group Styles (Merged Look) */
+.phone-input-group {
+  display: flex;
+  align-items: stretch; /* Ensure full height */
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s;
+  overflow: hidden; /* Ensures borders radius works for children */
+}
+
+/* When any input inside is focused, light up the whole group */
+.phone-input-group:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(224, 58, 62, 0.1);
+}
+
+.phone-input-group .country-select {
+  width: 110px; /* Slight fixed width */
+  flex-shrink: 0;
+  background-color: #f8fafc; /* Slight gray to separate visually */
+  border: none !important;   /* Remove individual border */
+  border-right: 1px solid var(--border) !important; /* Divider line */
+  border-radius: 0;
+  padding: 12px 10px;
+  cursor: pointer;
+  outline: none;
+  color: var(--text-main);
+  font-weight: 500;
+  box-shadow: none !important;
+}
+
+.phone-input-group .phone-input {
+  flex-grow: 1;
+  border: none !important; /* Remove individual border */
+  border-radius: 0;
+  padding: 12px;
+  outline: none;
+  width: 100%;
+  box-shadow: none !important;
+}
+
 
 .error-msg {
   color: var(--primary);
@@ -404,6 +453,8 @@
   background: white;
   flex-shrink: 0;
   gap: 10px;
+  position: relative; /* Ensure footer stays separate */
+  z-index: 5;
 }
 
 .btn {
@@ -468,6 +519,7 @@
   /* Stack the layout vertically */
   .application-wrapper { 
     flex-direction: column; 
+    height: 100dvh; /* Force full dynamic viewport height */
   }
 
   /* Hide Side Panel to save space */
@@ -475,9 +527,16 @@
     display: none; 
   }
 
+  .form-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
   /* Adjust Form Header */
   .form-header { 
     padding: 1rem; 
+    flex-shrink: 0;
   }
   .header-info h2 {
     font-size: 1.2rem; /* Smaller title */
@@ -489,7 +548,10 @@
 
   /* Adjust Form Body Padding */
   .form-body { 
-    padding: 1.5rem 1rem; 
+    flex: 1;
+    padding: 1.5rem 1rem;
+    padding-bottom: 8rem; /* Extra padding for mobile scroll */
+    overflow-y: auto;
   }
 
   /* Make Input Grid Stack (1 Column) */
@@ -505,6 +567,9 @@
   .form-footer { 
     padding: 1rem; 
     flex-wrap: wrap; /* Allow wrapping */
+    flex-shrink: 0;
+    background: white;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05); /* Subtle shadow to separate */
   }
   .btn {
     flex: 1; /* Make buttons grow to fill space */
@@ -515,6 +580,7 @@
   /* Adjust Stepper */
   .stepper-container {
     padding: 1rem 0;
+    flex-shrink: 0;
   }
   .stepper-wrapper {
     width: 90%; /* Ensure it fits */

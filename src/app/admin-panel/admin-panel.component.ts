@@ -1,13 +1,14 @@
-import { Component, ChangeDetectionStrategy, signal, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { Router } from '@angular/router'; 
 import { UserManagementComponent } from './user-management/user-management.component'; 
 import { ManageCourseComponent } from './manage-course/manage-course.component'; 
 import { BatchManagementComponent } from './batch-management/batch-management.component';
+import { CareerService } from '../services/careers.service'; // Import Service
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
-// Added 'upload-careers' to TabId type to handle the new view
-type TabId = 'dashboard' | 'users' | 'courses' | 'batches' | 'settings' | 'upload-careers'; 
+// Added 'applicants' to TabId
+type TabId = 'dashboard' | 'users' | 'courses' | 'batches' | 'settings' | 'upload-careers' | 'applicants'; 
 
 interface NavLink {
   id: TabId; 
@@ -42,6 +43,8 @@ const ADMIN_CONFIG = {
     { id: 'users', label: 'Users', icon: 'fas fa-users', route: '/users' }, 
     { id: 'courses', label: 'Courses', icon: 'fas fa-book-open', route: '/courses' }, 
     { id: 'batches', label: 'Batches', icon: 'fas fa-graduation-cap', route: '/batches' }, 
+    // New Sidebar Link
+    { id: 'applicants', label: 'Applicants', icon: 'fas fa-file-alt', route: '/applicants' },
   ] as NavLink[],
   
   ADMIN_CARDS: [
@@ -123,7 +126,7 @@ const ADMIN_CONFIG = {
       subtitle: 'Upload lecture notes, assignments, and study materials.', 
       iconImage: 'notes.png', 
       buttonText: 'Upload Notes', 
-      colorClass: 'violet', // Consistent color class
+      colorClass: 'violet', 
       route: '/upload-notes' 
     }
   ] as AdminCard[]
@@ -143,6 +146,12 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   headerSearchQuery = signal<string>(''); 
   private searchTerms = new Subject<string>();
   
+  // Applicants Data Signal
+  applicantsList = signal<any[]>([]);
+  isLoadingApplicants = signal<boolean>(false);
+
+  private careerService = inject(CareerService); // Inject CareerService
+
   @ViewChild(UserManagementComponent) userManagementComponent!: UserManagementComponent; 
   @ViewChild(ManageCourseComponent) manageCourseComponent!: ManageCourseComponent;
   @ViewChild(BatchManagementComponent) batchManagementComponent!: BatchManagementComponent;
@@ -154,6 +163,10 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
     const matchingLink = this.config.SIDEBAR_LINKS.find(link => link.route === path);
     if (matchingLink) {
         this.activeTab.set(matchingLink.id);
+        // If loaded directly on applicants
+        if (matchingLink.id === 'applicants') {
+          this.fetchApplicants();
+        }
     }
   }
   
@@ -183,17 +196,38 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   navigateTo(route: string, tabId?: TabId): void { 
     if (tabId) {
         this.activeTab.set(tabId);
+        // Fetch data if Applicants tab is clicked
+        if (tabId === 'applicants') {
+          this.fetchApplicants();
+        }
     }
     
     if (tabId && tabId !== 'dashboard' && this.headerSearchQuery() !== '') {
         this.headerSearchQuery.set('');
     }
     
-    if (route) {
+    // For routing within SPA without full reload if component handles it
+    // Or actual router navigation
+    if (route && route !== '/applicants') { 
         this.router.navigate([route]).catch(err => {
             if (!tabId) console.error(err);
         });
     }
+  }
+
+  fetchApplicants() {
+    this.isLoadingApplicants.set(true);
+    this.careerService.getApplicants().subscribe({
+      next: (data) => {
+        this.applicantsList.set(data);
+        this.isLoadingApplicants.set(false);
+      },
+      error: (err) => {
+        console.error("Failed to fetch applicants", err);
+        this.isLoadingApplicants.set(false);
+        this.showMessageBox("Failed to load applicants", 'error');
+      }
+    });
   }
 
   logoutUser(): void {

@@ -5,7 +5,6 @@
     <div class="panel-overlay"></div>
     <div class="panel-content">
       <div class="brand-area">
-        <!-- Logo Text - Professional & Clean -->
         <div class="logo-text">CSMIT <span class="thin">Careers</span></div>
       </div>
       
@@ -44,19 +43,16 @@
     <!-- Stepper Progress -->
     <div class="stepper-container" *ngIf="!isSuccess && !isSubmitting">
       <div class="stepper-wrapper">
-        <!-- Step 1 -->
         <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
           <div class="step-circle"><span *ngIf="currentStep <= 1">1</span><span *ngIf="currentStep > 1">✓</span></div>
           <span class="step-label">Personal</span>
         </div>
         <div class="step-line"></div>
-        <!-- Step 2 -->
         <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
           <div class="step-circle"><span *ngIf="currentStep <= 2">2</span><span *ngIf="currentStep > 2">✓</span></div>
           <span class="step-label">Experience</span>
         </div>
         <div class="step-line"></div>
-        <!-- Step 3 -->
         <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
           <div class="step-circle">3</div>
           <span class="step-label">Review</span>
@@ -85,18 +81,43 @@
               <div class="form-group">
                 <label>Email Address <span class="req">*</span></label>
                 <input type="email" formControlName="email" placeholder="name@example.com">
-                <div class="error-msg" *ngIf="isFieldInvalid('email')">Valid email required</div>
+                <div class="error-msg" *ngIf="isFieldInvalid('email')">Valid email required (e.g., user@example.com)</div>
               </div>
 
+              <!-- Phone Number Group with Manual Option -->
               <div class="form-group">
                 <label>Phone Number <span class="req">*</span></label>
-                <input type="tel" formControlName="phone" placeholder="+91 98765 43210">
-                <div class="error-msg" *ngIf="isFieldInvalid('phone')">Valid phone required</div>
+                <div class="phone-input-group">
+                  
+                  <!-- Dropdown Mode -->
+                  <select *ngIf="!isManualCode" class="country-select" formControlName="countryCode">
+                    <option *ngFor="let c of countryCodes" [value]="c.code">
+                      {{ c.code }} ({{ c.country }})
+                    </option>
+                  </select>
+
+                  <!-- Manual Mode -->
+                  <input *ngIf="isManualCode" 
+                         type="text" 
+                         class="country-select" 
+                         style="width: 100px; text-align: center; padding: 12px 5px;" 
+                         formControlName="countryCode" 
+                         placeholder="+Code">
+
+                  <input type="tel" formControlName="phone" class="phone-input" placeholder="Phone Number">
+                </div>
+                
+                <div class="error-msg" *ngIf="isFieldInvalid('phone')">
+                  <!-- Use the dynamic hint here -->
+                  {{ phoneHint }}
+                </div>
+                <div class="error-msg" *ngIf="isFieldInvalid('countryCode')">Code required</div>
               </div>
 
               <div class="form-group">
                 <label>Date of Birth <span class="req">*</span></label>
-                <input type="date" formControlName="dob">
+                <!-- ADDED: [max] attribute to restrict future dates/years -->
+                <input type="date" formControlName="dob" [max]="maxDate">
                 <div class="error-msg" *ngIf="isFieldInvalid('dob')">Date of birth is required</div>
               </div>
 
@@ -126,7 +147,6 @@
             
             <div class="input-grid">
               
-              <!-- Experience Type Selector -->
               <div class="form-group span-2">
                 <label>Work Status <span class="req">*</span></label>
                 <div class="radio-group">
@@ -141,7 +161,6 @@
                 </div>
               </div>
 
-              <!-- DYNAMIC EXPERIENCE FIELDS -->
               <ng-container *ngIf="applyForm.get('workStatus')?.value === 'Experienced'">
                 <div class="divider span-2"><span>Work History</span></div>
                 
@@ -160,7 +179,7 @@
                 <div class="form-group fade-in">
                   <label>Experience (Years) <span class="req">*</span></label>
                   <input type="number" formControlName="experienceYears" placeholder="e.g. 3.5">
-                  <div class="error-msg" *ngIf="isFieldInvalid('experienceYears')">Experience required</div>
+                  <div class="error-msg" *ngIf="isFieldInvalid('experienceYears')">Valid number required</div>
                 </div>
 
                 <div class="form-group fade-in">
@@ -189,7 +208,6 @@
                 </div>
               </ng-container>
 
-              <!-- Education Header -->
               <div class="divider span-2"><span>Education</span></div>
 
               <div class="form-group">
@@ -207,8 +225,8 @@
 
               <div class="form-group">
                 <label>Passing Year <span class="req">*</span></label>
-                <input type="number" formControlName="gradYear" placeholder="YYYY">
-                <div class="error-msg" *ngIf="isFieldInvalid('gradYear')">Year is required</div>
+                <input type="tel" formControlName="gradYear" placeholder="YYYY" maxlength="4">
+                <div class="error-msg" *ngIf="isFieldInvalid('gradYear')">Valid 4-digit year required</div>
               </div>
 
               <div class="form-group span-2">
@@ -219,8 +237,8 @@
 
               <div class="form-group">
                 <label>CGPA / Percentage <span class="req">*</span></label>
-                <input type="text" formControlName="cgpa" placeholder="e.g. 8.5 or 85%">
-                <div class="error-msg" *ngIf="isFieldInvalid('cgpa')">CGPA is required</div>
+                <input type="text" formControlName="cgpa" placeholder="e.g. 8.5 or 85">
+                <div class="error-msg" *ngIf="isFieldInvalid('cgpa')">Valid number required (e.g., 8.5)</div>
               </div>
             </div>
           </div>
@@ -268,14 +286,12 @@
 
         </form>
 
-        <!-- Loading State -->
         <div *ngIf="isSubmitting" class="full-screen-msg">
           <div class="spinner"></div>
           <h2>Processing Application</h2>
           <p>Please wait while we securely transmit your details.</p>
         </div>
 
-        <!-- Success State -->
         <div *ngIf="isSuccess" class="full-screen-msg">
           <div class="icon-lg">✨</div>
           <h2>Application Received</h2>
