@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-
-// Interface define kar rahe hain data type ke liye
 export interface SuccessStory {
   id?: number;
   name: string;
@@ -11,7 +9,7 @@ export interface SuccessStory {
   package: string;
   quote: string;
   image: string;
-  logo: string; // Company logo URL
+  logo: string; 
 }
 
 @Injectable({
