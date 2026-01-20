@@ -27,8 +27,10 @@ export class UserService {
   private deactivateEndpoint = `${this.apiUrl}/deactivate-user/`;
   private reactivateEndpoint = `${this.apiUrl}/reactivate-user/`; 
   private deleteEndpoint = `${this.apiUrl}/delete-user/`;
-  // ✅ Added Update Password Endpoint
   private updatePasswordEndpoint = `${this.apiUrl}/update-password/`;
+  
+  // ✅ New Endpoint for Forgot Password
+  private forgotPasswordEndpoint = `${this.apiUrl}/forgot-password/`;
 
   constructor(private http: HttpClient) { }
 
@@ -52,8 +54,12 @@ export class UserService {
     return this.http.post<any>(this.deleteEndpoint, { userId });
   }
 
-  // ✅ New Method for Forgot Password functionality
   updatePassword(userId: string, newPassword: string): Observable<any> {
     return this.http.post<any>(this.updatePasswordEndpoint, { userId, newPassword });
+  }
+
+  // ✅ New Method to trigger email notification
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(this.forgotPasswordEndpoint, { username: email });
   }
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApiService, LoginResponse } from '../services/api.service';
+import { ApiService } from '../services/api.service';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -13,15 +13,16 @@ export class LoginFormComponent {
   username: string = '';
   password: string = '';
   
-  // Reset Password Models
-  resetUserId: string = '';
-  resetNewPassword: string = '';
+  // Forgot Password Model
+  forgotEmail: string = '';
   
   // UI States
   errorMessage: string = '';
   successMessage: string = '';
+  isLoading: boolean = false;
   hidePassword: boolean = true;
-  hideResetPassword: boolean = true;
+  
+  // Toggle between Login and Forgot Password View
   isForgotPasswordMode: boolean = false;
 
   constructor(
@@ -33,36 +34,27 @@ export class LoginFormComponent {
   togglePasswordVisibility() {
     this.hidePassword = !this.hidePassword;
   }
-  
-  toggleResetPasswordVisibility() {
-    this.hideResetPassword = !this.hideResetPassword;
-  }
 
   toggleView() {
     this.isForgotPasswordMode = !this.isForgotPasswordMode;
+    // Clear states when switching views
     this.errorMessage = '';
     this.successMessage = '';
-    this.username = '';
+    this.forgotEmail = '';
     this.password = '';
-    this.resetUserId = '';
-    this.resetNewPassword = '';
+    this.username = '';
   }
 
-  // ✅ UPDATED LOGIN FUNCTION
   login() {
     this.errorMessage = '';
     this.successMessage = '';
+    this.isLoading = true;
     
     this.api.login(this.username, this.password).subscribe(
-      (res: any) => { // Type 'any' use kiya hai temporarily taaki access token read ho sake
-        
-        // 1. TOKENS SAVE KAREIN
-        if (res.access) {
-            localStorage.setItem('access_token', res.access);
-        }
-        if (res.refresh) {
-            localStorage.setItem('refresh_token', res.refresh);
-        }
+      (res: any) => { 
+        this.isLoading = false;
+        if (res.access) localStorage.setItem('access_token', res.access);
+        if (res.refresh) localStorage.setItem('refresh_token', res.refresh);
 
         const authenticatedRole = res.role ? res.role.toUpperCase() : null; 
 
@@ -86,30 +78,46 @@ export class LoginFormComponent {
         }
       },
       (error) => {
+        this.isLoading = false;
         this.errorMessage = error.error?.error || 'Login failed. Invalid credentials.';
       } 
     );
   }
 
-  performPasswordReset() {
+  // ✅ New Logic: Send Request to Backend
+  requestForgotPassword() {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.resetUserId || !this.resetNewPassword) {
-      this.errorMessage = 'Please provide both User ID and New Password.';
+    if (!this.forgotEmail) {
+      this.errorMessage = 'Please enter your registered email address.';
       return;
     }
+    
+    // Simple email format check
+    if (!this.forgotEmail.includes('@') || !this.forgotEmail.includes('.')) {
+        this.errorMessage = 'Please enter a valid email address.';
+        return;
+    }
 
-    this.userService.updatePassword(this.resetUserId, this.resetNewPassword).subscribe(
+    this.isLoading = true;
+
+    this.userService.forgotPassword(this.forgotEmail).subscribe(
       (res) => {
-        this.successMessage = 'Password updated successfully! Please login.';
+        this.isLoading = false;
+        this.successMessage = 'Success! A temporary password has been sent to your Gmail.';
+        // Optionally switch back to login after delay
         setTimeout(() => {
-          this.toggleView();
-        }, 2000);
+            this.isForgotPasswordMode = false;
+            this.username = this.forgotEmail; // Auto-fill email for convenience
+            this.forgotEmail = '';
+            this.successMessage = 'Please login with the password sent to your email.';
+        }, 3000);
       },
       (error) => {
+        this.isLoading = false;
         console.error('Reset Failed:', error);
-        this.errorMessage = error.error?.error || 'Failed to update password. Check User ID.';
+        this.errorMessage = error.error?.error || 'Could not reset password. Please verify your email.';
       }
     );
   }
