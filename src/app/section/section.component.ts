@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { UiStateService } from '../services/ui-state.service';
 
@@ -7,7 +7,7 @@ import { UiStateService } from '../services/ui-state.service';
   templateUrl: './section.component.html',
   styleUrls: ['./section.component.css']
 })
-export class SectionComponent implements OnInit {
+export class SectionComponent implements OnInit, OnDestroy {
   // Inject Service
   private uiService = inject(UiStateService);
 
@@ -99,26 +99,31 @@ export class SectionComponent implements OnInit {
     });
   }
 
+  // --- FIX: Unlock scroll on component destruction ---
+  ngOnDestroy() {
+    document.body.style.overflow = 'auto';
+  }
+
   openAboutModal() {
     this.isAboutModalOpen = true;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; // Lock scroll
   }
 
   closeAboutModal() {
     this.isAboutModalOpen = false;
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Unlock scroll
   }
 
   openModal(videoId: string) {
     const unsafeUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
     this.selectedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(unsafeUrl);
     this.isModalOpen = true;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; // Lock scroll
   }
 
   closeModal() {
     this.isModalOpen = false;
     this.selectedVideoUrl = '';
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Unlock scroll
   }
 }

@@ -77,6 +77,9 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopAutoScroll();
+    
+    // --- FIX: Unlock scroll on component destruction ---
+    document.body.style.overflow = 'auto';
   }
 
   // --- Auto Scroll Logic ---
@@ -129,7 +132,7 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
            this.previewTitle = doc.title;
            this.isPreviewOpen = true;
            this.stopAutoScroll(); 
-           document.body.style.overflow = 'hidden'; 
+           document.body.style.overflow = 'hidden'; // Lock scroll
         } else {
            alert('Error: File URL not found.');
         }
@@ -145,7 +148,7 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isPreviewOpen = false;
     this.previewUrl = null;
     this.startAutoScroll();
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Unlock scroll
   }
 
   // --- Download Functionality (Force Download) ---
@@ -153,24 +156,21 @@ export class BlogComponent implements OnInit, AfterViewInit, OnDestroy {
     this.blogService.getDownloadLink(doc.id).subscribe({
       next: (res) => {
         if (res.download_url) {
-          // Fetch as blob to force download instead of opening in tab
           fetch(res.download_url)
             .then(response => response.blob())
             .then(blob => {
               const url = window.URL.createObjectURL(blob);
               const link = document.createElement('a');
               link.href = url;
-              link.download = doc.fileName; // Forces the browser to download
+              link.download = doc.fileName;
               document.body.appendChild(link);
               link.click();
               
-              // Cleanup
               document.body.removeChild(link);
               window.URL.revokeObjectURL(url);
             })
             .catch(err => {
               console.error('Download failed, falling back to open:', err);
-              // Fallback if fetch fails (e.g. CORS issues)
               window.open(res.download_url, '_blank');
             });
         } else {

@@ -7,7 +7,7 @@ import { SuccessStoriesService, SuccessStory } from '../services/success-stories
 import { ManageNotesService, Note } from '../services/manage-notes.service';
 import { UiStateService } from '../services/ui-state.service'; 
 import { InquiryService } from '../services/inquiry.service'; 
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; // Import Sanctifier
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-navbar',
@@ -22,7 +22,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private inquiryService = inject(InquiryService);
   private ngZone = inject(NgZone);
   private fb = inject(FormBuilder);
-  private sanitizer = inject(DomSanitizer); // Inject Sanitizer
+  private sanitizer = inject(DomSanitizer);
 
   selectedFeature: 'batch' | 'notes' | 'success' = 'batch';
   isLoading = true;
@@ -94,6 +94,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.stopBatchRotation();
     this.stopNoteScroll();
     this.stopStoryRotation(); 
+    
+    // --- FIX: Ensure scrollbar is restored if component is destroyed while modal is open ---
+    document.body.style.overflow = 'auto';
   }
 
   // --- INQUIRY FORM LOGIC ---
@@ -110,14 +113,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.submissionSuccess = false;
     this.inquiryForm.patchValue({ course_name: courseName });
     this.showInquiryForm = true;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; // Lock scroll
   }
 
   closeInquiryForm() {
     this.showInquiryForm = false;
     this.inquiryForm.reset();
     this.submissionSuccess = false;
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Unlock scroll
   }
 
   submitInquiry() {
@@ -210,7 +213,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- NEW: Preview Modal Logic ---
+  // --- Preview Modal Logic ---
   openPreviewModal(note: Note) {
     this.notesService.getDownloadLink(note.id).subscribe({
       next: (res) => {
@@ -218,7 +221,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
            this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(res.download_url);
            this.previewTitle = note.title;
            this.isPreviewOpen = true;
-           document.body.style.overflow = 'hidden';
+           document.body.style.overflow = 'hidden'; // Lock scroll
         }
       },
       error: () => alert('Could not load preview.')
@@ -228,7 +231,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   closePreviewModal() {
     this.isPreviewOpen = false;
     this.previewUrl = null;
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Unlock scroll
   }
 
   startNoteScroll() {
@@ -439,13 +442,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.selectedStory = story;
     this.isStoryModalOpen = true;
     this.stopStoryRotation(); 
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; // Lock scroll
   }
 
   closeStoryModal() {
     this.isStoryModalOpen = false;
     this.selectedStory = null;
     this.startStoryRotation(); 
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Unlock scroll
   }
 }

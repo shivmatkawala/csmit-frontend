@@ -51,8 +51,7 @@ export class JobApplicationComponent implements OnInit {
     { code: 'Other', country: 'Other', min: 7, max: 15 }
   ];
 
-  // --- Regex Patterns ---
-  // Updated: Name now only accepts Letters, Spaces, and Dots (No Integers)
+  // Regex Patterns
   private nameRegex = /^[a-zA-Z\s.]+$/; 
   private emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   private integerRegex = /^[0-9]+$/;       
@@ -60,7 +59,6 @@ export class JobApplicationComponent implements OnInit {
 
   constructor() {
     this.applyForm = this.fb.group({
-      // STEP 1: Personal Details (Added Name Validation)
       fullName: ['', [Validators.required, Validators.pattern(this.nameRegex)]],
       email: ['', [Validators.required, Validators.pattern(this.emailRegex)]],
       countryCode: ['+91', Validators.required],
@@ -69,7 +67,7 @@ export class JobApplicationComponent implements OnInit {
       gender: ['', Validators.required],
       location: ['', Validators.required],
 
-      // STEP 2: Education & Work
+      // Education & Work
       degree: ['', Validators.required],
       university: ['', Validators.required],
       gradYear: ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]], 
@@ -91,6 +89,7 @@ export class JobApplicationComponent implements OnInit {
     });
 
     this.applyForm.get('countryCode')?.valueChanges.subscribe(val => {
+      // Logic Fix: If 'Other' is selected, switch to manual mode and clear input for typing.
       if (val === 'Other') {
         this.isManualCode = true;
         this.applyForm.patchValue({ countryCode: '' }, { emitEvent: false });
@@ -98,6 +97,14 @@ export class JobApplicationComponent implements OnInit {
         this.updatePhoneValidators('Other');
         return;
       }
+
+      // Logic Fix: If currently in manual mode, do not automatically switch back to dropdown 
+      // when the user types a value that isn't 'Other'.
+      if (this.isManualCode) {
+        return;
+      }
+
+      // Default behavior for standard selections
       this.isManualCode = false;
       this.updatePhoneValidators(val);
     });
@@ -270,7 +277,12 @@ export class JobApplicationComponent implements OnInit {
     });
   }
 
-  closeModal() {
+  closeModal(event?: Event) {
+    if (event) {
+      // Prevents the event from bubbling up to potentially trigger other logic
+      event.preventDefault();
+      event.stopPropagation();
+    }
     this.close.emit();
   }
 

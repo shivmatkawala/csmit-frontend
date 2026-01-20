@@ -35,7 +35,8 @@
         <span class="sub-label">Applying For Position</span>
         <h2>{{ job?.title || 'Senior Position' }}</h2>
       </div>
-      <button class="close-btn" (click)="closeModal()">
+      <!-- Fixed: Added type="button" and pass $event to prevent navigation issues -->
+      <button type="button" class="close-btn" (click)="closeModal($event)">
         <span>Close</span> ✕
       </button>
     </div>
@@ -108,7 +109,6 @@
                 </div>
                 
                 <div class="error-msg" *ngIf="isFieldInvalid('phone')">
-                  <!-- Use the dynamic hint here -->
                   {{ phoneHint }}
                 </div>
                 <div class="error-msg" *ngIf="isFieldInvalid('countryCode')">Code required</div>
@@ -116,7 +116,6 @@
 
               <div class="form-group">
                 <label>Date of Birth <span class="req">*</span></label>
-                <!-- ADDED: [max] attribute to restrict future dates/years -->
                 <input type="date" formControlName="dob" [max]="maxDate">
                 <div class="error-msg" *ngIf="isFieldInvalid('dob')">Date of birth is required</div>
               </div>
@@ -296,7 +295,7 @@
           <div class="icon-lg">✨</div>
           <h2>Application Received</h2>
           <p>Thank you for applying to <strong>CSMIT Careers</strong>. A confirmation email has been sent to you.</p>
-          <button class="btn btn-primary" (click)="closeModal()">Return to Jobs</button>
+          <button class="btn btn-primary" (click)="closeModal($event)">Return to Jobs</button>
         </div>
 
       </div>
