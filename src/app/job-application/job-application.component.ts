@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, inject, OnInit } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CareerService } from '../services/careers.service';
-import { AlertService } from '../services/alert.service'; // Import AlertService
+import { AlertService } from '../services/alert.service';
 
 @Component({
   selector: 'app-job-application',
@@ -17,7 +17,7 @@ export class JobApplicationComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private careerService = inject(CareerService);
-  private alertService = inject(AlertService); // Inject AlertService
+  private alertService = inject(AlertService);
 
   applyForm: FormGroup;
   
@@ -51,13 +51,17 @@ export class JobApplicationComponent implements OnInit {
     { code: 'Other', country: 'Other', min: 7, max: 15 }
   ];
 
+  // --- Regex Patterns ---
+  // Updated: Name now only accepts Letters, Spaces, and Dots (No Integers)
+  private nameRegex = /^[a-zA-Z\s.]+$/; 
   private emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   private integerRegex = /^[0-9]+$/;       
   private numericRegex = /^[0-9.]+$/;      
 
   constructor() {
     this.applyForm = this.fb.group({
-      fullName: ['', Validators.required],
+      // STEP 1: Personal Details (Added Name Validation)
+      fullName: ['', [Validators.required, Validators.pattern(this.nameRegex)]],
       email: ['', [Validators.required, Validators.pattern(this.emailRegex)]],
       countryCode: ['+91', Validators.required],
       phone: ['', [Validators.required, Validators.pattern(this.integerRegex)]],
@@ -65,6 +69,7 @@ export class JobApplicationComponent implements OnInit {
       gender: ['', Validators.required],
       location: ['', Validators.required],
 
+      // STEP 2: Education & Work
       degree: ['', Validators.required],
       university: ['', Validators.required],
       gradYear: ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]], 
@@ -244,7 +249,6 @@ export class JobApplicationComponent implements OnInit {
 
     this.careerService.submitApplication(payload, this.selectedFile).subscribe({
       next: (response) => {
-        // --- 1. Success Alert (Requested by user) ---
         this.alertService.success(
           'Your application has been submitted successfully. Please check your email for confirmation.',
           'Application Received!'
@@ -255,14 +259,11 @@ export class JobApplicationComponent implements OnInit {
       error: (err) => {
         this.isSubmitting = false;
         
-        // --- 2. Extract Error Message from Backend (for Duplicates) ---
         const errorMsg = err.error?.error || 'Failed to submit application. Please try again.';
         
         if (errorMsg.toLowerCase().includes('already applied')) {
-           // Warning for duplicate application
            this.alertService.warning(errorMsg, 'Application Exists');
         } else {
-           // Generic Error
            this.alertService.error(errorMsg, 'Submission Failed');
         }
       }
