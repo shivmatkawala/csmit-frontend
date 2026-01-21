@@ -60,6 +60,7 @@
       
       <div class="form-group">
         <label for="startDate">Start Date <span class="required">*</span></label>
+        <!-- Added [min] attribute for validation -->
         <input 
           id="startDate" 
           name="startDate" 
@@ -68,6 +69,7 @@
           [(ngModel)]="batchData.startDate" 
           #startDate="ngModel" 
           class="input-field"
+          [min]="minDate"
         />
         <div *ngIf="startDate.invalid && (startDate.dirty || startDate.touched)" class="error-message">
           Start date is required.

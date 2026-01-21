@@ -94,8 +94,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.stopBatchRotation();
     this.stopNoteScroll();
     this.stopStoryRotation(); 
-    
-    // --- FIX: Ensure scrollbar is restored if component is destroyed while modal is open ---
     document.body.style.overflow = 'auto';
   }
 
@@ -110,6 +108,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   openInquiryForm(courseName: string = 'General') {
+    // Stop background activities when form opens to prevent glitches
+    this.stopBatchRotation();
+    this.stopStoryRotation();
+
     this.submissionSuccess = false;
     this.inquiryForm.patchValue({ course_name: courseName });
     this.showInquiryForm = true;
@@ -121,6 +123,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.inquiryForm.reset();
     this.submissionSuccess = false;
     document.body.style.overflow = 'auto'; // Unlock scroll
+
+    // Resume background activities
+    this.startBatchRotation();
+    this.startStoryRotation();
+  }
+
+  // Improved Overlay Click Handler
+  // This ensures the form only closes if the user clicks strictly on the overlay,
+  // not if they drag mouse from inside the form to outside.
+  onOverlayClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      this.closeInquiryForm();
+    }
   }
 
   submitInquiry() {

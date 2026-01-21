@@ -22,6 +22,7 @@ export class CreateBatchComponent implements OnInit {
 
   isSubmitting: boolean = false;
   courses: Course[] = []; 
+  minDate: string = ''; // Added property for date validation
   
   // Default Data
   batchData: Batch = {
@@ -42,6 +43,16 @@ export class CreateBatchComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchCourseList();
+    this.setMinDate(); // Set validation on init
+  }
+  
+  // Logic to set minimum date to Today (Local Time)
+  setMinDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    this.minDate = `${year}-${month}-${day}`;
   }
   
   // Go Back Method

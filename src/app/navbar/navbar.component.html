@@ -91,7 +91,6 @@
               <div class="note-meta"><span class="category-tag">{{ note.category }}</span><span class="date-tag">📅 {{ note.uploaded_at | date:'mediumDate' }}</span></div>
             </div>
           </div>
-          <!-- CHANGED: Replaced Download with Preview -->
           <div class="note-actions">
             <button class="action-btn download-btn" (click)="openPreviewModal(note)">Preview 👁️</button>
           </div>
@@ -127,60 +126,62 @@
 </section>
 
 <!-- INQUIRY FORM MODAL -->
-<div class="modal-overlay" *ngIf="showInquiryForm" (click)="closeInquiryForm()">
-<div class="modal-content" (click)="$event.stopPropagation()">
-<button class="close-modal-btn" (click)="closeInquiryForm()">×</button>
+<!-- UPDATED: Use onOverlayClick to prevent closing when dragging from inside to outside -->
+<div class="modal-overlay" *ngIf="showInquiryForm" (click)="onOverlayClick($event)">
+  <!-- UPDATED: Removed stopPropagation as onOverlayClick handles safety better -->
+  <div class="modal-content">
+    <button class="close-modal-btn" (click)="closeInquiryForm()">×</button>
 
-<div *ngIf="!submissionSuccess">
-  <div class="modal-header">
-    <h3>Book Your Demo Seat</h3>
-    <p>Fill out the form below to reserve your spot for <strong>{{ inquiryForm.get('course_name')?.value }}</strong>.</p>
+    <div *ngIf="!submissionSuccess">
+      <div class="modal-header">
+        <h3>Book Your Demo Seat</h3>
+        <p>Fill out the form below to reserve your spot for <strong>{{ inquiryForm.get('course_name')?.value }}</strong>.</p>
+      </div>
+
+      <form [formGroup]="inquiryForm" (ngSubmit)="submitInquiry()">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" formControlName="name" placeholder="Enter your full name" class="form-input">
+          <div *ngIf="inquiryForm.get('name')?.invalid && inquiryForm.get('name')?.touched" class="error-text">
+            Name is required.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" formControlName="phone_number" placeholder="Enter mobile number" class="form-input">
+          <div *ngIf="inquiryForm.get('phone_number')?.invalid && inquiryForm.get('phone_number')?.touched" class="error-text">
+            Valid phone number is required.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email (Optional)</label>
+          <input type="email" formControlName="email" placeholder="example@email.com" class="form-input">
+          <div *ngIf="inquiryForm.get('email')?.invalid && inquiryForm.get('email')?.touched" class="error-text">
+            Please enter a valid email.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Selected Course</label>
+          <input type="text" formControlName="course_name" readonly class="form-input" style="background-color: #f1f5f9;">
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="inquiryForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Booking Seat...' : 'Confirm Booking' }}
+        </button>
+      </form>
+    </div>
+
+    <div *ngIf="submissionSuccess" class="success-message">
+      <span class="success-icon">🎉</span>
+      <h4>Seat Booked Successfully!</h4>
+      <p>Thank you for your interest. Our team will contact you shortly to confirm your demo schedule.</p>
+      <button class="submit-btn" style="margin-top: 2rem;" (click)="closeInquiryForm()">Close</button>
+    </div>
+
   </div>
-
-  <form [formGroup]="inquiryForm" (ngSubmit)="submitInquiry()">
-    <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input type="text" formControlName="name" placeholder="Enter your full name" class="form-input">
-      <div *ngIf="inquiryForm.get('name')?.invalid && inquiryForm.get('name')?.touched" class="error-text">
-        Name is required.
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Phone Number</label>
-      <input type="tel" formControlName="phone_number" placeholder="Enter mobile number" class="form-input">
-      <div *ngIf="inquiryForm.get('phone_number')?.invalid && inquiryForm.get('phone_number')?.touched" class="error-text">
-        Valid phone number is required.
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Email (Optional)</label>
-      <input type="email" formControlName="email" placeholder="example@email.com" class="form-input">
-      <div *ngIf="inquiryForm.get('email')?.invalid && inquiryForm.get('email')?.touched" class="error-text">
-        Please enter a valid email.
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Selected Course</label>
-      <input type="text" formControlName="course_name" readonly class="form-input" style="background-color: #f1f5f9;">
-    </div>
-
-    <button type="submit" class="submit-btn" [disabled]="inquiryForm.invalid || isSubmitting">
-      {{ isSubmitting ? 'Booking Seat...' : 'Confirm Booking' }}
-    </button>
-  </form>
-</div>
-
-<div *ngIf="submissionSuccess" class="success-message">
-  <span class="success-icon">🎉</span>
-  <h4>Seat Booked Successfully!</h4>
-  <p>Thank you for your interest. Our team will contact you shortly to confirm your demo schedule.</p>
-  <button class="submit-btn" style="margin-top: 2rem;" (click)="closeInquiryForm()">Close</button>
-</div>
-
-</div>
 </div>
 
 <!-- SUCCESS STORY DETAIL MODAL -->
