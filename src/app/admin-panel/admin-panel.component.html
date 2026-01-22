@@ -84,48 +84,162 @@
             </div>
         </div>
 
-        <!-- NEW: Applicants View -->
+        <!-- Applicants View -->
         <div *ngIf="activeTab() === 'applicants'" class="fade-in">
             <div class="main-content-header">
                 <h1>Job Applicants</h1>
                 <p>View and manage all received applications.</p>
             </div>
 
-            <div class="applicants-container" style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eef2f6;">
-                <div *ngIf="isLoadingApplicants()" style="text-align: center; padding: 20px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #4f46e5;"></i>
+            <div class="content-container">
+                <div *ngIf="isLoadingApplicants()" class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
                     <p>Loading applicants...</p>
                 </div>
 
-                <table *ngIf="!isLoadingApplicants()" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <table *ngIf="!isLoadingApplicants()" class="modern-table">
                     <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #eef2f6;">
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Name</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Job ID</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Email</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Phone</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Experience</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Applied Date</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600;">Resume</th>
+                        <tr>
+                            <th>Name</th>
+                            <th>Job ID</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Experience</th>
+                            <th>Applied Date</th>
+                            <th>Resume</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let app of applicantsList()" style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 12px; font-weight: 500;">{{ app.full_name }}</td>
-                            <td style="padding: 12px;"><span style="background: #eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">#{{ app.job_id }}</span></td>
-                            <td style="padding: 12px; color: #475569;">{{ app.email }}</td>
-                            <td style="padding: 12px; color: #475569;">{{ app.phone }}</td>
-                            <td style="padding: 12px;">{{ app.work_status }} <span *ngIf="app.work_status === 'Experienced'">({{ app.experience_years }} Yrs)</span></td>
-                            <td style="padding: 12px; color: #64748b; font-size: 0.9rem;">{{ app.applied_at | date:'mediumDate' }}</td>
-                            <td style="padding: 12px;">
-                                <a [href]="app.resume_url" target="_blank" style="text-decoration: none; color: #dc2626; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                        <tr *ngFor="let app of applicantsList()">
+                            <td class="font-medium">{{ app.full_name }}</td>
+                            <td><span class="badge badge-indigo">#{{ app.job_id }}</span></td>
+                            <td class="text-muted">{{ app.email }}</td>
+                            <td class="text-muted">{{ app.phone }}</td>
+                            <td>{{ app.work_status }} <span *ngIf="app.work_status === 'Experienced'">({{ app.experience_years }} Yrs)</span></td>
+                            <td class="text-muted">{{ app.applied_at | date:'mediumDate' }}</td>
+                            <td>
+                                <a [href]="app.resume_url" target="_blank" class="link-danger">
                                     <i class="fas fa-file-pdf"></i> View
                                 </a>
                             </td>
                         </tr>
                         <tr *ngIf="applicantsList().length === 0">
-                            <td colspan="7" style="text-align: center; padding: 30px; color: #94a3b8;">
+                            <td colspan="7" class="empty-state">
                                 No applications received yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NEW: Inquiries View -->
+        <div *ngIf="activeTab() === 'inquiries'" class="fade-in">
+            <div class="main-content-header">
+                <h1>Course Inquiries</h1>
+                <p>Track and manage student inquiries from the website.</p>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label><i class="fas fa-book"></i> Course</label>
+                    <input 
+                        type="text" 
+                        placeholder="Filter by Course Name..." 
+                        [value]="filterCourseName()"
+                        (input)="filterCourseName.set($any($event.target).value)"
+                    >
+                </div>
+                <div class="filter-group">
+                    <label><i class="far fa-calendar-alt"></i> From</label>
+                    <input 
+                        type="date" 
+                        [value]="filterStartDate()"
+                        (input)="filterStartDate.set($any($event.target).value)"
+                    >
+                </div>
+                <div class="filter-group">
+                    <label><i class="far fa-calendar-alt"></i> To</label>
+                    <input 
+                        type="date" 
+                        [value]="filterEndDate()"
+                        (input)="filterEndDate.set($any($event.target).value)"
+                    >
+                </div>
+                
+                <!-- Reset Filter -->
+                <button class="btn-reset" (click)="resetFilters()" title="Reset Filters">
+                    <i class="fas fa-undo"></i>
+                </button>
+
+                <div style="flex-grow: 1;"></div>
+
+                <!-- Delete Actions -->
+                <div class="delete-actions" style="display: flex; gap: 10px;">
+                    <!-- Show this button only when dates are selected -->
+                    <button *ngIf="filterStartDate() && filterEndDate()" 
+                            class="btn-danger-outline" 
+                            (click)="deleteByDateRange()"
+                            title="Delete displayed range">
+                        <i class="fas fa-trash-alt"></i> Delete Range
+                    </button>
+                    
+                    <button class="btn-danger" (click)="deleteAllData()" title="Delete ALL Inquiries">
+                        <i class="fas fa-exclamation-triangle"></i> Delete All
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-container">
+                <div *ngIf="isLoadingInquiries()" class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading inquiries...</p>
+                </div>
+
+                <table *ngIf="!isLoadingInquiries()" class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Interested Course</th>
+                            <th>Contact Email</th>
+                            <th>Phone Number</th>
+                            <th>Inquiry Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inq of filteredInquiries()">
+                            <td class="font-medium">
+                                <div class="user-cell">
+                                    <div class="avatar-initial">{{ inq.name.charAt(0).toUpperCase() }}</div>
+                                    {{ inq.name }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-violet">{{ inq.course_name || 'General' }}</span>
+                            </td>
+                            <td class="text-muted">
+                                <a href="mailto:{{inq.email}}" class="hover-link">{{ inq.email }}</a>
+                            </td>
+                            <td class="text-muted">
+                                <a href="tel:{{inq.phone_number}}" class="hover-link">{{ inq.phone_number }}</a>
+                            </td>
+                            <td class="text-muted">{{ inq.created_at | date:'mediumDate' }} <small>{{ inq.created_at | date:'shortTime' }}</small></td>
+                            <td>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn-icon" title="Mark as Contacted" (click)="markAsContacted()">
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    </button>
+                                    <button class="btn-icon delete-icon" title="Delete Inquiry" (click)="deleteInquiry(inq.id!)">
+                                        <i class="fas fa-trash text-danger"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="filteredInquiries().length === 0">
+                            <td colspan="6" class="empty-state">
+                                No inquiries found matching your filters.
                             </td>
                         </tr>
                     </tbody>
@@ -157,11 +271,4 @@
         ></app-upload-career>
         
     </main>
-
-    <!-- Message Box -->
-    <div class="message-box" id="messageBox">
-        <p>Action Successful!</p>
-        <button class="close-btn" (click)="closeMessageBox()">✕</button>
-    </div>
-
 </div>

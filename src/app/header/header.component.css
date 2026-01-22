@@ -461,6 +461,12 @@
   cursor: pointer;
 }
 
+.manual-code-input {
+  width: 80px; /* Width for manual code input */
+  flex-shrink: 0;
+  text-align: center;
+}
+
 .phone-input {
   flex-grow: 1; /* Input takes remaining space */
 }

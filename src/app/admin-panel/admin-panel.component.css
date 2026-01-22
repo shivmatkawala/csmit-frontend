@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Updated font for modern look */
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     background-color: #f4f7fa;
     color: #333;
     transition: background-color 0.3s, color 0.3s;
@@ -31,12 +31,12 @@ header {
     align-items: center;
     padding: 0 2rem;
     background-color: #fff;
-    border-bottom: 1px solid #eef2f6; /* Subtle border instead of heavy shadow */
+    border-bottom: 1px solid #eef2f6; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 70px; /* Slightly reduced height for cleaner look */
+    height: 70px; 
     z-index: 2000;
     transition: background-color 0.3s;
 }
@@ -49,24 +49,24 @@ body.dark-mode header {
 .logo-search {
     display: flex;
     align-items: center;
-    gap: 3rem; /* More space between logo and search */
+    gap: 3rem; 
 }
 
 .logo img {
-    height: 40px; /* Adjusted logo size */
+    height: 40px; 
     width: auto;
 }
 
 .search-wrapper {
     position: relative;
-    width: 350px; /* Wider search bar */
+    width: 350px; 
 }
 
 .search-wrapper input {
     width: 100%;
     padding: 0.6rem 1rem 0.6rem 2.5rem;
     border: 1px solid #e0e0e0;
-    border-radius: 8px; /* Softer corners */
+    border-radius: 8px; 
     background-color: #f8f9fa;
     font-size: 0.95rem;
     transition: all 0.3s;
@@ -75,13 +75,13 @@ body.dark-mode header {
 .search-wrapper input:focus {
     outline: none;
     background-color: #fff;
-    border-color: #4f46e5; /* Primary color focus */
+    border-color: #4f46e5; 
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .search-wrapper i {
     position: absolute;
-    left: 1rem; /* Icon on left */
+    left: 1rem; 
     top: 50%;
     transform: translateY(-50%);
     color: #999;
@@ -131,13 +131,13 @@ body.dark-mode header {
 
 /* --- SIDEBAR --- */
 aside.sidebar {
-    width: 200px; /* WIDTH REDUCED from 240px to 200px as requested */
+    width: 200px; 
     background-color: #fff;
     border-right: 1px solid #eef2f6;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 1.5rem 0.5rem; /* Further reduced padding for narrower sidebar */
+    padding: 1.5rem 0.5rem; 
     position: fixed;
     height: calc(100vh - 70px);
     left: 0;
@@ -154,21 +154,21 @@ body.dark-mode aside.sidebar {
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem; /* Gap between items */
+    gap: 0.5rem; 
 }
 
 /* Modern "Pill" Style Links */
 .sidebar-nav a {
     display: flex;
     align-items: center;
-    gap: 0.6rem; /* Reduced gap slightly for compact sidebar */
-    padding: 0.75rem 0.8rem; /* Adjusted padding */
+    gap: 0.6rem; 
+    padding: 0.75rem 0.8rem; 
     text-decoration: none;
-    color: #64748b; /* Muted text color */
-    border-radius: 12px; /* Rounded pill shape */
+    color: #64748b; 
+    border-radius: 12px; 
     transition: all 0.2s ease;
     font-weight: 500;
-    font-size: 0.85rem; /* Slightly smaller text */
+    font-size: 0.85rem; 
     margin-bottom: 2px;
 }
 
@@ -183,8 +183,8 @@ body.dark-mode .sidebar-nav a {
 
 /* Active State Design */
 .sidebar-nav a.active {
-    background-color: #eef2ff; /* Light primary bg */
-    color: #4f46e5; /* Primary color text */
+    background-color: #eef2ff; 
+    color: #4f46e5; 
     font-weight: 600;
 }
 
@@ -213,8 +213,8 @@ body.dark-mode .sidebar-nav a.active {
     justify-content: center;
     gap: 0.8rem;
     padding: 0.85rem;
-    background-color: #fee2e2; /* Light red bg */
-    color: #ef4444; /* Red text */
+    background-color: #fee2e2; 
+    color: #ef4444; 
     border: none;
     border-radius: 12px;
     cursor: pointer;
@@ -234,15 +234,15 @@ body.dark-mode .sidebar-nav a.active {
 /* --- MAIN CONTENT --- */
 .main-content {
     flex: 1;
-    margin-left: 200px; /* Updated margin to match new sidebar width (200px) */
-    margin-top: 70px; /* Matches header height */
+    margin-left: 200px; 
+    margin-top: 70px; 
     padding: 2.5rem;
     background-color: #f4f7fa;
     min-height: calc(100vh - 70px);
 }
 
 .main-content-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .main-content-header h1 {
@@ -258,13 +258,10 @@ body.dark-mode .sidebar-nav a.active {
 /* --- CARD GRID --- */
 .card-grid {
     display: grid;
-    /* CHANGED: Using minmax(220px, 1fr) ensures cards shrink enough to fit 4 in a row on standard screens */
-    /* Alternatively, for strict 4 per row on large screens: grid-template-columns: repeat(4, 1fr); */
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-    gap: 1.5rem; /* Reduced gap slightly to help fit cards */
+    gap: 1.5rem; 
 }
 
-/* Force 4 columns on large screens if auto-fill doesn't catch it right away */
 @media (min-width: 1400px) {
     .card-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -275,8 +272,8 @@ body.dark-mode .sidebar-nav a.active {
     background-color: #fff;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* Soft modern shadow */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover transition */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
     border: 1px solid #f0f0f0;
     cursor: pointer;
     display: flex;
@@ -288,15 +285,14 @@ body.dark-mode .card {
     border-color: #444;
 }
 
-/* HOVER EFFECT: Only card moves up, image stays static */
 .card:hover {
-    transform: translateY(-8px); /* Card lifts up */
+    transform: translateY(-8px); 
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .card-image-wrapper {
     position: relative;
-    height: 160px; /* Slightly reduced height for compactness */
+    height: 160px; 
     overflow: hidden;
 }
 
@@ -304,10 +300,7 @@ body.dark-mode .card {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* REMOVED: transition and transform on image hover */
 }
-
-/* Removed the image zoom hover effect block */
 
 .card-overlay {
     position: absolute;
@@ -321,7 +314,7 @@ body.dark-mode .card {
 }
 
 .card-overlay h2 {
-    font-size: 1.15rem; /* Adjusted font size */
+    font-size: 1.15rem; 
     font-weight: 600;
     margin-bottom: 0.2rem;
 }
@@ -353,7 +346,7 @@ body.dark-mode .card-action {
 
 .card-action button {
     width: 100%;
-    padding: 0.65rem; /* Slightly reduced padding */
+    padding: 0.65rem; 
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -366,11 +359,205 @@ body.dark-mode .card-action {
     opacity: 0.9;
 }
 
+/* --- COMMON CONTENT STYLES (Applicants & Inquiries) --- */
+.content-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    /* Mobile Table Scroll Fix */
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch;
+}
+
+.loading-state, .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+
+.loading-state i {
+    font-size: 24px;
+    color: #4f46e5;
+    margin-bottom: 10px;
+}
+
+/* --- FILTER BAR --- */
+.filter-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #eef2f6;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-group input, .filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    min-width: 160px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.filter-group input:focus {
+    border-color: #4f46e5;
+}
+
+.btn-reset {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-reset:hover {
+    background: #e2e8f0;
+    color: #333;
+}
+
+/* --- MODERN TABLE STYLES --- */
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 600px; /* Ensures table doesn't squash too much */
+}
+
+.modern-table thead th {
+    background: #f8fafc;
+    padding: 12px 16px;
+    text-align: left;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid #eef2f6;
+    white-space: nowrap; /* Prevents headers breaking awkwardly */
+}
+
+.modern-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.modern-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.modern-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.modern-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Table Utilities */
+.font-medium { font-weight: 500; }
+.text-muted { color: #64748b; font-size: 0.9rem; }
+.text-success { color: #10b981; }
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.badge-indigo { background: #eef2ff; color: #4f46e5; }
+.badge-violet { background: #f5f3ff; color: #7c3aed; }
+
+.link-danger {
+    text-decoration: none;
+    color: #dc2626;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.hover-link {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s;
+}
+.hover-link:hover {
+    color: #4f46e5;
+    text-decoration: underline;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-initial {
+    width: 32px;
+    height: 32px;
+    background: #4f46e5;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0; /* Prevents circle squashing */
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.btn-icon:hover {
+    background: #ecfdf5;
+}
+
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
     aside.sidebar {
-        width: 80px; /* Collapsed width for tablet */
+        width: 80px; 
         padding: 1rem 0.5rem;
     }
     
@@ -453,5 +640,26 @@ body.dark-mode .card-action {
     
     .card-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group input {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    /* Ensure action buttons wrap properly on mobile */
+    .delete-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .delete-actions button {
+        width: 100%;
+        justify-content: center;
     }
 }

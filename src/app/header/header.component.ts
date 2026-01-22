@@ -27,7 +27,7 @@ export class HeaderComponent implements OnInit {
   isEnrollmentModalOpen = false;
   selectedCourse: string = '';
 
-  // --- NEW: Country Codes List ---
+  // --- Country Codes List ---
   countryCodes = [
     { code: '+91', country: 'India' },
     { code: '+1', country: 'USA' },
@@ -38,8 +38,13 @@ export class HeaderComponent implements OnInit {
     { code: '+49', country: 'Germany' },
     { code: '+33', country: 'France' },
     { code: '+86', country: 'China' },
-    { code: '+65', country: 'Singapore' }
+    { code: '+65', country: 'Singapore' },
+    { code: 'Others', country: 'Enter Code' } // Added Others option
   ];
+
+  // Flag to toggle between select dropdown and manual input
+  isManualCountryCode = false;
+  countrySelectValue = '+91'; // To keep track of dropdown selection separately
 
   // Form Data Models
   enrollmentForm = {
@@ -137,11 +142,39 @@ export class HeaderComponent implements OnInit {
       countryCode: '+91',
       phone: ''
     };
+    this.countrySelectValue = '+91'; // Reset dropdown
+    this.isManualCountryCode = false; // Reset manual mode
   }
 
   closeEnrollmentModal() {
     this.isEnrollmentModalOpen = false;
     document.body.style.overflow = 'auto';
+  }
+
+  // --- Handle Country Code Changes ---
+  onCountryChange() {
+    if (this.countrySelectValue === 'Others') {
+      this.isManualCountryCode = true;
+      this.enrollmentForm.countryCode = '+'; // Reset to + for user input
+    } else {
+      this.isManualCountryCode = false;
+      this.enrollmentForm.countryCode = this.countrySelectValue;
+    }
+  }
+
+  // --- Sanitize Manual Country Code Input ---
+  sanitizeCountryCode(event: any) {
+    let value = event.target.value;
+    
+    // Ensure it starts with +
+    if (!value.startsWith('+')) {
+      value = '+' + value.replace(/[^0-9]/g, '');
+    } else {
+      // Keep + at start, allow only numbers after that
+      value = '+' + value.substring(1).replace(/[^0-9]/g, '');
+    }
+    
+    this.enrollmentForm.countryCode = value;
   }
 
   private isValidEmail(email: string): boolean {
@@ -150,14 +183,26 @@ export class HeaderComponent implements OnInit {
   }
 
   private isValidPhone(phone: string): boolean {
+    // Check if it's only digits
     const phoneRegex = /^\d+$/; 
-    return phoneRegex.test(phone);
+    if (!phoneRegex.test(phone)) return false;
+
+    // Check length 7-15
+    return phone.length >= 7 && phone.length <= 15;
   }
 
   submitEnrollment() {
-    if (!this.enrollmentForm.name || !this.enrollmentForm.email || !this.enrollmentForm.phone) {
+    if (!this.enrollmentForm.name || !this.enrollmentForm.email || !this.enrollmentForm.phone || !this.enrollmentForm.countryCode) {
       this.alertService.validation('Please fill in all fields.', 'Missing Information');
       return;
+    }
+
+    // Validate Country Code (Manual Mode)
+    if (this.isManualCountryCode) {
+       if (this.enrollmentForm.countryCode === '+' || this.enrollmentForm.countryCode.length < 2) {
+          this.alertService.validation('Please enter a valid country code (e.g., +1).', 'Invalid Code');
+          return;
+       }
     }
 
     const email = this.enrollmentForm.email.trim();
@@ -172,7 +217,7 @@ export class HeaderComponent implements OnInit {
     const phone = this.enrollmentForm.phone.trim();
     if (!this.isValidPhone(phone)) {
       this.alertService.validation(
-        'Please enter a valid phone number containing only digits (0-9). No spaces or special characters allowed.',
+        'Please enter a valid phone number (7-15 digits only). No spaces or special characters allowed.',
         'Invalid Phone Number'
       );
       return;
@@ -203,10 +248,19 @@ export class HeaderComponent implements OnInit {
         this.isSubmitting = false;
       },
       error: (error) => {
-        this.alertService.error(
-          'Something went wrong while submitting your inquiry. Please try again later.',
-          'Submission Failed'
-        );
+        // --- UPDATED ERROR HANDLING ---
+        // Display message from backend if available, otherwise generic error
+        const backendMessage = error.error?.message;
+        
+        if (backendMessage) {
+           // If it's our duplicate entry message, show it as info or warning
+           this.alertService.info(backendMessage, 'Already Registered');
+        } else {
+           this.alertService.error(
+            'Something went wrong while submitting your inquiry. Please try again later.',
+            'Submission Failed'
+           );
+        }
         this.isSubmitting = false;
       }
     });

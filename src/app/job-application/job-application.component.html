@@ -85,39 +85,40 @@
                 <div class="error-msg" *ngIf="isFieldInvalid('email')">Valid email required (e.g., user@example.com)</div>
               </div>
 
-              <!-- Phone Number Group with Manual Option -->
+              <!-- Phone Number Group with Manual Option (UPDATED to match Header) -->
               <div class="form-group">
                 <label>Phone Number <span class="req">*</span></label>
                 <div class="phone-input-group">
                   
-                  <!-- Dropdown Mode -->
-                  <select *ngIf="!isManualCode" class="country-select" formControlName="countryCode">
+                  <!-- Dropdown: Always Visible, controls toggle -->
+                  <select class="country-select" [ngModel]="countrySelectValue" (ngModelChange)="onCountryChange($event)" [ngModelOptions]="{standalone: true}">
                     <option *ngFor="let c of countryCodes" [value]="c.code">
-                      {{ c.code }} ({{ c.country }})
+                      {{ c.code === 'Others' ? 'Others' : c.code + ' (' + c.country + ')' }}
                     </option>
                   </select>
 
-                  <!-- Manual Mode -->
+                  <!-- Manual Mode Input: Shows next to dropdown when 'Others' selected -->
                   <input *ngIf="isManualCode" 
                          type="text" 
-                         class="country-select" 
-                         style="width: 100px; text-align: center; padding: 12px 5px;" 
+                         class="manual-code-input" 
                          formControlName="countryCode" 
-                         placeholder="+Code">
+                         placeholder="+Code"
+                         (input)="sanitizeCountryCode($event)">
 
-                  <input type="tel" formControlName="phone" class="phone-input" placeholder="Phone Number">
+                  <input type="tel" formControlName="phone" class="phone-input" placeholder="Phone Number" minlength="7" maxlength="15">
                 </div>
                 
                 <div class="error-msg" *ngIf="isFieldInvalid('phone')">
-                  {{ phoneHint }}
+                   Valid number required (7-15 digits)
                 </div>
                 <div class="error-msg" *ngIf="isFieldInvalid('countryCode')">Code required</div>
               </div>
 
+              <!-- UPDATED: Date of Birth Validation -->
               <div class="form-group">
                 <label>Date of Birth <span class="req">*</span></label>
-                <input type="date" formControlName="dob" [max]="maxDate">
-                <div class="error-msg" *ngIf="isFieldInvalid('dob')">Date of birth is required</div>
+                <input type="date" formControlName="dob" [max]="maxDate" min="1900-01-01">
+                <div class="error-msg" *ngIf="isFieldInvalid('dob')">Valid Date of Birth required (Year 1900+)</div>
               </div>
 
               <div class="form-group">
@@ -177,7 +178,7 @@
 
                 <div class="form-group fade-in">
                   <label>Experience (Years) <span class="req">*</span></label>
-                  <input type="number" formControlName="experienceYears" placeholder="e.g. 3.5">
+                  <input type="text" formControlName="experienceYears" placeholder="e.g. 3.5">
                   <div class="error-msg" *ngIf="isFieldInvalid('experienceYears')">Valid number required</div>
                 </div>
 
@@ -209,23 +210,30 @@
 
               <div class="divider span-2"><span>Education</span></div>
 
+              <!-- UPDATED: Degree Selection with Manual Option -->
               <div class="form-group">
                 <label>Highest Degree <span class="req">*</span></label>
-                <select formControlName="degree">
+                
+                <!-- Dropdown Mode -->
+                <select *ngIf="!isManualDegree" [ngModel]="degreeSelectValue" (ngModelChange)="onDegreeChange($event)" [ngModelOptions]="{standalone: true}">
                   <option value="" disabled selected>Select Degree</option>
-                  <option value="B.Tech">B.Tech / B.E.</option>
-                  <option value="M.Tech">M.Tech / M.E.</option>
-                  <option value="MBA">MBA / PGDM</option>
-                  <option value="MCA">MCA</option>
+                  <option *ngFor="let d of degrees" [value]="d">{{ d }}</option>
                   <option value="Other">Other</option>
                 </select>
+
+                <!-- Manual Mode -->
+                <div *ngIf="isManualDegree" class="manual-input-wrapper">
+                  <input type="text" formControlName="degree" placeholder="Enter your degree manually" class="manual-degree-input">
+                  <button type="button" class="btn-icon" (click)="resetDegree()" title="Back to list">✕</button>
+                </div>
+                
                 <div class="error-msg" *ngIf="isFieldInvalid('degree')">Degree is required</div>
               </div>
 
               <div class="form-group">
                 <label>Passing Year <span class="req">*</span></label>
                 <input type="tel" formControlName="gradYear" placeholder="YYYY" maxlength="4">
-                <div class="error-msg" *ngIf="isFieldInvalid('gradYear')">Valid 4-digit year required</div>
+                <div class="error-msg" *ngIf="isFieldInvalid('gradYear')">Valid year required (1900-2099)</div>
               </div>
 
               <div class="form-group span-2">
@@ -236,8 +244,8 @@
 
               <div class="form-group">
                 <label>CGPA / Percentage <span class="req">*</span></label>
-                <input type="text" formControlName="cgpa" placeholder="e.g. 8.5 or 85">
-                <div class="error-msg" *ngIf="isFieldInvalid('cgpa')">Valid number required (e.g., 8.5)</div>
+                <input type="text" formControlName="cgpa" placeholder="e.g. 8.5 or 85%">
+                <div class="error-msg" *ngIf="isFieldInvalid('cgpa')">Valid number required (max 100)</div>
               </div>
             </div>
           </div>

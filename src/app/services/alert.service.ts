@@ -8,7 +8,8 @@ export class AlertService {
 
   constructor() { }
 
-  success(message: string, title: string = 'Success', timer: number = 2000) {
+  // Default timer increased to 4000ms (4 seconds) as requested
+  success(message: string, title: string = 'Success', timer: number = 4000) {
     Swal.fire({
       title,
       text: message,
@@ -19,7 +20,7 @@ export class AlertService {
     });
   }
 
-  error(message: string, title: string = 'Error', timer: number = 2000) {
+  error(message: string, title: string = 'Error', timer: number = 4000) {
     Swal.fire({
       title,
       text: message,
@@ -30,7 +31,7 @@ export class AlertService {
     });
   }
 
-  warning(message: string, title: string = 'Warning', timer: number = 2000) {
+  warning(message: string, title: string = 'Warning', timer: number = 4000) {
     Swal.fire({
       title,
       text: message,
@@ -41,7 +42,7 @@ export class AlertService {
     });
   }
 
-  info(message: string, title: string = 'Info', timer: number = 2000) {
+  info(message: string, title: string = 'Info', timer: number = 4000) {
     Swal.fire({
       title,
       text: message,
@@ -52,15 +53,27 @@ export class AlertService {
     });
   }
 
-  // --- NEW: Dedicated Validation Alert ---
+  // Confirmation Dialog helper
+  confirm(title: string, text: string, confirmButtonText: string = 'Yes, delete it!'): Promise<any> {
+    return Swal.fire({
+      title: title,
+      text: text,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmButtonText
+    });
+  }
+
   validation(message: string, title: string = 'Invalid Input') {
     Swal.fire({
       title,
       text: message,
       icon: 'warning',
-      confirmButtonColor: '#f39c12', // distinct orange color for validation
+      confirmButtonColor: '#f39c12',
       confirmButtonText: 'Got it',
-      timer: 3000,
+      timer: 5000, // Validation messages slightly longer
       timerProgressBar: true
     });
   }

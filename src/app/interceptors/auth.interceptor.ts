@@ -17,13 +17,20 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = localStorage.getItem('access_token');
-    if (token) {
+    
+    // 1. Check if the URL is for AWS S3. If yes, DO NOT attach the token.
+    const isS3Url = request.url.includes('s3.ap-south-2.amazonaws.com') || request.url.includes('amazonaws.com');
+
+    if (token && !isS3Url) {
+      // Sirf tabhi token add karein jab S3 URL NA ho
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
         }
       });
     }
+
+    // 2. Original error handling logic (Logout on 401)
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {

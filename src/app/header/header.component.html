@@ -189,16 +189,28 @@
           <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required [(ngModel)]="enrollmentForm.email">
         </div>
 
-        <!-- UPDATED: Phone Number Group with Country Code -->
+        <!-- UPDATED: Phone Number Group with Country Code & Manual Option -->
         <div class="form-group">
           <label for="phone">Phone Number</label>
           <div class="phone-input-group">
-            <select class="form-control country-select" name="countryCode" [(ngModel)]="enrollmentForm.countryCode">
+            
+            <!-- Standard Dropdown - Always Visible -->
+            <select class="form-control country-select" name="countryCodeSelect" 
+                    [(ngModel)]="countrySelectValue" (change)="onCountryChange()">
               <option *ngFor="let c of countryCodes" [value]="c.code">
-                {{ c.code }} ({{ c.country }})
+                {{ c.code === 'Others' ? 'Others' : c.code + ' (' + c.country + ')' }}
               </option>
             </select>
-            <input type="tel" id="phone" name="phone" class="form-control phone-input" placeholder="98765 43210" required [(ngModel)]="enrollmentForm.phone">
+
+            <!-- Manual Input (Shows NEXT TO dropdown when 'Others' is selected) -->
+            <input *ngIf="isManualCountryCode" type="text" class="form-control manual-code-input" 
+                   name="manualCountryCode" [(ngModel)]="enrollmentForm.countryCode" 
+                   placeholder="+Code" (input)="sanitizeCountryCode($event)">
+
+            <input type="tel" id="phone" name="phone" class="form-control phone-input" 
+                   placeholder="98765 43210" required 
+                   minlength="7" maxlength="15" 
+                   [(ngModel)]="enrollmentForm.phone">
           </div>
         </div>
 

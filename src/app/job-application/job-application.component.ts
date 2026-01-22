@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { CareerService } from '../services/careers.service';
 import { AlertService } from '../services/alert.service';
 
 @Component({
   selector: 'app-job-application',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './job-application.component.html',
   styleUrls: ['./job-application.component.css']
 })
@@ -32,46 +32,77 @@ export class JobApplicationComponent implements OnInit {
   errorMessage = '';
 
   isExperienced = false;
+  
+  // States for Country Code
   isManualCode = false;
+  countrySelectValue = '+91';
+
+  // States for Degree
+  isManualDegree = false;
+  degreeSelectValue = '';
+
   maxDate: string = '';
   
-  phoneHint: string = 'Valid number required';
-
+  // Lists
   countryCodes = [
-    { code: '+91', country: 'India', len: 10 },
-    { code: '+1', country: 'USA', len: 10 },
-    { code: '+44', country: 'UK', len: 10 },
-    { code: '+61', country: 'Australia', len: 9 },
-    { code: '+971', country: 'UAE', len: 9 },
-    { code: '+81', country: 'Japan', len: 10 },
-    { code: '+49', country: 'Germany', min: 10, max: 11 },
-    { code: '+33', country: 'France', len: 9 },
-    { code: '+86', country: 'China', len: 11 },
-    { code: '+65', country: 'Singapore', len: 8 },
-    { code: 'Other', country: 'Other', min: 7, max: 15 }
+    { code: '+91', country: 'India' },
+    { code: '+1', country: 'USA' },
+    { code: '+44', country: 'UK' },
+    { code: '+61', country: 'Australia' },
+    { code: '+971', country: 'UAE' },
+    { code: '+81', country: 'Japan' },
+    { code: '+49', country: 'Germany' },
+    { code: '+33', country: 'France' },
+    { code: '+86', country: 'China' },
+    { code: '+65', country: 'Singapore' },
+    { code: 'Others', country: 'Enter Code' }
+  ];
+
+  degrees = [
+    'B.Tech / B.E.', 
+    'M.Tech / M.E.', 
+    'MBA / PGDM', 
+    'MCA', 
+    'BCA', 
+    'B.Sc', 
+    'M.Sc'
   ];
 
   // Regex Patterns
   private nameRegex = /^[a-zA-Z\s.]+$/; 
   private emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   private integerRegex = /^[0-9]+$/;       
-  private numericRegex = /^[0-9.]+$/;      
+  private numericRegex = /^[0-9]+(\.[0-9]{1,2})?$/;
+  private cgpaRegex = /^[0-9]+(\.[0-9]{1,2})?%?$/;
+  private yearRegex = /^(19|20)\d{2}$/;
+  // NEW: DOB Regex ensures year starts with 19 or 20 (Format: YYYY-MM-DD)
+  private dobRegex = /^(19|20)\d{2}-\d{2}-\d{2}$/;
 
   constructor() {
     this.applyForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.pattern(this.nameRegex)]],
       email: ['', [Validators.required, Validators.pattern(this.emailRegex)]],
       countryCode: ['+91', Validators.required],
-      phone: ['', [Validators.required, Validators.pattern(this.integerRegex)]],
-      dob: ['', Validators.required],
+      phone: ['', [
+        Validators.required, 
+        Validators.pattern(this.integerRegex), 
+        Validators.minLength(7), 
+        Validators.maxLength(15)
+      ]],
+      // UPDATED: Added Pattern Validator for DOB
+      dob: ['', [Validators.required, Validators.pattern(this.dobRegex)]],
       gender: ['', Validators.required],
       location: ['', Validators.required],
 
       // Education & Work
       degree: ['', Validators.required],
       university: ['', Validators.required],
-      gradYear: ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]], 
-      cgpa: ['', [Validators.required, Validators.pattern(this.numericRegex)]], 
+      gradYear: ['', [Validators.required, Validators.pattern(this.yearRegex)]], 
+      cgpa: ['', [
+        Validators.required, 
+        Validators.pattern(this.cgpaRegex),
+        Validators.max(100)
+      ]], 
       
       workStatus: ['Fresher', Validators.required],
       currentCompany: [''],
@@ -87,69 +118,50 @@ export class JobApplicationComponent implements OnInit {
     this.applyForm.get('workStatus')?.valueChanges.subscribe(value => {
       this.updateExperienceValidators(value === 'Experienced');
     });
-
-    this.applyForm.get('countryCode')?.valueChanges.subscribe(val => {
-      // Logic Fix: If 'Other' is selected, switch to manual mode and clear input for typing.
-      if (val === 'Other') {
-        this.isManualCode = true;
-        this.applyForm.patchValue({ countryCode: '' }, { emitEvent: false });
-        this.phoneHint = 'Valid number required';
-        this.updatePhoneValidators('Other');
-        return;
-      }
-
-      // Logic Fix: If currently in manual mode, do not automatically switch back to dropdown 
-      // when the user types a value that isn't 'Other'.
-      if (this.isManualCode) {
-        return;
-      }
-
-      // Default behavior for standard selections
-      this.isManualCode = false;
-      this.updatePhoneValidators(val);
-    });
-    
-    this.updatePhoneValidators('+91');
   }
 
   ngOnInit() {
     this.maxDate = new Date().toISOString().split('T')[0];
   }
 
-  updatePhoneValidators(code: string) {
-    const phoneControl = this.applyForm.get('phone');
-    phoneControl?.clearValidators();
-
-    const baseValidators = [Validators.required, Validators.pattern(this.integerRegex)];
-    
-    const rule = this.countryCodes.find(c => c.code === code);
-
-    if (rule) {
-      if (rule.len) {
-        phoneControl?.setValidators([
-          ...baseValidators,
-          Validators.minLength(rule.len),
-          Validators.maxLength(rule.len)
-        ]);
-        this.phoneHint = `Valid ${rule.len}-digit number required`;
-      } else if (rule.min && rule.max) {
-        phoneControl?.setValidators([
-          ...baseValidators,
-          Validators.minLength(rule.min),
-          Validators.maxLength(rule.max)
-        ]);
-        this.phoneHint = `Valid ${rule.min}-${rule.max} digit number required`;
-      }
+  // --- Country Code Logic ---
+  onCountryChange(val: string) {
+    this.countrySelectValue = val;
+    if (val === 'Others') {
+      this.isManualCode = true;
+      this.applyForm.patchValue({ countryCode: '+' });
     } else {
-      phoneControl?.setValidators([
-        ...baseValidators,
-        Validators.minLength(7),
-        Validators.maxLength(15)
-      ]);
-      this.phoneHint = 'Valid number required';
+      this.isManualCode = false;
+      this.applyForm.patchValue({ countryCode: val });
     }
-    
-    phoneControl?.updateValueAndValidity();
+  }
+
+  sanitizeCountryCode(event: any) {
+    let value = event.target.value;
+    if (!value.startsWith('+')) {
+      value = '+' + value.replace(/[^0-9]/g, '');
+    } else {
+      value = '+' + value.substring(1).replace(/[^0-9]/g, '');
+    }
+    this.applyForm.get('countryCode')?.setValue(value, { emitEvent: false });
+  }
+
+  // --- Degree Logic ---
+  onDegreeChange(val: string) {
+    this.degreeSelectValue = val;
+    if (val === 'Other') {
+      this.isManualDegree = true;
+      this.applyForm.patchValue({ degree: '' }); // Clear for manual input
+    } else {
+      this.isManualDegree = false;
+      this.applyForm.patchValue({ degree: val });
+    }
+  }
+
+  resetDegree() {
+    this.isManualDegree = false;
+    this.degreeSelectValue = '';
+    this.applyForm.patchValue({ degree: '' });
   }
 
   updateExperienceValidators(isExp: boolean) {
@@ -160,7 +172,17 @@ export class JobApplicationComponent implements OnInit {
       const control = this.applyForm.get(field);
       if (isExp) {
         if (field === 'experienceYears') {
-          control?.setValidators([Validators.required, Validators.pattern(this.numericRegex)]);
+          control?.setValidators([
+            Validators.required, 
+            Validators.pattern(this.numericRegex), 
+            Validators.max(50)
+          ]);
+        } else if (field === 'currentCTC' || field === 'expectedCTC') {
+          control?.setValidators([
+            Validators.required,
+            Validators.pattern(this.numericRegex),
+            Validators.max(100)
+          ]);
         } else {
           control?.setValidators([Validators.required]);
         }
@@ -175,6 +197,12 @@ export class JobApplicationComponent implements OnInit {
   nextStep() {
     if (this.currentStep === 1) {
       if (this.checkControls(['fullName', 'email', 'phone', 'dob', 'gender', 'location', 'countryCode'])) return;
+      
+      const code = this.applyForm.get('countryCode')?.value;
+      if (this.isManualCode && (code === '+' || code.length < 2)) {
+         this.alertService.validation('Please enter a valid country code (e.g., +1).', 'Invalid Code');
+         return;
+      }
     }
     
     if (this.currentStep === 2) {
@@ -279,7 +307,6 @@ export class JobApplicationComponent implements OnInit {
 
   closeModal(event?: Event) {
     if (event) {
-      // Prevents the event from bubbling up to potentially trigger other logic
       event.preventDefault();
       event.stopPropagation();
     }
