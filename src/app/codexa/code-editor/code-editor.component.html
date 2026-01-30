@@ -1,0 +1,83 @@
+<div class="main-container">
+  <!-- IDE Toolbar -->
+  <div class="header">
+    <div class="left-controls">
+      <div class="file-tab">
+        <svg class="file-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+        </svg>
+        <span>main.{{ selectedLanguage.value === 'python' ? 'py' : (selectedLanguage.value === 'cpp' ? 'cpp' : 'ts') }}</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Language Dropdown -->
+      <div class="custom-dropdown" [class.open]="isOpen">
+        <div class="selected" (click)="toggleDropdown()">
+          {{ selectedLanguage.label }}
+          <svg class="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+        <ul class="options">
+          <li *ngFor="let lang of languages" (click)="selectLanguage(lang)">
+            {{ lang.label }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="right-controls">
+      <button
+        (click)="runCode()"
+        class="run-btn"
+        [class.running]="isRunning"
+        [disabled]="isRunning">
+        <svg *ngIf="!isRunning" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <span *ngIf="isRunning" class="loader"></span>
+        {{ isRunning ? 'Running' : 'Run' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Editor Container -->
+  <div class="editor-area" #editorArea>
+    <ngx-monaco-editor
+      class="editor"
+      [options]="editorOptions"
+      [(ngModel)]="code"
+      (onInit)="onEditorInit($event)">
+    </ngx-monaco-editor>
+  </div>
+
+  <!-- Resize Handle -->
+  <div class="horizontal-divider" (mousedown)="startResize($event)">
+    <div class="drag-handle"></div>
+  </div>
+
+  <!-- Professional Terminal -->
+  <div class="terminal-box" #terminalBox>
+    <div class="terminal-header">
+      <div class="terminal-tabs">
+        <span class="tab active">
+          Console Output
+          <span *ngIf="lastRunStatus === 'success'" class="status-dot success"></span>
+          <span *ngIf="lastRunStatus === 'error'" class="status-dot error"></span>
+        </span>
+      </div>
+      <div class="terminal-actions">
+        <button class="icon-btn" (click)="output = ''" title="Clear Console">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="terminal-content">
+      <div *ngIf="!output && !isRunning" class="placeholder">
+        <span class="prompt">></span> Press "Run" to execute your code...
+      </div>
+      <pre *ngIf="output || isRunning" [class.text-error]="lastRunStatus === 'error'">{{ output }}</pre>
+    </div>
+  </div>
+</div>
