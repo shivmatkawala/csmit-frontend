@@ -107,7 +107,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   studentProfileData: StudentProfileData = {
     full_name: 'Loading...',
     email: 'loading@example.com',
-    student_id: '',  // Initialize empty
+    student_id: '', 
     profileImageUrl: '',
     profileInitial: '',
     profileImagePlaceholder: true, 
@@ -139,7 +139,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   selectedBatchDetails: BatchDetailsModal[] = []; 
 
   // --- Feature Cards ---
-  // REMOVED "Assignments" card as requested
   quickAccessCards: FeatureCard[] = [
     { 
       label: 'Batches Status', 
@@ -164,22 +163,21 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       route: 'exams' 
     },
     { 
-      label: 'Fee Status', 
-      title: 'Payment Details', 
-      value: 'View Payments', 
-      icon: 'fas fa-receipt', 
+      label: 'AI Practice', 
+      title: 'Practice with Quenrix AI', 
+      value: 'Practice Now', 
+      icon: 'fas fa-robot', 
       color: '#F43F5E', 
-      info: 'Loading Payment Details...', 
-      subText: 'Loading Payment Details...', 
+      info: 'Sharpen your skills with AI', 
+      subText: 'Interactive Practice', 
       colorClass: 'stat-red', 
-      route: 'payments' 
+      route: 'home' 
     },
-    // NEW CARD ADDED FOR SYNTAX SHARE
     { 
       label: 'Doubt Support', 
       title: 'Syntax Share', 
       value: 'Ask Doubts', 
-      icon: 'fas fa-comments', // or fa-share-alt
+      icon: 'fas fa-comments', 
       color: '#8B5CF6', 
       info: 'Community Support', 
       subText: 'Share code & errors', 
@@ -225,7 +223,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   selectedCourseId: number | null = null; 
   selectedBatchId: number | null = null; 
   
-  // FIX: Explicitly defined arrays to solve "Property does not exist" error
   studentCoursesForFilter: FilterCourse[] = [];
   studentBatchesForFilter: FilterBatch[] = [];
 
@@ -246,15 +243,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       return this.activeExams.find(e => e.examId === this.selectedExamId); 
   }
 
-  // =========================================================================
-  // LIFECYCLE HOOKS
-  // =========================================================================
-
   ngOnInit(): void {
-    // 1. Load Filter Data
     this.fetchCoursesAndBatchesForFilter().subscribe({
       next: () => {
-        // 2. Load Student Data
         this.fetchStudentDataFromStorage().subscribe(() => {
             this.checkProfileCompletion();
         });
@@ -285,7 +276,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.timeSubscription?.unsubscribe();
   }
 
-  // --- LOGOUT FUNCTIONALITY ---
   logout(): void {
       localStorage.clear();
       sessionStorage.clear();
@@ -336,10 +326,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     ];
     return data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
-
-  // =========================================================================
-  // DATA FETCHING METHODS
-  // =========================================================================
 
   private fetchStudentDataFromStorage(): Observable<any> {
     const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
@@ -553,10 +539,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
   }
 
-  // =========================================================================
-  // NAVIGATION
-  // =========================================================================
-  
   setActivePage(page: string): void {
     const validPages = ['dashboard', 'courses', 'batches', 'assignments', 'career', 'profile', 'profile-setting', 'attend-exam', 'generate-resume', 'shorts', 'setup-profile', 'syntaxshare'];
     if (validPages.includes(page)) {
@@ -570,7 +552,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   handleQuickCardClick(route: string): void {
       switch (route) {
           case 'batches':
-              // MODIFIED: Navigate to the full batch page instead of opening a modal
               this.setActivePage('batches');
               break;
           case 'exams':
@@ -579,8 +560,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           case 'assignments':
               this.setActivePage('assignments'); 
               break;
-          case 'payments':
-              this.showMessage('Navigating to Payment Details page...', 'warning');
+          case 'home':
+              // Navigating to Home for Quenrix AI Practice
+              window.location.href = 'home';
               break;
           case 'syntaxshare':
               this.setActivePage('syntaxshare');
@@ -606,10 +588,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       this.goToProfileSetupForm();
   }
 
-  // =========================================================================
-  // MODAL/MESSAGE LOGIC
-  // =========================================================================
-  
   openAssignmentModal(): void {
     this.showAssignmentModal = true;
     this.assignmentTitleControl.setValue('');
@@ -630,8 +608,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   openBatchModal(): void {
-     // NOTE: This legacy modal function is now superseded by the full page view,
-     // but kept in case specific fallback logic is needed.
      this.handleQuickCardClick('batches');
   }
   
@@ -696,7 +672,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.messageType = '';
   }
 
-  // --- Clock/Calendar Logic ---
   private updateClock(): void {
     const now = new Date();
     this.currentDayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
@@ -798,7 +773,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return '#ef4444'; 
   }
   
-  // --- Exam/Filter Logic ---
   fetchCoursesAndBatchesForFilter(): Observable<any> {
     return this.examService.fetchCourses().pipe(
         switchMap((courses: any[]) => {
@@ -878,8 +852,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // applyExamFilter method ko update kiya gaya hai dynamic text ke liye
-applyExamFilter(): void {
+  applyExamFilter(): void {
     this.updateFilterOptions();
 
     const courseId = this.selectedCourseId;
@@ -909,11 +882,9 @@ applyExamFilter(): void {
         }
     });
 
-    // --- Dynamic Card Text Update ---
     const examCard = this.quickAccessCards.find(c => c.route === 'exams');
     if (examCard) {
         if (this.upcomingExams.length > 0) {
-            // Sort by earliest start time
             const nextExam = this.upcomingExams.sort((a, b) => 
                 new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime()
             )[0];
@@ -927,7 +898,7 @@ applyExamFilter(): void {
 
     this.isLoadingExams = false;
     this.cdr.detectChanges(); 
-}
+  }
 
   updateFilterOptions(): void {
     if (this.studentAssignedBatches.length > 0) {
