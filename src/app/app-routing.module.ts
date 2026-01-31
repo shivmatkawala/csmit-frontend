@@ -24,6 +24,7 @@ import { UploadNotesComponent } from './upload-notes/upload-notes.component';
 import { CareersComponent } from './careers/careers.component';
 import { SyntaxshareComponent } from './syntaxshare/syntaxshare.component';
 import { JobApplicationComponent } from './job-application/job-application.component';
+import { HomeComponent } from './codexa/home/home.component';
 const routes: Routes = [
   { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
   {path:'landing-page',component:LandingPageComponent},
@@ -49,7 +50,8 @@ const routes: Routes = [
   {path:'upload-blog',component:UploadBlogComponent},
   {path:'upload-notes',component:UploadNotesComponent},
   {path:'careers',component:CareersComponent},
-  {path:'syntaxshare',component:SyntaxshareComponent}
+  {path:'syntaxshare',component:SyntaxshareComponent},
+  {path:'home',component:HomeComponent}
 ];
 
 @NgModule({
