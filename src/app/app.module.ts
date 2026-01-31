@@ -42,6 +42,10 @@ import { JobApplicationComponent } from './job-application/job-application.compo
 import { SyntaxshareComponent } from './syntaxshare/syntaxshare.component';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { HomeComponent } from './codexa/home/home.component';
+import { CodexaaiComponent } from './codexa/codexaai/codexaai.component';
+import { QuestionsComponent } from './codexa/questions/questions.component';
+import { CodeEditorComponent } from './codexa/code-editor/code-editor.component';
 
 @NgModule({
   declarations: [
@@ -76,6 +80,10 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     UploadCareerComponent,
     AdminPanelComponent,
     SyntaxshareComponent,
+    HomeComponent,
+    CodexaaiComponent,
+    QuestionsComponent,
+    CodeEditorComponent
   ],
   imports: [
     MonacoEditorModule.forRoot({
