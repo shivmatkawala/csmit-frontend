@@ -5,6 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService, LoginResponse, StudentBatchDetails } from '../services/api.service'; 
 import { examAPi } from '../services/createexam.service'; 
 import { ResumeService } from '../services/create-resume.service'; 
+import { CreateBatchService } from '../services/create-batch.service'; // Added for Zoom links
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 // --- Interfaces ---
@@ -85,6 +86,8 @@ interface BatchDetailsModal {
     num_students: number; 
     status: string; 
     description: string;
+    zoom_join_url?: string; // Added for joining meetings
+    timing?: string;
 }
 
 @Component({
@@ -136,10 +139,22 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   isProfileComplete: boolean = false; 
   showProfileCompletionModal: boolean = false; 
   showBatchModal: boolean = false; 
-  selectedBatchDetails: BatchDetailsModal[] = []; 
+  showJoinMeetingModal: boolean = false; // Added
+  selectedBatchDetails: any[] = []; // To store batches with Zoom links
 
   // --- Feature Cards ---
   quickAccessCards: FeatureCard[] = [
+    { 
+      label: 'Live Sessions', 
+      title: 'Class Meeting', 
+      value: 'Join Class', 
+      icon: 'fas fa-video', 
+      color: '#10B981', 
+      info: 'Attend live lectures', 
+      subText: 'Click to Join', 
+      colorClass: 'stat-blue', // Reusing class for style consistency
+      route: 'live-sessions' 
+    },
     { 
       label: 'Batches Status', 
       title: 'My Batches', 
@@ -233,6 +248,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       private apiService: ApiService, 
       private examService: examAPi, 
       private resumeService: ResumeService,
+      private batchService: CreateBatchService, // Injected for Zoom links
       private sanitizer: DomSanitizer
   ) {}
 
@@ -551,6 +567,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   
   handleQuickCardClick(route: string): void {
       switch (route) {
+          case 'live-sessions':
+              this.openJoinMeetingModal();
+              break;
           case 'batches':
               this.setActivePage('batches');
               break;
@@ -561,7 +580,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               this.setActivePage('assignments'); 
               break;
           case 'home':
-              // Navigating to Home for Quenrix AI Practice
               window.location.href = 'home';
               break;
           case 'syntaxshare':
@@ -586,6 +604,40 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   
   goToProfileSetup(): void {
       this.goToProfileSetupForm();
+  }
+
+  openJoinMeetingModal(): void {
+      if (this.studentAssignedBatches.length === 0) {
+          this.showMessage('You are not assigned to any batches.', 'warning');
+          return;
+      }
+      
+      this.showJoinMeetingModal = true;
+      this.selectedBatchDetails = []; // Clear old data
+      
+      // Fetch fresh details for each batch to get Zoom links
+      const requests = this.studentAssignedBatches.map(b => 
+          this.batchService.getBatchesByCourse(b.course_id).pipe(
+              map(batches => batches.find(batch => batch.batchId === b.batchid))
+          )
+      );
+      
+      forkJoin(requests).subscribe(results => {
+          this.selectedBatchDetails = results.filter(r => !!r);
+          this.cdr.detectChanges();
+      });
+  }
+
+  closeJoinMeetingModal(): void {
+      this.showJoinMeetingModal = false;
+  }
+
+  joinMeeting(url: string): void {
+      if (!url) {
+          this.showMessage('Meeting link not available for this batch.', 'error');
+          return;
+      }
+      window.open(url, '_blank');
   }
 
   openAssignmentModal(): void {

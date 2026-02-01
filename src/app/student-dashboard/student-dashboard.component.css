@@ -919,3 +919,45 @@ header {
 .exam-list-container::-webkit-scrollbar { width: 6px; }
 .exam-list-container::-webkit-scrollbar-track { background: transparent; }
 .exam-list-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+/* --- Reusing the premium modal structure for the Join Meeting UI --- */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 4000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exam-entry-card h4 {
+    margin: 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.stat-card .footer-info i {
+    font-size: 24px;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover .footer-info i {
+    transform: scale(1.1);
+}
+
+/* Ensure the new card follows the grid layout */
+.stats-cards-container {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Specific styling for Join Meeting buttons in the list */
+.btn-primary-gradient:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+}
