@@ -118,7 +118,7 @@ export class GenerateAtsResumeComponent implements OnInit{
       this.isLoading.set(false);
       
       // Redirect to setup form, allowing the user to continue filling data
-      window.location.href = 'create-student'; 
+      window.location.href = 'setup-profile'; 
   }
 
 

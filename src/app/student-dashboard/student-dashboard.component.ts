@@ -156,17 +156,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       route: 'live-sessions' 
     },
     { 
-      label: 'Batches Status', 
-      title: 'My Batches', 
-      value: 'View Details', 
-      icon: 'fas fa-users', 
-      color: '#4338CA', 
-      info: 'Loading Batch Status...', 
-      subText: 'Click to view', 
-      colorClass: 'stat-blue', 
-      route: 'batches' 
-    },
-    { 
       label: 'Exam Schedule', 
       title: 'Upcoming Exams', 
       value: 'View Exams', 

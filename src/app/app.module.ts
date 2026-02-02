@@ -4,7 +4,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CreateStudentComponent } from './setup-profile/setup-profile.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { HeaderComponent } from './header/header.component';
@@ -17,7 +16,6 @@ import { ChatbotComponent } from './chatbot/chatbot.component';
 import { ProfileSettingComponent } from './student-dashboard/profile-setting/profile-setting.component';
 import { CreateCourseComponent } from './create-course/create-course.component';
 import { AboutCsmitComponent } from './about-csmit/about-csmit.component';
-import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
 import { CreateUserComponent } from './create-user/create-user.component';
 import { AssignUserToBatchComponent } from './assign-user-to-batch/assign-user-to-batch.component';
 import { CreateJobComponent } from './create-job/create-job.component';
@@ -30,7 +28,7 @@ import { BatchManagementComponent } from './admin-panel/batch-management/batch-m
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { GenerateAtsResumeComponent } from './generate-ats-resume/generate-ats-resume.component';
 import { CommonModule } from '@angular/common';
-import { CourseBatchManagementComponent } from './student-dashboard/course-batch-management/course-batch-management.component';
+import { CourseBatchManagementComponent } from './course-batch-management/course-batch-management.component';
 import { ContactComponent } from './contact/contact.component';
 import { CreateSuccessStoryComponent } from './admin-panel/create-success-story/create-success-story.component';
 import { BlogComponent } from './blog/blog.component';
@@ -46,11 +44,12 @@ import { HomeComponent } from './codexa/home/home.component';
 import { CodexaaiComponent } from './codexa/codexaai/codexaai.component';
 import { QuestionsComponent } from './codexa/questions/questions.component';
 import { CodeEditorComponent } from './codexa/code-editor/code-editor.component';
+import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
+import { SetupProfileComponent } from './setup-profile/setup-profile.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CreateStudentComponent,
     LandingPageComponent,
     HeaderComponent,
     NavbarComponent,
@@ -61,7 +60,6 @@ import { CodeEditorComponent } from './codexa/code-editor/code-editor.component'
     ProfileSettingComponent,
     CreateCourseComponent,
     AboutCsmitComponent,
-    TrainerDashboardComponent,
     CreateUserComponent,
     AssignUserToBatchComponent,
     CreateJobComponent,
@@ -83,7 +81,9 @@ import { CodeEditorComponent } from './codexa/code-editor/code-editor.component'
     HomeComponent,
     CodexaaiComponent,
     QuestionsComponent,
-    CodeEditorComponent
+    CodeEditorComponent,
+    TrainerDashboardComponent,
+    SetupProfileComponent
   ],
   imports: [
     MonacoEditorModule.forRoot({

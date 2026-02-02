@@ -1,181 +1,126 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<body>
-  <!-- Main container -->
-  <div class="container">
-    
-    <!-- HEADER SECTION -->
-    <header>
-      <div class="logo-search">
-        <div class="logo">
-          <img src="assets/logo.jpg" alt="Logo" class="institute-logo">
-        </div>
-        <div class="search-wrapper">
-          <input type="search" [placeholder]="config.SEARCH_PLACEHOLDER" />
-          <i class="fas fa-search"></i>
-        </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" />
+<div class="container">
+  <header>
+    <div class="logo-search">
+      <div class="logo"><img src="assets/logo.jpg" alt="Logo" class="institute-logo"></div>
+      <div class="search-wrapper">
+        <input type="search" placeholder="Search curriculum, students..." />
+        <i class="fas fa-search"></i>
       </div>
-      <div class="header-right">
-        <button class="btn-request" (click)="goToProfileSetupForm()" style="background-color: #F43F5E;">
-            <i class="fas fa-user-edit"></i> <span>Setup Profile</span>
-        </button>
+    </div>
+    <div class="header-right">
+      <button class="btn-request" (click)="goToProfileSetupForm()">
+        <i class="fas fa-user-edit"></i> <span>Setup Profile</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-grid">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a [class.active]="activePage === 'dashboard'" (click)="setActivePage('dashboard')">
+          <i class="fas fa-home"></i> <span>Home</span>
+        </a>
+        <a [class.active]="activePage === 'batches'" (click)="setActivePage('batches')">
+          <i class="fas fa-users"></i> <span>Batches</span>
+        </a>
+        <a [class.active]="activePage === 'shorts'" (click)="setActivePage('shorts')" style="color: #ec4899;">
+          <i class="fas fa-play-circle" style="font-size: 26px;"></i> <span>Shorts</span>
+        </a>
+        <a [class.active]="activePage === 'generate-resume'" (click)="goToResumeView()">
+          <i class="fas fa-file-alt"></i> <span>Resume</span>
+        </a>
+        <a [class.active]="activePage === 'syntaxshare'" (click)="setActivePage('syntaxshare')">
+          <i class="fas fa-comments"></i> <span>Doubt Hub</span>
+        </a>
+        <a (click)="logout()" class="logout-link" style="color: #ef4444; margin-top: auto;">
+          <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <ng-container *ngIf="activePage === 'dashboard'">
+        <!-- Profile Section -->
+        <section class="premium-profile-card">
+          <div class="profile-content-wrapper">
+            <div class="profile-upload-container" (click)="triggerProfileUpload()">
+              <div class="premium-profile-ring">
+                <div class="attractive-profile-circle">
+                  <img *ngIf="uploadedProfileImage" [src]="uploadedProfileImage" class="uploaded-profile-img">
+                  <span *ngIf="!uploadedProfileImage" class="profile-initial-text">{{ profileInitial }}</span>
+                </div>
+              </div>
+              <input type="file" #fileInput (change)="onProfileImageSelected($event)" style="display: none;">
+            </div>
+            <div class="profile-text-content">
+              <span class="status-badge">Senior Trainer</span>
+              <h2 class="student-name-text">{{ trainerName }}</h2>
+              <p class="greeting-message">{{ greeting }}</p>
+              <div class="date-badge"><i class="far fa-calendar-alt"></i> {{ currentDayOfWeek }}, {{ currentDay }} {{ currentMonth }}</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="stats-cards-container">
+          <div *ngFor="let card of quickAccessCards" class="stat-card" [ngClass]="card.colorClass" (click)="handleQuickCardClick(card.route)">
+            <p class="title">{{ card.title }}</p>
+            <p class="value">{{ card.value }}</p>
+            <div class="footer-info"><span>{{ card.subText }}</span><i [class]="card.icon" [style.color]="card.color"></i></div>
+          </div>
+        </section>
+      </ng-container>
+
+      <ng-container *ngIf="activePage === 'batches'">
+        <app-course-batch-management 
+          [userId]="trainerId" 
+          [initialBatches]="trainerAssignedBatches"
+          (backToDashboard)="setActivePage('dashboard')">
+        </app-course-batch-management>
+      </ng-container>
+
+      <ng-container *ngIf="activePage === 'shorts'"><div class="no-data">Shorts Content Loading...</div></ng-container>
+      
+      <ng-container *ngIf="activePage === 'generate-resume'">
+          <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
+      </ng-container>
+
+      <ng-container *ngIf="activePage === 'syntaxshare'"><app-syntaxshare></app-syntaxshare></ng-container>
+    </main>
+
+    <aside class="right-schedule-card">
+      <div class="current-time-display"><p class="current-time-text">{{ currentTime }}</p></div>
+      <div class="calendar-controls">
+        <button (click)="navigateCalendar(-1)">&lt;</button>
+        <p>{{ selectedMonthYear }}</p>
+        <button (click)="navigateCalendar(1)">&gt;</button>
       </div>
-    </header>
-
-    <!-- DASHBOARD GRID WRAPPER -->
-    <div class="dashboard-grid">
-
-      <!-- 1. LEFT SIDEBAR -->
-      <aside class="sidebar">
-        <nav class="sidebar-nav">
-          <!-- Sidebar Links: Only Dashboard and Resume now -->
-          <a *ngFor="let link of config.SIDEBAR_LINKS"
-             [class.active]="activeTab() === link.id" 
-             (click)="activeTab.set(link.id)" 
-             [title]="link.label">
-            <i [class]="link.icon"></i> <span>{{ link.label }}</span>
-          </a>
-
-           <!-- Logout -->
-           <a style="color: #ef4444; margin-top: 10px; border-top: 1px solid #f3f4f6; cursor: pointer;" (click)="logout()">
-              <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-          </a>
-        </nav>
-        
-        <div class="sidebar-bottom">
-          <div class="toggle-switch" [class.active]="darkModeActive()" (click)="darkModeActive.set(!darkModeActive())" title="Toggle Mode">
-            <span></span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- 2. CENTER CONTENT -->
-      <main class="main-content">
-        
-        <!-- DASHBOARD VIEW -->
-        <ng-container *ngIf="activeTab() === 'dashboard'">
-          
-          <!-- Trainer Info Card (Displays name from Setup Profile data) -->
-          <section class="trainer-info-card attractive-greeting-card">
-              <div class="profile-upload-container" (click)="triggerProfileUpload()">
-                  <div class="attractive-profile-circle" 
-                       [style.backgroundColor]="uploadedProfileImage() ? 'transparent' : '#4338CA'">
-                      <img *ngIf="uploadedProfileImage()" [src]="uploadedProfileImage()" alt="Profile" class="uploaded-profile-img">
-                      <img *ngIf="!uploadedProfileImage()" [src]="trainerDetails.profileUrl" alt="Profile" class="uploaded-profile-img">
-                      
-                      <div class="camera-icon-overlay">
-                          <i class="fas fa-camera"></i>
-                      </div>
-                  </div>
-                  <input type="file" #fileInput (change)="onProfileImageSelected($event)" accept="image/*" style="display: none;">
-              </div>
-
-              <div class="trainer-text" style="text-align: center;">
-                  <h2>{{ trainerDetails.name }}</h2>
-                  <p class="role">{{ trainerDetails.role }}</p>
-                  <p class="role attractive-greeting-text">{{ greeting() }}</p>
-              </div>
-
-              <div class="batch-info-badge" style="margin-top: 15px;">
-                  <ng-container *ngIf="myBatches().length > 0">
-                      <p>{{ myBatches()[0].name }}</p>
-                      <span>{{ myBatches()[0].strength }} Students &bull; {{ myBatches()[0].countdown }}</span>
-                  </ng-container>
-                  <p *ngIf="myBatches().length === 0">No Active Batches</p>
-              </div>
-          </section>
-
-          <!-- Quick Actions Removed -->
-        </ng-container>
-
-        <!-- RESUME VIEW -->
-        <ng-container *ngIf="activeTab() === 'resume'">
-            <app-generate-ats-resume [isDashboardEmbed]="true"></app-generate-ats-resume>
-        </ng-container>
-
-        <!-- Removed Profile Setting View from sidebar, accessible only via Setup Profile logic if needed -->
-
-        <!-- Placeholder for unknown tabs -->
-        <ng-container *ngIf="activeTab() !== 'dashboard' && activeTab() !== 'resume'">
-            <div class="panel-card" style="height: 100%; justify-content: center; align-items: center; text-align: center; color: #9ca3af; display: flex; flex-direction: column; background: white; border-radius: 20px;">
-                <i class="fas fa-tools" style="font-size: 48px; margin-bottom: 20px;"></i>
-                <h2>Section Under Development</h2>
-                <button class="btn-request" (click)="activeTab.set('dashboard')" style="margin-top: 20px;">Back to Dashboard</button>
-            </div>
-        </ng-container>
-
-      </main>
-
-      <!-- 3. RIGHT SIDEBAR (Schedule) -->
-      <section class="right-schedule-card">
-        <div class="current-time-display">
-          <p class="current-time-text">Current Time: {{ currentTime() }}</p>
-        </div>
-        
-        <div class="calendar-controls">
-          <button (click)="navigateCalendar(-1)">&lt;</button>
-          <p>{{ selectedMonthYear() }}</p>
-          <button (click)="navigateCalendar(1)">&gt;</button>
-        </div>
-
-        <div class="calendar-weekdays">
-          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-        </div>
-        <div class="calendar-days">
-          <div *ngFor="let day of calendarDays()"
-            [class.inactive]="day.disabled"
-            [class.active]="day.selected"
-            [class.has-event]="day.hasEvent"
-            (click)="!day.disabled && onDateSelect(day)">
-            {{ day.date }}
-          </div>
-        </div>
-
-        <div class="schedule-list">
-          <h5>Events for {{ selectedScheduleDate() | date:'dd MMM' }}</h5>
-          <div *ngIf="scheduleDetails().length === 0" style="font-size: 13px; color: #9ca3af; text-align: center; padding: 20px 0; background: #f9fafb; border-radius: 12px; border: 1px dashed #e5e7eb;">
-              No specific events today.
-          </div>
-          <div class="schedule-section" *ngIf="scheduleDetails().length > 0">
-            <div *ngFor="let item of scheduleDetails()" class="schedule-item" [ngClass]="getScheduleTypeClass(item.type)">
-              <div class="date">{{ item.dayOfWeekShort }}<br>{{ item.dayOfMonth }}</div>
-              <p class="desc">{{ item.desc }}</p>
-              <button *ngIf="item.joinButton" class="join-button">JOIN</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top: auto; padding-top: 20px;">
-            <button class="btn-request" style="width: 100%; justify-content: center;" (click)="openLeaveForm()">
-                Apply for Leave
-            </button>
-        </div>
-      </section>
-
-    </div>
-
-    <!-- Modals -->
-    <div *ngIf="isLeaveFormOpen()" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Apply for Leave</h3>
-                <button class="close-button" (click)="closeLeaveForm()">&times;</button>
-            </div>
-            <div class="form-group">
-                <label>Start Date</label>
-                <input type="date" [value]="leaveStartDate()" (input)="leaveStartDate.set($any($event.target).value)">
-                
-                <label>End Date</label>
-                <input type="date" [value]="leaveEndDate()" (input)="leaveEndDate.set($any($event.target).value)">
-                
-                <label>Reason</label>
-                <textarea rows="3" [value]="leaveReason()" (input)="leaveReason.set($any($event.target).value)"></textarea>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" (click)="closeLeaveForm()">Cancel</button>
-                <button class="btn-submit" (click)="submitLeave()">Submit Application</button>
-            </div>
-        </div>
-    </div>
-
+      <div class="calendar-weekdays"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div>
+      <div class="calendar-days">
+        <div *ngFor="let day of calendarDays" [class.inactive]="day.disabled" [class.active]="day.selected" (click)="!day.disabled && onDateSelect(day.fullDate)">{{ day.date }}</div>
+      </div>
+      <div class="schedule-list">
+        <h5>Today's Schedule</h5>
+        <div *ngIf="scheduleDetails.length === 0" class="no-schedule-message">No live sessions for today.</div>
+      </div>
+    </aside>
   </div>
-</body>
+
+  <div *ngIf="showJoinMeetingModal" class="modal-overlay">
+    <div class="premium-exam-modal" style="max-width: 500px; background: white; border-radius: 24px; padding: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0;"><i class="fas fa-video" style="color: #10B981;"></i> Host Session</h3>
+        <button (click)="closeJoinMeetingModal()" style="border: none; background: #f1f5f9; border-radius: 8px; width: 32px; height: 32px; cursor: pointer;"><i class="fas fa-times"></i></button>
+      </div>
+      <div *ngFor="let b of selectedBatchDetails" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #f1f5f9; border-radius: 12px; margin-bottom: 10px;">
+        <div>
+          <div style="font-weight: 700;">{{ b.batch_name }}</div>
+          <div style="font-size: 12px; color: #64748b;">{{ b.timing }} • {{ b.mode }}</div>
+        </div>
+        <button (click)="joinMeeting(b.zoom_join_url)" style="background: #10B981; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600;">Start</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="message" [class]="'message-box ' + messageType">{{ message }}</div>

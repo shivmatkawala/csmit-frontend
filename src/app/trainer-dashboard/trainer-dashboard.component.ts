@@ -1,407 +1,274 @@
-import { Component, ChangeDetectionStrategy, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { ApiService, LoginResponse } from '../services/api.service';
-import { ResumeService } from '../services/create-resume.service';
-import { HttpClient } from '@angular/common/http'; // Added HttpClient for real-time calls
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { interval, Subscription, timer, forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { of, interval, Subscription } from 'rxjs';
+import { ApiService, StudentBatchDetails } from '../services/api.service';
+import { CreateBatchService } from '../services/create-batch.service';
+import { ResumeService } from '../services/create-resume.service';
 
-// --- Interfaces for Data Models ---
 interface ScheduleItem {
   date: string; 
   desc: string;
-  type: 'class' | 'meeting' | 'admin' | 'study'; 
+  type: 'class' | 'meeting' | 'admin' | 'study';
   dayOfWeekShort?: string;
   dayOfMonth?: string;
   joinButton?: boolean;
 }
-interface CalendarDay {
-  date: number | string;
-  disabled: boolean;
-  selected: boolean;
-  fullDate: Date | null;
-  hasEvent: boolean;
-}
 
-interface BatchInfo {
-    name: string;
-    strength: number;
-    timing: string;
-    countdown: string;
-}
-
-interface TrainerDetails {
-    name: string;
-    role: string;
-    profileUrl: string;
-}
-
-// --- CONFIGURATION INTERFACES ---
-interface NavLink {
-  id: 'dashboard' | 'resume';
-  label: string;
+interface FeatureCard {
+  label: string; 
+  value: string;
   icon: string;
+  color: string; 
+  title: string; 
+  subText: string; 
+  colorClass: string; 
+  route: string;
 }
-
-// --- STATIC UI CONFIG ---
-const UI_CONFIG = {
-  SEARCH_PLACEHOLDER: "Search Batches, Students...",
-  // Removed 'assignments' and 'profile-setting' as requested
-  SIDEBAR_LINKS: [
-    { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-line' },
-    { id: 'resume', label: 'Resume', icon: 'fas fa-file-alt' }
-  ] as NavLink[]
-};
 
 @Component({
   selector: 'app-trainer-dashboard',
   templateUrl: './trainer-dashboard.component.html',
-  styleUrls: ['./trainer-dashboard.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./trainer-dashboard.component.css']
 })
 export class TrainerDashboardComponent implements OnInit, OnDestroy {
-  // Expose UI Config
-  config = UI_CONFIG;
-
   @ViewChild('fileInput') fileInputRef!: ElementRef;
 
-  // --- State Signals ---
-  darkModeActive = signal(false);
-  activeTab = signal<'dashboard' | 'resume'>('dashboard');
+  activePage: string = 'dashboard';
+  currentTime: string = '';
+  greeting: string = '';
+  message: string = '';
+  messageType: string = '';
   
-  // Realtime Data Signals
-  currentTime = signal('');
-  greeting = signal('');
-  uploadedProfileImage = signal<string | ArrayBuffer | null>(null);
-  isLoading = signal(true);
+  trainerName: string = 'Loading...';
+  trainerId: string = '';
+  profileInitial: string = '';
+  uploadedProfileImage: string | ArrayBuffer | null = null;
+  currentDayOfWeek: string = '';
+  currentMonth: string = '';
+  currentDay: number = 0;
 
-  // --- Trainer Data ---
-  trainerDetails: TrainerDetails = {
-    name: 'Loading...',
-    role: 'Trainer',
-    profileUrl: '' 
-  };
-  
-  // Profile Completion State
-  isProfileComplete: boolean = false;
-  userId: string | null = null;
+  trainerAssignedBatches: StudentBatchDetails[] = [];
+  selectedBatchDetails: any[] = [];
+  showJoinMeetingModal: boolean = false;
 
-  // --- Dynamic Dashboard Data ---
-  myBatches = signal<BatchInfo[]>([]);
-  
-  // --- Calendar & Schedule State ---
-  today = signal(new Date());
-  displayedMonthStart = signal(new Date(this.today().getFullYear(), this.today().getMonth(), 1));
-  selectedScheduleDate = signal<Date | null>(this.today());
-  calendarDays = signal<CalendarDay[]>([]);
-  fullScheduleDetails = signal<ScheduleItem[]>([]);
-  scheduleDetails = signal<ScheduleItem[]>([]);
-  isLeaveFormOpen = signal(false);
+  quickAccessCards: FeatureCard[] = [
+    { 
+      label: 'Live Sessions', 
+      title: 'Class Meeting', 
+      value: 'Start Session', 
+      icon: 'fas fa-video', 
+      color: '#10B981', 
+      subText: 'Host live lecture', 
+      colorClass: 'stat-blue', 
+      route: 'live-sessions' 
+    },
+    { 
+      label: 'AI Practice', 
+      title: 'Quenrix AI Lab', 
+      value: 'Open Lab', 
+      icon: 'fas fa-robot', 
+      color: '#F43F5E', 
+      subText: 'Review student work', 
+      colorClass: 'stat-red', 
+      route: 'home' 
+    },
+    { 
+      label: 'Doubt Hub', 
+      title: 'Syntax Share', 
+      value: 'Resolve Doubts', 
+      icon: 'fas fa-comments', 
+      color: '#8B5CF6', 
+      subText: 'Help your students', 
+      colorClass: 'stat-purple', 
+      route: 'syntaxshare' 
+    }
+  ];
 
-  // Leave Form Fields
-  leaveStartDate = signal('');
-  leaveEndDate = signal('');
-  leaveReason = signal('');
+  calendarDays: any[] = [];
+  selectedMonthYear: string = '';
+  displayedMonthStart: Date = new Date();
+  selectedScheduleDate: Date | null = new Date();
+  scheduleDetails: ScheduleItem[] = [];
 
   private timeSubscription?: Subscription;
-
-  // Computed signal for calendar header
-  selectedMonthYear = computed(() =>
-    this.displayedMonthStart().toLocaleString('en-US', { month: 'long', year: 'numeric' })
-  );
 
   constructor(
     private cdr: ChangeDetectorRef,
     private apiService: ApiService,
+    private batchService: CreateBatchService,
     private resumeService: ResumeService,
-    private http: HttpClient 
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
     this.updateClock();
     this.timeSubscription = interval(1000).subscribe(() => this.updateClock());
-
-    // Initialize Calendar
-    this.populateCalendar(this.displayedMonthStart());
-    
-    // Fetch Real Data
-    this.fetchTrainerDataFromStorage();
+    this.loadTrainerProfile();
+    this.initializeCalendar();
   }
 
   ngOnDestroy(): void {
-    if (this.timeSubscription) {
-      this.timeSubscription.unsubscribe();
-    }
+    this.timeSubscription?.unsubscribe();
   }
 
-  // =========================================================================
-  // DATA FETCHING & INITIALIZATION
-  // =========================================================================
+  private loadTrainerProfile(): void {
+    const loginData = this.apiService.getStoredStudentData();
+    const userId = loginData?.userId;
 
-  private fetchTrainerDataFromStorage(): void {
-    this.isLoading.set(true);
-    
-    // Retrieve User ID from Local Storage
-    const loginData: LoginResponse | null = this.apiService.getStoredStudentData(); 
-    this.userId = loginData?.userId || null;
-
-    if (this.userId) {
+    if (userId) {
+        this.trainerId = userId;
+        
+        // Storage sync logic mirroring student dashboard
         let fullName = loginData?.info?.full_name || loginData?.username || 'Trainer';
-        
-        // CHECKBOTH: Try to get data from TRAINER_DATA first, then fallback to STUDENT_DATA (as Setup Profile saves there)
-        const trainerData = localStorage.getItem('TRAINER_DATA') || sessionStorage.getItem('TRAINER_DATA');
-        const studentData = localStorage.getItem('STUDENT_DATA') || sessionStorage.getItem('STUDENT_DATA');
-        
-        // Prioritize updated data from Setup Profile (which saves to STUDENT_DATA logic in current setup)
-        if (studentData) {
-             const parsed = JSON.parse(studentData);
-             if (parsed.info && parsed.info.full_name) fullName = parsed.info.full_name;
-        } else if (trainerData) {
-             const parsed = JSON.parse(trainerData);
-             if (parsed.info && parsed.info.full_name) fullName = parsed.info.full_name;
+        const storedData = window.localStorage.getItem('STUDENT_DATA') || window.sessionStorage.getItem('STUDENT_DATA');
+        if (storedData) {
+            const parsed = JSON.parse(storedData);
+            if (parsed.info && parsed.info.full_name) {
+                fullName = parsed.info.full_name;
+            }
         }
 
-        this.trainerDetails = {
-            name: fullName,
-            role: 'Senior Trainer',
-            profileUrl: '' 
-        };
+        this.trainerName = fullName;
+        this.profileInitial = this.getProfileInitial(fullName);
 
-        this.checkProfileCompletion();
-        this.fetchDashboardStats();
-
+        // Fetch trainer-specific batches
+        this.apiService.fetchTrainerBatches(this.trainerId).subscribe({
+            next: (batches) => {
+                this.trainerAssignedBatches = batches;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.showMessage('Error fetching batches.', 'error');
+            }
+        });
     } else {
-        this.trainerDetails.name = "Guest Trainer";
-        this.isLoading.set(false);
+        this.trainerName = 'Guest Trainer';
+        this.profileInitial = 'T';
     }
   }
 
-  private checkProfileCompletion(): void {
-      if (!this.userId) return;
-
-      // Check if profile was completed via the Setup Profile flow (which sets cshub_profile_complete_once)
-      const isStudentComplete = (localStorage.getItem('cshub_profile_complete_once') === 'true');
-      const isTrainerComplete = (localStorage.getItem('trainer_profile_complete') === 'true');
-
-      if (isStudentComplete || isTrainerComplete) {
-          this.isProfileComplete = true;
-          // Logic to update name if stored in local storage is already handled in fetchTrainerDataFromStorage
-          return;
-      }
-
-      this.resumeService.getResumeData(this.userId).pipe(
-          tap((data: any) => {
-              if (data && (data.full_name || data.firstName)) {
-                  this.isProfileComplete = true;
-                  localStorage.setItem('trainer_profile_complete', 'true');
-                  
-                  const name = data.full_name || `${data.firstName} ${data.lastName}`;
-                  this.trainerDetails.name = name;
-                  
-                  if (data.profileImageUrl) {
-                      this.uploadedProfileImage.set(data.profileImageUrl);
-                  }
-              } else {
-                  this.isProfileComplete = false;
-              }
-              this.cdr.detectChanges();
-          }),
-          catchError(err => {
-              console.error("Profile check failed", err);
-              this.isProfileComplete = false;
-              return of(null);
-          })
-      ).subscribe();
+  getProfileInitial(fullName: string): string {
+    if (!fullName) return 'T';
+    const parts = fullName.split(/\s+/).filter(p => p.length > 0);
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    if (parts.length > 1) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return fullName[0].toUpperCase();
   }
 
-  private fetchDashboardStats(): void {
-      if (!this.userId) {
-          this.isLoading.set(false);
-          return;
-      }
-
-      // --- 1. Real-time Batches Fetch ---
-      this.http.get<any[]>(`/api/trainer/${this.userId}/batches`).pipe(
-          catchError(err => {
-              console.warn('Real-time Batches API failed (using fallback/empty):', err);
-              return of([]); // Return empty array on error
-          })
-      ).subscribe(batches => {
-          const mappedBatches: BatchInfo[] = batches.map(b => ({
-              name: b.batch_name || 'Unknown Batch',
-              strength: b.student_count || 0,
-              timing: b.timing || 'N/A',
-              countdown: b.status || 'Active'
-          }));
-          this.myBatches.set(mappedBatches);
-      });
-
-      // --- 2. Real-time Schedule Fetch ---
-      this.http.get<any[]>(`/api/trainer/${this.userId}/schedule`).pipe(
-           catchError(err => {
-              console.warn('Real-time Schedule API failed (using fallback/empty):', err);
-              return of([]);
-           })
-      ).subscribe(schedule => {
-           const mappedSchedule: ScheduleItem[] = schedule.map(s => ({
-               date: s.date, // Expecting YYYY-MM-DD
-               desc: s.description,
-               type: s.type || 'class',
-               dayOfWeekShort: new Date(s.date).toLocaleString('en-US', {weekday:'short'}).toUpperCase(),
-               dayOfMonth: new Date(s.date).getDate().toString(),
-               joinButton: s.has_link
-           }));
-           this.fullScheduleDetails.set(mappedSchedule);
-           this.updateDisplayedScheduleDetails();
-           this.isLoading.set(false);
-           this.cdr.detectChanges();
-      });
+  goToResumeView(): void {
+      this.setActivePage('generate-resume');
+      this.showMessage('Resume Viewer opened.', 'success');
   }
 
-  // =========================================================================
-  // CLOCK & GREETING
-  // =========================================================================
+  openJoinMeetingModal(): void {
+      if (this.trainerAssignedBatches.length === 0) {
+          this.showMessage('No active batches assigned.', 'warning');
+          return;
+      }
+      this.showJoinMeetingModal = true;
+      this.selectedBatchDetails = this.trainerAssignedBatches;
+      this.cdr.detectChanges();
+  }
+
+  closeJoinMeetingModal(): void {
+      this.showJoinMeetingModal = false;
+  }
+
+  joinMeeting(url: string): void {
+      if (!url) {
+          this.showMessage('Zoom link not available.', 'error');
+          return;
+      }
+      window.open(url, '_blank');
+  }
+
+  handleQuickCardClick(route: string): void {
+    if (route === 'live-sessions') {
+        this.openJoinMeetingModal();
+    } else if (route === 'home') {
+        window.location.href = 'home';
+    } else {
+        this.setActivePage(route);
+    }
+  }
+
+  setActivePage(page: string): void {
+    this.activePage = page;
+    this.cdr.detectChanges();
+  }
+
+  logout(): void {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = 'login';
+  }
+
   private updateClock(): void {
     const now = new Date();
-    this.currentTime.set(now.toLocaleTimeString('en-US', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-    }));
+    this.currentDayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+    this.currentMonth = now.toLocaleString('en-US', { month: 'long' });
+    this.currentDay = now.getDate();
+    this.currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
     
     const hour = now.getHours();
-    let greet = '';
-    if (hour >= 5 && hour < 12) greet = 'Good Morning! Ready to teach?';
-    else if (hour >= 12 && hour < 17) greet = 'Good Afternoon! Keep the energy up.';
-    else if (hour >= 17 && hour < 21) greet = 'Good Evening! Wrapping up soon?';
-    else greet = 'Good Night! Time to recharge.';
-    this.greeting.set(greet);
+    if (hour >= 5 && hour < 12) this.greeting = 'Good Morning, Trainer!';
+    else if (hour >= 12 && hour < 17) this.greeting = 'Good Afternoon, Trainer!';
+    else if (hour >= 17 && hour < 21) this.greeting = 'Good Evening, Trainer!';
+    else this.greeting = 'Good Night, Rest Well!';
   }
 
-  // =========================================================================
-  // ACTIONS
-  // =========================================================================
+  initializeCalendar(): void {
+    this.displayedMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    this.populateCalendar(this.displayedMonthStart);
+  }
+
+  populateCalendar(startDate: Date): void {
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth();
+    this.selectedMonthYear = startDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    const firstDay = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    this.calendarDays = [];
+    for (let i = 0; i < firstDay; i++) this.calendarDays.push({ date: '', disabled: true });
+    for (let i = 1; i <= totalDays; i++) {
+        const d = new Date(year, month, i);
+        this.calendarDays.push({ date: i, disabled: false, selected: d.toDateString() === new Date().toDateString(), fullDate: d });
+    }
+  }
+
+  navigateCalendar(dir: number): void {
+    this.displayedMonthStart.setMonth(this.displayedMonthStart.getMonth() + dir);
+    this.populateCalendar(this.displayedMonthStart);
+  }
+
+  onDateSelect(date: Date | null): void {
+    if (date) {
+        this.selectedScheduleDate = date;
+        this.scheduleDetails = [];
+    }
+  }
+
+  showMessage(msg: string, type: 'success' | 'error' | 'warning'): void {
+    this.message = msg;
+    this.messageType = type;
+    timer(3000).subscribe(() => this.message = '');
+  }
+
+  goToProfileSetupForm(): void {
+    window.location.href = 'setup-profile';
+  }
 
   triggerProfileUpload(): void {
-    if(this.fileInputRef) this.fileInputRef.nativeElement.click();
+    this.fileInputRef.nativeElement.click();
   }
 
   onProfileImageSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            this.uploadedProfileImage.set(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (e) => this.uploadedProfileImage = e.target?.result || null;
+      reader.readAsDataURL(file);
     }
-  }
-
-  goToProfileSetupForm(): void {
-    window.location.href = 'setup-profile'; 
-  }
-
-  goToResumeView(): void {
-      this.activeTab.set('resume');
-  }
-
-  logout(): void {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = 'login';
-  }
-
-  // =========================================================================
-  // CALENDAR & SCHEDULE LOGIC
-  // =========================================================================
-
-  populateCalendar(startDate: Date): void {
-    const year = startDate.getFullYear();
-    const month = startDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDayOfWeek = firstDay.getDay();
-    const daysInMonth = lastDay.getDate();
-
-    const newDays: CalendarDay[] = [];
-
-    // Empty slots
-    for (let i = 0; i < startDayOfWeek; i++) {
-      newDays.push({ date: '', disabled: true, selected: false, fullDate: null, hasEvent: false });
-    }
-
-    // Days
-    for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(year, month, i);
-      const isSelected = this.selectedScheduleDate()?.toDateString() === d.toDateString();
-      newDays.push({
-        date: i, disabled: false, selected: isSelected, fullDate: d, hasEvent: false 
-      });
-    }
-    this.calendarDays.set(newDays);
-  }
-
-  navigateCalendar(direction: number): void {
-    const newStart = new Date(this.displayedMonthStart());
-    newStart.setMonth(newStart.getMonth() + direction);
-    this.displayedMonthStart.set(newStart);
-    this.selectedScheduleDate.set(null);
-    this.populateCalendar(newStart);
-  }
-
-  onDateSelect(day: CalendarDay): void {
-    if (day.fullDate) {
-      this.selectedScheduleDate.set(day.fullDate);
-      this.populateCalendar(this.displayedMonthStart()); // Refresh selection UI
-      this.updateDisplayedScheduleDetails();
-    }
-  }
-
-  updateDisplayedScheduleDetails(): void {
-    const selected = this.selectedScheduleDate();
-    let filtered: ScheduleItem[] = [];
-    if (selected) {
-        const iso = selected.toISOString().slice(0, 10);
-        filtered = this.fullScheduleDetails().filter(i => i.date === iso);
-        
-        if (filtered.length === 0) {
-            filtered.push({ 
-                date: iso, desc: 'No events scheduled.', type: 'study', 
-                dayOfWeekShort: selected.toLocaleString('en-US', {weekday:'short'}).toUpperCase(),
-                dayOfMonth: selected.getDate().toString()
-            });
-        }
-    }
-    this.scheduleDetails.set(filtered);
-  }
-
-  getScheduleTypeClass(type: ScheduleItem['type']): string {
-    switch (type) {
-      case 'class': return 'class-item';
-      case 'meeting': return 'meeting-item';
-      case 'admin': return 'admin-item';
-      default: return 'default-item';
-    }
-  }
-
-  // =========================================================================
-  // LEAVE FORM
-  // =========================================================================
-
-  openLeaveForm(): void {
-    const d = this.selectedScheduleDate() || new Date();
-    this.leaveStartDate.set(d.toISOString().slice(0, 10));
-    this.isLeaveFormOpen.set(true);
-  }
-
-  closeLeaveForm(): void {
-    this.isLeaveFormOpen.set(false);
-    this.leaveStartDate.set('');
-    this.leaveEndDate.set('');
-    this.leaveReason.set('');
-  }
-
-  submitLeave(): void {
-    if (!this.leaveStartDate() || !this.leaveReason()) return;
-    // Here you would add a real API call to submit leave
-    console.log('Submitting Leave:', this.leaveStartDate(), this.leaveEndDate(), this.leaveReason());
-    this.closeLeaveForm();
   }
 }

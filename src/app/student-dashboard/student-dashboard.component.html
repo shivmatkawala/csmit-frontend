@@ -93,6 +93,7 @@
                   [ngClass]="card.colorClass"
                   (click)="handleQuickCardClick(card.route)">
                 <p class="title">{{ card.title }}</p>
+                <!-- Display logic for batches -->
                 <p class="value" *ngIf="card.route === 'batches'">{{ studentAssignedBatches.length > 0 ? studentAssignedBatches[0].batch_name : 'No Batch' }}</p>
                 <p class="value" *ngIf="card.route !== 'batches'">{{ card.value }}</p>
                 <div class="footer-info">
@@ -105,8 +106,9 @@
 
         <!-- Pages Integration -->
         <ng-container *ngIf="activePage === 'batches'">
+          <!-- COMPILATION FIX: Using userId property matched with updated component logic -->
           <app-course-batch-management 
-            [studentId]="studentProfileData.student_id" 
+            [userId]="studentProfileData.student_id" 
             [initialBatches]="studentAssignedBatches"
             (backToDashboard)="setActivePage('dashboard')">
           </app-course-batch-management>

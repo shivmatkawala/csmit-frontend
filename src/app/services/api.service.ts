@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-// --- Interfaces (Same as before) ---
+// --- Interfaces for Data Models ---
 export interface User {
   id: number;
   email: string; 
@@ -41,7 +41,8 @@ export interface LoginResponse {
 }
 
 export interface StudentBatchDetails {
-    studentbatchid: number;
+    studentbatchid?: number;
+    trainerbatchid?: number;
     batchid: number;
     userid: string;
     batch_name: string;
@@ -64,19 +65,17 @@ export class ApiService {
   
   private http = inject(HttpClient); 
 
-  //  FIXED: Hardcoded IP hata diya hai. Ab ye Proxy ke through jayega.
+  // Base URL configuration (Using relative path for proxy)
   private baseUrl = '/api/'; 
   private readonly STORAGE_KEY = 'cshub_student_login_data';
 
-  /** Login Data check karne ke liye */
+  /** Login data se userId nikalne ke liye helper */
   getUserId(): string {
     const storedData = sessionStorage.getItem(this.STORAGE_KEY);
     try {
       if (storedData) {
         const loginData = JSON.parse(storedData);
-        if (loginData && loginData.userId) {
-          return loginData.userId;
-        }
+        return loginData?.userId || '';
       }
     } catch (e) {
       console.error('Error parsing login data', e);
@@ -84,7 +83,7 @@ export class ApiService {
     return ''; 
   }
 
-  /** 🔑 LOGIN - Ab ye mobile aur laptop dono par kaam karega */
+  /** 🔑 Authenticate user and store session data */
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}users/login/`, { username, password })
       .pipe(
@@ -99,55 +98,68 @@ export class ApiService {
       );
   }
 
+  /** Retrieve stored session data */
   getStoredStudentData(): LoginResponse | null {
     try {
       const data = sessionStorage.getItem(this.STORAGE_KEY);
-      if (data) {
-        return JSON.parse(data) as LoginResponse;
-      }
+      return data ? (JSON.parse(data) as LoginResponse) : null;
     } catch (e) {
       console.error('Error retrieving session data', e);
+      return null;
     }
-    return null;
   }
   
+  /** Session clear karne ke liye */
   clearStoredStudentData(): void {
       sessionStorage.removeItem(this.STORAGE_KEY);
   }
 
+  /** 🎓 Students ke batches fetch karne ke liye (Existing) */
   fetchStudentBatches(userId: string): Observable<StudentBatchDetails[]> {
       const apiUrl = `${this.baseUrl}exams/student-batches/${userId}/`;
       return this.http.get<StudentBatchDetails[]>(apiUrl).pipe(catchError(this.handleError));
   }
 
+  /** 👨‍🏫 Trainers ke batches fetch karne ke liye (New logic) */
+  fetchTrainerBatches(userId: string): Observable<StudentBatchDetails[]> {
+      // Direct call to the trainer-batches endpoint in the batches app
+      const apiUrl = `${this.baseUrl}batches/trainer-batches/${userId}/`;
+      return this.http.get<StudentBatchDetails[]>(apiUrl).pipe(catchError(this.handleError));
+  }
+
+  /** Resume submission logic */
   submitResume(resumeData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(`${this.baseUrl}students/`, resumeData, { headers }) 
       .pipe(catchError(this.handleError));
   }
 
+  /** New student record create karne ke liye */
   createStudent(student: Student): Observable<any> {
     return this.http.post(`${this.baseUrl}students/`, student).pipe(catchError(this.handleError));
   }
 
+  /** User profile/resume data fetch karne ke liye */
   getResumeData(studentId: string | number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}students/${studentId}/`).pipe(catchError(this.handleError));
   }
 
-  /** Generic error handler */
+  /** 🛠 Generic error handler */
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Something went wrong!';
     if (error.error instanceof ErrorEvent) {
+      // Client-side or network error
       errorMessage = `Client Error: ${error.error.message}`;
     } else {
+      // Backend error responses
       const errorBody = error.error;
       if (typeof errorBody === 'object' && errorBody !== null) {
-          errorMessage = errorBody.message || errorBody.error || error.statusText || `Server Error (Status: ${error.status})`;
+          errorMessage = errorBody.message || errorBody.detail || errorBody.error || error.statusText || `Server Error (Status: ${error.status})`;
       } else {
           errorMessage = error.message;
       }
     }
-    console.error('API Error:', errorMessage);
+    console.error('API Service Error:', errorMessage);
     return throwError(() => new Error(errorMessage)); 
   }
 }
