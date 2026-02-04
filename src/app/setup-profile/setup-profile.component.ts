@@ -244,7 +244,16 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: () => {
+        // --- CACHE CLEAR LOGIC FIX ---
+        // Purana data clear karna zaroori hai taaki dashboard fresh fetch kare
+        localStorage.removeItem('STUDENT_DATA');
+        sessionStorage.removeItem('STUDENT_DATA');
+        localStorage.removeItem('cshub_profile_complete_once');
+        sessionStorage.removeItem('cshub_profile_complete_once');
+        localStorage.removeItem('cshub_profile_prompt_dismissed');
+
         this.alertService.success('Profile setup complete! Your resume data is now live.', 'Success');
+        
         setTimeout(() => {
           const path = this.userRole() === 'student' ? 'student-dashboard' : 'trainer-dashboard';
           window.location.href = path;

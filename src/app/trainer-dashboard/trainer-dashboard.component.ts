@@ -26,6 +26,15 @@ interface FeatureCard {
   route: string;
 }
 
+// Trainer Profile Data Interface
+export interface TrainerProfileData {
+  full_name: string;
+  email: string; 
+  trainer_id: string; 
+  profileImageUrl: string;
+  profileInitial: string;
+}
+
 @Component({
   selector: 'app-trainer-dashboard',
   templateUrl: './trainer-dashboard.component.html',
@@ -47,6 +56,17 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   currentDayOfWeek: string = '';
   currentMonth: string = '';
   currentDay: number = 0;
+
+  // Profile Completion Logic Variables
+  isProfileComplete: boolean = false;
+  showProfileCompletionModal: boolean = false;
+  trainerProfileData: TrainerProfileData = {
+    full_name: '',
+    email: '',
+    trainer_id: '',
+    profileImageUrl: '',
+    profileInitial: ''
+  };
 
   trainerAssignedBatches: StudentBatchDetails[] = [];
   selectedBatchDetails: any[] = [];
@@ -104,7 +124,10 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.updateClock();
     this.timeSubscription = interval(1000).subscribe(() => this.updateClock());
+    
+    // Initial loading sequence
     this.loadTrainerProfile();
+    this.checkProfileCompletion(); // Resume fetch logic yahan integrate kiya
     this.initializeCalendar();
   }
 
@@ -119,7 +142,6 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
     if (userId) {
         this.trainerId = userId;
         
-        // Storage sync logic mirroring student dashboard
         let fullName = loginData?.info?.full_name || loginData?.username || 'Trainer';
         const storedData = window.localStorage.getItem('STUDENT_DATA') || window.sessionStorage.getItem('STUDENT_DATA');
         if (storedData) {
@@ -131,6 +153,8 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
 
         this.trainerName = fullName;
         this.profileInitial = this.getProfileInitial(fullName);
+        this.trainerProfileData.trainer_id = userId;
+        this.trainerProfileData.full_name = fullName;
 
         // Fetch trainer-specific batches
         this.apiService.fetchTrainerBatches(this.trainerId).subscribe({
@@ -146,6 +170,67 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
         this.trainerName = 'Guest Trainer';
         this.profileInitial = 'T';
     }
+  }
+
+  // Same logic as Student Dashboard for Resume Fetching
+  private checkProfileCompletion(): void {
+      const loginData = this.apiService.getStoredStudentData();
+      const userId = loginData?.userId;
+      
+      // Check if already completed in this session
+      const isCompleteOnce = (localStorage.getItem('cshub_profile_complete_once') || sessionStorage.getItem('cshub_profile_complete_once')) === 'true'; 
+      
+      if (!userId) return;
+
+      if (isCompleteOnce) {
+          this.isProfileComplete = true;
+          return;
+      }
+      
+      // Resume service call to fetch trainer details
+      this.resumeService.getResumeData(userId).pipe(
+          map(resumeData => {
+              const apiData = resumeData as any;
+              
+              const mappedProfile = {
+                  full_name: apiData.full_name || `${apiData.firstName || ''} ${apiData.lastName || ''}`.trim(),
+                  email: apiData.email,
+                  education: apiData.education || [],
+                  skills: apiData.skills || []
+              };
+
+              const hasName = mappedProfile.full_name && mappedProfile.full_name !== 'Not Found';
+              const hasEmail = !!mappedProfile.email;
+              const hasEducation = mappedProfile.education.length > 0;
+
+              this.isProfileComplete = !!hasName && !!hasEmail && hasEducation;
+
+              if (this.isProfileComplete) {
+                   localStorage.setItem('cshub_profile_complete_once', 'true'); 
+                   // Sync dashboard name with resume name
+                   this.trainerName = mappedProfile.full_name;
+                   this.profileInitial = this.getProfileInitial(this.trainerName);
+                   
+                   const dataToSave = { info: mappedProfile, userId: userId };
+                   localStorage.setItem('STUDENT_DATA', JSON.stringify(dataToSave));
+              }
+          }),
+          catchError(error => {
+              this.isProfileComplete = false;
+              return of(null);
+          })
+      ).subscribe(() => {
+          const isDismissed = (localStorage.getItem('cshub_profile_prompt_dismissed') || sessionStorage.getItem('cshub_profile_prompt_dismissed')) === 'true';
+          if (!this.isProfileComplete && !isDismissed) {
+              this.showProfileCompletionModal = true;
+          }
+          this.cdr.detectChanges();
+      });
+  }
+
+  dismissProfileCompletionModal(): void {
+      this.showProfileCompletionModal = false;
+      localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
   }
 
   getProfileInitial(fullName: string): string {

@@ -3,11 +3,6 @@ import { interval, Subscription, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { ApiService, StudentBatchDetails } from 'src/app/services/api.service';
 import { CreateCourseService, Subject } from 'src/app/services/create-course.service';
-
-/**
- * Generic component for both Student and Trainer dashboards.
- * This component uses 'userId' as a universal input property.
- */
 @Component({
   selector: 'app-course-batch-management',
   templateUrl: './course-batch-management.component.html',

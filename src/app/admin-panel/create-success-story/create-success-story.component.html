@@ -1,115 +1,60 @@
 <div class="form-card">
-
-    <!-- Back Button -->
-    <button (click)="goBack()" class="back-button" title="Go Back">
+    <button (click)="goBack()" class="back-button" title="Piche Jayein">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
         </svg>
     </button>
 
-    <!-- Header -->
     <div class="header-section">
         <h2>Add Success Story</h2>
-        <p>Celebrate student achievements on the Wall of Fame.</p>
+        <p>Wall of Fame par student ki kamyabi darj karein.</p>
     </div>
 
-    <!-- Form -->
     <form (ngSubmit)="onSubmit()">
-        
-        <!-- Row 1: Name & Role -->
         <div class="form-row">
             <div class="form-group">
                 <label>Student Name <span class="required">*</span></label>
-                <input 
-                    type="text" 
-                    class="input-field" 
-                    [(ngModel)]="story.name" 
-                    name="name" 
-                    placeholder="e.g. Rahul Kumar" 
-                    required
-                >
+                <input type="text" class="input-field" [(ngModel)]="story.name" name="name" placeholder="Ex: Rahul Kumar" required>
             </div>
             <div class="form-group">
                 <label>Role / Designation <span class="required">*</span></label>
-                <input 
-                    type="text" 
-                    class="input-field" 
-                    [(ngModel)]="story.role" 
-                    name="role" 
-                    placeholder="e.g. Software Engineer" 
-                    required
-                >
+                <input type="text" class="input-field" [(ngModel)]="story.role" name="role" placeholder="Ex: Software Engineer" required>
             </div>
         </div>
 
-        <!-- Row 2: Company & Package -->
         <div class="form-row">
             <div class="form-group">
                 <label>Company Name <span class="required">*</span></label>
-                <input 
-                    type="text" 
-                    class="input-field" 
-                    [(ngModel)]="story.company" 
-                    name="company" 
-                    placeholder="e.g. Google" 
-                    required
-                >
+                <input type="text" class="input-field" [(ngModel)]="story.company" name="company" placeholder="Ex: Google" required>
             </div>
             <div class="form-group">
                 <label>Package (LPA)</label>
-                <input 
-                    type="text" 
-                    class="input-field" 
-                    [(ngModel)]="story.package" 
-                    name="package" 
-                    placeholder="e.g. 12 LPA"
-                >
+                <input type="text" class="input-field" [(ngModel)]="story.package" name="package" placeholder="Ex: 12 LPA">
             </div>
         </div>
 
-        <!-- Row 3: Image URLs -->
+        <!-- File Upload Section -->
         <div class="form-row">
             <div class="form-group">
-                <label>Student Image URL</label>
-                <input 
-                    type="text" 
-                    class="input-field" 
-                    [(ngModel)]="story.image" 
-                    name="image" 
-                    placeholder="https://..."
-                >
+                <label>Student Image (Select File) <span class="required">*</span></label>
+                <input type="file" class="input-field" (change)="onImageSelected($event)" accept="image/*">
+                <small *ngIf="selectedImage" style="color: green;">Selected: {{selectedImage.name}}</small>
             </div>
             <div class="form-group">
-                <label>Company Logo URL</label>
-                <input 
-                    type="text" 
-                    class="input-field" 
-                    [(ngModel)]="story.logo" 
-                    name="logo" 
-                    placeholder="https://..."
-                >
+                <label>Company Logo (Select File) <span class="required">*</span></label>
+                <input type="file" class="input-field" (change)="onLogoSelected($event)" accept="image/*">
+                <small *ngIf="selectedLogo" style="color: green;">Selected: {{selectedLogo.name}}</small>
             </div>
         </div>
 
-        <!-- Quote Area -->
         <div class="form-group" style="margin-bottom: 25px;">
             <label>Success Quote</label>
-            <textarea 
-                class="input-field" 
-                [(ngModel)]="story.quote" 
-                name="quote" 
-                rows="3" 
-                placeholder="Write a short inspiring quote from the student..."
-            ></textarea>
+            <textarea class="input-field" [(ngModel)]="story.quote" name="quote" rows="3" placeholder="Student ka koi prerak vichaar..."></textarea>
         </div>
 
-        <!-- Submit Button -->
-        <div>
-            <button type="submit" class="submit-button" [disabled]="isSubmitting">
-                <span *ngIf="isSubmitting" class="spinner"></span>
-                <span>{{ isSubmitting ? 'Publishing...' : 'Publish Story' }}</span>
-            </button>
-        </div>
-
+        <button type="submit" class="submit-button" [disabled]="isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner"></span>
+            <span>{{ isSubmitting ? 'Uploading & Publishing...' : 'Publish Story' }}</span>
+        </button>
     </form>
 </div>

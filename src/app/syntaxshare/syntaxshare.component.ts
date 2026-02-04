@@ -28,15 +28,13 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
   constructor(
     private doubtService: DoubtService,
     private apiService: ApiService,
-    private createCourseService: CreateCourseService // Inject Course Service
+    private createCourseService: CreateCourseService 
   ) {}
 
   ngOnInit(): void {
-    // Get User Data from Session
     const userInfo = this.apiService.getStoredStudentData();
     
-    // --- UPDATED LOGIC: Fetch Name from Dashboard Storage (STUDENT_DATA) ---
-    // Dashboard logic use kar rahe hain taaki Gmail ki jagah Name dikhe
+    // Fetch Name from Dashboard Storage for consistent branding
     let dashboardName = '';
     try {
         const storedStudentData = localStorage.getItem('STUDENT_DATA') || sessionStorage.getItem('STUDENT_DATA');
@@ -46,31 +44,22 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
                 dashboardName = parsedData.info.full_name;
             }
         }
-    } catch(e) {
-        console.error('Error reading student dashboard data', e);
-    }
+    } catch(e) {}
 
     if (userInfo && userInfo.userId) {
         this.currentUserId = userInfo.userId;
-        
-        // Priority: Dashboard Name > API Full Name > Username (Email)
-        // Agar dashboardName available hai (Profile setup done), toh woh use karega.
         this.currentUserName = dashboardName || userInfo.info?.full_name || userInfo.username;
         
-        // Agar abhi bhi email dikh raha hai aur '@' hai, toh usse format kar dete hain
         if (this.currentUserName.includes('@')) {
-            this.currentUserName = this.currentUserName.split('@')[0]; // Fallback to part before @
+            this.currentUserName = this.currentUserName.split('@')[0];
         }
     }
 
-    // Load Subjects First
     this.loadSubjects();
-
-    // Initial Load
     this.loadData(true);
 
-    // Polling every 5 seconds
-    this.updateSubscription = interval(5000).subscribe(() => {
+    // Polling interval for live updates
+    this.updateSubscription = interval(10000).subscribe(() => {
       this.loadData(false);
     });
   }
@@ -81,18 +70,14 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
     }
   }
 
-  // New: TrackBy function to prevent HTML re-rendering and losing focus
   trackByDoubt(index: number, doubt: Doubt): number {
     return doubt.doubtid;
   }
 
-  // Fetch Active Subjects from Courses
   loadSubjects() {
     this.createCourseService.listCourses().subscribe({
       next: (courses) => {
         const extractedSubjects: { id: number, name: string }[] = [];
-        
-        // Iterate through courses to find subjects
         courses.forEach(course => {
             if (course.subjects && course.subjects.length > 0) {
                 course.subjects.forEach(sub => {
@@ -101,20 +86,14 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
                     }
                 });
             } else {
-                // Fallback: If course has no subjects, treat the Course itself as a Subject (Topic)
                 extractedSubjects.push({ id: course.courseId, name: course.courseName });
             }
         });
-
-        // Remove Duplicates based on ID
         this.subjects = extractedSubjects.filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i);
-
-        // Select first subject by default if available
         if (this.subjects.length > 0) {
             this.selectedSubjectId = this.subjects[0].id;
         }
-      },
-      error: (err) => console.error('Error fetching subjects:', err)
+      }
     });
   }
 
@@ -131,8 +110,7 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.refreshing = false;
       },
-      error: (err) => {
-        console.error('Error fetching data:', err);
+      error: () => {
         this.loading = false;
         this.refreshing = false;
       }
@@ -140,10 +118,8 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
   }
 
   mapDoubtsAndSolutions(doubts: Doubt[], solutions: Solution[]) {
-    // Preserve UI state (reply box open OR typed text)
     const oldStateMap = new Map<number, { showReply: boolean, tempReply: string }>();
     this.doubts.forEach(d => {
-      // Save both the toggle state AND the text user was typing
       oldStateMap.set(d.doubtid, { 
         showReply: d.showReply || false, 
         tempReply: d.tempReply || '' 
@@ -159,33 +135,22 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
       });
 
       mySolutions.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-
-      // Restore state from map
       const savedState = oldStateMap.get(doubt.doubtid);
 
       return {
         ...doubt,
         solutions: mySolutions,
         showReply: savedState ? savedState.showReply : false,
-        tempReply: savedState ? savedState.tempReply : '' // Restore typed text
+        tempReply: savedState ? savedState.tempReply : '' 
       };
     });
     
     processedDoubts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    
     this.doubts = processedDoubts;
   }
 
   postDoubt() {
-    if (!this.newDoubtText.trim()) return;
-    if (!this.currentUserId) {
-      alert('Please login to post a doubt.');
-      return;
-    }
-    if (!this.selectedSubjectId) {
-        alert('Please select a subject/topic.');
-        return;
-    }
+    if (!this.newDoubtText.trim() || !this.currentUserId || !this.selectedSubjectId) return;
 
     const payload = {
       subjectid: Number(this.selectedSubjectId),
@@ -194,26 +159,16 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
     };
 
     this.doubtService.createDoubt(payload).subscribe({
-      next: (res) => {
+      next: () => {
         this.newDoubtText = '';
         this.loadData(false); 
-      },
-      error: (err) => {
-        console.error('Failed to post doubt:', err);
-        alert('Failed to post doubt.');
       }
     });
   }
 
   postSolution(doubt: Doubt) {
-    // Now using the model bound variable doubt.tempReply
     const solutionText = doubt.tempReply;
-
-    if (!solutionText || !solutionText.trim()) return;
-    if (!this.currentUserId) {
-      alert('Please login to reply.');
-      return;
-    }
+    if (!solutionText || !solutionText.trim() || !this.currentUserId) return;
 
     const payload = {
       doubtid: doubt.doubtid,
@@ -222,13 +177,10 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
     };
 
     this.doubtService.createSolution(payload).subscribe({
-      next: (res) => {
-        doubt.tempReply = ''; // Clear the specific text box
+      next: () => {
+        doubt.tempReply = ''; 
+        doubt.showReply = false;
         this.loadData(false);
-      },
-      error: (err) => {
-        console.error('Failed to post solution:', err);
-        alert('Failed to reply.');
       }
     });
   }
@@ -238,7 +190,7 @@ export class SyntaxshareComponent implements OnInit, OnDestroy {
   }
 
   getInitials(name: string | undefined | null): string {
-      if (!name) return '?';
+      if (!name) return 'U';
       return name.charAt(0).toUpperCase();
   }
 }

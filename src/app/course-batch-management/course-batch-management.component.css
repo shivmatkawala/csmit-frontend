@@ -58,7 +58,7 @@
     border: none;
     padding: 10px 18px;
     border-radius: 12px;
-    color: #475569;
+    color: #526886;
     font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
@@ -191,7 +191,7 @@
 
 .btn-open {
     background: var(--primary-indigo);
-    color: white;
+    color: rgb(49, 151, 143);
     border: none;
     padding: 10px 18px;
     border-radius: 12px;

@@ -20,9 +20,6 @@ export class GenerateAtsResumeComponent implements OnInit{
   // Variables to hold skills divided into two columns for better layout.
   skillColumn1: { name: string, level?: string }[] = [];
   skillColumn2: { name: string, level?: string }[] = [];
-
-  // Signal to control the visibility of the action buttons (print, download).
-  // FIX: Action buttons should be visible by default for dashboard view
   isButtonContainerVisible = signal(true); 
   
   // Track loading state for UI feedback
@@ -37,10 +34,6 @@ export class GenerateAtsResumeComponent implements OnInit{
   ngOnInit(): void {
     this.fetchResumeData();
   }
-  
-  /**
-   * Fetches the student's resume data using the GET API.
-   */
   private fetchResumeData(): void {
       
     const loginData = this.apiService.getStoredStudentData();

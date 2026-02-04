@@ -38,6 +38,7 @@ export interface LoginResponse {
   info: StudentInfo;
   batch_id?: number;
   course_id?: number; 
+  
 }
 
 export interface StudentBatchDetails {
