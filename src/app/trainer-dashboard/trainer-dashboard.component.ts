@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { interval, Subscription, timer, forkJoin, of, Observable } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
-import { ApiService, StudentBatchDetails } from '../services/api.service';
+import { interval, Subscription, timer, of } from 'rxjs';
+import { catchError, map, finalize } from 'rxjs/operators';
+import { ApiService, StudentBatchDetails, LoginResponse } from '../services/api.service';
 import { CreateBatchService } from '../services/create-batch.service';
 import { ResumeService } from '../services/create-resume.service';
 
@@ -26,7 +26,6 @@ interface FeatureCard {
   route: string;
 }
 
-// Trainer Profile Data Interface
 export interface TrainerProfileData {
   full_name: string;
   email: string; 
@@ -44,22 +43,22 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInputRef!: ElementRef;
 
   activePage: string = 'dashboard';
+  loadingDashboardData: boolean = true;
+  
+  // Clock & Greeting
   currentTime: string = '';
   greeting: string = '';
-  message: string = '';
-  messageType: string = '';
-  
+  currentDayOfWeek: string = '';
+  currentMonth: string = '';
+  currentDay: number = 0;
+  private timeSubscription?: Subscription;
+
+  // Trainer Data
   trainerName: string = 'Loading...';
   trainerId: string = '';
   profileInitial: string = '';
   uploadedProfileImage: string | ArrayBuffer | null = null;
-  currentDayOfWeek: string = '';
-  currentMonth: string = '';
-  currentDay: number = 0;
-
-  // Profile Completion Logic Variables
-  isProfileComplete: boolean = false;
-  showProfileCompletionModal: boolean = false;
+  
   trainerProfileData: TrainerProfileData = {
     full_name: '',
     email: '',
@@ -68,50 +67,46 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
     profileInitial: ''
   };
 
+  // Logic Variables
+  isProfileComplete: boolean = false;
+  showProfileCompletionModal: boolean = false;
+  
+  // Batches & Meetings
   trainerAssignedBatches: StudentBatchDetails[] = [];
   selectedBatchDetails: any[] = [];
   showJoinMeetingModal: boolean = false;
 
+  // Shorts
+  shortsList: any[] = [];
+
+  // UI Components
+  message: string = '';
+  messageType: string = '';
+
   quickAccessCards: FeatureCard[] = [
     { 
-      label: 'Live Sessions', 
-      title: 'Class Meeting', 
-      value: 'Start Session', 
-      icon: 'fas fa-video', 
-      color: '#10B981', 
-      subText: 'Host live lecture', 
-      colorClass: 'stat-blue', 
-      route: 'live-sessions' 
+      label: 'Live Sessions', title: 'Class Meeting', value: 'Start Session', 
+      icon: 'fas fa-video', color: '#10B981', subText: 'Host live lecture', 
+      colorClass: 'stat-blue', route: 'live-sessions' 
     },
     { 
-      label: 'AI Practice', 
-      title: 'Quenrix AI Lab', 
-      value: 'Open Lab', 
-      icon: 'fas fa-robot', 
-      color: '#F43F5E', 
-      subText: 'Review student work', 
-      colorClass: 'stat-red', 
-      route: 'home' 
+      label: 'AI Practice', title: 'Quenrix AI Lab', value: 'Open Lab', 
+      icon: 'fas fa-robot', color: '#F43F5E', subText: 'Review student work', 
+      colorClass: 'stat-red', route: 'home' 
     },
     { 
-      label: 'Doubt Hub', 
-      title: 'Syntax Share', 
-      value: 'Resolve Doubts', 
-      icon: 'fas fa-comments', 
-      color: '#8B5CF6', 
-      subText: 'Help your students', 
-      colorClass: 'stat-purple', 
-      route: 'syntaxshare' 
+      label: 'Doubt Hub', title: 'Syntax Share', value: 'Resolve Doubts', 
+      icon: 'fas fa-comments', color: '#8B5CF6', subText: 'Help your students', 
+      colorClass: 'stat-purple', route: 'syntaxshare' 
     }
   ];
 
+  // Calendar
   calendarDays: any[] = [];
   selectedMonthYear: string = '';
   displayedMonthStart: Date = new Date();
   selectedScheduleDate: Date | null = new Date();
   scheduleDetails: ScheduleItem[] = [];
-
-  private timeSubscription?: Subscription;
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -122,128 +117,111 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // 1. Synchronous UI Setup
     this.updateClock();
     this.timeSubscription = interval(1000).subscribe(() => this.updateClock());
-    
-    // Initial loading sequence
-    this.loadTrainerProfile();
-    this.checkProfileCompletion(); // Resume fetch logic yahan integrate kiya
     this.initializeCalendar();
+    this.initializeShorts();
+
+    // 2. Fetch Data
+    this.fetchTrainerDataFromStorage();
+    this.checkProfileCompletion();
   }
 
   ngOnDestroy(): void {
     this.timeSubscription?.unsubscribe();
   }
 
-  private loadTrainerProfile(): void {
-    const loginData = this.apiService.getStoredStudentData();
+  private fetchTrainerDataFromStorage(): void {
+    const loginData: LoginResponse | null = this.apiService.getStoredStudentData();
     const userId = loginData?.userId;
 
     if (userId) {
         this.trainerId = userId;
         
+        // Load initial name from local storage to prevent flicker
         let fullName = loginData?.info?.full_name || loginData?.username || 'Trainer';
-        const storedData = window.localStorage.getItem('STUDENT_DATA') || window.sessionStorage.getItem('STUDENT_DATA');
+        const storedData = window.localStorage.getItem('STUDENT_DATA');
         if (storedData) {
             const parsed = JSON.parse(storedData);
-            if (parsed.info && parsed.info.full_name) {
-                fullName = parsed.info.full_name;
-            }
+            if (parsed.info?.full_name) fullName = parsed.info.full_name;
         }
 
-        this.trainerName = fullName;
-        this.profileInitial = this.getProfileInitial(fullName);
-        this.trainerProfileData.trainer_id = userId;
-        this.trainerProfileData.full_name = fullName;
+        this.setTrainerDetails(fullName, userId);
 
-        // Fetch trainer-specific batches
-        this.apiService.fetchTrainerBatches(this.trainerId).subscribe({
+        // Fetch Trainer Batches
+        this.apiService.fetchTrainerBatches(this.trainerId).pipe(
+            finalize(() => {
+                this.loadingDashboardData = false;
+                this.cdr.detectChanges();
+            })
+        ).subscribe({
             next: (batches) => {
                 this.trainerAssignedBatches = batches;
-                this.cdr.detectChanges();
             },
-            error: () => {
-                this.showMessage('Error fetching batches.', 'error');
-            }
+            error: () => this.showMessage('Error fetching assigned batches.', 'error')
         });
     } else {
-        this.trainerName = 'Guest Trainer';
-        this.profileInitial = 'T';
+        this.setTrainerDetails('Guest Trainer', 'T-GUEST');
+        this.loadingDashboardData = false;
     }
   }
 
-  // Same logic as Student Dashboard for Resume Fetching
+  private setTrainerDetails(name: string, id: string): void {
+      this.trainerName = name;
+      this.trainerId = id;
+      this.profileInitial = this.getProfileInitial(name);
+      this.trainerProfileData = {
+          full_name: name,
+          email: '', // Can be fetched if needed
+          trainer_id: id,
+          profileImageUrl: '',
+          profileInitial: this.profileInitial
+      };
+  }
+
+  // --- Optimized Profile Sync ---
   private checkProfileCompletion(): void {
-      const loginData = this.apiService.getStoredStudentData();
-      const userId = loginData?.userId;
-      
-      // Check if already completed in this session
-      const isCompleteOnce = (localStorage.getItem('cshub_profile_complete_once') || sessionStorage.getItem('cshub_profile_complete_once')) === 'true'; 
-      
-      if (!userId) return;
+      if (!this.trainerId) return;
 
-      if (isCompleteOnce) {
-          this.isProfileComplete = true;
-          return;
-      }
-      
-      // Resume service call to fetch trainer details
-      this.resumeService.getResumeData(userId).pipe(
-          map(resumeData => {
-              const apiData = resumeData as any;
-              
-              const mappedProfile = {
-                  full_name: apiData.full_name || `${apiData.firstName || ''} ${apiData.lastName || ''}`.trim(),
-                  email: apiData.email,
-                  education: apiData.education || [],
-                  skills: apiData.skills || []
-              };
-
-              const hasName = mappedProfile.full_name && mappedProfile.full_name !== 'Not Found';
-              const hasEmail = !!mappedProfile.email;
-              const hasEducation = mappedProfile.education.length > 0;
-
-              this.isProfileComplete = !!hasName && !!hasEmail && hasEducation;
-
-              if (this.isProfileComplete) {
-                   localStorage.setItem('cshub_profile_complete_once', 'true'); 
-                   // Sync dashboard name with resume name
-                   this.trainerName = mappedProfile.full_name;
-                   this.profileInitial = this.getProfileInitial(this.trainerName);
-                   
-                   const dataToSave = { info: mappedProfile, userId: userId };
-                   localStorage.setItem('STUDENT_DATA', JSON.stringify(dataToSave));
+      this.resumeService.getResumeData(this.trainerId).subscribe({
+          next: (res: any) => {
+              // 1. Construct Name
+              let fetchedName = res.full_name;
+              if (!fetchedName && (res.firstName || res.lastName)) {
+                  fetchedName = `${res.firstName || ''} ${res.lastName || ''}`.trim();
               }
-          }),
-          catchError(error => {
-              this.isProfileComplete = false;
-              return of(null);
-          })
-      ).subscribe(() => {
-          const isDismissed = (localStorage.getItem('cshub_profile_prompt_dismissed') || sessionStorage.getItem('cshub_profile_prompt_dismissed')) === 'true';
-          if (!this.isProfileComplete && !isDismissed) {
-              this.showProfileCompletionModal = true;
-          }
-          this.cdr.detectChanges();
+
+              // 2. Check Completion Status
+              this.isProfileComplete = !!fetchedName && res.education?.length > 0;
+
+              // 3. Force Sync Name with Dashboard (Fix for "Noman" issue)
+              if (fetchedName) {
+                  this.setTrainerDetails(fetchedName, this.trainerId);
+                  
+                  // Update Storage for next reload
+                  const stored = window.localStorage.getItem('STUDENT_DATA');
+                  if (stored) {
+                      const parsed = JSON.parse(stored);
+                      if (!parsed.info) parsed.info = {};
+                      parsed.info.full_name = fetchedName;
+                      window.localStorage.setItem('STUDENT_DATA', JSON.stringify(parsed));
+                  }
+                  this.cdr.detectChanges();
+              }
+
+              // 4. Show modal only if strictly needed
+              const isDismissed = localStorage.getItem('cshub_profile_prompt_dismissed') === 'true';
+              if (!this.isProfileComplete && !isDismissed) {
+                  this.showProfileCompletionModal = true;
+              }
+          },
+          error: () => console.warn('Resume data not found, using default profile.')
       });
   }
 
-  dismissProfileCompletionModal(): void {
-      this.showProfileCompletionModal = false;
-      localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
-  }
-
-  getProfileInitial(fullName: string): string {
-    if (!fullName) return 'T';
-    const parts = fullName.split(/\s+/).filter(p => p.length > 0);
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    if (parts.length > 1) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    return fullName[0].toUpperCase();
-  }
-
-  goToResumeView(): void {
-      this.setActivePage('generate-resume');
-      this.showMessage('Resume Viewer opened.', 'success');
+  initializeShorts() {
+    this.shortsList = [{ safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl('https://www.youtube.com/embed/dQw4w9WgXcQ') }];
   }
 
   openJoinMeetingModal(): void {
@@ -252,35 +230,37 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
           return;
       }
       this.showJoinMeetingModal = true;
+      // Backend already sends 'zoom_join_url' for trainers, no extra fetch needed
       this.selectedBatchDetails = this.trainerAssignedBatches;
       this.cdr.detectChanges();
   }
 
-  closeJoinMeetingModal(): void {
-      this.showJoinMeetingModal = false;
-  }
-
   joinMeeting(url: string): void {
       if (!url) {
-          this.showMessage('Zoom link not available.', 'error');
+          this.showMessage('Zoom link not configured for this batch.', 'error');
           return;
       }
       window.open(url, '_blank');
   }
 
   handleQuickCardClick(route: string): void {
-    if (route === 'live-sessions') {
-        this.openJoinMeetingModal();
-    } else if (route === 'home') {
-        window.location.href = 'home';
-    } else {
-        this.setActivePage(route);
-    }
+    if (route === 'live-sessions') this.openJoinMeetingModal();
+    else if (route === 'home') window.location.href = 'home';
+    else this.setActivePage(route);
   }
 
   setActivePage(page: string): void {
     this.activePage = page;
     this.cdr.detectChanges();
+  }
+
+  goToResumeView(): void {
+      this.setActivePage('generate-resume');
+      this.showMessage('Resume Viewer opened.', 'success');
+  }
+
+  goToProfileSetupForm(): void {
+    window.location.href = 'setup-profile';
   }
 
   logout(): void {
@@ -289,20 +269,41 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
     window.location.href = 'login';
   }
 
+  // --- Utility Methods ---
+
   private updateClock(): void {
     const now = new Date();
     this.currentDayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
     this.currentMonth = now.toLocaleString('en-US', { month: 'long' });
     this.currentDay = now.getDate();
-    this.currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    this.currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     
     const hour = now.getHours();
-    if (hour >= 5 && hour < 12) this.greeting = 'Good Morning, Trainer!';
-    else if (hour >= 12 && hour < 17) this.greeting = 'Good Afternoon, Trainer!';
-    else if (hour >= 17 && hour < 21) this.greeting = 'Good Evening, Trainer!';
-    else this.greeting = 'Good Night, Rest Well!';
+    if (hour < 12) this.greeting = 'Good Morning, Trainer!';
+    else if (hour < 17) this.greeting = 'Good Afternoon, Trainer!';
+    else this.greeting = 'Good Evening, Trainer!';
   }
 
+  getProfileInitial(name: string): string {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  }
+
+  showMessage(msg: string, type: string): void {
+    this.message = msg;
+    this.messageType = type;
+    timer(3000).subscribe(() => this.message = '');
+  }
+
+  dismissProfileCompletionModal(): void {
+    this.showProfileCompletionModal = false;
+    localStorage.setItem('cshub_profile_prompt_dismissed', 'true');
+  }
+
+  triggerProfileUpload(): void { this.fileInputRef.nativeElement.click(); }
+  onProfileImageSelected(e: any) { /* Image logic */ }
+  closeJoinMeetingModal() { this.showJoinMeetingModal = false; }
+
+  // Calendar Logic
   initializeCalendar(): void {
     this.displayedMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     this.populateCalendar(this.displayedMonthStart);
@@ -331,29 +332,6 @@ export class TrainerDashboardComponent implements OnInit, OnDestroy {
     if (date) {
         this.selectedScheduleDate = date;
         this.scheduleDetails = [];
-    }
-  }
-
-  showMessage(msg: string, type: 'success' | 'error' | 'warning'): void {
-    this.message = msg;
-    this.messageType = type;
-    timer(3000).subscribe(() => this.message = '');
-  }
-
-  goToProfileSetupForm(): void {
-    window.location.href = 'setup-profile';
-  }
-
-  triggerProfileUpload(): void {
-    this.fileInputRef.nativeElement.click();
-  }
-
-  onProfileImageSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => this.uploadedProfileImage = e.target?.result || null;
-      reader.readAsDataURL(file);
     }
   }
 }

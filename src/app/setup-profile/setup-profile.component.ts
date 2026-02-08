@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, signal, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl, AbstractControl } from '@angular/forms';
-import { Subject } from 'rxjs'; 
-import { debounceTime, distinctUntilChanged, takeUntil, finalize } from 'rxjs/operators'; 
+import { Subject, forkJoin, of, Observable, lastValueFrom } from 'rxjs'; 
+import { debounceTime, distinctUntilChanged, takeUntil, finalize, catchError } from 'rxjs/operators'; 
 import { ResumeService, SkillMaster, ProficiencyLevel, SetupData, ApiPayload } from '../services/create-resume.service'; 
 import { AlertService } from '../services/alert.service'; 
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router'; 
 
 @Component({
   selector: 'app-setup-profile',
@@ -17,12 +18,10 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private resumeService = inject(ResumeService); 
   private alertService = inject(AlertService); 
+  private router = inject(Router); 
 
-  // Stepper State
   currentStep = signal(1);
   readonly totalSteps = 5;
-  
-  // User Info
   currentUserId = signal<string | null>(null);
   userRole = signal<string>('student'); 
 
@@ -37,14 +36,13 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
   isSubmitted = signal(false);
   isLoading = signal(false);
 
-  // API Data Signals
   skillMasterList = signal<SkillMaster[]>([]);
   proficiencyList = signal<ProficiencyLevel[]>([]);
-  techStackList = signal<{tech_stackid: number, techname: string}[]>([]); // Added to store tech stacks
+  techStackList = signal<{tech_stackid: number, techname: string}[]>([]); 
+  
   skillSearchControl = new FormControl('');
   filteredSuggestions = signal<string[]>([]);
 
-  // Main Form with strict patterns
   resumeForm: FormGroup = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(3)]],
     dob: ['', Validators.required], 
@@ -70,40 +68,42 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
 
   private loadSessionData(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
-        const loginData = localStorage.getItem('cshub_student_login_data') || sessionStorage.getItem('cshub_student_login_data');
-        if (loginData) {
-          const parsed = JSON.parse(loginData);
-          this.currentUserId.set(parsed.userId);
-          this.userRole.set(parsed.role_id === 2 ? 'student' : 'trainer');
+        const rawLoginData = localStorage.getItem('cshub_student_login_data') || 
+                             sessionStorage.getItem('cshub_student_login_data') ||
+                             localStorage.getItem('user_data');
+                             
+        if (rawLoginData) {
+          const parsed = JSON.parse(rawLoginData);
+          this.currentUserId.set(parsed.userId || parsed.uid || parsed.student_id);
+          const roleId = Number(parsed.role_id || parsed.roleId || parsed.role_ID);
+          this.userRole.set(roleId === 3 ? 'trainer' : 'student');
         }
     }
   }
 
   private initFormArrays(): void {
-    // We start with at least one item for education and skills
     if (this.educationArr.length === 0) this.addEducation();
     if (this.skillsArr.length === 0) this.addSkill();
-    if (this.projectsArr.length === 0) this.addProject();
+    // Projects are optional
   }
 
   fetchSetupData(): void {
     this.resumeService.getSetupData().subscribe({
       next: (data: SetupData) => {
-        if(data && data.skills) this.skillMasterList.set(data.skills.map((s: any) => ({ id: s.skillmasterid, skillName: s.skillname })));
-        if(data && data.proficiencies) this.proficiencyList.set(data.proficiencies.map((p: any) => ({ id: p.proficiencyid, levelName: p.levelname })));
-        if(data && data.techStacks) this.techStackList.set(data.techStacks); // Store Tech Stacks
+        if(data?.skills) this.skillMasterList.set(data.skills.map((s: any) => ({ id: s.skillmasterid, skillName: s.skillname })));
+        if(data?.proficiencies) this.proficiencyList.set(data.proficiencies.map((p: any) => ({ id: p.proficiencyid, levelName: p.levelname })));
+        if(data?.techStacks) this.techStackList.set(data.techStacks);
       },
-      error: () => this.alertService.error('Could not load technical setup data from server.')
+      error: () => this.alertService.error('Could not load technical data.')
     });
   }
 
   private setupSubscriptions(): void {
     this.resumeForm.get('experienceType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((type: string) => {
-      // If switched to Fresher, clear experience. If not, ensure at least one row exists.
       if (type === 'Fresher') {
         this.experienceArr.clear();
-      } else {
-        if (this.experienceArr.length === 0) this.addExperience();
+      } else if (this.experienceArr.length === 0) {
+        this.addExperience();
       }
     });
 
@@ -121,225 +121,196 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
   get skillsArr(): FormArray { return this.resumeForm.get('skills') as FormArray; }
   get projectsArr(): FormArray { return this.resumeForm.get('projects') as FormArray; }
 
-  // --- ADD METHODS ---
   addEducation(): void {
     this.educationArr.push(this.fb.group({
-      degree: ['', Validators.required],
-      institution: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: [''],
-      isCurrent: [false],
-      grade: ['', Validators.required]
+      degree: ['', Validators.required], institution: ['', Validators.required],
+      startDate: ['', Validators.required], endDate: [''], isCurrent: [false], grade: ['']
     }));
   }
-
   addExperience(): void {
     this.experienceArr.push(this.fb.group({
-      title: ['', Validators.required],
-      company: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: [''],
-      isCurrent: [false],
-      description: ['', [Validators.required, Validators.minLength(20)]]
+      title: ['', Validators.required], company: ['', Validators.required],
+      startDate: ['', Validators.required], endDate: [''], isCurrent: [false], description: ['', [Validators.required, Validators.minLength(20)]]
     }));
   }
-
   addSkill(): void {
-    this.skillsArr.push(this.fb.group({
-      name: ['', Validators.required],
-      level: ['', Validators.required]
-    }));
+    this.skillsArr.push(this.fb.group({ name: ['', Validators.required], level: ['', Validators.required] }));
   }
-
   addProject(): void {
     this.projectsArr.push(this.fb.group({
-      title: ['', Validators.required],
-      url: ['', Validators.pattern('^(https?:\\/\\/)?(www\\.)?github\\.com\\/.*$')],
-      description: ['', Validators.required],
-      techUsed: ['', Validators.required] // Ensure this is bound to input
+      title: [''], url: ['', Validators.pattern('^(https?:\\/\\/)?(www\\.)?github\\.com\\/.*$')],
+      description: [''], techUsed: ['']
     }));
   }
+  
+  removeEducation(i: number) { this.educationArr.removeAt(i); }
+  removeExperience(i: number) { this.experienceArr.removeAt(i); }
+  removeSkill(i: number) { this.skillsArr.removeAt(i); }
+  removeProject(i: number) { this.projectsArr.removeAt(i); }
 
-  // --- REMOVE METHODS ---
-  removeEducation(index: number): void {
-      this.educationArr.removeAt(index);
-  }
-
-  removeExperience(index: number): void {
-      this.experienceArr.removeAt(index);
-  }
-
-  removeSkill(index: number): void {
-      this.skillsArr.removeAt(index);
-  }
-
-  removeProject(index: number): void {
-      this.projectsArr.removeAt(index);
-  }
-
-  // --- NAVIGATION ---
   nextStep(): void {
     const currentStepId = this.currentStep();
     const currentControls = this.getControlsByStep(currentStepId);
     let isStepValid = true;
     
-    // Validate controls
     currentControls.forEach((ctrl: any) => {
+        if (!ctrl) return;
         if (ctrl instanceof FormArray) {
-            ctrl.controls.forEach((group: any) => {
-                this.markFormGroupTouched(group); // Helper function usage
-                if (group.invalid) isStepValid = false;
+            ctrl.controls.forEach((group: any) => { 
+                this.markFormGroupTouched(group); 
+                if (group.invalid) isStepValid = false; 
             });
-        } else {
-            ctrl.markAsTouched();
-            if (ctrl.invalid) isStepValid = false;
+        } else { 
+            ctrl.markAsTouched(); 
+            if (ctrl.invalid) isStepValid = false; 
         }
     });
 
     if (currentStepId === 3 && this.resumeForm.get('experienceType')?.value !== 'Fresher' && this.experienceArr.length === 0) {
-        this.alertService.warning('Please add at least one experience detail or select "Fresher".');
+        this.alertService.warning('Please add experience or select "Fresher".');
         return;
     }
-    
+
     if (isStepValid && this.currentStep() < this.totalSteps) {
-      this.currentStep.update((v: number) => v + 1);
-      window.scrollTo(0, 0);
-    } else {
-      if (!isStepValid) {
-          this.alertService.warning('Please correct the highlighted errors before proceeding.');
-      }
+      this.currentStep.update(v => v + 1); window.scrollTo(0, 0);
+    } else if (!isStepValid) {
+      this.alertService.warning('Please fix errors before proceeding.');
     }
   }
 
-  // Helper to deep mark touched
   private markFormGroupTouched(formGroup: FormGroup | AbstractControl) {
     if (formGroup instanceof FormGroup) {
-        Object.values(formGroup.controls).forEach(control => {
-            control.markAsTouched();
-            if (control instanceof FormGroup) {
-                this.markFormGroupTouched(control);
-            }
-        });
-    } else {
-        formGroup.markAsTouched();
-    }
+        Object.values(formGroup.controls).forEach(c => { c.markAsTouched(); if (c instanceof FormGroup) this.markFormGroupTouched(c); });
+    } else { formGroup.markAsTouched(); }
   }
 
   private getControlsByStep(step: number): any[] {
-    const map: any = {
-      1: ['fullName', 'dob', 'email', 'phone', 'linkedin', 'address'],
-      2: ['education'],
-      3: ['experienceType', 'experience'], 
-      4: ['skills'],
-      5: ['projects']
-    };
+    const map: any = { 1: ['fullName', 'dob', 'email', 'phone', 'linkedin', 'address'], 2: ['education'], 3: ['experienceType', 'experience'], 4: ['skills'], 5: ['projects'] };
     return map[step].map((name: string) => this.resumeForm.get(name));
   }
 
-  prevStep(): void {
-    if (this.currentStep() > 1) this.currentStep.update((v: number) => v - 1);
-    window.scrollTo(0, 0);
-  }
+  prevStep(): void { if (this.currentStep() > 1) this.currentStep.update(v => v - 1); window.scrollTo(0, 0); }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.isSubmitted.set(true);
-    
     if (this.resumeForm.invalid) {
-      this.markFormGroupTouched(this.resumeForm); // Ensure EVERYTHING is touched
-      this.alertService.validation('Form is incomplete. Please review all red-marked fields.');
+      this.markFormGroupTouched(this.resumeForm);
+      this.alertService.validation('The form is incomplete.');
       return;
     }
 
     const userId = this.currentUserId();
-    if (!userId) {
-      this.alertService.error('Session expired. Please log in again.');
-      return;
-    }
+    if (!userId) { this.alertService.error('Session expired.'); return; }
 
     this.isLoading.set(true);
     const val = this.resumeForm.getRawValue();
-    const nameParts = val.fullName.trim().split(' ');
 
-    const payload: ApiPayload = {
-      userId: userId,
-      personalInfo: {
-        firstName: nameParts[0],
-        lastName: nameParts.slice(1).join(' ') || nameParts[0],
-        dob: val.dob,
-        email: val.email,
-        phone: val.phone,
-        linkedinId: val.linkedin.split('/').pop() || '',
-        githubId: val.portfolio?.split('/').pop() || ''
-      },
-      education: val.education.map((e: any) => ({
-        qualification_type: 'Degree',
-        qualification: e.degree,
-        university: e.institution,
-        joined_on: `${e.startDate}-01`,
-        left_on: e.isCurrent ? null : (e.endDate ? `${e.endDate}-01` : null),
-        marks: e.grade,
-        marking_system: 'CGPA'
-      })),
-      experience: val.experienceType === 'Fresher' ? [] : val.experience.map((ex: any) => ({
-        position: ex.title,
-        company: ex.company,
-        joined_on: `${ex.startDate}-01`,
-        left_on: ex.isCurrent ? null : (ex.endDate ? `${ex.endDate}-01` : null),
-        location: val.address,
-        worked_on: ex.description
-      })),
-      skills: val.skills.map((s: any) => ({
-        skillMasterId: this.skillMasterList().find((m: SkillMaster) => m.skillName.toLowerCase() === s.name.toLowerCase())?.id || 1,
-        proficiencyId: this.proficiencyList().find((p: ProficiencyLevel) => p.levelName.toLowerCase() === s.level.toLowerCase())?.id || 1
-      })),
-      projects: val.projects.map((p: any) => {
-        
-        // --- FIX: Logic to map comma-separated text to Backend Tech Stack IDs ---
-        const userTechs = p.techUsed ? p.techUsed.split(',') : [];
-        const mappedTechStacks = userTechs.map((t: string) => {
-             const cleanName = t.trim().toLowerCase();
-             const found = this.techStackList().find(ts => ts.techname.toLowerCase() === cleanName);
-             return found ? { tech_stackId: found.tech_stackid, techName: found.techname } : null;
-        }).filter((t: any) => t !== null);
+    try {
+        const newSkillsToCreate: string[] = [];
+        const newTechsToCreate: string[] = [];
 
-        // If no matching tech stacks found, we send an empty array instead of hardcoded Docker
-        // You might need to add a "Create Tech Stack" feature later if the backend requires IDs strictly
+        val.skills.forEach((s: any) => {
+            const clean = s.name.trim();
+            const exists = this.skillMasterList().some(m => m.skillName.toLowerCase() === clean.toLowerCase());
+            if (!exists && clean) newSkillsToCreate.push(clean);
+        });
+
+        val.projects.forEach((p: any) => {
+            if (p.techUsed) {
+                p.techUsed.split(',').forEach((t: string) => {
+                    const clean = t.trim();
+                    const exists = this.techStackList().some(ts => ts.techname.toLowerCase() === clean.toLowerCase());
+                    if (!exists && clean && !newTechsToCreate.includes(clean)) newTechsToCreate.push(clean);
+                });
+            }
+        });
+
+        const creationPromises: Observable<any>[] = [];
+        newSkillsToCreate.forEach(name => creationPromises.push(this.resumeService.addSkill(name).pipe(catchError(() => of(null)))));
+        newTechsToCreate.forEach(name => creationPromises.push(this.resumeService.addTechStack(name).pipe(catchError(() => of(null)))));
+
+        if (creationPromises.length > 0) {
+             await lastValueFrom(forkJoin(creationPromises));
+             const refreshedData = await lastValueFrom(this.resumeService.getSetupData());
+             if (refreshedData.skills) this.skillMasterList.set(refreshedData.skills.map((s: any) => ({ id: s.skillmasterid, skillName: s.skillname })));
+             if (refreshedData.techStacks) this.techStackList.set(refreshedData.techStacks);
+        }
+
+        const nameParts = val.fullName.trim().split(' ');
         
-        return {
-          projectName: p.title,
-          githubLink: p.url,
-          // FIX: Removed hardcoded [{tech_stackId: 1}] and replaced with mapped list
-          techStack: mappedTechStacks.length > 0 ? mappedTechStacks : [], 
-          descriptions: [{ description: p.description }]
+        const payload: ApiPayload = {
+            userId: userId,
+            personalInfo: {
+                firstName: nameParts[0],
+                lastName: nameParts.slice(1).join(' ') || nameParts[0],
+                dob: val.dob, email: val.email, phone: val.phone,
+                linkedinId: val.linkedin.split('/').pop() || '',
+                githubId: val.portfolio?.split('/').pop() || ''
+            },
+            education: val.education.map((e: any) => ({
+                qualification_type: 'Degree', qualification: e.degree, university: e.institution,
+                joined_on: `${e.startDate}-01`, left_on: e.isCurrent ? null : (e.endDate ? `${e.endDate}-01` : null),
+                marks: e.grade, marking_system: 'CGPA'
+            })),
+            experience: val.experienceType === 'Fresher' ? [] : val.experience.map((ex: any) => ({
+                position: ex.title, company: ex.company,
+                joined_on: `${ex.startDate}-01`, left_on: ex.isCurrent ? null : (ex.endDate ? `${ex.endDate}-01` : null),
+                location: val.address, 
+                worked_on: ex.description 
+            })),
+            skills: val.skills.map((s: any) => {
+                const foundSkill = this.skillMasterList().find(m => m.skillName.toLowerCase() === s.name.trim().toLowerCase());
+                const foundLevel = this.proficiencyList().find(p => p.levelName.toLowerCase() === s.level.trim().toLowerCase());
+                if (foundSkill && foundLevel) return { skillMasterId: foundSkill.id, proficiencyId: foundLevel.id };
+                return null;
+            }).filter((s: any) => s !== null),
+
+            projects: val.projects.filter((p: any) => p.title).map((p: any) => {
+                const userTechs = p.techUsed ? p.techUsed.split(',') : [];
+                const techStackIds = userTechs.map((t: string) => {
+                    const cleanName = t.trim().toLowerCase();
+                    const found = this.techStackList().find(ts => ts.techname.toLowerCase() === cleanName);
+                    return found ? { tech_stackId: found.tech_stackid } : null;
+                }).filter((t: any) => t !== null);
+
+                return {
+                    projectName: p.title,
+                    githubLink: p.url,
+                    techStack: techStackIds, 
+                    descriptions: [{ description: p.description }]
+                };
+            })
         };
-      })
-    };
 
-    this.resumeService.submitResume(payload).pipe(
-      finalize(() => this.isLoading.set(false))
-    ).subscribe({
-      next: () => {
-        localStorage.removeItem('STUDENT_DATA');
-        sessionStorage.removeItem('STUDENT_DATA');
-        localStorage.removeItem('cshub_profile_complete_once');
-        sessionStorage.removeItem('cshub_profile_complete_once');
-        localStorage.removeItem('cshub_profile_prompt_dismissed');
+        this.resumeService.submitResume(payload).pipe(finalize(() => this.isLoading.set(false))).subscribe({
+            next: () => this.handleSuccess(),
+            error: (err: HttpErrorResponse) => this.alertService.error(err.error?.error || 'Failed to save data.')
+        });
 
-        this.alertService.success('Profile setup complete! Your resume data is now live.', 'Success');
-        
-        setTimeout(() => {
-          const path = this.userRole() === 'student' ? 'student-dashboard' : 'trainer-dashboard';
-          window.location.href = path;
-        }, 2000);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.alertService.error(err.error?.error || 'Server submission failed.');
-      }
-    });
+    } catch (error) {
+        this.isLoading.set(false);
+        this.alertService.error('An error occurred.');
+    }
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private handleSuccess() {
+    localStorage.removeItem('STUDENT_DATA');
+    sessionStorage.removeItem('STUDENT_DATA');
+    localStorage.removeItem('cshub_profile_complete_once');
+    this.alertService.success('Profile setup completed successfully!', 'Success');
+    setTimeout(() => {
+        this.goBack();
+    }, 2000);
   }
+
+  goBack(): void {
+    const role = this.userRole();
+    if (role === 'trainer') {
+      this.router.navigate(['/trainer-dashboard']);
+    } else {
+      this.router.navigate(['/student-dashboard']);
+    }
+  }
+
+  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 }

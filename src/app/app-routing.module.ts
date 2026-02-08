@@ -26,19 +26,52 @@ import { HomeComponent } from './codexa/home/home.component';
 import { CourseBatchManagementComponent } from './course-batch-management/course-batch-management.component';
 import { SetupProfileComponent } from './setup-profile/setup-profile.component';
 import { TrainerDashboardComponent } from './trainer-dashboard/trainer-dashboard.component';
+import { GuestGuard } from './guest.guard';
+import { AuthGuard } from './auth.guard';
+
+
+
 const routes: Routes = [
-  { path: '', redirectTo: 'landing-page', pathMatch: 'full' },
-  {path:'landing-page',component:LandingPageComponent},
-  {path:'login',component:LoginFormComponent},
-  {path:'admin-panel',component:AdminPanelComponent},
+  // Guest Routes (Accessible only if NOT logged in)
+  { 
+    path: '', 
+    component: LandingPageComponent, 
+    pathMatch: 'full',
+    canActivate: [GuestGuard] 
+  },
+  { 
+    path: 'landing-page', 
+    component: LandingPageComponent,
+    canActivate: [GuestGuard] 
+  },
+  { 
+    path: 'login', 
+    component: LoginFormComponent,
+    canActivate: [GuestGuard]
+  },
+
+  // Protected Routes (Accessible only if logged in)
+  { 
+    path: 'admin-panel', 
+    component: AdminPanelComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'student-dashboard', 
+    component: StudentDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'trainer-dashboard', 
+    component: TrainerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
   {path:'setup-profile', component:SetupProfileComponent},
   {path:'trainer-form',component:TrainerFormComponent},
   {path:'chatbot',component:ChatbotComponent},
-  {path:'student-dashboard',component:StudentDashboardComponent},
   {path: 'generate-ats-resume', component: GenerateAtsResumeComponent},
   {path:'create-batch',component:CreateBatchComponent},
   {path:'create-course',component:CreateCourseComponent},
-  {path:'trainer-dashboard',component:TrainerDashboardComponent},
   {path:'create-user',component:CreateUserComponent},
   {path:'assign-user-to-batch',component:AssignUserToBatchComponent},
   {path:'create-job',component:CreateJobComponent},

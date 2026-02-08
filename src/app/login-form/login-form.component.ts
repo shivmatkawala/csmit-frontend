@@ -63,6 +63,10 @@ export class LoginFormComponent {
              return; 
         }
         
+        // --- CRITICAL UPDATE: Save Role for GuestGuard ---
+        localStorage.setItem('user_role', authenticatedRole);
+        // -------------------------------------------------
+
         console.log('Login successful:', authenticatedRole);
         
         if (authenticatedRole === 'ADMIN') { 

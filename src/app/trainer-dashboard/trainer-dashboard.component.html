@@ -107,22 +107,22 @@
     </aside>
   </div>
 
-  <!-- Profile Completion Modal (New) -->
+  <!-- Profile Completion Modal -->
   <div *ngIf="showProfileCompletionModal" class="modal-overlay">
     <div class="premium-modal">
       <div class="modal-header" style="text-align: center; margin-bottom: 20px;">
         <div class="header-icon" style="font-size: 50px; color: #6366f1; margin-bottom: 15px;">
           <i class="fas fa-user-circle"></i>
         </div>
-        <h2 style="margin: 0; color: #1e293b;">Profile Adhoora Hai!</h2>
-        <p style="color: #64748b; margin-top: 10px;">Trainer dashboard ke saare features unlock karne ke liye apni details update karein.</p>
+        <h2 style="margin: 0; color: #1e293b;">Profile Incomplete!</h2>
+        <p style="color: #64748b; margin-top: 10px;">Please update your details to unlock all features of the trainer dashboard.</p>
       </div>
       <div class="modal-footer" style="display: flex; flex-direction: column; gap: 10px;">
         <button class="btn-submit" (click)="goToProfileSetupForm()" style="width: 100%;">
-          Abhi Update Karein
+          Update Profile Now
         </button>
         <button class="btn-cancel" (click)="dismissProfileCompletionModal()" style="width: 100%; background: transparent;">
-          Baad mein karenge
+          Maybe Later
         </button>
       </div>
     </div>

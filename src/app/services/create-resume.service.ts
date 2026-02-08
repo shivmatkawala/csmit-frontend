@@ -43,7 +43,6 @@ export class ResumeService {
   
   private http = inject(HttpClient);
 
-  // ✅ FIXED: Hardcoded IP hata diya hai taaki Proxy ke raste chale
   private BASE_RESUME_URL = '/api/resume/';
   
   private CREATE_RESUME_URL = `${this.BASE_RESUME_URL}create-resume/`;
@@ -67,7 +66,6 @@ export class ResumeService {
     
     return this.http.get<StudentInfo>(fetchUrl).pipe(
       catchError(error => {
-        // 404 error handle karne ke liye taaki component crash na ho
         const emptyData: StudentInfo = { 
           full_name: 'Not Found', email: '', phone: '', location: '', linkedin: '', 
           portfolio: '', experience_type: 'Fresher', education: [], 
@@ -78,15 +76,16 @@ export class ResumeService {
     );
   }
 
+  // FIX: Serializers expect lowercase keys ('skillname', 'techname', 'levelname')
   addSkill(skillName: string): Observable<any> {
-      return this.http.post<any>(this.ADD_SKILL_URL, { skillName });
+      return this.http.post<any>(this.ADD_SKILL_URL, { skillname: skillName });
   }
 
   addProficiency(levelName: string): Observable<any> {
-      return this.http.post<any>(this.ADD_PROFICIENCY_URL, { levelName });
+      return this.http.post<any>(this.ADD_PROFICIENCY_URL, { levelname: levelName });
   }
 
   addTechStack(techName: string): Observable<any> {
-      return this.http.post<any>(this.ADD_TECHSTACK_URL, { tech_stack_name: techName });
+      return this.http.post<any>(this.ADD_TECHSTACK_URL, { techname: techName });
   }
 }

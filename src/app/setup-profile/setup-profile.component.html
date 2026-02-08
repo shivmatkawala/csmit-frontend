@@ -1,5 +1,13 @@
 <div class="setup-container">
     <div class="form-card">
+        
+        <!-- Back Button Added Here -->
+        <button class="back-button" (click)="goBack()" title="Go Back to Dashboard">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
         <!-- Stepper -->
         <div class="stepper">
             <div *ngFor="let s of steps" class="step" [class.active]="currentStep() >= s.id">
@@ -65,10 +73,8 @@
                 <h2 class="section-title">Education History</h2>
                 <div formArrayName="education">
                     <div *ngFor="let edu of educationArr.controls; let i=index" [formGroupName]="i" class="dynamic-item">
-                        
-                        <!-- REMOVE BUTTON for Education -->
-                        <button type="button" class="btn-remove" (click)="removeEducation(i)" title="Remove Degree">
-                            <i class="fas fa-trash-alt"></i> &#10005;
+                        <button type="button" class="btn-remove" *ngIf="i > 0" (click)="removeEducation(i)" title="Remove Degree">
+                            &#10005;
                         </button>
 
                         <div class="grid-2">
@@ -90,18 +96,21 @@
                                 <div class="error" *ngIf="edu.get('startDate')?.touched && edu.get('startDate')?.invalid">Required.</div>
                             </div>
                             <div class="input-box">
-                                <label>End Date</label>
-                                <input type="month" formControlName="endDate" [disabled]="edu.get('isCurrent')?.value">
+                                <label [style.opacity]="edu.get('isCurrent')?.value ? '0.5' : '1'">End Date</label>
+                                <input type="month" formControlName="endDate" 
+                                       [attr.disabled]="edu.get('isCurrent')?.value ? true : null"
+                                       [style.background]="edu.get('isCurrent')?.value ? '#f8fafc' : 'white'">
+                                
+                                <label class="checkbox-row" [class.disabled]="!!edu.get('endDate')?.value">
+                                    <input type="checkbox" formControlName="isCurrent" [attr.disabled]="!!edu.get('endDate')?.value ? true : null"> 
+                                    <span class="checkbox-text">Currently Studying</span>
+                                </label>
                             </div>
                             <div class="input-box">
-                                <label>Grade/CGPA *</label>
+                                <label>Grade/CGPA</label>
                                 <input formControlName="grade" placeholder="Grade/CGPA">
-                                <div class="error" *ngIf="edu.get('grade')?.touched && edu.get('grade')?.invalid">Required.</div>
                             </div>
                         </div>
-                        <label class="check-box" style="margin-top: 5px; display: block;">
-                            <input type="checkbox" formControlName="isCurrent"> Currently Studying
-                        </label>
                     </div>
                 </div>
                 <button type="button" class="btn-add" (click)="addEducation()">+ Add Another Degree</button>
@@ -110,8 +119,6 @@
             <!-- Step 3: Experience -->
             <div *ngIf="currentStep() === 3" class="animate-fade">
                 <h2 class="section-title">Work Experience</h2>
-                
-                <!-- FIX 2: Better Dropdown Design for Experience Type -->
                 <div class="input-box" style="margin-bottom: 20px;">
                     <label>Experience Level *</label>
                     <select formControlName="experienceType">
@@ -123,12 +130,9 @@
 
                 <div formArrayName="experience" *ngIf="resumeForm.get('experienceType')?.value !== 'Fresher'">
                     <div *ngFor="let exp of experienceArr.controls; let i=index" [formGroupName]="i" class="dynamic-item">
-                        
-                        <!-- REMOVE BUTTON for Experience -->
-                        <button type="button" class="btn-remove" (click)="removeExperience(i)" title="Remove Job">
+                        <button type="button" class="btn-remove" *ngIf="i > 0" (click)="removeExperience(i)" title="Remove Job">
                              &#10005;
                         </button>
-
                         <div class="grid-2">
                             <div class="input-box">
                                 <label>Job Title *</label>
@@ -141,24 +145,27 @@
                                 <div class="error" *ngIf="exp.get('company')?.touched && exp.get('company')?.invalid">Company is required.</div>
                             </div>
                         </div>
-                         <div class="grid-3">
+                         <div class="grid-2">
                             <div class="input-box">
                                 <label>Start Date *</label>
                                 <input type="month" formControlName="startDate">
                                 <div class="error" *ngIf="exp.get('startDate')?.touched && exp.get('startDate')?.invalid">Required.</div>
                             </div>
                             <div class="input-box">
-                                <label>End Date</label>
-                                <input type="month" formControlName="endDate" [disabled]="exp.get('isCurrent')?.value">
+                                <label [style.opacity]="exp.get('isCurrent')?.value ? '0.5' : '1'">End Date</label>
+                                <input type="month" formControlName="endDate" 
+                                       [attr.disabled]="exp.get('isCurrent')?.value ? true : null"
+                                       [style.background]="exp.get('isCurrent')?.value ? '#f8fafc' : 'white'">
+                                
+                                <label class="checkbox-row" [class.disabled]="!!exp.get('endDate')?.value">
+                                    <input type="checkbox" formControlName="isCurrent" [attr.disabled]="!!exp.get('endDate')?.value ? true : null"> 
+                                    <span class="checkbox-text">Currently Working Here</span>
+                                </label>
                             </div>
                         </div>
-                        <label class="check-box" style="margin-bottom: 15px; display:block;">
-                            <input type="checkbox" formControlName="isCurrent"> Currently Working Here
-                        </label>
-
-                        <div class="input-box">
+                        <div class="input-box" style="margin-top: 15px;">
                             <label>Description *</label>
-                            <textarea formControlName="description" placeholder="Describe your roles and responsibilities... (Min 20 chars)"></textarea>
+                            <textarea formControlName="description" placeholder="Describe your roles... (Min 20 chars)"></textarea>
                             <div class="error" *ngIf="exp.get('description')?.touched && exp.get('description')?.invalid">Description (min 20 chars) required.</div>
                         </div>
                     </div>
@@ -175,11 +182,9 @@
                 <h2 class="section-title">Core Competencies</h2>
                 <div formArrayName="skills" class="skills-grid">
                     <div *ngFor="let s of skillsArr.controls; let i=index" [formGroupName]="i" class="skill-row dynamic-item">
-                         <!-- REMOVE BUTTON for Skill -->
-                        <button type="button" class="btn-remove" (click)="removeSkill(i)" title="Remove Skill" style="width: 24px; height: 24px; font-size: 12px; top: 10px; right: 10px;">
+                        <button type="button" class="btn-remove" *ngIf="i > 0" (click)="removeSkill(i)" title="Remove Skill" style="width: 24px; height: 24px; font-size: 12px; top: 10px; right: 10px;">
                              &#10005;
                         </button>
-                        
                         <div class="grid-2">
                             <div class="input-box">
                                 <label>Skill Name *</label>
@@ -200,35 +205,33 @@
                 <button type="button" class="btn-add" (click)="addSkill()">+ Add Skill</button>
             </div>
 
-            <!-- Step 5: Projects -->
+            <!-- Step 5: Projects (Optional) -->
             <div *ngIf="currentStep() === 5" class="animate-fade">
-                <h2 class="section-title">Key Projects</h2>
+                <h2 class="section-title">Key Projects (Optional)</h2>
                 <div formArrayName="projects">
                     <div *ngFor="let p of projectsArr.controls; let i=index" [formGroupName]="i" class="dynamic-item">
-                        
-                        <!-- REMOVE BUTTON for Project -->
                         <button type="button" class="btn-remove" (click)="removeProject(i)" title="Remove Project">
                              &#10005;
                         </button>
 
                         <div class="input-box">
-                            <label>Project Title *</label>
+                            <label>Project Title</label>
                             <input formControlName="title" placeholder="Project Name">
-                            <div class="error" *ngIf="p.get('title')?.touched && p.get('title')?.invalid">Project title required.</div>
                         </div>
                         <div class="input-box">
-                            <label>Tech Stack *</label>
+                            <label>Tech Stack</label>
                             <input formControlName="techUsed" placeholder="Technologies used (Comma separated)">
-                            <div class="error" *ngIf="p.get('techUsed')?.touched && p.get('techUsed')?.invalid">Required.</div>
                         </div>
                         <div class="input-box">
-                            <label>Description *</label>
+                            <label>Description</label>
                             <textarea formControlName="description" placeholder="Detail description..."></textarea>
-                            <div class="error" *ngIf="p.get('description')?.touched && p.get('description')?.invalid">Description required.</div>
                         </div>
                     </div>
                 </div>
                 <button type="button" class="btn-add" (click)="addProject()">+ Add Project</button>
+                <div *ngIf="projectsArr.length === 0" style="text-align: center; color: #94a3b8; margin-top: 20px;">
+                    <p>No projects added. You can complete setup without projects.</p>
+                </div>
             </div>
 
             <div class="form-footer">
