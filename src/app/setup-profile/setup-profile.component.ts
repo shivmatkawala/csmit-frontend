@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { Subject } from 'rxjs'; 
 import { debounceTime, distinctUntilChanged, takeUntil, finalize } from 'rxjs/operators'; 
 import { ResumeService, SkillMaster, ProficiencyLevel, SetupData, ApiPayload } from '../services/create-resume.service'; 
@@ -40,6 +40,7 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
   // API Data Signals
   skillMasterList = signal<SkillMaster[]>([]);
   proficiencyList = signal<ProficiencyLevel[]>([]);
+  techStackList = signal<{tech_stackid: number, techname: string}[]>([]); // Added to store tech stacks
   skillSearchControl = new FormControl('');
   filteredSuggestions = signal<string[]>([]);
 
@@ -68,25 +69,29 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadSessionData(): void {
-    const loginData = localStorage.getItem('cshub_student_login_data') || sessionStorage.getItem('cshub_student_login_data');
-    if (loginData) {
-      const parsed = JSON.parse(loginData);
-      this.currentUserId.set(parsed.userId);
-      this.userRole.set(parsed.role_id === 2 ? 'student' : 'trainer');
+    if (typeof window !== 'undefined' && window.localStorage) {
+        const loginData = localStorage.getItem('cshub_student_login_data') || sessionStorage.getItem('cshub_student_login_data');
+        if (loginData) {
+          const parsed = JSON.parse(loginData);
+          this.currentUserId.set(parsed.userId);
+          this.userRole.set(parsed.role_id === 2 ? 'student' : 'trainer');
+        }
     }
   }
 
   private initFormArrays(): void {
-    this.addEducation();
-    this.addSkill();
-    this.addProject();
+    // We start with at least one item for education and skills
+    if (this.educationArr.length === 0) this.addEducation();
+    if (this.skillsArr.length === 0) this.addSkill();
+    if (this.projectsArr.length === 0) this.addProject();
   }
 
   fetchSetupData(): void {
     this.resumeService.getSetupData().subscribe({
       next: (data: SetupData) => {
-        this.skillMasterList.set(data.skills.map((s: any) => ({ id: s.skillmasterid, skillName: s.skillname })));
-        this.proficiencyList.set(data.proficiencies.map((p: any) => ({ id: p.proficiencyid, levelName: p.levelname })));
+        if(data && data.skills) this.skillMasterList.set(data.skills.map((s: any) => ({ id: s.skillmasterid, skillName: s.skillname })));
+        if(data && data.proficiencies) this.proficiencyList.set(data.proficiencies.map((p: any) => ({ id: p.proficiencyid, levelName: p.levelname })));
+        if(data && data.techStacks) this.techStackList.set(data.techStacks); // Store Tech Stacks
       },
       error: () => this.alertService.error('Could not load technical setup data from server.')
     });
@@ -94,8 +99,12 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
 
   private setupSubscriptions(): void {
     this.resumeForm.get('experienceType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((type: string) => {
-      if (type === 'Fresher') this.experienceArr.clear();
-      else if (this.experienceArr.length === 0) this.addExperience();
+      // If switched to Fresher, clear experience. If not, ensure at least one row exists.
+      if (type === 'Fresher') {
+        this.experienceArr.clear();
+      } else {
+        if (this.experienceArr.length === 0) this.addExperience();
+      }
     });
 
     this.skillSearchControl.valueChanges.pipe(
@@ -112,6 +121,7 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
   get skillsArr(): FormArray { return this.resumeForm.get('skills') as FormArray; }
   get projectsArr(): FormArray { return this.resumeForm.get('projects') as FormArray; }
 
+  // --- ADD METHODS ---
   addEducation(): void {
     this.educationArr.push(this.fb.group({
       degree: ['', Validators.required],
@@ -146,24 +156,72 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
       title: ['', Validators.required],
       url: ['', Validators.pattern('^(https?:\\/\\/)?(www\\.)?github\\.com\\/.*$')],
       description: ['', Validators.required],
-      techUsed: ['', Validators.required]
+      techUsed: ['', Validators.required] // Ensure this is bound to input
     }));
   }
 
+  // --- REMOVE METHODS ---
+  removeEducation(index: number): void {
+      this.educationArr.removeAt(index);
+  }
+
+  removeExperience(index: number): void {
+      this.experienceArr.removeAt(index);
+  }
+
+  removeSkill(index: number): void {
+      this.skillsArr.removeAt(index);
+  }
+
+  removeProject(index: number): void {
+      this.projectsArr.removeAt(index);
+  }
+
+  // --- NAVIGATION ---
   nextStep(): void {
-    const currentControls = this.getControlsByStep(this.currentStep());
+    const currentStepId = this.currentStep();
+    const currentControls = this.getControlsByStep(currentStepId);
     let isStepValid = true;
     
+    // Validate controls
     currentControls.forEach((ctrl: any) => {
-      ctrl.markAsTouched();
-      if (ctrl.invalid) isStepValid = false;
+        if (ctrl instanceof FormArray) {
+            ctrl.controls.forEach((group: any) => {
+                this.markFormGroupTouched(group); // Helper function usage
+                if (group.invalid) isStepValid = false;
+            });
+        } else {
+            ctrl.markAsTouched();
+            if (ctrl.invalid) isStepValid = false;
+        }
     });
 
+    if (currentStepId === 3 && this.resumeForm.get('experienceType')?.value !== 'Fresher' && this.experienceArr.length === 0) {
+        this.alertService.warning('Please add at least one experience detail or select "Fresher".');
+        return;
+    }
+    
     if (isStepValid && this.currentStep() < this.totalSteps) {
       this.currentStep.update((v: number) => v + 1);
       window.scrollTo(0, 0);
     } else {
-      this.alertService.warning('Please correct the highlighted errors before proceeding.');
+      if (!isStepValid) {
+          this.alertService.warning('Please correct the highlighted errors before proceeding.');
+      }
+    }
+  }
+
+  // Helper to deep mark touched
+  private markFormGroupTouched(formGroup: FormGroup | AbstractControl) {
+    if (formGroup instanceof FormGroup) {
+        Object.values(formGroup.controls).forEach(control => {
+            control.markAsTouched();
+            if (control instanceof FormGroup) {
+                this.markFormGroupTouched(control);
+            }
+        });
+    } else {
+        formGroup.markAsTouched();
     }
   }
 
@@ -171,7 +229,7 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
     const map: any = {
       1: ['fullName', 'dob', 'email', 'phone', 'linkedin', 'address'],
       2: ['education'],
-      3: ['experienceType', 'experience'],
+      3: ['experienceType', 'experience'], 
       4: ['skills'],
       5: ['projects']
     };
@@ -185,7 +243,9 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     this.isSubmitted.set(true);
+    
     if (this.resumeForm.invalid) {
+      this.markFormGroupTouched(this.resumeForm); // Ensure EVERYTHING is touched
       this.alertService.validation('Form is incomplete. Please review all red-marked fields.');
       return;
     }
@@ -199,7 +259,7 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     const val = this.resumeForm.getRawValue();
     const nameParts = val.fullName.trim().split(' ');
-    
+
     const payload: ApiPayload = {
       userId: userId,
       personalInfo: {
@@ -216,15 +276,15 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
         qualification: e.degree,
         university: e.institution,
         joined_on: `${e.startDate}-01`,
-        left_on: e.isCurrent ? null : `${e.endDate}-01`,
+        left_on: e.isCurrent ? null : (e.endDate ? `${e.endDate}-01` : null),
         marks: e.grade,
         marking_system: 'CGPA'
       })),
-      experience: val.experience.map((ex: any) => ({
+      experience: val.experienceType === 'Fresher' ? [] : val.experience.map((ex: any) => ({
         position: ex.title,
         company: ex.company,
         joined_on: `${ex.startDate}-01`,
-        left_on: ex.isCurrent ? null : `${ex.endDate}-01`,
+        left_on: ex.isCurrent ? null : (ex.endDate ? `${ex.endDate}-01` : null),
         location: val.address,
         worked_on: ex.description
       })),
@@ -232,20 +292,33 @@ export class SetupProfileComponent implements OnInit, OnDestroy {
         skillMasterId: this.skillMasterList().find((m: SkillMaster) => m.skillName.toLowerCase() === s.name.toLowerCase())?.id || 1,
         proficiencyId: this.proficiencyList().find((p: ProficiencyLevel) => p.levelName.toLowerCase() === s.level.toLowerCase())?.id || 1
       })),
-      projects: val.projects.map((p: any) => ({
-        projectName: p.title,
-        githubLink: p.url,
-        techStack: [{ tech_stackId: 1 }],
-        descriptions: [{ description: p.description }]
-      }))
+      projects: val.projects.map((p: any) => {
+        
+        // --- FIX: Logic to map comma-separated text to Backend Tech Stack IDs ---
+        const userTechs = p.techUsed ? p.techUsed.split(',') : [];
+        const mappedTechStacks = userTechs.map((t: string) => {
+             const cleanName = t.trim().toLowerCase();
+             const found = this.techStackList().find(ts => ts.techname.toLowerCase() === cleanName);
+             return found ? { tech_stackId: found.tech_stackid, techName: found.techname } : null;
+        }).filter((t: any) => t !== null);
+
+        // If no matching tech stacks found, we send an empty array instead of hardcoded Docker
+        // You might need to add a "Create Tech Stack" feature later if the backend requires IDs strictly
+        
+        return {
+          projectName: p.title,
+          githubLink: p.url,
+          // FIX: Removed hardcoded [{tech_stackId: 1}] and replaced with mapped list
+          techStack: mappedTechStacks.length > 0 ? mappedTechStacks : [], 
+          descriptions: [{ description: p.description }]
+        };
+      })
     };
 
     this.resumeService.submitResume(payload).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: () => {
-        // --- CACHE CLEAR LOGIC FIX ---
-        // Purana data clear karna zaroori hai taaki dashboard fresh fetch kare
         localStorage.removeItem('STUDENT_DATA');
         sessionStorage.removeItem('STUDENT_DATA');
         localStorage.removeItem('cshub_profile_complete_once');
