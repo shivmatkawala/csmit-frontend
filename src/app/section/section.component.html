@@ -1,28 +1,47 @@
 <main>
-  <!-- Hero Section -->
+  <!-- NEW: MNC Style Hero Section -->
   <section class="hero-section">
-    <div class="container hero-container">
-      <div class="hero-content-left">
-        <h1 class="hero-title">
-          <span class="line-1">Your Digital</span>
-          <span class="line-2">Transformation Starts Here.</span>
-        </h1>
-        <p class="hero-subtitle">
-          QUENRIX delivers top-tier digital training, professional branding, and placement solutions that align with your career goals, empowering you to achieve success.
-        </p>
-        <div class="hero-cta">
-          <a href="javascript:void(0)" class="cta-button" (click)="openAboutModal()">About Quenrix</a>
-        </div>
-      </div>
-      <div class="hero-graphics-right">
-          <div class="digital-core">
-              <div class="core-ring ring-1"></div>
-              <div class="core-ring ring-2"></div>
-              <div class="core-node"></div>
-          </div>
-          <div class="data-flow flow-1"></div>
-          <div class="data-flow flow-2"></div>
-      </div>
+    <!-- Background Video -->
+    <div class="video-background">
+      <!-- 
+        UPDATED: [muted]="true" ensures silence.
+        Source set to assets/video.mp4.
+      -->
+      <video autoplay [muted]="true" loop playsinline poster="assets/video-poster.jpg" onloadedmetadata="this.muted = true">
+        <source src="assets/video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="overlay-gradient"></div>
+    </div>
+
+    <div class="hero-content-wrapper">
+       <!-- Text Content -->
+       <div class="hero-text-content">
+         <h1 class="mnc-headline">
+           Your Digital <br>
+           Transformation <span class="highlight">Starts Here.</span>
+         </h1>
+         <p class="hero-subtitle-mnc">
+           QUENRIX delivers top-tier digital training, professional branding, and placement solutions aligned with your career goals.
+         </p>
+         <div class="hero-cta-mnc">
+            <button class="cta-button-mnc" (click)="openAboutModal()">
+              About Quenrix 
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-left: 8px;">
+                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+              </svg>
+            </button>
+         </div>
+       </div>
+
+       <!-- Play Button -->
+       <div class="hero-play-btn-wrapper">
+         <button class="pulse-play-btn" (click)="openMainVideo()">
+           <svg viewBox="0 0 24 24" fill="currentColor" class="play-icon-svg">
+             <path d="M8 5v14l11-7z" />
+           </svg>
+         </button>
+       </div>
     </div>
   </section>
 
@@ -62,7 +81,7 @@
     </div>
 
     <!-- Scroller 2 -->
-    <div class="video-scroller" data-direction="right" style="margin-top: 20px;">
+    <div class="video-scroller" data-direction="right" style="margin-top: 10px;">
       <div class="scroller-inner">
         <div class="demo-card" *ngFor="let video of scrollerVideos2" (click)="openModal(video.youtubeVideoId)">
           <div class="thumbnail-container">

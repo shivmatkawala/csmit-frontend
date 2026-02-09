@@ -114,6 +114,12 @@ export class SectionComponent implements OnInit, OnDestroy {
     document.body.style.overflow = 'auto'; // Unlock scroll
   }
 
+  // Added method to handle the Play button on hero
+  openMainVideo() {
+    // Opens a specific video (e.g., Intro video or one from the list)
+    this.openModal('7wnove7K-ZQ'); // Using Python video as example main video
+  }
+
   openModal(videoId: string) {
     const unsafeUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
     this.selectedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(unsafeUrl);

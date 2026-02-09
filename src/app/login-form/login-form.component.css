@@ -1,76 +1,47 @@
 /* Google Fonts Import */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700;900&display=swap');
 
 *, *::before, *::after {
     box-sizing: border-box;
 }
 
 :host {
-    --primary-green: #554451;
+    --primary-color: #554451;
     --accent-color: #e09f3e;
-    --text-dark: #333333;
-    --text-light: #666666;
-    --input-background: #ffffff;
-    --card-background: #ffffff;
-    --border-light: #e0e0e0;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text-dark: #1a1a1a;
+    --text-light: #444444;
 }
 
+/* Page Wrapper */
 .login-page-wrapper {
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background-color: #ffffff; 
-    font-family: 'Roboto', sans-serif;
+    background: white;
+    font-family: 'Poppins', sans-serif;
 }
 
+/* Glassmorphism Card */
 .login-card {
     width: 100%;
-    max-width: 400px;
-    background-color: var(--card-background);
-    border-radius: 12px;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1); 
-    padding: 30px;
+    max-width: 420px;
     position: relative;
+    padding: 40px 30px;
+    border-radius: 24px;
     overflow: hidden;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
     z-index: 1;
-    transition: all 0.3s ease;
-}
-.login-card:hover {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-.back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: var(--card-background);
-    border: 1px solid var(--border-light);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    padding: 0;
-    color: rgb(83, 65, 100);
-    transition: all 0.3s ease;
-    z-index: 10;
-}
-.back-button:hover {
-    color: white;
-    background-color: var(--primary-green);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(26, 77, 46, 0.2);
-}
-.back-button svg {
-    width: 24px;
-    height: 24px;
-}
-
+/* Background Image covering the whole form */
 .login-card::before {
     content: '';
     position: absolute;
@@ -79,193 +50,193 @@
     right: 0;
     bottom: 0;
     background-image: url('/assets/logo.jpg'); 
-    background-size: 80%;
+    background-size: cover;
+    background-position: center;
     background-repeat: no-repeat;
-    background-position: center 75%;
-    opacity: 0.05;
+    opacity: 0.15;
     z-index: -1;
-    filter: grayscale(100%) blur(0.5px);
 }
 
+/* Back Button */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.back-button:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Header Content */
 .header-content {
     text-align: center;
-    margin-bottom: 25px;
-    padding-top: 10px;
+    margin-bottom: 35px;
 }
 
 .welcome-text {
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--text-light);
-    margin-bottom: 5px;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     text-transform: uppercase;
+    margin-bottom: 8px;
 }
 
 .main-heading {
-    font-family: 'Roboto', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: var(--primary-green);
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
     margin: 0;
-    padding: 0;
-    letter-spacing: 3px;
-    border-bottom: 4px solid var(--accent-color); 
-    display: inline-block; 
-    padding-bottom: 8px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.error-message-box {
-    margin-bottom: 20px;
-    padding: 10px 15px;
-    border-radius: 8px;
-    background-color: #ffebeb;
-    color: #cc0000;
-    border: 1px solid #ffaaaa;
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(204, 0, 0, 0.1);
-}
-
-.form-group {
-    margin-bottom: 20px;
+    letter-spacing: 4px;
     position: relative;
-    z-index: 2;
+    display: inline-block;
 }
+
+.main-heading::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 15%;
+    width: 70%;
+    height: 4px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+/* Input Styles */
+.form-group {
+    margin-bottom: 22px;
+    position: relative;
+}
+
 label {
     display: block;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--text-dark);
-    margin-bottom: 6px;
-    font-weight: 500;
+    margin-bottom: 8px;
+    font-weight: 600;
 }
 
-/* --- Input Wrapper --- */
 .input-wrapper {
     position: relative;
-    width: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .text-input {
     width: 100%;
-    padding: 12px 15px;
-    border: 1px solid var(--border-light);
-    border-radius: 8px;
+    padding: 14px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.15);
+    background: #ffffff; /* Solid white as requested */
     font-size: 1rem;
-    background-color: var(--input-background);
     color: var(--text-dark);
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.text-input::-ms-reveal,
-.text-input::-ms-clear {
-    display: none;
-}
-
-.text-input.with-left-icon {
-    padding-left: 42px;
-}
-
-/* MATCHED FROM create-user: Right padding for the button */
-.text-input.with-right-icon {
-    padding-right: 45px; 
+    transition: all 0.3s ease;
 }
 
 .text-input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(224, 159, 62, 0.4);
-    background-color: var(--card-background);
+    box-shadow: 0 0 0 4px rgba(224, 159, 62, 0.2);
 }
 
-/* --- Left Icon Styling --- */
+.text-input.with-left-icon { padding-left: 48px; }
+.text-input.with-right-icon { padding-right: 48px; }
+
+/* Left Icon */
 .input-icon.left-icon {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    left: 15px;
     color: var(--text-light);
-    z-index: 20;
     pointer-events: none;
+    display: flex;
+    z-index: 5;
 }
 
 .input-icon.left-icon svg {
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
 }
 
-/* --- NEW: Password Toggle Button (Matches create-user.component.css) --- */
+/* Eye Icon / Password Toggle */
 .password-toggle-btn {
     position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
+    right: 15px;
+    background: transparent;
     border: none;
     cursor: pointer;
     color: var(--text-light);
-    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 20;
+    padding: 5px;
+    z-index: 10; /* Ensure it stays above the input */
 }
 
 .password-toggle-btn:hover {
-    color: var(--primary-green);
+    color: var(--primary-color);
 }
 
 .password-toggle-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+    stroke-width: 2; /* Make the icon more visible */
 }
-/* --- END New Button Styles --- */
 
+/* Button & Links */
 .login-button {
     width: 100%;
-    padding: 14px;
+    padding: 16px;
     border: none;
-    border-radius: 10px;
-    background-color: var(--primary-green);
+    border-radius: 14px;
+    background: var(--primary-color);
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(26, 77, 46, 0.4);
-    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-    margin-top: 15px;
-    position: relative;
-    z-index: 2;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 10px 20px -5px rgba(85, 68, 81, 0.4);
 }
-.login-button:hover {
-    background-color: #0d341c;
+
+.login-button:hover:not(:disabled) {
+    background: #3d313a;
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(26, 77, 46, 0.5); 
-}
-.login-button:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 15px rgba(26, 77, 46, 0.3);
 }
 
 .links-container {
+    margin-top: 25px;
     text-align: center;
-    margin-top: 30px;
-    font-size: 0.95rem;
 }
+
 .links-container a {
-    color: var(--primary-green);
+    color: var(--primary-color);
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
-.links-container a:hover {
-    color: var(--accent-color);
-    text-decoration: underline;
+
+.error-message-box {
+    background: #fff5f5;
+    border: 1px solid #feb2b2;
+    color: #c53030;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    text-align: center;
 }

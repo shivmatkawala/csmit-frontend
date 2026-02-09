@@ -1,34 +1,30 @@
-<!-- Main wrapper to center the form on the page -->
 <div class="login-page-wrapper">
-    <!-- Login Card -->
     <div class="login-card">
-
-        <!-- Back Button (Only shows in Login Mode, hidden in Forgot Password mode for cleaner UI or kept as per choice) -->
-        <button class="back-button" (click)="goBack()" title="Go back to Home">
+        <!-- Back Button -->
+        <button class="back-button" (click)="goBack()" title="Go Back">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                 <path fill-rule="evenodd" d="M11.03 3.25l-7.75 7.75a.75.75 0 000 1.06l7.75 7.75a.75.75 0 101.06-1.06l-6.47-6.47h13.13a.75.75 0 000-1.5H5.62l6.47-6.47a.75.75 0 00-1.06-1.06z" clip-rule="evenodd" />
             </svg>
         </button>
 
-        <!-- Header Content -->
+        <!-- Header -->
         <div class="header-content">
-            <div class="welcome-text">{{ isForgotPasswordMode ? 'Recover Account' : 'Welcome to' }}</div>
+            <div class="welcome-text">{{ isForgotPasswordMode ? 'Account Recovery' : 'Welcome' }}</div>
             <h1 class="main-heading">QUENRIX</h1>
         </div>
         
-        <!-- Messages -->
+        <!-- Status Messages -->
         <div *ngIf="errorMessage" class="error-message-box">
             {{ errorMessage }}
         </div>
-        <div *ngIf="successMessage" class="success-message-box" style="margin-bottom: 20px; padding: 10px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; text-align: center; border: 1px solid #c8e6c9;">
+        <div *ngIf="successMessage" class="success-message-box" style="margin-bottom: 20px; padding: 12px; background: rgba(232, 245, 233, 0.9); color: #2e7d32; border-radius: 10px; text-align: center; border: 1px solid #c8e6c9; font-size: 0.85rem;">
             {{ successMessage }}
         </div>
 
-        <!-- MODE 1: LOGIN FORM -->
+        <!-- LOGIN FORM -->
         <form *ngIf="!isForgotPasswordMode" (ngSubmit)="login()">
-            <!-- Email Input -->
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">Email Address</label>
                 <div class="input-wrapper">
                     <span class="input-icon left-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -36,11 +32,10 @@
                             <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
                         </svg>
                     </span>
-                    <input type="email" id="email" class="text-input with-left-icon" placeholder="your.email@gmail.com" [(ngModel)]="username" name="username" required>
+                    <input type="email" id="email" class="text-input with-left-icon" placeholder="name@example.com" [(ngModel)]="username" name="username" required>
                 </div>
             </div>
 
-            <!-- Password Input -->
             <div class="form-group">
                 <label for="password">Password</label>
                 <div class="input-wrapper">
@@ -49,9 +44,7 @@
                             <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
                         </svg>
                     </span>
-                    
                     <input [type]="hidePassword ? 'password' : 'text'" id="password" class="text-input with-left-icon with-right-icon" placeholder="Enter your password" [(ngModel)]="password" name="password" required>
-                    
                     <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()">
                         <svg *ngIf="!hidePassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                         <svg *ngIf="hidePassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
@@ -60,14 +53,18 @@
             </div>
 
             <button type="submit" class="login-button" [disabled]="isLoading">
-                {{ isLoading ? 'Logging in...' : 'Login' }}
+                {{ isLoading ? 'Please Wait...' : 'Login' }}
             </button>
+            
+            <div class="links-container">
+                <a href="javascript:void(0)" (click)="toggleView()">Forgot Password?</a>
+            </div>
         </form>
 
-        <!-- MODE 2: FORGOT PASSWORD FORM -->
+        <!-- FORGOT PASSWORD FORM -->
         <form *ngIf="isForgotPasswordMode" (ngSubmit)="requestForgotPassword()">
-            <p style="text-align: center; color: #666; margin-bottom: 20px; font-size: 0.9rem;">
-                Enter your registered email address. We will send you a temporary password to your Gmail.
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 25px; font-size: 0.9rem; line-height: 1.5;">
+                Enter your registered email address. We will send you a temporary password.
             </p>
 
             <div class="form-group">
@@ -79,24 +76,19 @@
                             <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
                         </svg>
                     </span>
-                    <input type="email" id="forgotEmail" class="text-input with-left-icon" placeholder="your.email@gmail.com" [(ngModel)]="forgotEmail" name="forgotEmail" required>
+                    <input type="email" id="forgotEmail" class="text-input with-left-icon" placeholder="name@example.com" [(ngModel)]="forgotEmail" name="forgotEmail" required>
                 </div>
             </div>
 
-            <button type="submit" class="login-button" style="background-color: var(--accent-color);" [disabled]="isLoading">
-                {{ isLoading ? 'Sending Email...' : 'Send Password' }}
+            <button type="submit" class="login-button" style="background-color: var(--accent-color); box-shadow: 0 10px 20px -5px rgba(224, 159, 62, 0.4);" [disabled]="isLoading">
+                {{ isLoading ? 'Sending...' : 'Send Password' }}
             </button>
 
-            <div style="text-align: center; margin-top: 15px;">
-                <button type="button" (click)="toggleView()" style="background: none; border: none; color: var(--text-light); cursor: pointer; text-decoration: underline;">
-                    Back to Login
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" (click)="toggleView()" style="background: none; border: none; color: var(--text-dark); cursor: pointer; font-weight: 600; text-decoration: none; font-size: 0.9rem;">
+                   ← Back to Login
                 </button>
             </div>
         </form>
-
-        <!-- Toggle Link (Only visible in Login Mode) -->
-        <div class="links-container" *ngIf="!isForgotPasswordMode">
-            <a href="javascript:void(0)" (click)="toggleView()">Forgot Password?</a>
-        </div>
     </div>
 </div>
