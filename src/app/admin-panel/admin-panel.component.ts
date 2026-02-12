@@ -375,10 +375,15 @@ export class AdminPanelComponent implements OnInit, AfterViewInit {
   }
 
   logoutUser(): void {
+    // Clear all stored data (Auth tokens, user info, etc.)
+    localStorage.clear();
+    sessionStorage.clear();
+
     this.alertService.success('Logged out successfully. Redirecting...', 'Goodbye');
     
     setTimeout(() => {
-        this.router.navigate(['/login']); 
+        // Force reload to clear memory state and redirect
+        window.location.href = '/login'; 
     }, 1500); 
   }
 }
