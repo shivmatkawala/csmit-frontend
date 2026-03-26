@@ -19,7 +19,7 @@ export interface User {
   providedIn: 'root'
 })
 export class UserService {
-  // ✅ Relative path for proxy setup
+  
   private apiUrl = '/api/users';
   
   private registerEndpoint = `${this.apiUrl}/register/`; 
